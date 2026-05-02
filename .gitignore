@@ -1,0 +1,29 @@
+# Secrets and Environment
+.env
+.env.local
+*.secret
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.venv/
+.pytest_cache/
+
+# Java (Spring Boot)
+target/
+*.class
+*.jar
+*.war
+.mvn/
+.gradle/
+build/
+
+# OS Specific
+.DS_Store
+Thumbs.db
+
+# IDEs
+.vscode/
+.idea/
