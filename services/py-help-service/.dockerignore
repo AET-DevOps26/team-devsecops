@@ -1,0 +1,16 @@
+# Ignore the secret key!
+.env
+
+# Ignore local python junk
+__pycache__/
+*.pyc
+venv/
+.venv/
+
+# Ignore Git metadata and config
+.git
+.gitignore
+.dockerignore
+
+# Ignore documentation/notes
+README.md
