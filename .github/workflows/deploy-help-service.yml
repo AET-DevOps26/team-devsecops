@@ -2,7 +2,6 @@ name: Deploy Help Service
 
 on:
   push:
-    branches: [main, feature/genai-service]
     paths: ['services/py-help-service/**'] # Only trigger if files in this folder change
 
 jobs:
