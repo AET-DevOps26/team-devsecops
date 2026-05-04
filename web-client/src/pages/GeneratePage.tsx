@@ -26,6 +26,13 @@ export function GeneratePage() {
         placeholder="What do you want to cook? (e.g. ingredients, cuisine, constraints)"
         value={prompt}
         onChange={(e) => setPrompt(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' && !e.shiftKey) {
+            // on Enter: directly submit instead of adding a new line
+            e.preventDefault()
+            if (!loading && prompt.trim() !== '') handleGenerate()
+          }
+        }}
       />
       <button
         type="button"
