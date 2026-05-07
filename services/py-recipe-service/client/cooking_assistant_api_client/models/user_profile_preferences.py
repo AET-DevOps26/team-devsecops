@@ -17,12 +17,12 @@ class UserProfilePreferences:
     Attributes:
         diet (str | Unset):
         allergies (list[str] | Unset):
-        cuisine_preferences (list[str] | Unset):
+        about_me (list[str] | Unset):
     """
 
     diet: str | Unset = UNSET
     allergies: list[str] | Unset = UNSET
-    cuisine_preferences: list[str] | Unset = UNSET
+    about_me: list[str] | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -32,9 +32,9 @@ class UserProfilePreferences:
         if not isinstance(self.allergies, Unset):
             allergies = self.allergies
 
-        cuisine_preferences: list[str] | Unset = UNSET
-        if not isinstance(self.cuisine_preferences, Unset):
-            cuisine_preferences = self.cuisine_preferences
+        about_me: list[str] | Unset = UNSET
+        if not isinstance(self.about_me, Unset):
+            about_me = self.about_me
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
@@ -43,8 +43,8 @@ class UserProfilePreferences:
             field_dict["diet"] = diet
         if allergies is not UNSET:
             field_dict["allergies"] = allergies
-        if cuisine_preferences is not UNSET:
-            field_dict["cuisinePreferences"] = cuisine_preferences
+        if about_me is not UNSET:
+            field_dict["aboutMe"] = about_me
 
         return field_dict
 
@@ -55,12 +55,12 @@ class UserProfilePreferences:
 
         allergies = cast(list[str], d.pop("allergies", UNSET))
 
-        cuisine_preferences = cast(list[str], d.pop("cuisinePreferences", UNSET))
+        about_me = cast(list[str], d.pop("aboutMe", UNSET))
 
         user_profile_preferences = cls(
             diet=diet,
             allergies=allergies,
-            cuisine_preferences=cuisine_preferences,
+            about_me=about_me,
         )
 
         user_profile_preferences.additional_properties = d

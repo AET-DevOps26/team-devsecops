@@ -1,10 +1,11 @@
 from http import HTTPStatus
-from typing import Any
+from typing import Any, cast
 
 import httpx
 
 from ... import errors
 from ...client import AuthenticatedClient, Client
+from ...models.recipe import Recipe
 from ...models.recipe_request import RecipeRequest
 from ...types import Response
 
@@ -28,9 +29,20 @@ def _get_kwargs(
     return _kwargs
 
 
-def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> Any | None:
+def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> Any | list[Recipe] | None:
     if response.status_code == 200:
-        return None
+        response_200 = []
+        _response_200 = response.json()
+        for response_200_item_data in _response_200:
+            response_200_item = Recipe.from_dict(response_200_item_data)
+
+            response_200.append(response_200_item)
+
+        return response_200
+
+    if response.status_code == 403:
+        response_403 = cast(Any, None)
+        return response_403
 
     if client.raise_on_unexpected_status:
         raise errors.UnexpectedStatus(response.status_code, response.content)
@@ -38,7 +50,7 @@ def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Res
         return None
 
 
-def _build_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> Response[Any]:
+def _build_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> Response[Any | list[Recipe]]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -51,7 +63,7 @@ def sync_detailed(
     *,
     client: AuthenticatedClient,
     body: RecipeRequest,
-) -> Response[Any]:
+) -> Response[Any | list[Recipe]]:
     """Generate recipes using AI
 
     Args:
@@ -62,7 +74,7 @@ def sync_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Any]
+        Response[Any | list[Recipe]]
     """
 
     kwargs = _get_kwargs(
@@ -76,11 +88,11 @@ def sync_detailed(
     return _build_response(client=client, response=response)
 
 
-async def asyncio_detailed(
+def sync(
     *,
     client: AuthenticatedClient,
     body: RecipeRequest,
-) -> Response[Any]:
+) -> Any | list[Recipe] | None:
     """Generate recipes using AI
 
     Args:
@@ -91,7 +103,31 @@ async def asyncio_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Any]
+        Any | list[Recipe]
+    """
+
+    return sync_detailed(
+        client=client,
+        body=body,
+    ).parsed
+
+
+async def asyncio_detailed(
+    *,
+    client: AuthenticatedClient,
+    body: RecipeRequest,
+) -> Response[Any | list[Recipe]]:
+    """Generate recipes using AI
+
+    Args:
+        body (RecipeRequest):
+
+    Raises:
+        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+        httpx.TimeoutException: If the request takes longer than Client.timeout.
+
+    Returns:
+        Response[Any | list[Recipe]]
     """
 
     kwargs = _get_kwargs(
@@ -101,3 +137,29 @@ async def asyncio_detailed(
     response = await client.get_async_httpx_client().request(**kwargs)
 
     return _build_response(client=client, response=response)
+
+
+async def asyncio(
+    *,
+    client: AuthenticatedClient,
+    body: RecipeRequest,
+) -> Any | list[Recipe] | None:
+    """Generate recipes using AI
+
+    Args:
+        body (RecipeRequest):
+
+    Raises:
+        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+        httpx.TimeoutException: If the request takes longer than Client.timeout.
+
+    Returns:
+        Any | list[Recipe]
+    """
+
+    return (
+        await asyncio_detailed(
+            client=client,
+            body=body,
+        )
+    ).parsed
