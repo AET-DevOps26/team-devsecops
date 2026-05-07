@@ -1,4 +1,5 @@
 import os
+from typing import Any
 from fastapi import FastAPI, HTTPException
 from dotenv import load_dotenv
 from langchain_google_genai import ChatGoogleGenerativeAI
@@ -21,8 +22,14 @@ llm = ChatGoogleGenerativeAI(
 def health_check():
     return {"status": "healthy"}
 
-@app.post("/ai/help", response_model=HelpResponse)
-async def generate_help(request: HelpRequest):
+@app.post("/ai/help")
+async def generate_help(request_data: dict[str, Any]):
+    
+    try:
+        request = HelpRequest.from_dict(request_data)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Invalid request format: {str(e)}")
+    
     try:
         context = ["You are a professional culinary assistant."]
         
@@ -41,7 +48,9 @@ async def generate_help(request: HelpRequest):
         user_prompt = HumanMessage(content=request.prompt)
 
         result = llm.invoke([system_prompt, user_prompt])
-        
-        return HelpResponse(response=result.content)
+
+        help_response = HelpResponse(response=result.content)
+        return help_response.to_dict()
+    
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
