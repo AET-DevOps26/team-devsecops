@@ -54,7 +54,7 @@ class AIApiController(
 		val response =
 			aiWebClient
 				.post()
-				.uri("/generate/help")
+				.uri(PATH_AI_HELP_POST)
 				.contentType(MediaType.APPLICATION_JSON)
 				.bodyValue(helpRequest)
 				.retrieve()
