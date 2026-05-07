@@ -15,6 +15,7 @@ venv/
 target/
 *.class
 *.jar
+!**/gradle/wrapper/gradle-wrapper.jar
 *.war
 .mvn/
 .gradle/
