@@ -1,0 +1,333 @@
+openapi: 3.1.1
+info:
+  title: Cooking Assistant API
+  version: 1.0.0
+  description: API for recipe management and cooking assistance
+
+servers:
+  - url: http://localhost:8080/api/v1
+
+tags:
+  - name: Users
+    description: User auth and preferences
+  - name: Recipes
+    description: Recipe storage and retrieval
+  - name: AI
+    description: AI-powered generation and assistance
+
+paths:
+  # -------------------------
+  # USERS
+  # -------------------------
+
+  /users/register:
+    post:
+      tags: [Users]
+      summary: Register a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterRequest"
+      responses:
+        "201":
+          description: User created
+
+  /users/login:
+    post:
+      tags: [Users]
+      summary: Login user and return JWT token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+      responses:
+        "200":
+          description: JWT token returned
+        "401":
+          description: Invalid username or password
+
+  /users/logout:
+    post:
+      tags: [Users]
+      summary: Logout user and invalidate token
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Logged out
+
+  /users/profile:
+    get:
+      tags: [Users]
+      summary: Get current user profile and preferences
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: User profile and preferences
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserProfile"
+        "403":
+          description: Not logged in
+    put:
+      tags: [Users]
+      summary: Update user profile and preferences
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserProfile"
+              blacklist:
+                - id
+      responses:
+        "200":
+          description: Profile and preferences updated
+        "400":
+          description: Invalid request body (e.g. empty password, username with invalid chars, unknown fields)
+        "403":
+          description: Not logged in
+        "409":
+          description: Username already taken
+
+  # -------------------------
+  # RECIPES
+  # -------------------------
+
+  /recipes:
+    get:
+      tags: [Recipes]
+      summary: List user recipes
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: List of user recipes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Recipe"
+        "403":
+          description: Not logged in
+
+    post:
+      tags: [Recipes]
+      summary: Save a recipe
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Recipe"
+      responses:
+        "201":
+          description: Recipe saved
+        "403":
+          description: Not logged in
+
+  /recipes/{recipeId}:
+    get:
+      tags: [Recipes]
+      summary: Get recipe by ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: recipeId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Recipe details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Recipe"
+        "403":
+          description: Not logged in
+
+  # -------------------------
+  # AI
+  # -------------------------
+
+  /ai/recipes:
+    post:
+      tags: [AI]
+      summary: Generate recipes using AI
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RecipeRequest"
+      responses:
+        "200":
+          description: Generated recipes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Recipe"
+        "403":
+          description: Not logged in
+
+  /ai/help:
+    post:
+      tags: [AI]
+      summary: Ask AI cooking assistant for help
+      # security:
+      #   - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/HelpRequest"
+      responses:
+        "200":
+          description: AI response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HelpResponse"
+        "403":
+          description: Not logged in
+
+# -------------------------
+# SECURITY
+# -------------------------
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  # -------------------------
+  # SCHEMAS
+  # -------------------------
+
+  schemas:
+    RegisterRequest:
+      type: object
+      required: [username, password]
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+
+    LoginRequest:
+      type: object
+      required: [username, password]
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+
+    UserProfile:
+      type: object
+      required: [id]
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        username:
+          type: string
+        password:
+          type: string
+        preferences:
+          type: object
+          properties:
+            diet:
+              type: string
+            allergies:
+              type: array
+              items:
+                type: string
+            aboutMe:
+              type: array
+              items:
+                type: string
+
+    Recipe:
+      type: object
+      required: [title, ingredients, instructions, portions]
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        title:
+          type: string
+        ingredients:
+          type: array
+          items:
+            type: object
+              quantity:
+                type: number
+              unit:
+                type: string
+              name:
+                type: string
+        instructions:
+          type: array
+          items:
+            type: string
+        portions:
+          type: integer
+        nutrients:
+          type: object
+          properties:
+            calories:
+              type: integer
+            protein:
+              type: integer
+            fat:
+              type: integer
+            carbs:
+              type: integer
+
+    RecipeRequest:
+      type: object
+      required: [profile,prompt]
+      properties:
+        profile:
+          $ref: "#/components/schemas/UserProfile"
+        prompt:
+          type: string
+
+    HelpRequest:
+      type: object
+      # required: [profile,recipe,prompt]
+      required: [prompt]
+      properties:
+        profile:
+          $ref: "#/components/schemas/UserProfile"
+        recipe:
+          $ref: "#/components/schemas/Recipe"
+        prompt:
+          type: string
+
+    HelpResponse:
+      type: object
+      properties:
+        response:
+          type: string
