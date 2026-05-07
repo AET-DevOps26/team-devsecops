@@ -19,6 +19,7 @@ target/
 .mvn/
 .gradle/
 build/
+.kotlin/
 
 # OS Specific
 .DS_Store
@@ -27,3 +28,8 @@ Thumbs.db
 # IDEs
 .vscode/
 .idea/
+
+# Claude Code
+/CLAUDE.md
+/.claude
+²

@@ -1,10 +1,7 @@
 import { useState } from 'react'
+import type { components } from '../api'
 
-// TODO: replace this with the actual call once the server works
-async function mockGenerate(prompt: string): Promise<string> {
-  await new Promise((resolve) => setTimeout(resolve, 600))
-  return `(mock) Recipe for: ${prompt}`
-}
+type HelpResponse = components['schemas']['HelpResponse']
 
 export function GeneratePage() {
   const [prompt, setPrompt] = useState('')
@@ -13,9 +10,21 @@ export function GeneratePage() {
 
   async function handleGenerate() {
     setloading(true)
-    const result = await mockGenerate(prompt)
-    setOutput(result)
-    setloading(false)
+		setOutput('Generating response... (this might take a while)')
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE ?? ''}/api/v1/ai/help`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ prompt }),
+      })
+      if (!response.ok) throw new Error(`HTTP ${response.status}`)
+      const data = (await response.json()) as HelpResponse
+      setOutput(data.response ?? '(empty response)')
+    } catch (e) {
+      setOutput(`Error: ${e instanceof Error ? e.message : String(e)}`)
+    } finally {
+      setloading(false)
+    }
   }
 
   return (

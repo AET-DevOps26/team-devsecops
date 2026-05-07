@@ -26,6 +26,6 @@ def health_check():
 async def generate_help(request: PromptRequest):
     try:
         response = llm.invoke(request.prompt)
-        return {"answer": response.content}
+        return {"response": response.content}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
