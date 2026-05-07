@@ -4,7 +4,7 @@ import { NotFoundPage } from './pages/NotFoundPage'
 
 export default function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={import.meta.env.BASE_URL}>
       <Routes>
         <Route path="/" element={<Navigate to="/generate" replace />} />
         <Route path="/generate" element={<GeneratePage />} />
