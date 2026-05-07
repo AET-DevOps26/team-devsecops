@@ -1,52 +1,52 @@
-package org.openapitools.api
+// package org.openapitools.api
 
-import org.junit.jupiter.api.Test
-import org.openapitools.model.Recipe
-import org.springframework.http.ResponseEntity
+// import org.junit.jupiter.api.Test
+// import org.openapitools.model.Recipe
+// import org.springframework.http.ResponseEntity
 
-class RecipesApiTest {
-	private val api: RecipesApiController = RecipesApiController()
+// class RecipesApiTest {
+// 	private val api: RecipesApiController = RecipesApiController()
 
-	/**
-	 * To test RecipesApiController.recipesGet
-	 *
-	 * @throws ApiException
-	 *          if the Api call fails
-	 */
-	@Test
-	fun recipesGetTest() {
-		val response: ResponseEntity<Unit> = api.recipesGet()
+// 	/**
+// 	 * To test RecipesApiController.recipesGet
+// 	 *
+// 	 * @throws ApiException
+// 	 *          if the Api call fails
+// 	 */
+// 	@Test
+// 	fun recipesGetTest() {
+// 		val response: ResponseEntity<Unit> = api.recipesGet()
 
-		// TODO: test validations
-	}
+// 		// TODO: test validations
+// 	}
 
-	/**
-	 * To test RecipesApiController.recipesPost
-	 *
-	 * @throws ApiException
-	 *          if the Api call fails
-	 */
-	@Test
-	fun recipesPostTest() {
-		val recipe: Recipe = TODO()
+// 	/**
+// 	 * To test RecipesApiController.recipesPost
+// 	 *
+// 	 * @throws ApiException
+// 	 *          if the Api call fails
+// 	 */
+// 	@Test
+// 	fun recipesPostTest() {
+// 		val recipe: Recipe = TODO()
 
-		val response: ResponseEntity<Unit> = api.recipesPost(recipe)
+// 		val response: ResponseEntity<Unit> = api.recipesPost(recipe)
 
-		// TODO: test validations
-	}
+// 		// TODO: test validations
+// 	}
 
-	/**
-	 * To test RecipesApiController.recipesRecipeIdGet
-	 *
-	 * @throws ApiException
-	 *          if the Api call fails
-	 */
-	@Test
-	fun recipesRecipeIdGetTest() {
-		val recipeId: kotlin.String = TODO()
+// 	/**
+// 	 * To test RecipesApiController.recipesRecipeIdGet
+// 	 *
+// 	 * @throws ApiException
+// 	 *          if the Api call fails
+// 	 */
+// 	@Test
+// 	fun recipesRecipeIdGetTest() {
+// 		val recipeId: kotlin.String = TODO()
 
-		val response: ResponseEntity<Unit> = api.recipesRecipeIdGet(recipeId)
+// 		val response: ResponseEntity<Unit> = api.recipesRecipeIdGet(recipeId)
 
-		// TODO: test validations
-	}
-}
+// 		// TODO: test validations
+// 	}
+// }
