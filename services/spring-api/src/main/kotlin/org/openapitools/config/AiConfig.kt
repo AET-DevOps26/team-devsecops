@@ -10,6 +10,6 @@ class AiConfig {
 	fun aiWebClient(): WebClient =
 		WebClient
 			.builder()
-			.baseUrl("http://localhost:8000")
+			.baseUrl("http://localhost:8081")
 			.build()
 }
