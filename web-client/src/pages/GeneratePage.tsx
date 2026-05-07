@@ -12,7 +12,7 @@ export function GeneratePage() {
     setloading(true)
 		setOutput('Generating response... (this might take a while)')
     try {
-      const response = await fetch('/api/v1/ai/help', {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE ?? ''}/api/v1/ai/help`, {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ prompt }),
