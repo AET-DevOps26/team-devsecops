@@ -6,7 +6,10 @@ from typing import TYPE_CHECKING, Any, TypeVar, cast
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
+from ..types import UNSET, Unset
+
 if TYPE_CHECKING:
+    from ..models.recipe_ingredients_item import RecipeIngredientsItem
     from ..models.recipe_nutrients import RecipeNutrients
 
 
@@ -18,29 +21,38 @@ class Recipe:
     """
     Attributes:
         title (str):
-        ingredients (list[str]):
-        instructions (str):
+        ingredients (list[RecipeIngredientsItem]):
+        instructions (list[str]):
         portions (int):
-        nutrients (RecipeNutrients):
+        id (int | Unset):
+        nutrients (RecipeNutrients | Unset):
     """
 
     title: str
-    ingredients: list[str]
-    instructions: str
+    ingredients: list[RecipeIngredientsItem]
+    instructions: list[str]
     portions: int
-    nutrients: RecipeNutrients
+    id: int | Unset = UNSET
+    nutrients: RecipeNutrients | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         title = self.title
 
-        ingredients = self.ingredients
+        ingredients = []
+        for ingredients_item_data in self.ingredients:
+            ingredients_item = ingredients_item_data.to_dict()
+            ingredients.append(ingredients_item)
 
         instructions = self.instructions
 
         portions = self.portions
 
-        nutrients = self.nutrients.to_dict()
+        id = self.id
+
+        nutrients: dict[str, Any] | Unset = UNSET
+        if not isinstance(self.nutrients, Unset):
+            nutrients = self.nutrients.to_dict()
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
@@ -50,32 +62,49 @@ class Recipe:
                 "ingredients": ingredients,
                 "instructions": instructions,
                 "portions": portions,
-                "nutrients": nutrients,
             }
         )
+        if id is not UNSET:
+            field_dict["id"] = id
+        if nutrients is not UNSET:
+            field_dict["nutrients"] = nutrients
 
         return field_dict
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
+        from ..models.recipe_ingredients_item import RecipeIngredientsItem
         from ..models.recipe_nutrients import RecipeNutrients
 
         d = dict(src_dict)
         title = d.pop("title")
 
-        ingredients = cast(list[str], d.pop("ingredients"))
+        ingredients = []
+        _ingredients = d.pop("ingredients")
+        for ingredients_item_data in _ingredients:
+            ingredients_item = RecipeIngredientsItem.from_dict(ingredients_item_data)
 
-        instructions = d.pop("instructions")
+            ingredients.append(ingredients_item)
+
+        instructions = cast(list[str], d.pop("instructions"))
 
         portions = d.pop("portions")
 
-        nutrients = RecipeNutrients.from_dict(d.pop("nutrients"))
+        id = d.pop("id", UNSET)
+
+        _nutrients = d.pop("nutrients", UNSET)
+        nutrients: RecipeNutrients | Unset
+        if isinstance(_nutrients, Unset):
+            nutrients = UNSET
+        else:
+            nutrients = RecipeNutrients.from_dict(_nutrients)
 
         recipe = cls(
             title=title,
             ingredients=ingredients,
             instructions=instructions,
             portions=portions,
+            id=id,
             nutrients=nutrients,
         )
 

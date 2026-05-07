@@ -19,13 +19,13 @@ T = TypeVar("T", bound="UserProfile")
 class UserProfile:
     """
     Attributes:
-        id (str):
+        id (int):
         username (str | Unset):
         password (str | Unset):
         preferences (UserProfilePreferences | Unset):
     """
 
-    id: str
+    id: int
     username: str | Unset = UNSET
     password: str | Unset = UNSET
     preferences: UserProfilePreferences | Unset = UNSET

@@ -10,6 +10,7 @@ from ..types import UNSET, Unset
 
 if TYPE_CHECKING:
     from ..models.recipe import Recipe
+    from ..models.user_profile import UserProfile
 
 
 T = TypeVar("T", bound="HelpRequest")
@@ -20,15 +21,21 @@ class HelpRequest:
     """
     Attributes:
         prompt (str):
+        profile (UserProfile | Unset):
         recipe (Recipe | Unset):
     """
 
     prompt: str
+    profile: UserProfile | Unset = UNSET
     recipe: Recipe | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         prompt = self.prompt
+
+        profile: dict[str, Any] | Unset = UNSET
+        if not isinstance(self.profile, Unset):
+            profile = self.profile.to_dict()
 
         recipe: dict[str, Any] | Unset = UNSET
         if not isinstance(self.recipe, Unset):
@@ -41,6 +48,8 @@ class HelpRequest:
                 "prompt": prompt,
             }
         )
+        if profile is not UNSET:
+            field_dict["profile"] = profile
         if recipe is not UNSET:
             field_dict["recipe"] = recipe
 
@@ -49,9 +58,17 @@ class HelpRequest:
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.recipe import Recipe
+        from ..models.user_profile import UserProfile
 
         d = dict(src_dict)
         prompt = d.pop("prompt")
+
+        _profile = d.pop("profile", UNSET)
+        profile: UserProfile | Unset
+        if isinstance(_profile, Unset):
+            profile = UNSET
+        else:
+            profile = UserProfile.from_dict(_profile)
 
         _recipe = d.pop("recipe", UNSET)
         recipe: Recipe | Unset
@@ -62,6 +79,7 @@ class HelpRequest:
 
         help_request = cls(
             prompt=prompt,
+            profile=profile,
             recipe=recipe,
         )
 

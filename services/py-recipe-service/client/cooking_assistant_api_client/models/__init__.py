@@ -4,6 +4,7 @@ from .help_request import HelpRequest
 from .help_response import HelpResponse
 from .login_request import LoginRequest
 from .recipe import Recipe
+from .recipe_ingredients_item import RecipeIngredientsItem
 from .recipe_nutrients import RecipeNutrients
 from .recipe_request import RecipeRequest
 from .register_request import RegisterRequest
@@ -15,6 +16,7 @@ __all__ = (
     "HelpResponse",
     "LoginRequest",
     "Recipe",
+    "RecipeIngredientsItem",
     "RecipeNutrients",
     "RecipeRequest",
     "RegisterRequest",
