@@ -1,0 +1,36 @@
+name: Deploy Recipe Service
+
+on:
+  push:
+    paths: ['services/py-recipe-service/**'] # Only trigger if files in this folder change
+
+jobs:
+  # --- Step 1: CI (Quality Check) ---
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Run Linting
+        run: |
+          cd services/py-recipe-service
+          pip install flake8
+          # Check for syntax errors and undefined names
+          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+
+  # --- Step 2: CD (The Scalable Deployment) ---
+  call-deploy:
+    needs: [test] 
+    if: github.ref == 'refs/heads/main'
+    uses: ./.github/workflows/reusable-deploy.yml
+    with:
+      service_name: py-recipe-service
+      service_dir: services/py-recipe-service
+    secrets:
+      GCP_SA_KEY: ${{ secrets.RECIPE_SERVICE_SA_KEY }}
+      GEMINI_API_KEY: ${{ secrets.RECIPE_SERVICE_KEY }}
