@@ -47,6 +47,8 @@ paths:
       responses:
         "200":
           description: JWT token returned
+        "401":
+          description: Invalid username or password
 
   /users/logout:
     post:
@@ -71,6 +73,8 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/UserProfile"
+        "403":
+          description: Not logged in
     put:
       tags: [Users]
       summary: Update user profile and preferences
@@ -87,6 +91,12 @@ paths:
       responses:
         "200":
           description: Profile and preferences updated
+        "400":
+          description: Invalid request body (e.g. empty password, username with invalid chars, unknown fields)
+        "403":
+          description: Not logged in
+        "409":
+          description: Username already taken
 
   # -------------------------
   # RECIPES
@@ -100,7 +110,15 @@ paths:
         - bearerAuth: []
       responses:
         "200":
-          description: List of recipes
+          description: List of user recipes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Recipe"
+        "403":
+          description: Not logged in
 
     post:
       tags: [Recipes]
@@ -116,6 +134,8 @@ paths:
       responses:
         "201":
           description: Recipe saved
+        "403":
+          description: Not logged in
 
   /recipes/{recipeId}:
     get:
@@ -132,6 +152,12 @@ paths:
       responses:
         "200":
           description: Recipe details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Recipe"
+        "403":
+          description: Not logged in
 
   # -------------------------
   # AI
@@ -152,6 +178,14 @@ paths:
       responses:
         "200":
           description: Generated recipes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Recipe"
+        "403":
+          description: Not logged in
 
   /ai/help:
     post:
@@ -172,6 +206,8 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HelpResponse"
+        "403":
+          description: Not logged in
 
 # -------------------------
 # SECURITY
@@ -212,7 +248,8 @@ components:
       required: [id]
       properties:
         id:
-          type: string
+          type: integer
+          readOnly: true
         username:
           type: string
         password:
@@ -226,23 +263,34 @@ components:
               type: array
               items:
                 type: string
-            cuisinePreferences:
+            aboutMe:
               type: array
               items:
                 type: string
 
     Recipe:
       type: object
-      required: [title, ingredients, instructions, portions, nutrients]
+      required: [title, ingredients, instructions, portions]
       properties:
+        id:
+          type: integer
+          readOnly: true
         title:
           type: string
         ingredients:
           type: array
           items:
-            type: string
+            type: object
+              quantity:
+                type: number
+              unit:
+                type: string
+              name:
+                type: string
         instructions:
-          type: string
+          type: array
+          items:
+            type: string
         portions:
           type: integer
         nutrients:
@@ -268,9 +316,11 @@ components:
 
     HelpRequest:
       type: object
-      # required: [recipe,prompt]
+      # required: [profile,recipe,prompt]
       required: [prompt]
       properties:
+        profile:
+          $ref: "#/components/schemas/UserProfile"
         recipe:
           $ref: "#/components/schemas/Recipe"
         prompt:
