@@ -44,4 +44,4 @@ jobs:
             --image gcr.io/${{ vars.GCP_PROJECT_ID }}/${{ inputs.service_name }}:${{ github.sha }} \
             --region us-central1 \
             --allow-unauthenticated \
-            --set-env-vars "GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}"
+            --set-env-vars "SERVICE_API_KEY=${{ secrets.GEMINI_API_KEY }}"
