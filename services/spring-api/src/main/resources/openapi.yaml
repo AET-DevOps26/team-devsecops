@@ -1,0 +1,329 @@
+openapi: 3.1.1
+info:
+  description: API for recipe management and cooking assistance
+  title: Cooking Assistant API
+  version: 1.0.0
+servers:
+- url: http://localhost:8080/api/v1
+tags:
+- description: User auth and preferences
+  name: Users
+- description: Recipe storage and retrieval
+  name: Recipes
+- description: AI-powered generation and assistance
+  name: AI
+paths:
+  /users/register:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterRequest"
+        required: true
+      responses:
+        "201":
+          description: User created
+      summary: Register a new user
+      tags:
+      - Users
+  /users/login:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+        required: true
+      responses:
+        "200":
+          description: JWT token returned
+      summary: Login user and return JWT token
+      tags:
+      - Users
+  /users/logout:
+    post:
+      responses:
+        "200":
+          description: Logged out
+      security:
+      - bearerAuth: []
+      summary: Logout user and invalidate token
+      tags:
+      - Users
+  /users/profile:
+    get:
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserProfile"
+          description: User profile and preferences
+      security:
+      - bearerAuth: []
+      summary: Get current user profile and preferences
+      tags:
+      - Users
+    put:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              allOf:
+              - $ref: "#/components/schemas/UserProfile"
+              blacklist:
+              - id
+        required: true
+      responses:
+        "200":
+          description: Profile and preferences updated
+      security:
+      - bearerAuth: []
+      summary: Update user profile and preferences
+      tags:
+      - Users
+  /recipes:
+    get:
+      responses:
+        "200":
+          description: List of recipes
+      security:
+      - bearerAuth: []
+      summary: List user recipes
+      tags:
+      - Recipes
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Recipe"
+        required: true
+      responses:
+        "201":
+          description: Recipe saved
+      security:
+      - bearerAuth: []
+      summary: Save a recipe
+      tags:
+      - Recipes
+  /recipes/{recipeId}:
+    get:
+      parameters:
+      - explode: false
+        in: path
+        name: recipeId
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          description: Recipe details
+      security:
+      - bearerAuth: []
+      summary: Get recipe by ID
+      tags:
+      - Recipes
+  /ai/recipes:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RecipeRequest"
+        required: true
+      responses:
+        "200":
+          description: Generated recipes
+      security:
+      - bearerAuth: []
+      summary: Generate recipes using AI
+      tags:
+      - AI
+  /ai/help:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/HelpRequest"
+        required: true
+      responses:
+        "200":
+          description: AI response
+      summary: Ask AI cooking assistant for help
+      tags:
+      - AI
+components:
+  schemas:
+    RegisterRequest:
+      example:
+        password: password
+        username: username
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+      required:
+      - password
+      - username
+    LoginRequest:
+      example:
+        password: password
+        username: username
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+      required:
+      - password
+      - username
+    UserProfile:
+      example:
+        password: password
+        preferences:
+          allergies:
+          - allergies
+          - allergies
+          cuisinePreferences:
+          - cuisinePreferences
+          - cuisinePreferences
+          diet: diet
+        id: id
+        username: username
+      properties:
+        id:
+          type: string
+        username:
+          type: string
+        password:
+          type: string
+        preferences:
+          $ref: "#/components/schemas/UserProfile_preferences"
+      required:
+      - id
+    Recipe:
+      example:
+        instructions: instructions
+        ingredients:
+        - ingredients
+        - ingredients
+        title: title
+        portions: 0
+        nutrients:
+          carbs: 5
+          protein: 1
+          fat: 5
+          calories: 6
+      properties:
+        title:
+          type: string
+        ingredients:
+          items:
+            type: string
+          type: array
+        instructions:
+          type: string
+        portions:
+          type: integer
+        nutrients:
+          $ref: "#/components/schemas/Recipe_nutrients"
+      required:
+      - ingredients
+      - instructions
+      - nutrients
+      - portions
+      - title
+    RecipeRequest:
+      example:
+        profile:
+          password: password
+          preferences:
+            allergies:
+            - allergies
+            - allergies
+            cuisinePreferences:
+            - cuisinePreferences
+            - cuisinePreferences
+            diet: diet
+          id: id
+          username: username
+        prompt: prompt
+      properties:
+        profile:
+          $ref: "#/components/schemas/UserProfile"
+        prompt:
+          type: string
+      required:
+      - profile
+      - prompt
+    HelpRequest:
+      example:
+        recipe:
+          instructions: instructions
+          ingredients:
+          - ingredients
+          - ingredients
+          title: title
+          portions: 0
+          nutrients:
+            carbs: 5
+            protein: 1
+            fat: 5
+            calories: 6
+        prompt: prompt
+      properties:
+        recipe:
+          $ref: "#/components/schemas/Recipe"
+        prompt:
+          type: string
+      required:
+      - prompt
+    HelpResponse:
+      properties:
+        response:
+          type: string
+    UserProfile_preferences:
+      example:
+        allergies:
+        - allergies
+        - allergies
+        cuisinePreferences:
+        - cuisinePreferences
+        - cuisinePreferences
+        diet: diet
+      properties:
+        diet:
+          type: string
+        allergies:
+          items:
+            type: string
+          type: array
+        cuisinePreferences:
+          items:
+            type: string
+          type: array
+    Recipe_nutrients:
+      example:
+        carbs: 5
+        protein: 1
+        fat: 5
+        calories: 6
+      properties:
+        calories:
+          type: integer
+        protein:
+          type: integer
+        fat:
+          type: integer
+        carbs:
+          type: integer
+  securitySchemes:
+    bearerAuth:
+      bearerFormat: JWT
+      scheme: bearer
+      type: http

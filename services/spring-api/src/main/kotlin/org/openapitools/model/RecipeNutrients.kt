@@ -1,0 +1,32 @@
+package org.openapitools.model
+
+import com.fasterxml.jackson.annotation.JsonProperty
+import io.swagger.v3.oas.annotations.media.Schema
+import jakarta.validation.Valid
+import jakarta.validation.constraints.DecimalMax
+import jakarta.validation.constraints.DecimalMin
+import jakarta.validation.constraints.Email
+import jakarta.validation.constraints.Max
+import jakarta.validation.constraints.Min
+import jakarta.validation.constraints.NotNull
+import jakarta.validation.constraints.Pattern
+import jakarta.validation.constraints.Size
+import java.util.Objects
+
+/**
+ *
+ * @param calories
+ * @param protein
+ * @param fat
+ * @param carbs
+ */
+data class RecipeNutrients(
+	@Schema(example = "null", description = "")
+	@get:JsonProperty("calories") val calories: kotlin.Int? = null,
+	@Schema(example = "null", description = "")
+	@get:JsonProperty("protein") val protein: kotlin.Int? = null,
+	@Schema(example = "null", description = "")
+	@get:JsonProperty("fat") val fat: kotlin.Int? = null,
+	@Schema(example = "null", description = "")
+	@get:JsonProperty("carbs") val carbs: kotlin.Int? = null,
+)
