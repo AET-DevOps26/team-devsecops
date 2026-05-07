@@ -23,6 +23,10 @@ plugins {
     id("io.spring.dependency-management") version "1.1.7"
 }
 
+tasks.bootJar {
+    archiveFileName.set("app.jar")
+}
+
 dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
