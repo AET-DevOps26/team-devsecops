@@ -1,0 +1,21 @@
+services:
+  py-help-service:
+    build: ./services/py-help-service
+    environment:
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
+
+  spring-api:
+    build: ./services/spring-api
+    ports:
+      - "8080:8080"
+    environment:
+      AI_HELP_SERVICE_URL: http://py-help-service:8080
+    depends_on:
+      - py-help-service
+
+  web-client:
+    build: ./web-client
+    ports:
+      - "8000:8000"
+    depends_on:
+      - spring-api
