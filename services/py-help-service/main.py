@@ -37,10 +37,14 @@ async def generate_help(request_data: dict[str, Any]):
             prefs = request.profile.preferences
             if prefs.diet:
                 context.append(f"The user follows a {prefs.diet} diet.")
-            if prefs.about_me:
-                context.append(f"The user specifies the following general information about himself: {prefs.about_me}") 
-            if prefs.allergies:
-                context.append(f"Important: The user is allergic to: {', '.join(prefs.allergies)}.")
+    
+            about_me = prefs.about_me or []
+            if about_me:
+                context.append(f"The user specifies: {', '.join(about_me)}") 
+
+            allergies = prefs.allergies or []
+            if allergies:
+                context.append(f"Important: The user is allergic to: {', '.join(allergies)}.")
         
         if request.recipe:
             context.append(f"The user is currently looking at a recipe for '{request.recipe.title}'.")
