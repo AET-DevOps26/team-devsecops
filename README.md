@@ -1,10 +1,12 @@
 # team-devsecops
 
-Repository for team DevSecOps.
+Repository for team DevSecOps — a GenAI-powered cooking assistant that recommends recipes based on user preferences.
 
 ## Deployment
 
 > **Live app:** https://aet-devops26.github.io/team-devsecops
+
+See the [project wiki](https://github.com/AET-DevOps26/team-devsecops/wiki) for the [problem statement](https://github.com/AET-DevOps26/team-devsecops/wiki/Problem-Statement) and [initial system structure](https://github.com/AET-DevOps26/team-devsecops/wiki/Initial-System-Structure).
 
 ## Local setup
 
