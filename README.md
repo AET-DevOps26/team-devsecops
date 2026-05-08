@@ -1,6 +1,4 @@
-# team-devsecops
-
-Repository for team DevSecOps — a GenAI-powered cooking assistant that recommends recipes based on user preferences.
+# Cooking Assistant (Team DevSecOps)
 
 ## Deployment
 
