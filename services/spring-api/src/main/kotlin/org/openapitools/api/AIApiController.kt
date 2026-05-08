@@ -56,7 +56,7 @@ class AIApiController(
 				.post()
 				.uri(PATH_AI_HELP_POST)
 				.contentType(MediaType.APPLICATION_JSON)
-				.bodyValue(helpRequest)
+				.bodyValue(mapOf("prompt" to helpRequest.prompt))
 				.retrieve()
 				.bodyToMono(HelpResponse::class.java)
 				.block()
