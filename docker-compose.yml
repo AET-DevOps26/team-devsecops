@@ -3,6 +3,16 @@ services:
     build: ./services/py-help-service
     environment:
       GEMINI_API_KEY: ${GEMINI_API_KEY}
+    develop:
+      watch:
+        - action: sync+restart
+          path: ./services/py-help-service
+          target: /app
+          ignore:
+            - __pycache__/
+            - "*.pyc"
+        - action: rebuild
+          path: ./services/py-help-service/requirements.txt
 
   spring-api:
     build: ./services/spring-api
@@ -12,6 +22,12 @@ services:
       AI_HELP_SERVICE_URL: http://py-help-service:8080
     depends_on:
       - py-help-service
+    develop:
+      watch:
+        - action: rebuild
+          path: ./services/spring-api/src
+        - action: rebuild
+          path: ./services/spring-api/build.gradle.kts
 
   web-client:
     build: ./web-client
@@ -19,3 +35,13 @@ services:
       - "8000:8000"
     depends_on:
       - spring-api
+    develop:
+      watch:
+        - action: rebuild
+          path: ./web-client/src
+        - action: rebuild
+          path: ./web-client/index.html
+        - action: rebuild
+          path: ./web-client/vite.config.ts
+        - action: rebuild
+          path: ./web-client/package.json
