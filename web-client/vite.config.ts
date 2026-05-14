@@ -9,7 +9,7 @@ export default defineConfig({
 		// mappings when running in dev mode
     proxy: {
       '/api': {
-        target: 'http://localhost:8080',
+        target: process.env.VITE_API_PROXY ?? 'http://localhost:8080',
         configure: (proxy) => {
           proxy.on('proxyReq', (proxyReq) => {
             // Spring's CorsConfig only allows the GitHub Pages origin; strip
