@@ -72,6 +72,13 @@ export interface paths {
                     };
                     content?: never;
                 };
+                /** @description Invalid username or password */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
             };
         };
         delete?: never;
@@ -140,6 +147,13 @@ export interface paths {
                         "application/json": components["schemas"]["UserProfile"];
                     };
                 };
+                /** @description Not logged in */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
             };
         };
         /** Update user profile and preferences */
@@ -158,6 +172,27 @@ export interface paths {
             responses: {
                 /** @description Profile and preferences updated */
                 200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Invalid request body (e.g. empty password, username with invalid chars, unknown fields) */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not logged in */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Username already taken */
+                409: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -189,8 +224,17 @@ export interface paths {
             };
             requestBody?: never;
             responses: {
-                /** @description List of recipes */
+                /** @description List of user recipes */
                 200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Recipe"][];
+                    };
+                };
+                /** @description Not logged in */
+                403: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -215,6 +259,13 @@ export interface paths {
             responses: {
                 /** @description Recipe saved */
                 201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not logged in */
+                403: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -249,6 +300,15 @@ export interface paths {
             responses: {
                 /** @description Recipe details */
                 200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Recipe"];
+                    };
+                };
+                /** @description Not logged in */
+                403: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -289,6 +349,15 @@ export interface paths {
             responses: {
                 /** @description Generated recipes */
                 200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Recipe"][];
+                    };
+                };
+                /** @description Not logged in */
+                403: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -334,6 +403,13 @@ export interface paths {
                         "application/json": components["schemas"]["HelpResponse"];
                     };
                 };
+                /** @description Not logged in */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
             };
         };
         delete?: never;
@@ -355,21 +431,26 @@ export interface components {
             password: string;
         };
         UserProfile: {
-            id: string;
+            readonly id: number;
             username?: string;
             password?: string;
             preferences?: {
                 diet?: string;
                 allergies?: string[];
-                cuisinePreferences?: string[];
+                aboutMe?: string[];
             };
         };
         Recipe: {
+            readonly id?: number;
             title: string;
-            ingredients: string[];
-            instructions: string;
+            ingredients: {
+                quantity?: number;
+                unit?: string;
+                name?: string;
+            }[];
+            instructions: string[];
             portions: number;
-            nutrients: {
+            nutrients?: {
                 calories?: number;
                 protein?: number;
                 fat?: number;
@@ -381,6 +462,7 @@ export interface components {
             prompt: string;
         };
         HelpRequest: {
+            profile?: components["schemas"]["UserProfile"];
             recipe?: components["schemas"]["Recipe"];
             prompt: string;
         };

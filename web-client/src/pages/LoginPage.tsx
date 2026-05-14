@@ -3,6 +3,7 @@ import type { SubmitEventHandler } from 'react'
 import { Navigate } from 'react-router-dom'
 import { useAuth } from '../auth'
 import { Button } from '../components/Button'
+import { PasswordInput } from '../components/PasswordInput'
 
 type Tab = 'login' | 'register'
 
@@ -38,7 +39,7 @@ export function LoginPage() {
     `w-full border rounded p-2 ${invalid ? 'border-red-500' : 'border-gray-300'}`
 
   // already signed in -> skip the login page
-  if (token) return <Navigate to="/profile" replace />
+  if (token) return <Navigate to="/generate" replace />
 
   return (
     <main className="mx-auto flex max-w-2xl flex-col gap-4 p-6 animate-fade-in">
@@ -80,8 +81,7 @@ export function LoginPage() {
 
         <label className="flex flex-col gap-1">
           <span className="font-medium">Password</span>
-          <input
-            type="password"
+          <PasswordInput
             className={inputClass(!!error)}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
@@ -92,8 +92,7 @@ export function LoginPage() {
         {tab === 'register' && (
           <label className="flex flex-col gap-1">
             <span className="font-medium">Repeat password</span>
-            <input
-              type="password"
+            <PasswordInput
               className={inputClass(passwordMismatch)}
               value={repeatPassword}
               onChange={(e) => setRepeatPassword(e.target.value)}
