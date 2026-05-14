@@ -10,6 +10,7 @@ class CorsConfig : WebMvcConfigurer {
 		registry.addMapping("/api/**")
 			.allowedOriginPatterns(
 				"https://aet-devops26.github.io",
+        "http://localhost:8080",
 				"https://*.team-devsecops.pages.dev",
 			)
 			.allowedMethods("POST")
