@@ -27,6 +27,10 @@ jobs:
             # Cloudflare Pages serves at the domain root, not under the
             # /team-devsecops/ subpath that vite.config.ts targets for GitHub Pages.
             -   run: npm run build -- --base=/
+                env:
+                    # Without this the client posts to the static CF host (405);
+                    # point it at the same backend the production build uses.
+                    VITE_API_BASE: ${{ vars.VITE_API_BASE }}
 
             -   name: Deploy to Cloudflare Pages
                 id: deploy
