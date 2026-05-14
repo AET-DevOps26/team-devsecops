@@ -32,5 +32,5 @@ jobs:
       service_name: py-help-service
       service_dir: services/py-help-service
     secrets:
-      GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
-      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      GCP_SA_KEY: ${{ secrets.HELP_SERVICE_SA_KEY }}
+      GEMINI_API_KEY: ${{ secrets.HELP_SERVICE_KEY }}
