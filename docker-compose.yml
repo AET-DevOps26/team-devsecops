@@ -4,7 +4,7 @@ services:
     ports:
       - "8090:8080"
     environment:
-      GEMINI_API_KEY: ${GEMINI_API_KEY}
+      SERVICE_API_KEY: ${HELP_SERVICE_KEY}
     develop:
       watch:
         - action: sync+restart
