@@ -1,6 +1,34 @@
 spring:
   application:
     name: cookingAssistant
+  datasource:
+    # Locally defaults to H2 in-memory. On GCP Cloud Run, set DB_URL (e.g. jdbc:postgresql:///<db>?socketFactory=...&cloudSqlInstance=...), DB_USER, DB_PASSWORD env vars
+    url: ${DB_URL:jdbc:h2:mem:cookingdb;DB_CLOSE_DELAY=-1}
+    username: ${DB_USER:sa}
+    password: ${DB_PASSWORD:}
+  jpa:
+    hibernate:
+      # create-drop: wipe and recreate tables every restart
+      # update: keep data between restarts
+      ddl-auto: ${JPA_DDL_AUTO:create-drop}
+    show-sql: false
+    open-in-view: false
+  h2:
+    console:
+      enabled: false # http://localhost:8080/h2-console
 
 server:
   port: 8080
+
+ai:
+  help:
+    service:
+      url: ${AI_HELP_SERVICE_URL:http://localhost:8091}
+  recipe:
+    service:
+      url: ${AI_RECIPE_SERVICE_URL:http://localhost:8090}
+
+app:
+  jwt:
+    secret: ${JWT_SECRET:local-dev-secret-change-this-in-production-use-env-var}
+    expiration-ms: 86400000   # 24 hours

@@ -48,4 +48,4 @@ jobs:
             --image gcr.io/${{ vars.GCP_PROJECT_ID }}/spring-api:${{ github.sha }} \
             --region us-central1 \
             --allow-unauthenticated \
-            --set-env-vars "AI_HELP_SERVICE_URL=${{ vars.AI_HELP_SERVICE_URL }}"
+            --set-env-vars "AI_HELP_SERVICE_URL=${{ vars.AI_HELP_SERVICE_URL }},AI_RECIPE_SERVICE_URL=${{ vars.AI_RECIPE_SERVICE_URL }},DB_URL=${{ vars.DB_URL }},DB_USER=${{ vars.DB_USER }},DB_PASSWORD=${{ secrets.DB_PASSWORD }},JWT_SECRET=${{ secrets.JWT_SECRET }},JPA_DDL_AUTO=${{ vars.JPA_DDL_AUTO }}"
