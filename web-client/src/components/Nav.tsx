@@ -34,6 +34,9 @@ export function Nav() {
       )
     }
     place()
+    // the Outfit web font loads async (font-display: swap); re-measure once it's
+    // ready so the pill isn't stuck on fallback-font metrics
+    document.fonts.ready.then(place)
     window.addEventListener('resize', place)
     return () => window.removeEventListener('resize', place)
   }, [activeIndex])
