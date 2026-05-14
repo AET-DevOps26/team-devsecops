@@ -16,7 +16,7 @@ app = FastAPI(title="Cooking Assistant GenAI Service")
 
 llm = ChatGoogleGenerativeAI(
     model="gemini-3.1-flash-lite-preview",
-    google_api_key=os.getenv("RECIPE_SERVICE_KEY")
+    google_api_key=os.getenv("SERVICE_API_KEY")
 )
 
 @app.get("/health")
