@@ -45,8 +45,7 @@ jobs:
                 with:
                     header: cf-preview
                     message: |
-                        Preview: ${{ steps.deploy.outputs.deployment-url }}
-                        Alias: ${{ steps.deploy.outputs.pages-deployment-alias-url }}
+                        🚀 Preview environment: ${{ steps.deploy.outputs.pages-deployment-alias-url }}
 
     cleanup:
         if: github.event.action == 'closed'
