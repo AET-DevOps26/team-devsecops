@@ -2,7 +2,9 @@ name: Deploy Spring API
 
 on:
   push:
+    branches: [main]
     paths: ['services/spring-api/**', '.github/workflows/deploy-spring-api.yml']
+  workflow_dispatch:
 
 jobs:
   build:
@@ -21,7 +23,7 @@ jobs:
 
   deploy:
     needs: [build]
-    if: github.ref == 'refs/heads/main'
+    environment: production
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -29,7 +31,7 @@ jobs:
       - name: Google Auth
         uses: 'google-github-actions/auth@v2'
         with:
-          credentials_json: '${{ secrets.GCP_SA_KEY }}'
+          credentials_json: '${{ secrets.API_SA_KEY }}'
 
       - name: Set up Cloud SDK
         uses: 'google-github-actions/setup-gcloud@v2'

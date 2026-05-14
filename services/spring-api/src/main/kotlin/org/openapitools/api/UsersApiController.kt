@@ -128,7 +128,12 @@ class UsersApiController(
 	): ResponseEntity<Unit> {
 		val user = userRepository.findByUsername(principal.username).orElseThrow()
 		userProfile.preferences?.let { user.preferences = objectMapper.writeValueAsString(it) }
-		userProfile.username?.let { user.username = it }
+		userProfile.username?.let { newUsername ->
+			if (newUsername != user.username && userRepository.existsByUsername(newUsername)) {
+				return ResponseEntity(HttpStatus.CONFLICT)
+			}
+			user.username = newUsername
+		}
 		userProfile.password?.let { user.password = passwordEncoder.encode(it)!! }
 		userRepository.save(user)
 		return ResponseEntity(HttpStatus.OK)

@@ -17,16 +17,14 @@ import java.util.Objects
 
 /**
  *
- * @param id
  * @param title
  * @param ingredients
  * @param instructions
  * @param portions
+ * @param id
  * @param nutrients
  */
 data class Recipe(
-	@Schema(example = "null", required = true, description = "")
-	@get:JsonProperty("id", required = true) val id: kotlin.Int,
 	@Schema(example = "null", required = true, description = "")
 	@get:JsonProperty("title", required = true) val title: kotlin.String,
 	@field:Valid
@@ -36,6 +34,8 @@ data class Recipe(
 	@get:JsonProperty("instructions", required = true) val instructions: kotlin.collections.List<kotlin.String>,
 	@Schema(example = "null", required = true, description = "")
 	@get:JsonProperty("portions", required = true) val portions: kotlin.Int,
+	@Schema(example = "null", required = true, description = "")
+	@get:JsonProperty("id", required = true) val id: kotlin.Int,
 	@field:Valid
 	@Schema(example = "null", description = "")
 	@get:JsonProperty("nutrients") val nutrients: RecipeNutrients? = null,

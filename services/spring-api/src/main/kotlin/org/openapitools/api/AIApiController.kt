@@ -64,7 +64,7 @@ class AIApiController(
 	fun aiRecipesPost(
 		@Parameter(description = "", required = true) @Valid @RequestBody recipeRequest: RecipeRequest,
 		@AuthenticationPrincipal principal: UserDetails,
-	): ResponseEntity<RecipeInput> {
+	): ResponseEntity<List<RecipeInput>> {
 		val user = userRepository.findByUsername(principal.username).orElseThrow()
 		val response =
 			aiRecipeWebClient
@@ -75,7 +75,7 @@ class AIApiController(
 				.retrieve()
 				.bodyToMono(RecipeInput::class.java)
 				.block() ?: return ResponseEntity.internalServerError().build()
-		return ResponseEntity.ok(response)
+		return ResponseEntity.ok(listOf(response))
 	}
 
 	// Converts the DB user entity into the API UserProfile model, injecting real profile data.

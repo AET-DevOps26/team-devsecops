@@ -2,7 +2,9 @@ name: Deploy Help Service
 
 on:
   push:
-    paths: ['services/py-help-service/**'] # Only trigger if files in this folder change
+    branches: [main]
+    paths: ['services/py-help-service/**']
+  workflow_dispatch:
 
 jobs:
   # --- Step 1: CI (Quality Check) ---
@@ -25,8 +27,7 @@ jobs:
 
   # --- Step 2: CD (The Scalable Deployment) ---
   call-deploy:
-    needs: [test] 
-    if: github.ref == 'refs/heads/main'
+    needs: [test]
     uses: ./.github/workflows/reusable-deploy.yml
     with:
       service_name: py-help-service

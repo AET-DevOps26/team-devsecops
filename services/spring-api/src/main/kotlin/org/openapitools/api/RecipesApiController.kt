@@ -11,6 +11,7 @@ import jakarta.validation.Valid
 import org.openapitools.entity.RecipeEntity
 import org.openapitools.model.Recipe
 import org.openapitools.model.RecipeIngredient
+import org.openapitools.model.RecipeInput
 import org.openapitools.model.RecipeNutrients
 import org.openapitools.repository.RecipeRepository
 import org.openapitools.repository.UserRepository
@@ -29,7 +30,6 @@ class RecipesApiController(
 	private val userRepository: UserRepository,
 	private val objectMapper: ObjectMapper,
 ) {
-
 	@Operation(
 		summary = "List user recipes",
 		operationId = "recipesGet",
@@ -53,7 +53,7 @@ class RecipesApiController(
 	)
 	@RequestMapping(method = [RequestMethod.POST], value = [PATH_RECIPES_POST], consumes = ["application/json"])
 	fun recipesPost(
-		@Parameter(description = "", required = true) @Valid @RequestBody recipe: Recipe,
+		@Parameter(description = "", required = true) @Valid @RequestBody recipe: RecipeInput,
 		@AuthenticationPrincipal principal: UserDetails,
 	): ResponseEntity<Unit> {
 		val user = userRepository.findByUsername(principal.username).orElseThrow()
@@ -81,26 +81,31 @@ class RecipesApiController(
 	)
 	@RequestMapping(method = [RequestMethod.GET], value = [PATH_RECIPES_RECIPE_ID_GET])
 	fun recipesRecipeIdGet(
+		@AuthenticationPrincipal principal: UserDetails,
 		@Parameter(description = "", required = true) @PathVariable("recipeId") recipeId: String,
 	): ResponseEntity<Recipe> {
 		val id = recipeId.toLongOrNull() ?: return ResponseEntity(HttpStatus.BAD_REQUEST)
 		val entity = recipeRepository.findById(id).orElse(null) ?: return ResponseEntity(HttpStatus.NOT_FOUND)
+		val user = userRepository.findByUsername(principal.username).orElseThrow()
+		if (entity.user.id != user.id) return ResponseEntity(HttpStatus.FORBIDDEN)
 		return ResponseEntity.ok(entity.toApiModel())
 	}
 
-	private fun RecipeEntity.toApiModel() = Recipe(
-		id = id.toInt(),
-		title = title,
-		ingredients = objectMapper.readValue(ingredients, object : TypeReference<List<RecipeIngredient>>() {}),
-		instructions = objectMapper.readValue(instructions, object : TypeReference<List<String>>() {}),
-		portions = portions,
-		nutrients = RecipeNutrients(
-			calories = nutrientKcal,
-			carbs = nutrientCarb,
-			protein = nutrientProt,
-			fat = nutrientFat,
-		),
-	)
+	private fun RecipeEntity.toApiModel() =
+		Recipe(
+			id = id.toInt(),
+			title = title,
+			ingredients = objectMapper.readValue(ingredients, object : TypeReference<List<RecipeIngredient>>() {}),
+			instructions = objectMapper.readValue(instructions, object : TypeReference<List<String>>() {}),
+			portions = portions,
+			nutrients =
+				RecipeNutrients(
+					calories = nutrientKcal,
+					carbs = nutrientCarb,
+					protein = nutrientProt,
+					fat = nutrientFat,
+				),
+		)
 
 	companion object {
 		const val BASE_PATH: String = "/api/v1"

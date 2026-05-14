@@ -20,25 +20,23 @@ T = TypeVar("T", bound="Recipe")
 class Recipe:
     """
     Attributes:
-        id (int):
         title (str):
         ingredients (list[RecipeIngredient]):
         instructions (list[str]):
         portions (int):
+        id (int):
         nutrients (RecipeNutrients | Unset):
     """
 
-    id: int
     title: str
     ingredients: list[RecipeIngredient]
     instructions: list[str]
     portions: int
+    id: int
     nutrients: RecipeNutrients | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
-        id = self.id
-
         title = self.title
 
         ingredients = []
@@ -50,6 +48,8 @@ class Recipe:
 
         portions = self.portions
 
+        id = self.id
+
         nutrients: dict[str, Any] | Unset = UNSET
         if not isinstance(self.nutrients, Unset):
             nutrients = self.nutrients.to_dict()
@@ -58,11 +58,11 @@ class Recipe:
         field_dict.update(self.additional_properties)
         field_dict.update(
             {
-                "id": id,
                 "title": title,
                 "ingredients": ingredients,
                 "instructions": instructions,
                 "portions": portions,
+                "id": id,
             }
         )
         if nutrients is not UNSET:
@@ -76,8 +76,6 @@ class Recipe:
         from ..models.recipe_nutrients import RecipeNutrients
 
         d = dict(src_dict)
-        id = d.pop("id")
-
         title = d.pop("title")
 
         ingredients = []
@@ -91,6 +89,8 @@ class Recipe:
 
         portions = d.pop("portions")
 
+        id = d.pop("id")
+
         _nutrients = d.pop("nutrients", UNSET)
         nutrients: RecipeNutrients | Unset
         if isinstance(_nutrients, Unset):
@@ -99,11 +99,11 @@ class Recipe:
             nutrients = RecipeNutrients.from_dict(_nutrients)
 
         recipe = cls(
-            id=id,
             title=title,
             ingredients=ingredients,
             instructions=instructions,
             portions=portions,
+            id=id,
             nutrients=nutrients,
         )
 

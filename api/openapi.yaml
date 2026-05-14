@@ -317,24 +317,13 @@ components:
 
     Recipe:
       type: object
-      required: [id, title, ingredients, instructions, portions]
-      properties:
-        id:
-          type: integer
-        title:
-          type: string
-        ingredients:
-          type: array
-          items:
-            $ref: "#/components/schemas/RecipeIngredient"
-        instructions:
-          type: array
-          items:
-            type: string
-        portions:
-          type: integer
-        nutrients:
-          $ref: "#/components/schemas/RecipeNutrients"
+      allOf:
+        - $ref: "#/components/schemas/RecipeInput"
+        - type: object
+          required: [id]
+          properties:
+            id:
+              type: integer
 
     RecipeRequest:
       type: object

@@ -462,13 +462,8 @@ export interface components {
             portions: number;
             nutrients?: components["schemas"]["RecipeNutrients"];
         };
-        Recipe: {
+        Recipe: components["schemas"]["RecipeInput"] & {
             id: number;
-            title: string;
-            ingredients: components["schemas"]["RecipeIngredient"][];
-            instructions: string[];
-            portions: number;
-            nutrients?: components["schemas"]["RecipeNutrients"];
         };
         RecipeRequest: {
             prompt: string;
