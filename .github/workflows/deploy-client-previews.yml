@@ -1,0 +1,77 @@
+name: Deploy PR Preview to Cloudflare Pages
+on:
+    pull_request:
+        types: [ opened, synchronize, reopened, closed ]
+        paths: [ 'web-client/**' ]
+
+jobs:
+    deploy:
+        if: github.event.action != 'closed'
+        runs-on: ubuntu-latest
+        defaults:
+            run:
+                working-directory: web-client
+        permissions:
+            contents: read
+            deployments: write
+            pull-requests: write
+        steps:
+            -   uses: actions/checkout@v4
+
+            -   uses: actions/setup-node@v4
+                with:
+                    node-version: 20
+                    cache: npm
+                    cache-dependency-path: web-client/package-lock.json
+
+            -   run: npm ci
+            # Cloudflare Pages serves at the domain root, not under the
+            # /team-devsecops/ subpath that vite.config.ts targets for GitHub Pages.
+            -   run: npm run build -- --base=/
+                env:
+                    # Without this the client posts to the static CF host (405);
+                    # point it at the same backend the production build uses.
+                    VITE_API_BASE: ${{ vars.VITE_API_BASE }}
+
+            -   name: Deploy to Cloudflare Pages
+                id: deploy
+                uses: cloudflare/wrangler-action@v3
+                with:
+                    apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+                    accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+                    command: pages deploy web-client/dist --project-name=team-devsecops --branch=pr-${{ github.event.pull_request.number }}
+
+            -   name: Add preview URL as PR comment
+                uses: marocchino/sticky-pull-request-comment@v2
+                with:
+                    header: cf-preview
+                    message: |
+                        🚀 Preview environment: ${{ steps.deploy.outputs.pages-deployment-alias-url }}
+
+    cleanup:
+        if: github.event.action == 'closed'
+        runs-on: ubuntu-latest
+        permissions:
+            pull-requests: write
+        steps:
+            -   name: Delete Cloudflare Pages preview deployments
+                # we do not want to inline the secrets so they don't end up in the command line
+                env:
+                    CF_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+                    CF_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+                    BRANCH: pr-${{ github.event.pull_request.number }}
+                # we added a new deployment for every push - delete all of them
+                run: |
+                    api="https://api.cloudflare.com/client/v4/accounts/$CF_ACCOUNT_ID/pages/projects/team-devsecops/deployments"
+                    ids=$(curl -sf -H "Authorization: Bearer $CF_API_TOKEN" "$api?per_page=100" \
+                        | jq -r --arg b "$BRANCH" '.result[] | select(.deployment_trigger.metadata.branch == $b) | .id')
+                    for id in $ids; do
+                        echo "Deleting deployment $id"
+                        curl -sf -X DELETE -H "Authorization: Bearer $CF_API_TOKEN" "$api/$id?force=true"
+                    done
+
+            -   name: Update PR comment
+                uses: marocchino/sticky-pull-request-comment@v2
+                with:
+                    header: cf-preview
+                    message: Preview deployment deleted.
