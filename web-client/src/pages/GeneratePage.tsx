@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import type { components } from '../api'
+import { Button } from '../components/Button'
 
 type HelpResponse = components['schemas']['HelpResponse']
 
@@ -10,7 +11,7 @@ export function GeneratePage() {
 
   async function handleGenerate() {
     setloading(true)
-		setOutput('Generating response... (this might take a while)')
+    setOutput('Generating response... (this might take a while)')
     try {
       const response = await fetch(`${import.meta.env.VITE_API_BASE ?? ''}/api/v1/ai/help`, {
         method: 'POST',
@@ -43,14 +44,14 @@ export function GeneratePage() {
           }
         }}
       />
-      <button
+      <Button
         type="button"
-        className="self-start px-4 py-2 bg-orange-500 text-white rounded disabled:opacity-50"
+        className="self-start"
         onClick={handleGenerate}
         disabled={loading || prompt.trim() === ''}
       >
         {loading ? 'Generating…' : 'Generate'}
-      </button>
+      </Button>
       {output && (
         <pre className="whitespace-pre-wrap border border-gray-200 rounded p-3 bg-gray-50">
           {output}
