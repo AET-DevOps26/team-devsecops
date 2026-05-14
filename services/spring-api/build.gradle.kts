@@ -31,7 +31,6 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
         implementation("org.springframework.boot:spring-boot-starter-webmvc")
-        implementation("org.springframework.boot:spring-boot-starter-actuator")
         implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.6")
 
     implementation("com.google.code.findbugs:jsr305:3.0.2")
