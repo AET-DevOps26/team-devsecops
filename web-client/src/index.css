@@ -20,4 +20,11 @@
 
 @theme {
   --font-sans: 'Outfit', ui-sans-serif, system-ui, -apple-system, sans-serif;
+
+  --animate-fade-in: fade-in 150ms ease-out;
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+  }
 }

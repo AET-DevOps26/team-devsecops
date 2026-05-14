@@ -3,7 +3,7 @@ import type { ReactNode } from 'react'
 
 const TOKEN_KEY = 'auth_token'
 
-// TODO: replace mock implementation with real server call
+// TODO: replace mock implementation with real server calls
 
 async function signInRequest(username: string, password: string): Promise<string> {
   if (!username.trim() || !password) throw new Error('Enter a username and password')
@@ -18,6 +18,7 @@ async function registerRequest(username: string, password: string): Promise<stri
 
 type AuthContextValue = {
   token: string | null
+  username: string | null
   signIn: (username: string, password: string) => Promise<void>
   register: (username: string, password: string) => Promise<void>
   signOut: () => void
@@ -35,6 +36,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const value: AuthContextValue = {
     token,
+    username: token ? token.replace('mock-token-for-', '') : null,
     signIn: async (username, password) => persist(await signInRequest(username, password)),
     register: async (username, password) => persist(await registerRequest(username, password)),
     signOut: () => {

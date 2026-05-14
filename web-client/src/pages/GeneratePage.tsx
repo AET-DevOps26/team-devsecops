@@ -29,8 +29,7 @@ export function GeneratePage() {
   }
 
   return (
-    <main className="mx-auto max-w-2xl p-6 flex flex-col gap-4">
-      <h1 className="text-2xl font-bold">Cooking Assistant</h1>
+    <>
       <textarea
         className="w-full min-h-32 border border-gray-300 rounded p-3"
         placeholder="What do you want to cook? (e.g. ingredients, cuisine, constraints)"
@@ -57,6 +56,6 @@ export function GeneratePage() {
           {output}
         </pre>
       )}
-    </main>
+    </>
   )
 }

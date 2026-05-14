@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { SubmitEventHandler } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Navigate } from 'react-router-dom'
 import { useAuth } from '../auth'
 import { Button } from '../components/Button'
 
@@ -13,8 +13,7 @@ export function LoginPage() {
   const [repeatPassword, setRepeatPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
-  const { signIn, register } = useAuth()
-  const navigate = useNavigate()
+  const { token, signIn, register } = useAuth()
 
   const handleSubmit: SubmitEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault()
@@ -27,7 +26,6 @@ export function LoginPage() {
     try {
       if (tab === 'login') await signIn(username, password)
       else await register(username, password)
-      navigate('/generate')
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e))
     } finally {
@@ -39,17 +37,24 @@ export function LoginPage() {
   const inputClass = (invalid: boolean) =>
     `w-full border rounded p-2 ${invalid ? 'border-red-500' : 'border-gray-300'}`
 
-  return (
-    <main className="mx-auto max-w-2xl p-6 flex flex-col gap-4">
-      <h1 className="text-2xl font-bold">Cooking Assistant</h1>
+  // already signed in -> skip the login page
+  if (token) return <Navigate to="/profile" replace />
 
-      <div className="inline-flex gap-1 self-start rounded-lg bg-gray-100 p-1">
+  return (
+    <main className="mx-auto flex max-w-2xl flex-col gap-4 p-6 animate-fade-in">
+      <h1 className="text-2xl font-bold">Cooking Assistant</h1>
+      <div className="relative inline-flex self-start rounded-lg bg-gray-100 p-1">
+        <span
+          className={`pointer-events-none absolute inset-y-1 left-1 w-24 rounded-md bg-white shadow-sm transition-transform duration-200 ease-out ${
+            tab === 'register' ? 'translate-x-full' : 'translate-x-0'
+          }`}
+        />
         {(['login', 'register'] as const).map((t) => (
           <button
             key={t}
             type="button"
-            className={`rounded-md px-3 py-1 text-sm font-medium ${
-              tab === t ? 'bg-white text-orange-600 shadow-sm' : 'text-gray-500'
+            className={`relative z-10 w-24 rounded-md py-1 text-sm font-medium transition-colors ${
+              tab === t ? 'text-orange-600' : 'text-gray-500'
             }`}
             onClick={() => {
               setTab(t)
