@@ -2,6 +2,7 @@ name: Deploy PR Preview to Cloudflare Pages
 on:
     pull_request:
         types: [ opened, synchronize, reopened, closed ]
+        paths: [ 'web-client/**' ]
 
 jobs:
     deploy:
