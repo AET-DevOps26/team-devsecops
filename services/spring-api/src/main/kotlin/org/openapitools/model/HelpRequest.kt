@@ -11,18 +11,18 @@ import jakarta.validation.constraints.Min
 import jakarta.validation.constraints.NotNull
 import jakarta.validation.constraints.Pattern
 import jakarta.validation.constraints.Size
-import org.openapitools.model.Recipe
+import org.openapitools.model.RecipeInput
 import java.util.Objects
 
 /**
  *
- * @param prompt
  * @param recipe
+ * @param prompt
  */
 data class HelpRequest(
+	@field:Valid
+	@Schema(example = "null", required = true, description = "")
+	@get:JsonProperty("recipe", required = true) val recipe: RecipeInput,
 	@Schema(example = "null", required = true, description = "")
 	@get:JsonProperty("prompt", required = true) val prompt: kotlin.String,
-	@field:Valid
-	@Schema(example = "null", description = "")
-	@get:JsonProperty("recipe") val recipe: Recipe? = null,
 )

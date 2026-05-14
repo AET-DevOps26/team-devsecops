@@ -6,38 +6,47 @@ from typing import TYPE_CHECKING, Any, TypeVar
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
+from ..types import UNSET, Unset
+
 if TYPE_CHECKING:
     from ..models.user_preferences import UserPreferences
 
 
-T = TypeVar("T", bound="UserProfile")
+T = TypeVar("T", bound="UserProfileUpdate")
 
 
 @_attrs_define
-class UserProfile:
+class UserProfileUpdate:
     """
     Attributes:
-        username (str):
-        preferences (UserPreferences):
+        username (str | Unset):
+        password (str | Unset):
+        preferences (UserPreferences | Unset):
     """
 
-    username: str
-    preferences: UserPreferences
+    username: str | Unset = UNSET
+    password: str | Unset = UNSET
+    preferences: UserPreferences | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         username = self.username
 
-        preferences = self.preferences.to_dict()
+        password = self.password
+
+        preferences: dict[str, Any] | Unset = UNSET
+        if not isinstance(self.preferences, Unset):
+            preferences = self.preferences.to_dict()
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update(
-            {
-                "username": username,
-                "preferences": preferences,
-            }
-        )
+        field_dict.update({})
+        if username is not UNSET:
+            field_dict["username"] = username
+        if password is not UNSET:
+            field_dict["password"] = password
+        if preferences is not UNSET:
+            field_dict["preferences"] = preferences
 
         return field_dict
 
@@ -46,17 +55,25 @@ class UserProfile:
         from ..models.user_preferences import UserPreferences
 
         d = dict(src_dict)
-        username = d.pop("username")
+        username = d.pop("username", UNSET)
 
-        preferences = UserPreferences.from_dict(d.pop("preferences"))
+        password = d.pop("password", UNSET)
 
-        user_profile = cls(
+        _preferences = d.pop("preferences", UNSET)
+        preferences: UserPreferences | Unset
+        if isinstance(_preferences, Unset):
+            preferences = UNSET
+        else:
+            preferences = UserPreferences.from_dict(_preferences)
+
+        user_profile_update = cls(
             username=username,
+            password=password,
             preferences=preferences,
         )
 
-        user_profile.additional_properties = d
-        return user_profile
+        user_profile_update.additional_properties = d
+        return user_profile_update
 
     @property
     def additional_keys(self) -> list[str]:

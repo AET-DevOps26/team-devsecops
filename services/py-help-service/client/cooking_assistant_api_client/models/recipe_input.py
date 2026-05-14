@@ -13,14 +13,13 @@ if TYPE_CHECKING:
     from ..models.recipe_nutrients import RecipeNutrients
 
 
-T = TypeVar("T", bound="Recipe")
+T = TypeVar("T", bound="RecipeInput")
 
 
 @_attrs_define
-class Recipe:
+class RecipeInput:
     """
     Attributes:
-        id (int):
         title (str):
         ingredients (list[RecipeIngredient]):
         instructions (list[str]):
@@ -28,7 +27,6 @@ class Recipe:
         nutrients (RecipeNutrients | Unset):
     """
 
-    id: int
     title: str
     ingredients: list[RecipeIngredient]
     instructions: list[str]
@@ -37,8 +35,6 @@ class Recipe:
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
-        id = self.id
-
         title = self.title
 
         ingredients = []
@@ -58,7 +54,6 @@ class Recipe:
         field_dict.update(self.additional_properties)
         field_dict.update(
             {
-                "id": id,
                 "title": title,
                 "ingredients": ingredients,
                 "instructions": instructions,
@@ -76,8 +71,6 @@ class Recipe:
         from ..models.recipe_nutrients import RecipeNutrients
 
         d = dict(src_dict)
-        id = d.pop("id")
-
         title = d.pop("title")
 
         ingredients = []
@@ -98,8 +91,7 @@ class Recipe:
         else:
             nutrients = RecipeNutrients.from_dict(_nutrients)
 
-        recipe = cls(
-            id=id,
+        recipe_input = cls(
             title=title,
             ingredients=ingredients,
             instructions=instructions,
@@ -107,8 +99,8 @@ class Recipe:
             nutrients=nutrients,
         )
 
-        recipe.additional_properties = d
-        return recipe
+        recipe_input.additional_properties = d
+        return recipe_input
 
     @property
     def additional_keys(self) -> list[str]:

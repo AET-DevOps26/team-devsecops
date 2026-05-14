@@ -11,13 +11,21 @@ import jakarta.validation.constraints.Min
 import jakarta.validation.constraints.NotNull
 import jakarta.validation.constraints.Pattern
 import jakarta.validation.constraints.Size
+import org.openapitools.model.UserPreferences
 import java.util.Objects
 
 /**
  *
- * @param prompt
+ * @param username
+ * @param password
+ * @param preferences
  */
-data class RecipeRequest(
-	@Schema(example = "null", required = true, description = "")
-	@get:JsonProperty("prompt", required = true) val prompt: kotlin.String,
+data class UserProfileUpdate(
+	@Schema(example = "null", description = "")
+	@get:JsonProperty("username") val username: kotlin.String? = null,
+	@Schema(example = "null", description = "")
+	@get:JsonProperty("password") val password: kotlin.String? = null,
+	@field:Valid
+	@Schema(example = "null", description = "")
+	@get:JsonProperty("preferences") val preferences: UserPreferences? = null,
 )

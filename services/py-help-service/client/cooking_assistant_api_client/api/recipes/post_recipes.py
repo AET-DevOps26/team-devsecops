@@ -5,13 +5,13 @@ import httpx
 
 from ... import errors
 from ...client import AuthenticatedClient, Client
-from ...models.recipe import Recipe
+from ...models.recipe_input import RecipeInput
 from ...types import Response
 
 
 def _get_kwargs(
     *,
-    body: Recipe,
+    body: RecipeInput,
 ) -> dict[str, Any]:
     headers: dict[str, Any] = {}
 
@@ -53,12 +53,12 @@ def _build_response(*, client: AuthenticatedClient | Client, response: httpx.Res
 def sync_detailed(
     *,
     client: AuthenticatedClient,
-    body: Recipe,
+    body: RecipeInput,
 ) -> Response[Any]:
     """Save a recipe
 
     Args:
-        body (Recipe):
+        body (RecipeInput):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -82,12 +82,12 @@ def sync_detailed(
 async def asyncio_detailed(
     *,
     client: AuthenticatedClient,
-    body: Recipe,
+    body: RecipeInput,
 ) -> Response[Any]:
     """Save a recipe
 
     Args:
-        body (Recipe):
+        body (RecipeInput):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.

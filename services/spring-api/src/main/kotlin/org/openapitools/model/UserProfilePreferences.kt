@@ -17,7 +17,7 @@ import java.util.Objects
  *
  * @param diet
  * @param allergies
- * @param cuisinePreferences
+ * @param aboutMe
  */
 data class UserProfilePreferences(
 	@Schema(example = "null", description = "")
@@ -25,5 +25,5 @@ data class UserProfilePreferences(
 	@Schema(example = "null", description = "")
 	@get:JsonProperty("allergies") val allergies: kotlin.collections.List<kotlin.String>? = null,
 	@Schema(example = "null", description = "")
-	@get:JsonProperty("cuisinePreferences") val cuisinePreferences: kotlin.collections.List<kotlin.String>? = null,
+	@get:JsonProperty("aboutMe") val aboutMe: kotlin.collections.List<kotlin.String>? = null,
 )

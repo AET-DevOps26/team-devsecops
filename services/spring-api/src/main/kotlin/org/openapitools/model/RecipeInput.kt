@@ -17,16 +17,13 @@ import java.util.Objects
 
 /**
  *
- * @param id
  * @param title
  * @param ingredients
  * @param instructions
  * @param portions
  * @param nutrients
  */
-data class Recipe(
-	@Schema(example = "null", required = true, description = "")
-	@get:JsonProperty("id", required = true) val id: kotlin.Int,
+data class RecipeInput(
 	@Schema(example = "null", required = true, description = "")
 	@get:JsonProperty("title", required = true) val title: kotlin.String,
 	@field:Valid

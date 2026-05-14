@@ -11,24 +11,18 @@ import jakarta.validation.constraints.Min
 import jakarta.validation.constraints.NotNull
 import jakarta.validation.constraints.Pattern
 import jakarta.validation.constraints.Size
-import org.openapitools.model.UserProfilePreferences
+import org.openapitools.model.UserPreferences
 import java.util.Objects
 
 /**
  *
- * @param id
  * @param username
- * @param password
  * @param preferences
  */
 data class UserProfile(
 	@Schema(example = "null", required = true, description = "")
-	@get:JsonProperty("id", required = true) val id: kotlin.String,
-	@Schema(example = "null", description = "")
-	@get:JsonProperty("username") val username: kotlin.String? = null,
-	@Schema(example = "null", description = "")
-	@get:JsonProperty("password") val password: kotlin.String? = null,
+	@get:JsonProperty("username", required = true) val username: kotlin.String,
 	@field:Valid
-	@Schema(example = "null", description = "")
-	@get:JsonProperty("preferences") val preferences: UserProfilePreferences? = null,
+	@Schema(example = "null", required = true, description = "")
+	@get:JsonProperty("preferences", required = true) val preferences: UserPreferences,
 )

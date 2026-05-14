@@ -8,11 +8,11 @@ from attrs import field as _attrs_field
 
 from ..types import UNSET, Unset
 
-T = TypeVar("T", bound="RecipeIngredientsItem")
+T = TypeVar("T", bound="RecipeIngredient")
 
 
 @_attrs_define
-class RecipeIngredientsItem:
+class RecipeIngredient:
     """
     Attributes:
         quantity (float | Unset):
@@ -53,14 +53,14 @@ class RecipeIngredientsItem:
 
         name = d.pop("name", UNSET)
 
-        recipe_ingredients_item = cls(
+        recipe_ingredient = cls(
             quantity=quantity,
             unit=unit,
             name=name,
         )
 
-        recipe_ingredients_item.additional_properties = d
-        return recipe_ingredients_item
+        recipe_ingredient.additional_properties = d
+        return recipe_ingredient
 
     @property
     def additional_keys(self) -> list[str]:

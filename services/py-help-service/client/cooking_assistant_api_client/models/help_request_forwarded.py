@@ -7,35 +7,41 @@ from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
 if TYPE_CHECKING:
-    from ..models.user_preferences import UserPreferences
+    from ..models.recipe_input import RecipeInput
+    from ..models.user_profile import UserProfile
 
 
-T = TypeVar("T", bound="UserProfile")
+T = TypeVar("T", bound="HelpRequestForwarded")
 
 
 @_attrs_define
-class UserProfile:
+class HelpRequestForwarded:
     """
     Attributes:
-        username (str):
-        preferences (UserPreferences):
+        profile (UserProfile):
+        recipe (RecipeInput):
+        prompt (str):
     """
 
-    username: str
-    preferences: UserPreferences
+    profile: UserProfile
+    recipe: RecipeInput
+    prompt: str
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
-        username = self.username
+        profile = self.profile.to_dict()
 
-        preferences = self.preferences.to_dict()
+        recipe = self.recipe.to_dict()
+
+        prompt = self.prompt
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
             {
-                "username": username,
-                "preferences": preferences,
+                "profile": profile,
+                "recipe": recipe,
+                "prompt": prompt,
             }
         )
 
@@ -43,20 +49,24 @@ class UserProfile:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.user_preferences import UserPreferences
+        from ..models.recipe_input import RecipeInput
+        from ..models.user_profile import UserProfile
 
         d = dict(src_dict)
-        username = d.pop("username")
+        profile = UserProfile.from_dict(d.pop("profile"))
 
-        preferences = UserPreferences.from_dict(d.pop("preferences"))
+        recipe = RecipeInput.from_dict(d.pop("recipe"))
 
-        user_profile = cls(
-            username=username,
-            preferences=preferences,
+        prompt = d.pop("prompt")
+
+        help_request_forwarded = cls(
+            profile=profile,
+            recipe=recipe,
+            prompt=prompt,
         )
 
-        user_profile.additional_properties = d
-        return user_profile
+        help_request_forwarded.additional_properties = d
+        return help_request_forwarded
 
     @property
     def additional_keys(self) -> list[str]:

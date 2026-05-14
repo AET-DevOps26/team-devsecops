@@ -6,8 +6,7 @@ from dotenv import load_dotenv
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.messages import HumanMessage, SystemMessage
 
-from client.cooking_assistant_api_client.models.recipe_request import RecipeRequest
-from client.cooking_assistant_api_client.models.recipe import Recipe
+from client.cooking_assistant_api_client.models.recipe_request_forwarded import RecipeRequestForwarded
 
 # Load variables from .env for local testing
 load_dotenv()
@@ -28,7 +27,7 @@ async def generate_recipes(request_data: dict[str, Any]):
     try:
 
         try:
-            request = RecipeRequest.from_dict(request_data)
+            request = RecipeRequestForwarded.from_dict(request_data)
         except Exception as e:
             raise HTTPException(status_code=400, detail=f"Invalid request format: {str(e)}")
 
@@ -67,8 +66,7 @@ async def generate_recipes(request_data: dict[str, Any]):
         clean_json = response.content.strip().removeprefix("```json").removesuffix("```").strip()
         data = json.loads(clean_json)
 
-        recipe_obj = Recipe.from_dict(data) 
-        return recipe_obj.to_dict()
+        return data
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

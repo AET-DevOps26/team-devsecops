@@ -15,9 +15,15 @@ import java.util.Objects
 
 /**
  *
- * @param prompt
+ * @param quantity
+ * @param unit
+ * @param name
  */
-data class RecipeRequest(
-	@Schema(example = "null", required = true, description = "")
-	@get:JsonProperty("prompt", required = true) val prompt: kotlin.String,
+data class RecipeIngredient(
+	@Schema(example = "null", description = "")
+	@get:JsonProperty("quantity") val quantity: java.math.BigDecimal? = null,
+	@Schema(example = "null", description = "")
+	@get:JsonProperty("unit") val unit: kotlin.String? = null,
+	@Schema(example = "null", description = "")
+	@get:JsonProperty("name") val name: kotlin.String? = null,
 )

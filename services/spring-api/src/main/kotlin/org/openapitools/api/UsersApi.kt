@@ -22,6 +22,7 @@ import jakarta.validation.constraints.Size
 import org.openapitools.model.LoginRequest
 import org.openapitools.model.RegisterRequest
 import org.openapitools.model.UserProfile
+import org.openapitools.model.UserProfileUpdate
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
@@ -42,6 +43,7 @@ interface UsersApi {
 		description = """""",
 		responses = [
 			ApiResponse(responseCode = "200", description = "JWT token returned"),
+			ApiResponse(responseCode = "401", description = "Invalid username or password"),
 		],
 	)
 	@RequestMapping(
@@ -82,6 +84,7 @@ interface UsersApi {
 				description = "User profile and preferences",
 				content = [Content(schema = Schema(implementation = UserProfile::class))],
 			),
+			ApiResponse(responseCode = "403", description = "Not logged in"),
 		],
 		security = [ SecurityRequirement(name = "bearerAuth") ],
 	)
@@ -100,6 +103,12 @@ interface UsersApi {
 		description = """""",
 		responses = [
 			ApiResponse(responseCode = "200", description = "Profile and preferences updated"),
+			ApiResponse(
+				responseCode = "400",
+				description = "Invalid request body (e.g. empty password, username with invalid chars, unknown fields)",
+			),
+			ApiResponse(responseCode = "403", description = "Not logged in"),
+			ApiResponse(responseCode = "409", description = "Username already taken"),
 		],
 		security = [ SecurityRequirement(name = "bearerAuth") ],
 	)
@@ -110,7 +119,7 @@ interface UsersApi {
 		consumes = ["application/json"],
 	)
 	fun usersProfilePut(
-		@Parameter(description = "", required = true) @Valid @RequestBody userProfile: UserProfile,
+		@Parameter(description = "", required = true) @Valid @RequestBody userProfileUpdate: UserProfileUpdate,
 	): ResponseEntity<Unit> = ResponseEntity(HttpStatus.NOT_IMPLEMENTED)
 
 	@Operation(

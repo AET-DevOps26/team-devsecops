@@ -72,6 +72,13 @@ export interface paths {
                     };
                     content?: never;
                 };
+                /** @description Invalid username or password */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
             };
         };
         delete?: never;
@@ -140,6 +147,13 @@ export interface paths {
                         "application/json": components["schemas"]["UserProfile"];
                     };
                 };
+                /** @description Not logged in */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
             };
         };
         /** Update user profile and preferences */
@@ -152,12 +166,33 @@ export interface paths {
             };
             requestBody: {
                 content: {
-                    "application/json": components["schemas"]["UserProfile"];
+                    "application/json": components["schemas"]["UserProfileUpdate"];
                 };
             };
             responses: {
                 /** @description Profile and preferences updated */
                 200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Invalid request body (e.g. empty password, username with invalid chars, unknown fields) */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not logged in */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Username already taken */
+                409: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -189,8 +224,17 @@ export interface paths {
             };
             requestBody?: never;
             responses: {
-                /** @description List of recipes */
+                /** @description List of user recipes */
                 200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Recipe"][];
+                    };
+                };
+                /** @description Not logged in */
+                403: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -209,12 +253,19 @@ export interface paths {
             };
             requestBody: {
                 content: {
-                    "application/json": components["schemas"]["Recipe"];
+                    "application/json": components["schemas"]["RecipeInput"];
                 };
             };
             responses: {
                 /** @description Recipe saved */
                 201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not logged in */
+                403: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -249,6 +300,15 @@ export interface paths {
             responses: {
                 /** @description Recipe details */
                 200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Recipe"];
+                    };
+                };
+                /** @description Not logged in */
+                403: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -289,6 +349,15 @@ export interface paths {
             responses: {
                 /** @description Generated recipes */
                 200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Recipe"][];
+                    };
+                };
+                /** @description Not logged in */
+                403: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -334,6 +403,13 @@ export interface paths {
                         "application/json": components["schemas"]["HelpResponse"];
                     };
                 };
+                /** @description Not logged in */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
             };
         };
         delete?: never;
@@ -355,33 +431,59 @@ export interface components {
             password: string;
         };
         UserProfile: {
-            id: string;
+            username: string;
+            preferences: components["schemas"]["UserPreferences"];
+        };
+        UserProfileUpdate: {
             username?: string;
             password?: string;
-            preferences?: {
-                diet?: string;
-                allergies?: string[];
-                cuisinePreferences?: string[];
-            };
+            preferences?: components["schemas"]["UserPreferences"];
+        };
+        UserPreferences: {
+            diet?: string;
+            allergies?: string[];
+            aboutMe?: string[];
+        };
+        RecipeIngredient: {
+            quantity?: number;
+            unit?: string;
+            name?: string;
+        };
+        RecipeNutrients: {
+            calories?: number;
+            protein?: number;
+            fat?: number;
+            carbs?: number;
+        };
+        RecipeInput: {
+            title: string;
+            ingredients: components["schemas"]["RecipeIngredient"][];
+            instructions: string[];
+            portions: number;
+            nutrients?: components["schemas"]["RecipeNutrients"];
         };
         Recipe: {
+            id: number;
             title: string;
-            ingredients: string[];
-            instructions: string;
+            ingredients: components["schemas"]["RecipeIngredient"][];
+            instructions: string[];
             portions: number;
-            nutrients: {
-                calories?: number;
-                protein?: number;
-                fat?: number;
-                carbs?: number;
-            };
+            nutrients?: components["schemas"]["RecipeNutrients"];
         };
         RecipeRequest: {
+            prompt: string;
+        };
+        RecipeRequestForwarded: {
             profile: components["schemas"]["UserProfile"];
             prompt: string;
         };
         HelpRequest: {
-            recipe?: components["schemas"]["Recipe"];
+            recipe: components["schemas"]["RecipeInput"];
+            prompt: string;
+        };
+        HelpRequestForwarded: {
+            profile: components["schemas"]["UserProfile"];
+            recipe: components["schemas"]["RecipeInput"];
             prompt: string;
         };
         HelpResponse: {

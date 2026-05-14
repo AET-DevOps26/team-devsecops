@@ -15,9 +15,15 @@ import java.util.Objects
 
 /**
  *
- * @param prompt
+ * @param diet
+ * @param allergies
+ * @param aboutMe
  */
-data class RecipeRequest(
-	@Schema(example = "null", required = true, description = "")
-	@get:JsonProperty("prompt", required = true) val prompt: kotlin.String,
+data class UserPreferences(
+	@Schema(example = "null", description = "")
+	@get:JsonProperty("diet") val diet: kotlin.String? = null,
+	@Schema(example = "null", description = "")
+	@get:JsonProperty("allergies") val allergies: kotlin.collections.List<kotlin.String>? = null,
+	@Schema(example = "null", description = "")
+	@get:JsonProperty("aboutMe") val aboutMe: kotlin.collections.List<kotlin.String>? = null,
 )
