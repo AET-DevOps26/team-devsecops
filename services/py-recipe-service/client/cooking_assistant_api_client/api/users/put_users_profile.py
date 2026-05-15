@@ -5,13 +5,13 @@ import httpx
 
 from ... import errors
 from ...client import AuthenticatedClient, Client
-from ...models.user_profile import UserProfile
+from ...models.user_profile_update import UserProfileUpdate
 from ...types import Response
 
 
 def _get_kwargs(
     *,
-    body: UserProfile,
+    body: UserProfileUpdate,
 ) -> dict[str, Any]:
     headers: dict[str, Any] = {}
 
@@ -59,12 +59,12 @@ def _build_response(*, client: AuthenticatedClient | Client, response: httpx.Res
 def sync_detailed(
     *,
     client: AuthenticatedClient,
-    body: UserProfile,
+    body: UserProfileUpdate,
 ) -> Response[Any]:
     """Update user profile and preferences
 
     Args:
-        body (UserProfile):
+        body (UserProfileUpdate):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -88,12 +88,12 @@ def sync_detailed(
 async def asyncio_detailed(
     *,
     client: AuthenticatedClient,
-    body: UserProfile,
+    body: UserProfileUpdate,
 ) -> Response[Any]:
     """Update user profile and preferences
 
     Args:
-        body (UserProfile):
+        body (UserProfileUpdate):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.

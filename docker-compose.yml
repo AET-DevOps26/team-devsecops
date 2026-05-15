@@ -1,8 +1,25 @@
 services:
+  py-recipe-service:
+    build: ./services/py-recipe-service
+    ports:
+      - "8090:8080"
+    environment:
+      SERVICE_API_KEY: ${RECIPE_SERVICE_KEY}
+    develop:
+      watch:
+        - action: sync+restart
+          path: ./services/py-recipe-service
+          target: /app
+          ignore:
+            - __pycache__/
+            - "*.pyc"
+        - action: rebuild
+          path: ./services/py-recipe-service/requirements.txt
+
   py-help-service:
     build: ./services/py-help-service
     ports:
-      - "8090:8080"
+      - "8091:8080"
     environment:
       SERVICE_API_KEY: ${HELP_SERVICE_KEY}
     develop:
@@ -21,9 +38,16 @@ services:
     ports:
       - "8081:8080"
     environment:
+      AI_RECIPE_SERVICE_URL: http://py-recipe-service:8080
       AI_HELP_SERVICE_URL: http://py-help-service:8080
+      DB_URL: ${DB_URL}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      JPA_DDL_AUTO: ${JPA_DDL_AUTO}
     depends_on:
       - py-help-service
+      - py-recipe-service
     develop:
       watch:
         - action: rebuild

@@ -1,14 +1,10 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
-from typing import TYPE_CHECKING, Any, TypeVar
+from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
-
-if TYPE_CHECKING:
-    from ..models.user_profile import UserProfile
-
 
 T = TypeVar("T", bound="RecipeRequest")
 
@@ -17,24 +13,19 @@ T = TypeVar("T", bound="RecipeRequest")
 class RecipeRequest:
     """
     Attributes:
-        profile (UserProfile):
         prompt (str):
     """
 
-    profile: UserProfile
     prompt: str
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
-        profile = self.profile.to_dict()
-
         prompt = self.prompt
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
             {
-                "profile": profile,
                 "prompt": prompt,
             }
         )
@@ -43,15 +34,10 @@ class RecipeRequest:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.user_profile import UserProfile
-
         d = dict(src_dict)
-        profile = UserProfile.from_dict(d.pop("profile"))
-
         prompt = d.pop("prompt")
 
         recipe_request = cls(
-            profile=profile,
             prompt=prompt,
         )
 

@@ -8,11 +8,11 @@ from attrs import field as _attrs_field
 
 from ..types import UNSET, Unset
 
-T = TypeVar("T", bound="UserProfilePreferences")
+T = TypeVar("T", bound="UserPreferences")
 
 
 @_attrs_define
-class UserProfilePreferences:
+class UserPreferences:
     """
     Attributes:
         diet (str | Unset):
@@ -57,14 +57,14 @@ class UserProfilePreferences:
 
         about_me = cast(list[str], d.pop("aboutMe", UNSET))
 
-        user_profile_preferences = cls(
+        user_preferences = cls(
             diet=diet,
             allergies=allergies,
             about_me=about_me,
         )
 
-        user_profile_preferences.additional_properties = d
-        return user_profile_preferences
+        user_preferences.additional_properties = d
+        return user_preferences
 
     @property
     def additional_keys(self) -> list[str]:

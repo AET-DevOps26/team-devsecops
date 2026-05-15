@@ -6,10 +6,8 @@ from typing import TYPE_CHECKING, Any, TypeVar
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..types import UNSET, Unset
-
 if TYPE_CHECKING:
-    from ..models.user_profile_preferences import UserProfilePreferences
+    from ..models.user_preferences import UserPreferences
 
 
 T = TypeVar("T", bound="UserProfile")
@@ -19,67 +17,41 @@ T = TypeVar("T", bound="UserProfile")
 class UserProfile:
     """
     Attributes:
-        id (int):
-        username (str | Unset):
-        password (str | Unset):
-        preferences (UserProfilePreferences | Unset):
+        username (str):
+        preferences (UserPreferences):
     """
 
-    id: int
-    username: str | Unset = UNSET
-    password: str | Unset = UNSET
-    preferences: UserProfilePreferences | Unset = UNSET
+    username: str
+    preferences: UserPreferences
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
-        id = self.id
-
         username = self.username
 
-        password = self.password
-
-        preferences: dict[str, Any] | Unset = UNSET
-        if not isinstance(self.preferences, Unset):
-            preferences = self.preferences.to_dict()
+        preferences = self.preferences.to_dict()
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
             {
-                "id": id,
+                "username": username,
+                "preferences": preferences,
             }
         )
-        if username is not UNSET:
-            field_dict["username"] = username
-        if password is not UNSET:
-            field_dict["password"] = password
-        if preferences is not UNSET:
-            field_dict["preferences"] = preferences
 
         return field_dict
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.user_profile_preferences import UserProfilePreferences
+        from ..models.user_preferences import UserPreferences
 
         d = dict(src_dict)
-        id = d.pop("id")
+        username = d.pop("username")
 
-        username = d.pop("username", UNSET)
-
-        password = d.pop("password", UNSET)
-
-        _preferences = d.pop("preferences", UNSET)
-        preferences: UserProfilePreferences | Unset
-        if isinstance(_preferences, Unset):
-            preferences = UNSET
-        else:
-            preferences = UserProfilePreferences.from_dict(_preferences)
+        preferences = UserPreferences.from_dict(d.pop("preferences"))
 
         user_profile = cls(
-            id=id,
             username=username,
-            password=password,
             preferences=preferences,
         )
 

@@ -20,6 +20,7 @@ import jakarta.validation.constraints.NotNull
 import jakarta.validation.constraints.Pattern
 import jakarta.validation.constraints.Size
 import org.openapitools.model.Recipe
+import org.openapitools.model.RecipeInput
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
@@ -39,7 +40,12 @@ interface RecipesApi {
 		operationId = "recipesGet",
 		description = """""",
 		responses = [
-			ApiResponse(responseCode = "200", description = "List of recipes"),
+			ApiResponse(
+				responseCode = "200",
+				description = "List of user recipes",
+				content = [Content(array = ArraySchema(schema = Schema(implementation = Recipe::class)))],
+			),
+			ApiResponse(responseCode = "403", description = "Not logged in"),
 		],
 		security = [ SecurityRequirement(name = "bearerAuth") ],
 	)
@@ -47,8 +53,9 @@ interface RecipesApi {
 		method = [RequestMethod.GET],
 		// "/recipes"
 		value = [PATH_RECIPES_GET],
+		produces = ["application/json"],
 	)
-	fun recipesGet(): ResponseEntity<Unit> = ResponseEntity(HttpStatus.NOT_IMPLEMENTED)
+	fun recipesGet(): ResponseEntity<List<Recipe>> = ResponseEntity(HttpStatus.NOT_IMPLEMENTED)
 
 	@Operation(
 		tags = ["Recipes"],
@@ -57,6 +64,7 @@ interface RecipesApi {
 		description = """""",
 		responses = [
 			ApiResponse(responseCode = "201", description = "Recipe saved"),
+			ApiResponse(responseCode = "403", description = "Not logged in"),
 		],
 		security = [ SecurityRequirement(name = "bearerAuth") ],
 	)
@@ -67,7 +75,7 @@ interface RecipesApi {
 		consumes = ["application/json"],
 	)
 	fun recipesPost(
-		@Parameter(description = "", required = true) @Valid @RequestBody recipe: Recipe,
+		@Parameter(description = "", required = true) @Valid @RequestBody recipeInput: RecipeInput,
 	): ResponseEntity<Unit> = ResponseEntity(HttpStatus.NOT_IMPLEMENTED)
 
 	@Operation(
@@ -76,7 +84,12 @@ interface RecipesApi {
 		operationId = "recipesRecipeIdGet",
 		description = """""",
 		responses = [
-			ApiResponse(responseCode = "200", description = "Recipe details"),
+			ApiResponse(
+				responseCode = "200",
+				description = "Recipe details",
+				content = [Content(schema = Schema(implementation = Recipe::class))],
+			),
+			ApiResponse(responseCode = "403", description = "Not logged in"),
 		],
 		security = [ SecurityRequirement(name = "bearerAuth") ],
 	)
@@ -84,10 +97,11 @@ interface RecipesApi {
 		method = [RequestMethod.GET],
 		// "/recipes/{recipeId}"
 		value = [PATH_RECIPES_RECIPE_ID_GET],
+		produces = ["application/json"],
 	)
 	fun recipesRecipeIdGet(
 		@Parameter(description = "", required = true) @PathVariable("recipeId") recipeId: kotlin.String,
-	): ResponseEntity<Unit> = ResponseEntity(HttpStatus.NOT_IMPLEMENTED)
+	): ResponseEntity<Recipe> = ResponseEntity(HttpStatus.NOT_IMPLEMENTED)
 
 	companion object {
 		// for your own safety never directly reuse these path definitions in tests

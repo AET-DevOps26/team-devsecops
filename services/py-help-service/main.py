@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.messages import HumanMessage, SystemMessage
 
-from client.cooking_assistant_api_client.models.help_request import HelpRequest
+from client.cooking_assistant_api_client.models.help_request_forwarded import HelpRequestForwarded
 from client.cooking_assistant_api_client.models.help_response import HelpResponse
 
 # Load variables from .env for local testing
@@ -26,7 +26,7 @@ def health_check():
 async def generate_help(request_data: dict[str, Any]):
     
     try:
-        request = HelpRequest.from_dict(request_data)
+        request = HelpRequestForwarded.from_dict(request_data)
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Invalid request format: {str(e)}")
     

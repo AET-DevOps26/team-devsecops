@@ -85,9 +85,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/UserProfile"
-              blacklist:
-                - id
+              $ref: "#/components/schemas/UserProfileUpdate"
       responses:
         "200":
           description: Profile and preferences updated
@@ -130,7 +128,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/Recipe"
+              $ref: "#/components/schemas/RecipeInput"
       responses:
         "201":
           description: Recipe saved
@@ -191,8 +189,8 @@ paths:
     post:
       tags: [AI]
       summary: Ask AI cooking assistant for help
-      # security:
-      #   - bearerAuth: []
+      security:
+        - bearerAuth: []
       requestBody:
         required: true
         content:
@@ -245,49 +243,69 @@ components:
 
     UserProfile:
       type: object
-      required: [id]
+      required: [username, preferences]
       properties:
-        id:
-          type: integer
-          readOnly: true
+        username:
+          type: string
+        preferences:
+          $ref: "#/components/schemas/UserPreferences"
+
+    UserProfileUpdate:
+      type: object
+      properties:
         username:
           type: string
         password:
           type: string
         preferences:
-          type: object
-          properties:
-            diet:
-              type: string
-            allergies:
-              type: array
-              items:
-                type: string
-            aboutMe:
-              type: array
-              items:
-                type: string
+          $ref: "#/components/schemas/UserPreferences"
 
-    Recipe:
+    UserPreferences:
+      type: object
+      properties:
+        diet:
+          type: string
+        allergies:
+          type: array
+          items:
+            type: string
+        aboutMe:
+          type: array
+          items:
+            type: string
+
+    RecipeIngredient:
+      type: object
+      properties:
+        quantity:
+          type: number
+        unit:
+          type: string
+        name:
+          type: string
+
+    RecipeNutrients:
+      type: object
+      properties:
+        calories:
+          type: integer
+        protein:
+          type: integer
+        fat:
+          type: integer
+        carbs:
+          type: integer
+
+    RecipeInput:
       type: object
       required: [title, ingredients, instructions, portions]
       properties:
-        id:
-          type: integer
-          readOnly: true
         title:
           type: string
         ingredients:
           type: array
           items:
-            type: object
-            properties:
-              quantity:
-                type: number
-              unit:
-                type: string
-              name:
-                type: string
+            $ref: "#/components/schemas/RecipeIngredient"
         instructions:
           type: array
           items:
@@ -295,18 +313,26 @@ components:
         portions:
           type: integer
         nutrients:
-          type: object
+          $ref: "#/components/schemas/RecipeNutrients"
+
+    Recipe:
+      type: object
+      allOf:
+        - $ref: "#/components/schemas/RecipeInput"
+        - type: object
+          required: [id]
           properties:
-            calories:
-              type: integer
-            protein:
-              type: integer
-            fat:
-              type: integer
-            carbs:
+            id:
               type: integer
 
     RecipeRequest:
+      type: object
+      required: [prompt]
+      properties:
+        prompt:
+          type: string
+
+    RecipeRequestForwarded:
       type: object
       required: [profile,prompt]
       properties:
@@ -317,13 +343,21 @@ components:
 
     HelpRequest:
       type: object
-      # required: [profile,recipe,prompt]
-      required: [prompt]
+      required: [recipe, prompt]
+      properties:
+        recipe:
+          $ref: "#/components/schemas/RecipeInput"
+        prompt:
+          type: string
+
+    HelpRequestForwarded:
+      type: object
+      required: [profile,recipe,prompt]
       properties:
         profile:
           $ref: "#/components/schemas/UserProfile"
         recipe:
-          $ref: "#/components/schemas/Recipe"
+          $ref: "#/components/schemas/RecipeInput"
         prompt:
           type: string
 

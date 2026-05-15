@@ -9,7 +9,7 @@ from attrs import field as _attrs_field
 from ..types import UNSET, Unset
 
 if TYPE_CHECKING:
-    from ..models.recipe_ingredients_item import RecipeIngredientsItem
+    from ..models.recipe_ingredient import RecipeIngredient
     from ..models.recipe_nutrients import RecipeNutrients
 
 
@@ -21,18 +21,18 @@ class Recipe:
     """
     Attributes:
         title (str):
-        ingredients (list[RecipeIngredientsItem]):
+        ingredients (list[RecipeIngredient]):
         instructions (list[str]):
         portions (int):
-        id (int | Unset):
+        id (int):
         nutrients (RecipeNutrients | Unset):
     """
 
     title: str
-    ingredients: list[RecipeIngredientsItem]
+    ingredients: list[RecipeIngredient]
     instructions: list[str]
     portions: int
-    id: int | Unset = UNSET
+    id: int
     nutrients: RecipeNutrients | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
@@ -62,10 +62,9 @@ class Recipe:
                 "ingredients": ingredients,
                 "instructions": instructions,
                 "portions": portions,
+                "id": id,
             }
         )
-        if id is not UNSET:
-            field_dict["id"] = id
         if nutrients is not UNSET:
             field_dict["nutrients"] = nutrients
 
@@ -73,7 +72,7 @@ class Recipe:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.recipe_ingredients_item import RecipeIngredientsItem
+        from ..models.recipe_ingredient import RecipeIngredient
         from ..models.recipe_nutrients import RecipeNutrients
 
         d = dict(src_dict)
@@ -82,7 +81,7 @@ class Recipe:
         ingredients = []
         _ingredients = d.pop("ingredients")
         for ingredients_item_data in _ingredients:
-            ingredients_item = RecipeIngredientsItem.from_dict(ingredients_item_data)
+            ingredients_item = RecipeIngredient.from_dict(ingredients_item_data)
 
             ingredients.append(ingredients_item)
 
@@ -90,7 +89,7 @@ class Recipe:
 
         portions = d.pop("portions")
 
-        id = d.pop("id", UNSET)
+        id = d.pop("id")
 
         _nutrients = d.pop("nutrients", UNSET)
         nutrients: RecipeNutrients | Unset

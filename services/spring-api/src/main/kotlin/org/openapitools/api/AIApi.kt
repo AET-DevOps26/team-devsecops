@@ -21,6 +21,7 @@ import jakarta.validation.constraints.Pattern
 import jakarta.validation.constraints.Size
 import org.openapitools.model.HelpRequest
 import org.openapitools.model.HelpResponse
+import org.openapitools.model.Recipe
 import org.openapitools.model.RecipeRequest
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
@@ -46,7 +47,9 @@ interface AIApi {
 				description = "AI response",
 				content = [Content(schema = Schema(implementation = HelpResponse::class))],
 			),
+			ApiResponse(responseCode = "403", description = "Not logged in"),
 		],
+		security = [ SecurityRequirement(name = "bearerAuth") ],
 	)
 	@RequestMapping(
 		method = [RequestMethod.POST],
@@ -65,7 +68,12 @@ interface AIApi {
 		operationId = "aiRecipesPost",
 		description = """""",
 		responses = [
-			ApiResponse(responseCode = "200", description = "Generated recipes"),
+			ApiResponse(
+				responseCode = "200",
+				description = "Generated recipes",
+				content = [Content(array = ArraySchema(schema = Schema(implementation = Recipe::class)))],
+			),
+			ApiResponse(responseCode = "403", description = "Not logged in"),
 		],
 		security = [ SecurityRequirement(name = "bearerAuth") ],
 	)
@@ -73,11 +81,12 @@ interface AIApi {
 		method = [RequestMethod.POST],
 		// "/ai/recipes"
 		value = [PATH_AI_RECIPES_POST],
+		produces = ["application/json"],
 		consumes = ["application/json"],
 	)
 	fun aiRecipesPost(
 		@Parameter(description = "", required = true) @Valid @RequestBody recipeRequest: RecipeRequest,
-	): ResponseEntity<Unit> = ResponseEntity(HttpStatus.NOT_IMPLEMENTED)
+	): ResponseEntity<List<Recipe>> = ResponseEntity(HttpStatus.NOT_IMPLEMENTED)
 
 	companion object {
 		// for your own safety never directly reuse these path definitions in tests
