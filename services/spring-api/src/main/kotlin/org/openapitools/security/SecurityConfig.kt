@@ -59,7 +59,7 @@ class SecurityConfig(
 			}
 			.headers { it.frameOptions { fo -> fo.disable() } } // needed for H2 console iframe
 			.addFilterBefore(
-				JwtAuthFilter(jwtUtils, userDetailsService()),
+				JwtAuthFilter(jwtUtils, userRepository),
 				UsernamePasswordAuthenticationFilter::class.java,
 			)
 		return http.build()

@@ -68,11 +68,11 @@ class UsersApiController(
 		@Parameter(description = "", required = true) @Valid @RequestBody loginRequest: LoginRequest,
 	): ResponseEntity<Map<String, String>> =
 		try {
-			val auth =
-				authManager.authenticate(
-					UsernamePasswordAuthenticationToken(loginRequest.username, loginRequest.password),
-				)
-			ResponseEntity.ok(mapOf("token" to jwtUtils.generateToken(auth.name)))
+			authManager.authenticate(
+				UsernamePasswordAuthenticationToken(loginRequest.username, loginRequest.password),
+			)
+			val user = userRepository.findByUsername(loginRequest.username).orElseThrow()
+			ResponseEntity.ok(mapOf("token" to jwtUtils.generateToken(user.id)))
 		} catch (e: BadCredentialsException) {
 			ResponseEntity(HttpStatus.UNAUTHORIZED)
 		}
