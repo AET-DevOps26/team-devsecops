@@ -1,5 +1,6 @@
 import os
 import json
+import traceback
 from typing import Any
 from fastapi import FastAPI, HTTPException
 from dotenv import load_dotenv
@@ -39,34 +40,48 @@ async def generate_recipes(request_data: dict[str, Any]):
 
         # 2. Build the System Prompt with strict JSON requirements
         system_prompt = (
-            "You are a professional chef. Create a single high-quality recipe.\n"
+            "You are a professional chef. Create a collection of distinct high-quality recipes.\n"
             f"Constraint - Diet: {diet}\n"
             f"Constraint - Allergies: {allergies} (DO NOT USE THESE)\n"
             f"User Context: {about}\n\n"
             "Respond ONLY with a JSON object matching this schema:\n"
             "{\n"
-            "  \"title\": \"string\",\n"
-            "  \"ingredients\": [{\"quantity\": number, \"unit\": \"string\", \"name\": \"string\"}],\n"
-            "  \"instructions\": [\"string\"],\n"
-            "  \"portions\": number,\n"
-            "  \"nutrients\": {\"calories\": int, \"protein\": int, \"fat\": int, \"carbs\": int}\n"
+            "  \"recipes\": [\n"
+            "    {\n"
+            "      \"title\": \"string\",\n"
+            "      \"ingredients\": [{\"quantity\": number, \"unit\": \"string\", \"name\": \"string\"}],\n"
+            "      \"instructions\": [\"string\"],\n"
+            "      \"portions\": number,\n"
+            "      \"nutrients\": {\"calories\": int, \"protein\": int, \"fat\": int, \"carbs\": int}\n"
+            "    }\n"
+            "  ]\n"
             "}"
         )
 
         # 3. Invoke LLM
         messages = [
             SystemMessage(content=system_prompt),
-            HumanMessage(content=f"Generate a recipe for: {request.prompt}")
+            HumanMessage(content=f"Generate 3 distinct recipes for: {request.prompt}")
         ]
         
         response = llm.invoke(messages)
 
         # 4. Parse and Validate
         # Clean markdown formatting if present
-        clean_json = response.content.strip().removeprefix("```json").removesuffix("```").strip()
+        clean_json = response.content.strip()
+
+        if clean_json.startswith("```json"):
+            clean_json = clean_json.removeprefix("```json").removesuffix("```").strip()
+        elif clean_json.startswith("```"):
+            clean_json = clean_json.removeprefix("```").removesuffix("```").strip()
+
         data = json.loads(clean_json)
+
+        if isinstance(data, dict) and "recipes" in data:
+            return data["recipes"]
 
         return data
 
     except Exception as e:
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
