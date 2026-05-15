@@ -22,6 +22,7 @@ import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.reactive.function.client.WebClient
+import org.springframework.core.ParameterizedTypeReference
 
 @RestController
 @Validated
@@ -66,16 +67,21 @@ class AIApiController(
 		@AuthenticationPrincipal principal: UserDetails,
 	): ResponseEntity<List<RecipeInput>> {
 		val user = userRepository.findByUsername(principal.username).orElseThrow()
-		val response =
+		
+		// Define a type reference for List<RecipeInput> so Jackson can deserialize it correctly
+    	val responseType = object : ParameterizedTypeReference<List<RecipeInput>>() {}
+		
+		val recipes =
 			aiRecipeWebClient
 				.post()
 				.uri("/ai/recipes")
 				.contentType(MediaType.APPLICATION_JSON)
 				.bodyValue(mapOf("profile" to user.toProfile(), "prompt" to recipeRequest.prompt))
 				.retrieve()
-				.bodyToMono(RecipeInput::class.java)
+				.bodyToMono(responseType)
 				.block() ?: return ResponseEntity.internalServerError().build()
-		return ResponseEntity.ok(listOf(response))
+		
+		return ResponseEntity.ok(recipes)
 	}
 
 	// Converts the DB user entity into the API UserProfile model, injecting real profile data.
