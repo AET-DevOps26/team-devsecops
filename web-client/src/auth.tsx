@@ -2,18 +2,38 @@ import { createContext, useContext, useState } from 'react'
 import type { ReactNode } from 'react'
 
 const TOKEN_KEY = 'auth_token'
+const USERNAME_KEY = 'auth_username'
+const API_BASE = import.meta.env.VITE_API_BASE ?? ''
 
-// TODO: replace mock implementation with real server calls
-
-async function signInRequest(username: string, password: string): Promise<string> {
+async function loginRequest(username: string, password: string): Promise<string> {
   if (!username.trim() || !password) throw new Error('Enter a username and password')
-  if (password !== 'test') throw new Error('Invalid credentials')
-  return `mock-token-for-${username}`
+  const res = await fetch(`${API_BASE}/api/v1/users/login`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ username, password }),
+  })
+  if (res.status === 401) throw new Error('Invalid username or password')
+  if (!res.ok) throw new Error(`Couldn't log in (HTTP ${res.status})`)
+  const data = (await res.json()) as { token: string }
+  return data.token
 }
 
-async function registerRequest(username: string, password: string): Promise<string> {
+async function registerRequest(username: string, password: string): Promise<void> {
   if (!username.trim() || !password) throw new Error('Enter a username and password')
-  return `mock-token-for-${username}`
+  const res = await fetch(`${API_BASE}/api/v1/users/register`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ username, password }),
+  })
+  if (res.status === 409) throw new Error('Username already taken')
+  if (!res.ok) throw new Error(`Couldn't sign up (HTTP ${res.status})`)
+}
+
+async function logoutRequest(token: string): Promise<void> {
+  await fetch(`${API_BASE}/api/v1/users/logout`, {
+    method: 'POST',
+    headers: { authorization: `Bearer ${token}` },
+  })
 }
 
 type AuthContextValue = {
@@ -28,20 +48,33 @@ const AuthContext = createContext<AuthContextValue | null>(null)
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [token, setToken] = useState<string | null>(() => localStorage.getItem(TOKEN_KEY))
+  const [username, setUsername] = useState<string | null>(() => localStorage.getItem(USERNAME_KEY))
 
-  function persist(newToken: string) {
+  function persistSession(newToken: string, newUsername: string) {
     localStorage.setItem(TOKEN_KEY, newToken)
+    localStorage.setItem(USERNAME_KEY, newUsername)
     setToken(newToken)
+    setUsername(newUsername)
+  }
+
+  function clearSession() {
+    localStorage.removeItem(TOKEN_KEY)
+    localStorage.removeItem(USERNAME_KEY)
+    setToken(null)
+    setUsername(null)
   }
 
   const value: AuthContextValue = {
     token,
-    username: token ? token.replace('mock-token-for-', '') : null,
-    signIn: async (username, password) => persist(await signInRequest(username, password)),
-    register: async (username, password) => persist(await registerRequest(username, password)),
+    username,
+    signIn: async (u, p) => persistSession(await loginRequest(u, p), u),
+    register: async (u, p) => {
+      await registerRequest(u, p)
+      persistSession(await loginRequest(u, p), u)
+    },
     signOut: () => {
-      localStorage.removeItem(TOKEN_KEY)
-      setToken(null)
+      if (token) void logoutRequest(token).catch(() => {})
+      clearSession()
     },
   }
 

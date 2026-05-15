@@ -1,13 +1,19 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import {
   ArrowRightStartOnRectangleIcon,
   PlusIcon,
   TrashIcon,
 } from '@heroicons/react/24/outline'
 import { useNavigate } from 'react-router-dom'
+import type { components } from '../api'
 import { useAuth } from '../auth'
 import { Button } from '../components/Button'
 import { PasswordInput } from '../components/PasswordInput'
+
+type UserProfile = components['schemas']['UserProfile']
+type UserProfileUpdate = components['schemas']['UserProfileUpdate']
+
+const API_BASE = import.meta.env.VITE_API_BASE ?? ''
 
 const allergyPlaceholders = [
   'e.g. peanuts',
@@ -21,15 +27,131 @@ const allergyPlaceholders = [
 ]
 
 export function ProfilePage() {
-  const { username, signOut } = useAuth()
+  const { username, token, signOut, signIn } = useAuth()
   const navigate = useNavigate()
 
+  const [usernameDraft, setUsernameDraft] = useState<string | null>(null)
+  const newUsername = usernameDraft ?? username ?? ''
+  const [currentPassword, setCurrentPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [repeatNewPassword, setRepeatNewPassword] = useState('')
-  const [deletePassword, setDeletePassword] = useState('')
   const [aboutMe, setAboutMe] = useState<string[]>([])
   const [diet, setDiet] = useState('')
   const [allergies, setAllergies] = useState<string[]>(['', ''])
+
+  const [prefsStatus, setPrefsStatus] = useState<{ kind: 'error' | 'ok'; msg: string } | null>(null)
+  const [accountStatus, setAccountStatus] = useState<{ kind: 'error' | 'ok'; msg: string } | null>(null)
+  const [prefsSaving, setPrefsSaving] = useState(false)
+  const [accountSaving, setAccountSaving] = useState(false)
+
+	// fetch the currently stored user profile
+  useEffect(() => {
+    if (!token) return
+    let cancelled = false
+    fetch(`${API_BASE}/api/v1/users/profile`, {
+      headers: { authorization: `Bearer ${token}` },
+    })
+      .then(async (res) => {
+        if (res.status === 403 || res.status === 401) {
+          signOut()
+          navigate('/login')
+          return
+        }
+        if (!res.ok) throw new Error(`HTTP ${res.status}`)
+        const data = (await res.json()) as UserProfile
+        if (cancelled) return
+        const prefs = data.preferences ?? {}
+        setAboutMe(prefs.aboutMe ?? [])
+        setDiet(prefs.diet ?? '')
+        setAllergies(prefs.allergies?.length ? prefs.allergies : ['', ''])
+      })
+      .catch((e) => {
+        if (!cancelled) setPrefsStatus({ kind: 'error', msg: e instanceof Error ? e.message : String(e) })
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [token, signOut, navigate])
+
+  async function updateProfile(body: UserProfileUpdate): Promise<void> {
+    const res = await fetch(`${API_BASE}/api/v1/users/profile`, {
+      method: 'PUT',
+      headers: {
+        'content-type': 'application/json',
+        authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(body),
+    })
+    if (res.status === 403 || res.status === 401) {
+      signOut()
+      navigate('/login')
+      throw new Error('Session expired')
+    }
+    if (res.status === 409) throw new Error('Username already taken')
+    if (res.status === 400) throw new Error('Invalid request')
+    if (!res.ok) throw new Error(`HTTP ${res.status}`)
+  }
+
+  async function handleSavePreferences() {
+    setPrefsSaving(true)
+    setPrefsStatus(null)
+    try {
+      await updateProfile({
+        preferences: {
+          diet,
+          allergies: allergies.map((a) => a.trim()).filter((a) => a !== ''),
+          aboutMe: aboutMe.map((a) => a.trim()).filter((a) => a !== ''),
+        },
+      })
+      setPrefsStatus({ kind: 'ok', msg: 'Preferences saved' })
+    } catch (e) {
+      setPrefsStatus({ kind: 'error', msg: e instanceof Error ? e.message : String(e) })
+    } finally {
+      setPrefsSaving(false)
+    }
+  }
+
+  async function handleUpdateAccount() {
+    const trimmedUsername = newUsername.trim()
+    const usernameChanged = trimmedUsername !== '' && trimmedUsername !== username
+    const wantsPasswordChange = newPassword !== ''
+
+    if (wantsPasswordChange && newPassword !== repeatNewPassword) {
+      setAccountStatus({ kind: 'error', msg: 'Passwords do not match' })
+      return
+    }
+    if (!usernameChanged && !wantsPasswordChange) {
+      setAccountStatus({ kind: 'error', msg: 'Nothing to update' })
+      return
+    }
+    if (usernameChanged && !currentPassword) {
+      setAccountStatus({ kind: 'error', msg: 'Enter your current password to change your username' })
+      return
+    }
+
+    const body: UserProfileUpdate = {}
+    if (usernameChanged) body.username = trimmedUsername
+    if (wantsPasswordChange) body.password = newPassword
+
+    setAccountSaving(true)
+    setAccountStatus(null)
+    try {
+      await updateProfile(body)
+      if (usernameChanged) {
+        // re-authenticate to get a fresh token
+        await signIn(trimmedUsername, wantsPasswordChange ? newPassword : currentPassword)
+      }
+      setUsernameDraft(null)
+      setCurrentPassword('')
+      setNewPassword('')
+      setRepeatNewPassword('')
+      setAccountStatus({ kind: 'ok', msg: 'Account updated' })
+    } catch (e) {
+      setAccountStatus({ kind: 'error', msg: e instanceof Error ? e.message : String(e) })
+    } finally {
+      setAccountSaving(false)
+    }
+  }
 
   return (
     <>
@@ -53,7 +175,10 @@ export function ProfilePage() {
       <div className="w-full max-w-md rounded-lg border border-gray-200 bg-white p-6 shadow-sm self-center md:self-start">
         <form
           className="flex flex-col gap-4"
-          onSubmit={(e) => e.preventDefault()}
+          onSubmit={(e) => {
+            e.preventDefault()
+            handleSavePreferences()
+          }}
         >
           <h2 className="text-lg font-bold">Taste preferences</h2>
 
@@ -113,18 +238,49 @@ export function ProfilePage() {
             </button>
           </div>
 
-          <Button type="submit" className="self-center">
-            Update taste preferences
+          <Button type="submit" className="self-center" disabled={prefsSaving}>
+            {prefsSaving ? 'Saving…' : 'Update taste preferences'}
           </Button>
+
+          {prefsStatus && (
+            <p className={prefsStatus.kind === 'error' ? 'text-red-600' : 'text-green-600'}>
+              {prefsStatus.msg}
+            </p>
+          )}
         </form>
       </div>
 
       <div className="w-full max-w-md rounded-lg border border-gray-200 bg-white p-6 shadow-sm self-center md:self-start">
         <form
           className="flex flex-col gap-4"
-          onSubmit={(e) => e.preventDefault()}
+          onSubmit={(e) => {
+            e.preventDefault()
+            handleUpdateAccount()
+          }}
         >
-          <h2 className="text-lg font-bold">Update password</h2>
+          <h2 className="text-lg font-bold">Update account</h2>
+
+          <label className="flex flex-col gap-1">
+            <span className="font-medium">New username</span>
+            <input
+              type="text"
+              className="w-full border border-gray-300 rounded p-2"
+              value={newUsername}
+              onChange={(e) => setUsernameDraft(e.target.value)}
+              autoComplete="username"
+            />
+          </label>
+
+          <label className="flex flex-col gap-1">
+            <span className="font-medium">Current password</span>
+            <PasswordInput
+              className="w-full border border-gray-300 rounded p-2"
+              value={currentPassword}
+              onChange={(e) => setCurrentPassword(e.target.value)}
+              autoComplete="current-password"
+              placeholder="Required when changing your username"
+            />
+          </label>
 
           <label className="flex flex-col gap-1">
             <span className="font-medium">New password</span>
@@ -133,6 +289,7 @@ export function ProfilePage() {
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
               autoComplete="new-password"
+              placeholder="Leave empty to keep current"
             />
           </label>
 
@@ -143,41 +300,49 @@ export function ProfilePage() {
               value={repeatNewPassword}
               onChange={(e) => setRepeatNewPassword(e.target.value)}
               autoComplete="new-password"
+              placeholder="Leave empty to keep current"
             />
           </label>
 
-          <Button type="submit" className="self-center">
-            Update password
+          <Button type="submit" className="self-center" disabled={accountSaving}>
+            {accountSaving ? 'Saving…' : 'Update account'}
           </Button>
+
+          {accountStatus && (
+            <p className={accountStatus.kind === 'error' ? 'text-red-600' : 'text-green-600'}>
+              {accountStatus.msg}
+            </p>
+          )}
         </form>
       </div>
 
-      <div className="w-full max-w-md rounded-lg border border-gray-200 bg-white p-6 shadow-sm self-center md:self-start">
-        <form
-          className="flex flex-col gap-4"
-          onSubmit={(e) => e.preventDefault()}
-        >
-          <h2 className="text-lg font-bold">Delete account</h2>
+			{/* Delete Account (not yet supported by backend) */}
+      {/*<div className="w-full max-w-md rounded-lg border border-gray-200 bg-white p-6 shadow-sm self-center md:self-start">*/}
+      {/*  <form*/}
+      {/*    className="flex flex-col gap-4"*/}
+      {/*    onSubmit={(e) => e.preventDefault()}*/}
+      {/*  >*/}
+      {/*    <h2 className="text-lg font-bold">Delete account</h2>*/}
 
-          <label className="flex flex-col gap-1">
-            <span className="font-medium">Password</span>
-            <PasswordInput
-              className="w-full border border-gray-300 rounded p-2"
-              value={deletePassword}
-              onChange={(e) => setDeletePassword(e.target.value)}
-              autoComplete="current-password"
-            />
-          </label>
+      {/*    <label className="flex flex-col gap-1">*/}
+      {/*      <span className="font-medium">Password</span>*/}
+      {/*      <PasswordInput*/}
+      {/*        className="w-full border border-gray-300 rounded p-2"*/}
+      {/*        value={deletePassword}*/}
+      {/*        onChange={(e) => setDeletePassword(e.target.value)}*/}
+      {/*        autoComplete="current-password"*/}
+      {/*      />*/}
+      {/*    </label>*/}
 
-          <button
-            type="button"
-            className="flex items-center gap-1 self-center text-red-600 cursor-pointer transition-transform duration-100 hover:scale-98"
-          >
-            <TrashIcon className="h-5 w-5" />
-            Delete account
-          </button>
-        </form>
-      </div>
+      {/*    <button*/}
+      {/*      type="button"*/}
+      {/*      className="flex items-center gap-1 self-center text-red-600 cursor-pointer transition-transform duration-100 hover:scale-98"*/}
+      {/*    >*/}
+      {/*      <TrashIcon className="h-5 w-5" />*/}
+      {/*      Delete account*/}
+      {/*    </button>*/}
+      {/*  </form>*/}
+      {/*</div>*/}
     </>
   )
 }
