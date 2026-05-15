@@ -40,9 +40,11 @@ export function ProfilePage() {
   const [allergies, setAllergies] = useState<string[]>(['', ''])
 
   const [prefsStatus, setPrefsStatus] = useState<{ kind: 'error' | 'ok'; msg: string } | null>(null)
-  const [accountStatus, setAccountStatus] = useState<{ kind: 'error' | 'ok'; msg: string } | null>(null)
+  const [usernameStatus, setUsernameStatus] = useState<{ kind: 'error' | 'ok'; msg: string } | null>(null)
+  const [passwordStatus, setPasswordStatus] = useState<{ kind: 'error' | 'ok'; msg: string } | null>(null)
   const [prefsSaving, setPrefsSaving] = useState(false)
-  const [accountSaving, setAccountSaving] = useState(false)
+  const [usernameSaving, setUsernameSaving] = useState(false)
+  const [passwordSaving, setPasswordSaving] = useState(false)
 
 	// fetch the currently stored user profile
   useEffect(() => {
@@ -111,45 +113,54 @@ export function ProfilePage() {
     }
   }
 
-  async function handleUpdateAccount() {
+  async function handleUpdateUsername() {
     const trimmedUsername = newUsername.trim()
-    const usernameChanged = trimmedUsername !== '' && trimmedUsername !== username
-    const wantsPasswordChange = newPassword !== ''
-
-    if (wantsPasswordChange && newPassword !== repeatNewPassword) {
-      setAccountStatus({ kind: 'error', msg: 'Passwords do not match' })
+    if (trimmedUsername === '' || trimmedUsername === username) {
+      setUsernameStatus({ kind: 'error', msg: 'Enter a new username' })
       return
     }
-    if (!usernameChanged && !wantsPasswordChange) {
-      setAccountStatus({ kind: 'error', msg: 'Nothing to update' })
-      return
-    }
-    if (usernameChanged && !currentPassword) {
-      setAccountStatus({ kind: 'error', msg: 'Enter your current password to change your username' })
+    if (!currentPassword) {
+      setUsernameStatus({ kind: 'error', msg: 'Enter your current password to change your username' })
       return
     }
 
-    const body: UserProfileUpdate = {}
-    if (usernameChanged) body.username = trimmedUsername
-    if (wantsPasswordChange) body.password = newPassword
-
-    setAccountSaving(true)
-    setAccountStatus(null)
+    setUsernameSaving(true)
+    setUsernameStatus(null)
     try {
-      await updateProfile(body)
-      if (usernameChanged) {
-        // re-authenticate to get a fresh token
-        await signIn(trimmedUsername, wantsPasswordChange ? newPassword : currentPassword)
-      }
+      await updateProfile({ username: trimmedUsername })
+      // The old JWT's `sub` is now stale — re-authenticate to get a fresh token.
+      await signIn(trimmedUsername, currentPassword)
       setUsernameDraft(null)
       setCurrentPassword('')
+      setUsernameStatus({ kind: 'ok', msg: 'Username updated' })
+    } catch (e) {
+      setUsernameStatus({ kind: 'error', msg: e instanceof Error ? e.message : String(e) })
+    } finally {
+      setUsernameSaving(false)
+    }
+  }
+
+  async function handleUpdatePassword() {
+    if (!newPassword) {
+      setPasswordStatus({ kind: 'error', msg: 'Enter a new password' })
+      return
+    }
+    if (newPassword !== repeatNewPassword) {
+      setPasswordStatus({ kind: 'error', msg: 'Passwords do not match' })
+      return
+    }
+
+    setPasswordSaving(true)
+    setPasswordStatus(null)
+    try {
+      await updateProfile({ password: newPassword })
       setNewPassword('')
       setRepeatNewPassword('')
-      setAccountStatus({ kind: 'ok', msg: 'Account updated' })
+      setPasswordStatus({ kind: 'ok', msg: 'Password updated' })
     } catch (e) {
-      setAccountStatus({ kind: 'error', msg: e instanceof Error ? e.message : String(e) })
+      setPasswordStatus({ kind: 'error', msg: e instanceof Error ? e.message : String(e) })
     } finally {
-      setAccountSaving(false)
+      setPasswordSaving(false)
     }
   }
 
@@ -255,10 +266,10 @@ export function ProfilePage() {
           className="flex flex-col gap-4"
           onSubmit={(e) => {
             e.preventDefault()
-            handleUpdateAccount()
+            handleUpdateUsername()
           }}
         >
-          <h2 className="text-lg font-bold">Update account</h2>
+          <h2 className="text-lg font-bold">Update username</h2>
 
           <label className="flex flex-col gap-1">
             <span className="font-medium">New username</span>
@@ -278,9 +289,30 @@ export function ProfilePage() {
               value={currentPassword}
               onChange={(e) => setCurrentPassword(e.target.value)}
               autoComplete="current-password"
-              placeholder="Required when changing your username"
             />
           </label>
+
+          <Button type="submit" className="self-center" disabled={usernameSaving}>
+            {usernameSaving ? 'Saving…' : 'Update username'}
+          </Button>
+
+          {usernameStatus && (
+            <p className={usernameStatus.kind === 'error' ? 'text-red-600' : 'text-green-600'}>
+              {usernameStatus.msg}
+            </p>
+          )}
+        </form>
+      </div>
+
+      <div className="w-full max-w-md rounded-lg border border-gray-200 bg-white p-6 shadow-sm self-center md:self-start">
+        <form
+          className="flex flex-col gap-4"
+          onSubmit={(e) => {
+            e.preventDefault()
+            handleUpdatePassword()
+          }}
+        >
+          <h2 className="text-lg font-bold">Update password</h2>
 
           <label className="flex flex-col gap-1">
             <span className="font-medium">New password</span>
@@ -289,7 +321,6 @@ export function ProfilePage() {
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
               autoComplete="new-password"
-              placeholder="Leave empty to keep current"
             />
           </label>
 
@@ -300,17 +331,16 @@ export function ProfilePage() {
               value={repeatNewPassword}
               onChange={(e) => setRepeatNewPassword(e.target.value)}
               autoComplete="new-password"
-              placeholder="Leave empty to keep current"
             />
           </label>
 
-          <Button type="submit" className="self-center" disabled={accountSaving}>
-            {accountSaving ? 'Saving…' : 'Update account'}
+          <Button type="submit" className="self-center" disabled={passwordSaving}>
+            {passwordSaving ? 'Saving…' : 'Update password'}
           </Button>
 
-          {accountStatus && (
-            <p className={accountStatus.kind === 'error' ? 'text-red-600' : 'text-green-600'}>
-              {accountStatus.msg}
+          {passwordStatus && (
+            <p className={passwordStatus.kind === 'error' ? 'text-red-600' : 'text-green-600'}>
+              {passwordStatus.msg}
             </p>
           )}
         </form>
