@@ -166,7 +166,7 @@ export interface paths {
             };
             requestBody: {
                 content: {
-                    "application/json": components["schemas"]["UserProfile"];
+                    "application/json": components["schemas"]["UserProfileUpdate"];
                 };
             };
             responses: {
@@ -253,7 +253,7 @@ export interface paths {
             };
             requestBody: {
                 content: {
-                    "application/json": components["schemas"]["Recipe"];
+                    "application/json": components["schemas"]["RecipeInput"];
                 };
             };
             responses: {
@@ -431,39 +431,54 @@ export interface components {
             password: string;
         };
         UserProfile: {
-            readonly id: number;
+            username: string;
+            preferences: components["schemas"]["UserPreferences"];
+        };
+        UserProfileUpdate: {
             username?: string;
             password?: string;
-            preferences?: {
-                diet?: string;
-                allergies?: string[];
-                aboutMe?: string[];
-            };
+            preferences?: components["schemas"]["UserPreferences"];
         };
-        Recipe: {
-            readonly id?: number;
+        UserPreferences: {
+            diet?: string;
+            allergies?: string[];
+            aboutMe?: string[];
+        };
+        RecipeIngredient: {
+            quantity?: number;
+            unit?: string;
+            name?: string;
+        };
+        RecipeNutrients: {
+            calories?: number;
+            protein?: number;
+            fat?: number;
+            carbs?: number;
+        };
+        RecipeInput: {
             title: string;
-            ingredients: {
-                quantity?: number;
-                unit?: string;
-                name?: string;
-            }[];
+            ingredients: components["schemas"]["RecipeIngredient"][];
             instructions: string[];
             portions: number;
-            nutrients?: {
-                calories?: number;
-                protein?: number;
-                fat?: number;
-                carbs?: number;
-            };
+            nutrients?: components["schemas"]["RecipeNutrients"];
+        };
+        Recipe: components["schemas"]["RecipeInput"] & {
+            id: number;
         };
         RecipeRequest: {
+            prompt: string;
+        };
+        RecipeRequestForwarded: {
             profile: components["schemas"]["UserProfile"];
             prompt: string;
         };
         HelpRequest: {
-            profile?: components["schemas"]["UserProfile"];
-            recipe?: components["schemas"]["Recipe"];
+            recipe: components["schemas"]["RecipeInput"];
+            prompt: string;
+        };
+        HelpRequestForwarded: {
+            profile: components["schemas"]["UserProfile"];
+            recipe: components["schemas"]["RecipeInput"];
             prompt: string;
         };
         HelpResponse: {

@@ -6,11 +6,8 @@ from typing import TYPE_CHECKING, Any, TypeVar
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..types import UNSET, Unset
-
 if TYPE_CHECKING:
-    from ..models.recipe import Recipe
-    from ..models.user_profile import UserProfile
+    from ..models.recipe_input import RecipeInput
 
 
 T = TypeVar("T", bound="HelpRequest")
@@ -20,67 +17,42 @@ T = TypeVar("T", bound="HelpRequest")
 class HelpRequest:
     """
     Attributes:
+        recipe (RecipeInput):
         prompt (str):
-        profile (UserProfile | Unset):
-        recipe (Recipe | Unset):
     """
 
+    recipe: RecipeInput
     prompt: str
-    profile: UserProfile | Unset = UNSET
-    recipe: Recipe | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
+        recipe = self.recipe.to_dict()
+
         prompt = self.prompt
-
-        profile: dict[str, Any] | Unset = UNSET
-        if not isinstance(self.profile, Unset):
-            profile = self.profile.to_dict()
-
-        recipe: dict[str, Any] | Unset = UNSET
-        if not isinstance(self.recipe, Unset):
-            recipe = self.recipe.to_dict()
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
             {
+                "recipe": recipe,
                 "prompt": prompt,
             }
         )
-        if profile is not UNSET:
-            field_dict["profile"] = profile
-        if recipe is not UNSET:
-            field_dict["recipe"] = recipe
 
         return field_dict
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.recipe import Recipe
-        from ..models.user_profile import UserProfile
+        from ..models.recipe_input import RecipeInput
 
         d = dict(src_dict)
+        recipe = RecipeInput.from_dict(d.pop("recipe"))
+
         prompt = d.pop("prompt")
 
-        _profile = d.pop("profile", UNSET)
-        profile: UserProfile | Unset
-        if isinstance(_profile, Unset):
-            profile = UNSET
-        else:
-            profile = UserProfile.from_dict(_profile)
-
-        _recipe = d.pop("recipe", UNSET)
-        recipe: Recipe | Unset
-        if isinstance(_recipe, Unset):
-            recipe = UNSET
-        else:
-            recipe = Recipe.from_dict(_recipe)
-
         help_request = cls(
-            prompt=prompt,
-            profile=profile,
             recipe=recipe,
+            prompt=prompt,
         )
 
         help_request.additional_properties = d

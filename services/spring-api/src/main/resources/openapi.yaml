@@ -240,26 +240,11 @@ components:
       - title
     RecipeRequest:
       example:
-        profile:
-          password: password
-          preferences:
-            allergies:
-            - allergies
-            - allergies
-            cuisinePreferences:
-            - cuisinePreferences
-            - cuisinePreferences
-            diet: diet
-          id: id
-          username: username
         prompt: prompt
       properties:
-        profile:
-          $ref: "#/components/schemas/UserProfile"
         prompt:
           type: string
       required:
-      - profile
       - prompt
     HelpRequest:
       example:

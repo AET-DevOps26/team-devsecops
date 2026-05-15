@@ -11,11 +11,28 @@ import java.time.Duration
 
 @Configuration
 class AiConfig {
-	@Value("\${ai.help.service.url:http://localhost:8081}")
-	private lateinit var aiServiceUrl: String
+	@Value("\${ai.recipe.service.url:http://localhost:8090}")
+	private lateinit var aiRecipeServiceUrl: String
+
+	@Value("\${ai.help.service.url:http://localhost:8091}")
+	private lateinit var aiHelpServiceUrl: String
 
 	@Bean
-	fun aiWebClient(): WebClient {
+	fun aiRecipeWebClient(): WebClient {
+		val pool =
+			ConnectionProvider
+				.builder("recipe")
+				.maxIdleTime(Duration.ofSeconds(2))
+				.build()
+		return WebClient
+			.builder()
+			.baseUrl(aiRecipeServiceUrl)
+			.clientConnector(ReactorClientHttpConnector(HttpClient.create(pool)))
+			.build()
+	}
+
+	@Bean
+	fun aiHelpWebClient(): WebClient {
 		val pool =
 			ConnectionProvider
 				.builder("ai")
@@ -26,7 +43,7 @@ class AiConfig {
 				.build()
 		return WebClient
 			.builder()
-			.baseUrl(aiServiceUrl)
+			.baseUrl(aiHelpServiceUrl)
 			.clientConnector(ReactorClientHttpConnector(HttpClient.create(pool)))
 			.build()
 	}

@@ -12,11 +12,16 @@ src/main/kotlin/org/openapitools/api/Exceptions.kt
 src/main/kotlin/org/openapitools/api/RecipesApi.kt
 src/main/kotlin/org/openapitools/api/UsersApi.kt
 src/main/kotlin/org/openapitools/model/HelpRequest.kt
+src/main/kotlin/org/openapitools/model/HelpRequestForwarded.kt
 src/main/kotlin/org/openapitools/model/HelpResponse.kt
 src/main/kotlin/org/openapitools/model/LoginRequest.kt
 src/main/kotlin/org/openapitools/model/Recipe.kt
+src/main/kotlin/org/openapitools/model/RecipeIngredient.kt
+src/main/kotlin/org/openapitools/model/RecipeInput.kt
 src/main/kotlin/org/openapitools/model/RecipeNutrients.kt
 src/main/kotlin/org/openapitools/model/RecipeRequest.kt
+src/main/kotlin/org/openapitools/model/RecipeRequestForwarded.kt
 src/main/kotlin/org/openapitools/model/RegisterRequest.kt
+src/main/kotlin/org/openapitools/model/UserPreferences.kt
 src/main/kotlin/org/openapitools/model/UserProfile.kt
-src/main/kotlin/org/openapitools/model/UserProfilePreferences.kt
+src/main/kotlin/org/openapitools/model/UserProfileUpdate.kt
