@@ -8,26 +8,22 @@ export function PasswordInput({
 }: Omit<ComponentProps<'input'>, 'type'>) {
   const [visible, setVisible] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
-  const selectionRef = useRef<[number, number] | null>(null)
-
 
   useLayoutEffect(() => {
-		// changing the input type re-selects all text in some browsers
-		// to avoid: restore the caret/selection the user had before the toggle
+    // changing the input type re-selects all text in some browsers;
+    // collapse the caret to the end so the toggle doesn't leave a selection
     const input = inputRef.current
-    if (input && selectionRef.current) {
-      input.setSelectionRange(...selectionRef.current)
-      selectionRef.current = null
-    }
+    if (!input || document.activeElement !== input) return
+    const end = input.value.length
+    input.setSelectionRange(end, end)
+    requestAnimationFrame(() => {
+      if (inputRef.current === input && document.activeElement === input) {
+        input.setSelectionRange(end, end)
+      }
+    })
   }, [visible])
 
-  const toggleVisibility = () => {
-    const input = inputRef.current
-    if (input) {
-      selectionRef.current = [input.selectionStart ?? 0, input.selectionEnd ?? 0]
-    }
-    setVisible((v) => !v)
-  }
+  const toggleVisibility = () => setVisible((v) => !v)
 
   return (
     <div className="relative">
