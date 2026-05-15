@@ -45,6 +45,10 @@ class SecurityConfig(
 	fun filterChain(http: HttpSecurity): SecurityFilterChain {
 		http
 			.csrf { it.disable() } // not needed for stateless JWT APIs
+			// Picks up the CorsConfigurationSource bean so preflights are answered
+			// before the auth filter — without this, OPTIONS to protected endpoints
+			// returns 403 and the browser reports a CORS error.
+			.cors { }
 			.sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
 			.authorizeHttpRequests { auth ->
 				auth
