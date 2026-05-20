@@ -40,11 +40,8 @@ services:
     environment:
       AI_RECIPE_SERVICE_URL: http://py-recipe-service:8080
       AI_HELP_SERVICE_URL: http://py-help-service:8080
-      DB_URL: ${DB_URL}
-      DB_USER: ${DB_USER}
-      DB_PASSWORD: ${DB_PASSWORD}
-      JWT_SECRET: ${JWT_SECRET}
-      JPA_DDL_AUTO: ${JPA_DDL_AUTO}
+    env_file:
+      - ./.env
     depends_on:
       - py-help-service
       - py-recipe-service
