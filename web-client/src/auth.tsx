@@ -41,6 +41,7 @@ type AuthContextValue = {
   username: string | null
   signIn: (username: string, password: string) => Promise<void>
   register: (username: string, password: string) => Promise<void>
+  updateUsername: (username: string) => void
   signOut: () => void
 }
 
@@ -71,6 +72,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     register: async (u, p) => {
       await registerRequest(u, p)
       persistSession(await loginRequest(u, p), u)
+    },
+    updateUsername: (u) => {
+      if (token) persistSession(token, u)
     },
     signOut: () => {
       if (token) void logoutRequest(token).catch(() => {})

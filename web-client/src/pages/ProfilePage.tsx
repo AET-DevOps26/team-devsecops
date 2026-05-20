@@ -27,12 +27,11 @@ const allergyPlaceholders = [
 ]
 
 export function ProfilePage() {
-  const { username, token, signOut, signIn } = useAuth()
+  const { username, token, signOut, updateUsername } = useAuth()
   const navigate = useNavigate()
 
   const [usernameDraft, setUsernameDraft] = useState<string | null>(null)
   const newUsername = usernameDraft ?? username ?? ''
-  const [currentPassword, setCurrentPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [repeatNewPassword, setRepeatNewPassword] = useState('')
   const [aboutMe, setAboutMe] = useState<string[]>([])
@@ -119,19 +118,13 @@ export function ProfilePage() {
       setUsernameStatus({ kind: 'error', msg: 'Enter a new username' })
       return
     }
-    if (!currentPassword) {
-      setUsernameStatus({ kind: 'error', msg: 'Enter your current password to change your username' })
-      return
-    }
 
     setUsernameSaving(true)
     setUsernameStatus(null)
     try {
       await updateProfile({ username: trimmedUsername })
-      // The old JWT's `sub` is now stale — re-authenticate to get a fresh token.
-      await signIn(trimmedUsername, currentPassword)
+      updateUsername(trimmedUsername)
       setUsernameDraft(null)
-      setCurrentPassword('')
       setUsernameStatus({ kind: 'ok', msg: 'Username updated' })
     } catch (e) {
       setUsernameStatus({ kind: 'error', msg: e instanceof Error ? e.message : String(e) })
@@ -279,16 +272,6 @@ export function ProfilePage() {
               value={newUsername}
               onChange={(e) => setUsernameDraft(e.target.value)}
               autoComplete="username"
-            />
-          </label>
-
-          <label className="flex flex-col gap-1">
-            <span className="font-medium">Current password</span>
-            <PasswordInput
-              className="w-full border border-gray-300 rounded p-2"
-              value={currentPassword}
-              onChange={(e) => setCurrentPassword(e.target.value)}
-              autoComplete="current-password"
             />
           </label>
 
