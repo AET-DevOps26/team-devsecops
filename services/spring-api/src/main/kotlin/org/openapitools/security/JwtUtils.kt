@@ -18,17 +18,17 @@ class JwtUtils {
 
 	private fun key() = Keys.hmacShaKeyFor(jwtSecret.toByteArray())
 
-	fun generateToken(username: String): String =
+	fun generateToken(userId: Long): String =
 		Jwts.builder()
-			.subject(username)
+			.subject(userId.toString())
 			.issuedAt(Date())
 			.expiration(Date(System.currentTimeMillis() + jwtExpirationMs))
 			.signWith(key())
 			.compact()
 
-	fun getUsernameFromToken(token: String): String =
+	fun getUserIdFromToken(token: String): Long =
 		Jwts.parser().verifyWith(key()).build()
-			.parseSignedClaims(token).payload.subject
+			.parseSignedClaims(token).payload.subject.toLong()
 
 	fun validateToken(token: String): Boolean =
 		try {
