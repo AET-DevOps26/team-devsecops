@@ -15,6 +15,8 @@ services:
             - "*.pyc"
         - action: rebuild
           path: ./services/py-recipe-service/requirements.txt
+        - action: rebuild
+          path: ./.env
 
   py-help-service:
     build: ./services/py-help-service
@@ -32,6 +34,8 @@ services:
             - "*.pyc"
         - action: rebuild
           path: ./services/py-help-service/requirements.txt
+        - action: rebuild
+          path: ./.env
 
   spring-api:
     build: ./services/spring-api
@@ -51,6 +55,8 @@ services:
           path: ./services/spring-api/src
         - action: rebuild
           path: ./services/spring-api/build.gradle.kts
+        - action: rebuild
+          path: ./.env
 
   web-client:
     build:
