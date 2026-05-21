@@ -5,6 +5,7 @@ services:
       - "8090:8080"
     environment:
       SERVICE_API_KEY: ${RECIPE_SERVICE_KEY}
+      INTERNAL_AUTH_SECRET: ${INTERNAL_AUTH_SECRET}
     develop:
       watch:
         - action: sync+restart
@@ -24,6 +25,7 @@ services:
       - "8091:8080"
     environment:
       SERVICE_API_KEY: ${HELP_SERVICE_KEY}
+      INTERNAL_AUTH_SECRET: ${INTERNAL_AUTH_SECRET}
     develop:
       watch:
         - action: sync+restart
@@ -44,6 +46,7 @@ services:
     environment:
       AI_RECIPE_SERVICE_URL: http://py-recipe-service:8080
       AI_HELP_SERVICE_URL: http://py-help-service:8080
+      INTERNAL_AUTH_SECRET: ${INTERNAL_AUTH_SECRET}
     env_file:
       - ./.env
     depends_on:
