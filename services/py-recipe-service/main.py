@@ -17,8 +17,6 @@ load_dotenv()
 
 app = FastAPI(title="Cooking Assistant GenAI Service")
 
-INTERNAL_AUTH_SECRET = os.getenv("INTERNAL_AUTH_SECRET")
-
 SECRET_KEY_STR = os.getenv("INTERNAL_AUTH_SECRET")
 if not SECRET_KEY_STR:
     raise RuntimeError("CRITICAL: INTERNAL_AUTH_SECRET environment variable is missing!") 
@@ -31,7 +29,8 @@ async def verify_internal_hmac(
 ):
     """
     Validates that the incoming request contains an authentic HMAC signature
-    and checks against clock drift to eliminate replay attacks.
+    and checks against clock drift.
+    Caution: Redundant code in py-help-service and py-recipe service.
     """
     if not x_internal_timestamp or not x_internal_signature:
         raise HTTPException(
@@ -45,7 +44,7 @@ async def verify_internal_hmac(
     except ValueError:
         raise HTTPException(status_code=400, detail="Invalid timestamp metadata formatting.")
 
-    # 2. Reject requests with more than 5 minutes of clock drift (prevents replay attacks)
+    # 2. Reject requests with more than 5 minutes of clock drift
     current_time = int(time.time())
     if abs(current_time - request_time) > 300:
         raise HTTPException(status_code=401, detail="Request token signature expired.")
@@ -60,7 +59,6 @@ async def verify_internal_hmac(
     # 4. Use constant-time comparison to completely prevent timing attacks
     if not hmac.compare_digest(expected_signature, x_internal_signature):
         raise HTTPException(status_code=403, detail="Forbidden: HMAC signature validation mismatch.")
-# --------------------------
 
 llm = ChatGoogleGenerativeAI(
     model="gemini-3.1-flash-lite-preview",
@@ -71,8 +69,8 @@ llm = ChatGoogleGenerativeAI(
 def health_check():
     return {"status": "healthy"}
 
-@app.post("/ai/recipes")
-async def generate_recipes(request_data: dict[str, Any], dependencies=[Depends(verify_internal_hmac)]):
+@app.post("/ai/recipes", dependencies=[Depends(verify_internal_hmac)])
+async def generate_recipes(request_data: dict[str, Any]):
     try:
 
         try:
