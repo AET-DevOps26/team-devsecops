@@ -1,15 +1,10 @@
 package org.openapitools.api
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import io.swagger.v3.oas.annotations.*
-import io.swagger.v3.oas.annotations.enums.*
-import io.swagger.v3.oas.annotations.media.*
-import io.swagger.v3.oas.annotations.responses.*
-import io.swagger.v3.oas.annotations.security.*
 import jakarta.validation.Valid
 import org.openapitools.entity.UserEntity
-import org.openapitools.model.LoginRequest
-import org.openapitools.model.RegisterRequest
+import org.openapitools.model.AuthRequest
+import org.openapitools.model.AuthResponse
 import org.openapitools.model.UserPreferences
 import org.openapitools.model.UserProfile
 import org.openapitools.model.UserProfileUpdate
@@ -20,11 +15,11 @@ import org.springframework.http.ResponseEntity
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.BadCredentialsException
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
-import org.springframework.security.core.annotation.AuthenticationPrincipal
-import org.springframework.security.core.userdetails.UserDetails
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.validation.annotation.Validated
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @Validated
@@ -35,18 +30,12 @@ class UsersApiController(
 	private val authManager: AuthenticationManager,
 	private val jwtUtils: JwtUtils,
 	private val objectMapper: ObjectMapper,
-) {
-	@Operation(
-		summary = "Register a new user",
-		operationId = "usersRegisterPost",
-		responses = [ApiResponse(responseCode = "201", description = "User created")],
-	)
-	@RequestMapping(method = [RequestMethod.POST], value = [PATH_USERS_REGISTER_POST], consumes = ["application/json"])
-	fun usersRegisterPost(
-		@Parameter(description = "", required = true) @Valid @RequestBody registerRequest: RegisterRequest,
+) : UsersApi {
+	override fun usersRegisterPost(
+		@Valid registerRequest: AuthRequest,
 	): ResponseEntity<Unit> {
 		if (userRepository.existsByUsername(registerRequest.username)) {
-			return ResponseEntity(HttpStatus.CONFLICT)
+			throw ConflictException("Username already taken")
 		}
 		userRepository.save(
 			UserEntity(
@@ -58,93 +47,55 @@ class UsersApiController(
 		return ResponseEntity(HttpStatus.CREATED)
 	}
 
-	@Operation(
-		summary = "Login user and return JWT token",
-		operationId = "usersLoginPost",
-		responses = [ApiResponse(responseCode = "200", description = "JWT token returned")],
-	)
-	@RequestMapping(method = [RequestMethod.POST], value = [PATH_USERS_LOGIN_POST], consumes = ["application/json"])
-	fun usersLoginPost(
-		@Parameter(description = "", required = true) @Valid @RequestBody loginRequest: LoginRequest,
-	): ResponseEntity<Map<String, String>> =
+	override fun usersLoginPost(
+		@Valid loginRequest: AuthRequest,
+	): ResponseEntity<AuthResponse> {
 		try {
 			authManager.authenticate(
 				UsernamePasswordAuthenticationToken(loginRequest.username, loginRequest.password),
 			)
-			val user = userRepository.findByUsername(loginRequest.username).orElseThrow()
-			ResponseEntity.ok(mapOf("token" to jwtUtils.generateToken(user.id)))
 		} catch (e: BadCredentialsException) {
-			ResponseEntity(HttpStatus.UNAUTHORIZED)
+			throw UnauthorizedException("Invalid username or password")
 		}
+		val user = userRepository.findByUsername(loginRequest.username).orElseThrow()
+		return ResponseEntity.ok(AuthResponse(token = jwtUtils.generateToken(user.id)))
+	}
 
-	@Operation(
-		summary = "Logout user and invalidate token",
-		operationId = "usersLogoutPost",
-		responses = [ApiResponse(responseCode = "200", description = "Logged out")],
-		security = [SecurityRequirement(name = "bearerAuth")],
-	)
-	@RequestMapping(method = [RequestMethod.POST], value = [PATH_USERS_LOGOUT_POST])
-	fun usersLogoutPost(): ResponseEntity<Unit> =
+	override fun usersLogoutPost(): ResponseEntity<Unit> =
 		// JWTs are stateless — the client simply discards the token.
 		// For true server-side invalidation you'd need a token blocklist (e.g. Redis).
 		ResponseEntity(HttpStatus.OK)
 
-	@Operation(
-		summary = "Get current user profile and preferences",
-		operationId = "usersProfileGet",
-		responses = [
-			ApiResponse(
-				responseCode = "200",
-				description = "User profile and preferences",
-				content = [Content(schema = Schema(implementation = UserProfile::class))],
-			),
-		],
-		security = [SecurityRequirement(name = "bearerAuth")],
-	)
-	@RequestMapping(method = [RequestMethod.GET], value = [PATH_USERS_PROFILE_GET], produces = ["application/json"])
-	fun usersProfileGet(
-		@AuthenticationPrincipal principal: UserDetails,
-	): ResponseEntity<UserProfile> {
-		val user = userRepository.findByUsername(principal.username).orElseThrow()
+	override fun usersProfileGet(): ResponseEntity<UserProfile> {
+		val user = userRepository.findByUsername(currentUsername()).orElseThrow()
 		val prefs =
 			user.preferences?.let {
 				objectMapper.readValue(it, UserPreferences::class.java)
 			} ?: UserPreferences()
-		return ResponseEntity.ok(
-			UserProfile(username = user.username, preferences = prefs),
-		)
+		return ResponseEntity.ok(UserProfile(username = user.username, preferences = prefs))
 	}
 
-	@Operation(
-		summary = "Update user profile and preferences",
-		operationId = "usersProfilePut",
-		responses = [ApiResponse(responseCode = "200", description = "Profile and preferences updated")],
-		security = [SecurityRequirement(name = "bearerAuth")],
-	)
-	@RequestMapping(method = [RequestMethod.PUT], value = [PATH_USERS_PROFILE_PUT], consumes = ["application/json"])
-	fun usersProfilePut(
-		@Parameter(description = "", required = true) @Valid @RequestBody userProfile: UserProfileUpdate,
-		@AuthenticationPrincipal principal: UserDetails,
+	override fun usersProfilePut(
+		@Valid userProfileUpdate: UserProfileUpdate,
 	): ResponseEntity<Unit> {
-		val user = userRepository.findByUsername(principal.username).orElseThrow()
-		userProfile.preferences?.let { user.preferences = objectMapper.writeValueAsString(it) }
-		userProfile.username?.let { newUsername ->
+		val user = userRepository.findByUsername(currentUsername()).orElseThrow()
+		userProfileUpdate.preferences?.let { user.preferences = objectMapper.writeValueAsString(it) }
+		userProfileUpdate.username?.let { newUsername ->
 			if (newUsername != user.username && userRepository.existsByUsername(newUsername)) {
-				return ResponseEntity(HttpStatus.CONFLICT)
+				throw ConflictException("Username already taken")
 			}
 			user.username = newUsername
 		}
-		userProfile.password?.let { user.password = passwordEncoder.encode(it)!! }
+		userProfileUpdate.password?.let { user.password = passwordEncoder.encode(it)!! }
 		userRepository.save(user)
 		return ResponseEntity(HttpStatus.OK)
 	}
 
-	companion object {
-		const val BASE_PATH: String = "/api/v1"
-		const val PATH_USERS_LOGIN_POST: String = "/users/login"
-		const val PATH_USERS_LOGOUT_POST: String = "/users/logout"
-		const val PATH_USERS_PROFILE_GET: String = "/users/profile"
-		const val PATH_USERS_PROFILE_PUT: String = "/users/profile"
-		const val PATH_USERS_REGISTER_POST: String = "/users/register"
+	override fun usersProfileDelete(): ResponseEntity<Unit> {
+		val user = userRepository.findByUsername(currentUsername()).orElseThrow()
+		userRepository.delete(user)
+		return ResponseEntity(HttpStatus.NO_CONTENT)
 	}
+
+	private fun currentUsername(): String = SecurityContextHolder.getContext().authentication!!.name
 }

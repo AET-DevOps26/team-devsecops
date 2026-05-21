@@ -1,314 +1,571 @@
 openapi: 3.1.1
 info:
-  description: API for recipe management and cooking assistance
   title: Cooking Assistant API
   version: 1.0.0
+  description: API for recipe management and cooking assistance
+
 servers:
-- url: http://localhost:8080/api/v1
+  - url: http://localhost:8080/api/v1
+
 tags:
-- description: User auth and preferences
-  name: Users
-- description: Recipe storage and retrieval
-  name: Recipes
-- description: AI-powered generation and assistance
-  name: AI
+  - name: Users
+    description: User auth and preferences
+  - name: Recipes
+    description: Recipe storage and retrieval
+  - name: AI
+    description: AI-powered generation and assistance
+
 paths:
+  # -------------------------
+  # USERS
+  # -------------------------
+
   /users/register:
     post:
+      tags: [Users]
+      summary: Register a new user
       requestBody:
+        required: true
         content:
           application/json:
             schema:
               $ref: "#/components/schemas/RegisterRequest"
-        required: true
       responses:
         "201":
-          description: User created
-      summary: Register a new user
-      tags:
-      - Users
+          description: User created successfully
+        "400":
+          description: Invalid request body (e.g. blank username or password, username contains invalid characters)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: Username already taken
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
   /users/login:
     post:
+      tags: [Users]
+      summary: Login and receive a JWT token
       requestBody:
+        required: true
         content:
           application/json:
             schema:
               $ref: "#/components/schemas/LoginRequest"
-        required: true
       responses:
         "200":
           description: JWT token returned
-      summary: Login user and return JWT token
-      tags:
-      - Users
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "401":
+          description: Invalid username or password
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
   /users/logout:
     post:
+      tags: [Users]
+      summary: Logout (client should discard the token; JWTs are stateless)
+      security:
+        - bearerAuth: []
       responses:
         "200":
-          description: Logged out
-      security:
-      - bearerAuth: []
-      summary: Logout user and invalidate token
-      tags:
-      - Users
+          description: Logged out successfully
+        "401":
+          description: Missing or invalid token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
   /users/profile:
     get:
+      tags: [Users]
+      summary: Get current user profile and preferences
+      security:
+        - bearerAuth: []
       responses:
         "200":
+          description: User profile and preferences
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/UserProfile"
-          description: User profile and preferences
-      security:
-      - bearerAuth: []
-      summary: Get current user profile and preferences
-      tags:
-      - Users
+        "401":
+          description: Missing or invalid token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
     put:
+      tags: [Users]
+      summary: Update user profile and preferences
+      security:
+        - bearerAuth: []
       requestBody:
+        required: true
         content:
           application/json:
             schema:
-              allOf:
-              - $ref: "#/components/schemas/UserProfile"
-              blacklist:
-              - id
-        required: true
+              $ref: "#/components/schemas/UserProfileUpdate"
       responses:
         "200":
           description: Profile and preferences updated
+        "400":
+          description: Invalid request body (e.g. blank password, username contains invalid characters)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Missing or invalid token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: Username already taken
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    delete:
+      tags: [Users]
+      summary: Delete current user account and all associated recipes (cascade)
       security:
-      - bearerAuth: []
-      summary: Update user profile and preferences
-      tags:
-      - Users
+        - bearerAuth: []
+      responses:
+        "204":
+          description: User account and all associated data deleted
+        "401":
+          description: Missing or invalid token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  # -------------------------
+  # RECIPES
+  # -------------------------
+
   /recipes:
     get:
+      tags: [Recipes]
+      summary: List all recipes saved by the current user
+      security:
+        - bearerAuth: []
       responses:
         "200":
-          description: List of recipes
-      security:
-      - bearerAuth: []
-      summary: List user recipes
-      tags:
-      - Recipes
+          description: List of user recipes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Recipe"
+        "401":
+          description: Missing or invalid token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
     post:
+      tags: [Recipes]
+      summary: Save a recipe to the current user's collection
+      security:
+        - bearerAuth: []
       requestBody:
+        required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/Recipe"
-        required: true
+              $ref: "#/components/schemas/RecipeInput"
       responses:
         "201":
-          description: Recipe saved
-      security:
-      - bearerAuth: []
-      summary: Save a recipe
-      tags:
-      - Recipes
+          description: Recipe saved successfully
+        "400":
+          description: Invalid recipe data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Missing or invalid token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
   /recipes/{recipeId}:
     get:
+      tags: [Recipes]
+      summary: Get a specific recipe by ID
+      security:
+        - bearerAuth: []
       parameters:
-      - explode: false
-        in: path
-        name: recipeId
-        required: true
-        schema:
-          type: string
-        style: simple
+        - name: recipeId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
       responses:
         "200":
           description: Recipe details
-      security:
-      - bearerAuth: []
-      summary: Get recipe by ID
-      tags:
-      - Recipes
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Recipe"
+        "400":
+          description: Recipe ID is not a valid integer
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Missing or invalid token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Recipe belongs to a different user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Recipe not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  # -------------------------
+  # AI
+  # -------------------------
+
   /ai/recipes:
     post:
+      tags: [AI]
+      summary: Generate recipes using an LLM based on a prompt
+      security:
+        - bearerAuth: []
       requestBody:
+        required: true
         content:
           application/json:
             schema:
               $ref: "#/components/schemas/RecipeRequest"
-        required: true
       responses:
         "200":
-          description: Generated recipes
-      security:
-      - bearerAuth: []
-      summary: Generate recipes using AI
-      tags:
-      - AI
+          description: AI-generated recipes without IDs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/RecipeInput"
+        "400":
+          description: Invalid request body
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Missing or invalid token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "502":
+          description: GenAI service unavailable or returned an unparseable response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
   /ai/help:
     post:
+      tags: [AI]
+      summary: Ask the LLM a question about a recipe
+      security:
+        - bearerAuth: []
       requestBody:
+        required: true
         content:
           application/json:
             schema:
               $ref: "#/components/schemas/HelpRequest"
-        required: true
       responses:
         "200":
-          description: AI response
-      summary: Ask AI cooking assistant for help
-      tags:
-      - AI
+          description: AI-generated help text
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HelpResponse"
+        "400":
+          description: Invalid request body
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Missing or invalid token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "502":
+          description: GenAI service unavailable or returned an unparseable response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+# -------------------------
+# SECURITY
+# -------------------------
+
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  # -------------------------
+  # SCHEMAS
+  # -------------------------
+
   schemas:
+    ErrorResponse:
+      type: object
+      required: [message]
+      additionalProperties: false
+      properties:
+        message:
+          type: string
+          minLength: 1
+
+    AuthResponse:
+      type: object
+      required: [token]
+      additionalProperties: false
+      properties:
+        token:
+          type: string
+          minLength: 1
+          description: JWT bearer token to include in subsequent requests
+
+    UserCredentialFields:
+      type: object
+      description: Reusable field definitions for username and password constraints
+      properties:
+        username:
+          type: string
+          minLength: 1
+          maxLength: 64
+          pattern: "^[a-zA-Z0-9_.-]+$"
+          description: Alphanumeric, underscores, hyphens, and dots only
+        password:
+          type: string
+          minLength: 8
+          maxLength: 128
+
     RegisterRequest:
-      example:
-        password: password
-        username: username
-      properties:
-        username:
-          type: string
-        password:
-          type: string
-      required:
-      - password
-      - username
+      additionalProperties: false
+      required: [username, password]
+      allOf:
+        - $ref: "#/components/schemas/UserCredentialFields"
+
     LoginRequest:
-      example:
-        password: password
-        username: username
+      type: object
+      required: [username, password]
+      additionalProperties: false
       properties:
         username:
           type: string
+          minLength: 1
         password:
           type: string
-      required:
-      - password
-      - username
+          minLength: 1
+
     UserProfile:
-      example:
-        password: password
-        preferences:
-          allergies:
-          - allergies
-          - allergies
-          cuisinePreferences:
-          - cuisinePreferences
-          - cuisinePreferences
-          diet: diet
-        id: id
-        username: username
+      type: object
+      required: [username, preferences]
       properties:
-        id:
-          type: string
         username:
           type: string
-        password:
-          type: string
+          minLength: 1
         preferences:
-          $ref: "#/components/schemas/UserProfile_preferences"
-      required:
-      - id
-    Recipe:
-      example:
-        instructions: instructions
-        ingredients:
-        - ingredients
-        - ingredients
-        title: title
-        portions: 0
-        nutrients:
-          carbs: 5
-          protein: 1
-          fat: 5
-          calories: 6
-      properties:
-        title:
-          type: string
-        ingredients:
-          items:
-            type: string
-          type: array
-        instructions:
-          type: string
-        portions:
-          type: integer
-        nutrients:
-          $ref: "#/components/schemas/Recipe_nutrients"
-      required:
-      - ingredients
-      - instructions
-      - nutrients
-      - portions
-      - title
-    RecipeRequest:
-      example:
-        prompt: prompt
-      properties:
-        prompt:
-          type: string
-      required:
-      - prompt
-    HelpRequest:
-      example:
-        recipe:
-          instructions: instructions
-          ingredients:
-          - ingredients
-          - ingredients
-          title: title
-          portions: 0
-          nutrients:
-            carbs: 5
-            protein: 1
-            fat: 5
-            calories: 6
-        prompt: prompt
-      properties:
-        recipe:
-          $ref: "#/components/schemas/Recipe"
-        prompt:
-          type: string
-      required:
-      - prompt
-    HelpResponse:
-      properties:
-        response:
-          type: string
-    UserProfile_preferences:
-      example:
-        allergies:
-        - allergies
-        - allergies
-        cuisinePreferences:
-        - cuisinePreferences
-        - cuisinePreferences
-        diet: diet
+          $ref: "#/components/schemas/UserPreferences"
+
+    UserProfileUpdate:
+      additionalProperties: false
+      description: At least one field must be provided
+      allOf:
+        - $ref: "#/components/schemas/UserCredentialFields"
+        - type: object
+          properties:
+            preferences:
+              $ref: "#/components/schemas/UserPreferences"
+
+    UserPreferences:
+      type: object
+      additionalProperties: false
       properties:
         diet:
-          type: string
+          type: ["string", "null"]
+          description: Dietary restriction or style (e.g. vegan, keto)
         allergies:
+          type: ["array", "null"]
           items:
             type: string
-          type: array
-        cuisinePreferences:
+            minLength: 1
+          description: List of ingredients the user is allergic to
+        aboutMe:
+          type: ["array", "null"]
           items:
             type: string
-          type: array
-    Recipe_nutrients:
-      example:
-        carbs: 5
-        protein: 1
-        fat: 5
-        calories: 6
+            minLength: 1
+          description: Free-form user context provided to the AI
+
+    RecipeIngredient:
+      type: object
+      required: [quantity, unit, name]
+      additionalProperties: false
+      properties:
+        quantity:
+          type: number
+          minimum: 0
+        unit:
+          type: string
+          minLength: 1
+          description: Unit of measurement (e.g. g, ml, cup, tbsp)
+        name:
+          type: string
+          minLength: 1
+
+    RecipeNutrients:
+      type: object
+      required: [calories, protein, fat, carbs]
+      additionalProperties: false
       properties:
         calories:
           type: integer
+          minimum: 0
         protein:
           type: integer
+          minimum: 0
+          description: Protein in grams
         fat:
           type: integer
+          minimum: 0
+          description: Fat in grams
         carbs:
           type: integer
-  securitySchemes:
-    bearerAuth:
-      bearerFormat: JWT
-      scheme: bearer
-      type: http
+          minimum: 0
+          description: Carbohydrates in grams
+
+    RecipeInput:
+      type: object
+      required: [title, ingredients, instructions, portions]
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 255
+        ingredients:
+          type: array
+          items:
+            $ref: "#/components/schemas/RecipeIngredient"
+          minItems: 1
+        instructions:
+          type: array
+          items:
+            type: string
+            minLength: 1
+          minItems: 1
+        portions:
+          type: integer
+          minimum: 1
+        nutrients:
+          $ref: "#/components/schemas/RecipeNutrients"
+
+    Recipe:
+      type: object
+      allOf:
+        - $ref: "#/components/schemas/RecipeInput"
+        - type: object
+          required: [id]
+          properties:
+            id:
+              type: integer
+              format: int64
+              minimum: 1
+
+    RecipeRequest:
+      type: object
+      required: [prompt]
+      additionalProperties: false
+      properties:
+        prompt:
+          type: string
+          minLength: 1
+          maxLength: 2000
+
+    RecipeRequestForwarded:
+      type: object
+      required: [profile, prompt]
+      additionalProperties: false
+      properties:
+        profile:
+          $ref: "#/components/schemas/UserProfile"
+        prompt:
+          type: string
+          minLength: 1
+
+    HelpRequest:
+      type: object
+      required: [recipe, prompt]
+      additionalProperties: false
+      properties:
+        recipe:
+          $ref: "#/components/schemas/RecipeInput"
+        prompt:
+          type: string
+          minLength: 1
+          maxLength: 2000
+
+    HelpRequestForwarded:
+      type: object
+      required: [profile, recipe, prompt]
+      additionalProperties: false
+      properties:
+        profile:
+          $ref: "#/components/schemas/UserProfile"
+        recipe:
+          $ref: "#/components/schemas/RecipeInput"
+        prompt:
+          type: string
+          minLength: 1
+
+    HelpResponse:
+      type: object
+      required: [response]
+      additionalProperties: false
+      properties:
+        response:
+          type: string
+          minLength: 1

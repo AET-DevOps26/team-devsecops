@@ -16,14 +16,17 @@ import java.util.Objects
 /**
  *
  * @param quantity
- * @param unit
+ * @param unit Unit of measurement (e.g. g, ml, cup, tbsp)
  * @param name
  */
 data class RecipeIngredient(
-	@Schema(example = "null", description = "")
-	@get:JsonProperty("quantity") val quantity: java.math.BigDecimal? = null,
-	@Schema(example = "null", description = "")
-	@get:JsonProperty("unit") val unit: kotlin.String? = null,
-	@Schema(example = "null", description = "")
-	@get:JsonProperty("name") val name: kotlin.String? = null,
+	@get:DecimalMin(value = "0")
+	@Schema(example = "null", required = true, description = "")
+	@get:JsonProperty("quantity", required = true) val quantity: java.math.BigDecimal,
+	@get:Size(min = 1)
+	@Schema(example = "null", required = true, description = "Unit of measurement (e.g. g, ml, cup, tbsp)")
+	@get:JsonProperty("unit", required = true) val unit: kotlin.String,
+	@get:Size(min = 1)
+	@Schema(example = "null", required = true, description = "")
+	@get:JsonProperty("name", required = true) val name: kotlin.String,
 )

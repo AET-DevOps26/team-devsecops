@@ -6,19 +6,22 @@ from typing import Any, TypeVar
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-T = TypeVar("T", bound="LoginRequest")
+from ..types import UNSET, Unset
+
+T = TypeVar("T", bound="UserCredentials")
 
 
 @_attrs_define
-class LoginRequest:
-    """
+class UserCredentials:
+    """Reusable field definitions for username and password constraints
+
     Attributes:
-        username (str):
-        password (str):
+        username (str | Unset): Alphanumeric, underscores, hyphens, and dots only
+        password (str | Unset):
     """
 
-    username: str
-    password: str
+    username: str | Unset = UNSET
+    password: str | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -28,29 +31,28 @@ class LoginRequest:
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update(
-            {
-                "username": username,
-                "password": password,
-            }
-        )
+        field_dict.update({})
+        if username is not UNSET:
+            field_dict["username"] = username
+        if password is not UNSET:
+            field_dict["password"] = password
 
         return field_dict
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
-        username = d.pop("username")
+        username = d.pop("username", UNSET)
 
-        password = d.pop("password")
+        password = d.pop("password", UNSET)
 
-        login_request = cls(
+        user_credentials = cls(
             username=username,
             password=password,
         )
 
-        login_request.additional_properties = d
-        return login_request
+        user_credentials.additional_properties = d
+        return user_credentials
 
     @property
     def additional_keys(self) -> list[str]:

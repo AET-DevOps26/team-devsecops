@@ -1,7 +1,11 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import type { components } from '../api'
 import { useAuth } from '../auth'
 import { Button } from '../components/Button'
+import { formatQuantity } from '../recipeFormat'
+import { usePressPulse } from '../usePressPulse'
+import { errorMessage } from '../apiError'
 
 type Recipe = components['schemas']['Recipe']
 type RecipeRequest = components['schemas']['RecipeRequest']
@@ -10,10 +14,20 @@ const API_BASE = import.meta.env.VITE_API_BASE ?? ''
 
 export function GeneratePage() {
   const { token } = useAuth()
+  const navigate = useNavigate()
+  const [generateBtnRef, pulseGenerate] = usePressPulse<HTMLButtonElement>()
   const [prompt, setPrompt] = useState('')
-  const [recipes, setRecipes] = useState<Recipe[]>([])
+  // keep the last results so the list is restored when returning from a recipe page
+  const [recipes, setRecipes] = useState<Recipe[]>(() => {
+    const stored = sessionStorage.getItem('generated_recipes')
+    return stored ? (JSON.parse(stored) as Recipe[]) : []
+  })
   const [status, setStatus] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    sessionStorage.setItem('generated_recipes', JSON.stringify(recipes))
+  }, [recipes])
 
   async function handleGenerate() {
     setLoading(true)
@@ -29,7 +43,7 @@ export function GeneratePage() {
         },
         body: JSON.stringify(body),
       })
-      if (!response.ok) throw new Error(`HTTP ${response.status}`)
+      if (!response.ok) throw new Error(await errorMessage(response, `HTTP ${response.status}`))
       const data = (await response.json()) as Recipe[]
       setRecipes(data)
       setStatus(data.length === 0 ? 'No recipes returned.' : null)
@@ -51,11 +65,15 @@ export function GeneratePage() {
           if (e.key === 'Enter' && !e.shiftKey) {
             // on Enter: directly submit instead of adding a new line
             e.preventDefault()
-            if (!loading && prompt.trim() !== '') handleGenerate()
+            if (!loading && prompt.trim() !== '') {
+              pulseGenerate()
+              handleGenerate()
+            }
           }
         }}
       />
       <Button
+        ref={generateBtnRef}
         type="button"
         className="self-start"
         onClick={handleGenerate}
@@ -67,9 +85,11 @@ export function GeneratePage() {
       {status && <p className="text-gray-600">{status}</p>}
 
       {recipes.map((recipe, i) => (
-        <article
+        <button
           key={i}
-          className="w-full rounded-lg border border-gray-200 bg-white p-6 shadow-sm flex flex-col gap-3"
+          type="button"
+          onClick={() => navigate('/recipe', { state: { index: i } })}
+          className="w-full text-left rounded-lg border border-gray-200 bg-white p-6 shadow-sm flex flex-col gap-3 cursor-pointer transition-transform duration-100 hover:scale-98"
         >
           <header className="flex items-baseline justify-between gap-3">
             <h2 className="text-lg font-bold">{recipe.title}</h2>
@@ -79,23 +99,19 @@ export function GeneratePage() {
           </header>
 
           <div>
-            <h3 className="font-medium">Ingredients</h3>
             <ul className="list-disc pl-5">
               {recipe.ingredients.map((ing, j) => (
                 <li key={j}>
-                  {[ing.quantity, ing.unit, ing.name].filter(Boolean).join(' ')}
+                  {[
+                    ing.quantity != null ? formatQuantity(ing.quantity) : null,
+                    ing.unit,
+                    ing.name,
+                  ]
+                    .filter(Boolean)
+                    .join(' ')}
                 </li>
               ))}
             </ul>
-          </div>
-
-          <div>
-            <h3 className="font-medium">Instructions</h3>
-            <ol className="list-decimal pl-5">
-              {recipe.instructions.map((step, j) => (
-                <li key={j}>{step}</li>
-              ))}
-            </ol>
           </div>
 
           {recipe.nutrients && (
@@ -106,7 +122,7 @@ export function GeneratePage() {
               {recipe.nutrients.carbs != null && <span>{recipe.nutrients.carbs}g carbs</span>}
             </div>
           )}
-        </article>
+        </button>
       ))}
     </>
   )

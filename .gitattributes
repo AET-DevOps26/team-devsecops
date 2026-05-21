@@ -1,0 +1,17 @@
+# Mark OpenAPI codegen output as generated so GitHub collapses it in diffs
+# and excludes it from language stats. Keep in sync with api/scripts/gen-all.sh
+
+# openapi-python-client output
+services/py-help-service/client/** linguist-generated=true
+services/py-recipe-service/client/** linguist-generated=true
+
+# kotlin-spring output
+services/spring-api/src/main/kotlin/org/openapitools/api/*Api.kt linguist-generated=true
+services/spring-api/src/main/kotlin/org/openapitools/api/ApiUtil.kt linguist-generated=true
+services/spring-api/src/main/kotlin/org/openapitools/api/Exceptions.kt linguist-generated=true
+services/spring-api/src/main/kotlin/org/openapitools/model/** linguist-generated=true
+services/spring-api/.openapi-generator/** linguist-generated=true
+services/spring-api/.openapi-generator-ignore linguist-generated=true
+
+# openapi-typescript output
+web-client/src/api.ts linguist-generated=true

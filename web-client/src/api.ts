@@ -23,16 +23,34 @@ export interface paths {
             };
             requestBody: {
                 content: {
-                    "application/json": components["schemas"]["RegisterRequest"];
+                    "application/json": components["schemas"]["AuthRequest"];
                 };
             };
             responses: {
-                /** @description User created */
+                /** @description User created successfully */
                 201: {
                     headers: {
                         [name: string]: unknown;
                     };
                     content?: never;
+                };
+                /** @description Invalid request body (e.g. blank username or password, username contains invalid characters) */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+                /** @description Username already taken */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
                 };
             };
         };
@@ -51,7 +69,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Login user and return JWT token */
+        /** Login and receive a JWT token */
         post: {
             parameters: {
                 query?: never;
@@ -61,7 +79,7 @@ export interface paths {
             };
             requestBody: {
                 content: {
-                    "application/json": components["schemas"]["LoginRequest"];
+                    "application/json": components["schemas"]["AuthRequest"];
                 };
             };
             responses: {
@@ -70,14 +88,18 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["AuthResponse"];
+                    };
                 };
                 /** @description Invalid username or password */
                 401: {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
                 };
             };
         };
@@ -96,7 +118,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Logout user and invalidate token */
+        /** Logout */
         post: {
             parameters: {
                 query?: never;
@@ -106,12 +128,21 @@ export interface paths {
             };
             requestBody?: never;
             responses: {
-                /** @description Logged out */
+                /** @description Logged out successfully */
                 200: {
                     headers: {
                         [name: string]: unknown;
                     };
                     content?: never;
+                };
+                /** @description Missing or invalid token */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
                 };
             };
         };
@@ -147,12 +178,14 @@ export interface paths {
                         "application/json": components["schemas"]["UserProfile"];
                     };
                 };
-                /** @description Not logged in */
-                403: {
+                /** @description Missing or invalid token */
+                401: {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
                 };
             };
         };
@@ -177,31 +210,64 @@ export interface paths {
                     };
                     content?: never;
                 };
-                /** @description Invalid request body (e.g. empty password, username with invalid chars, unknown fields) */
+                /** @description Invalid request body (e.g. blank password, username contains invalid characters) */
                 400: {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
                 };
-                /** @description Not logged in */
-                403: {
+                /** @description Missing or invalid token */
+                401: {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
                 };
                 /** @description Username already taken */
                 409: {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
                 };
             };
         };
         post?: never;
-        delete?: never;
+        /** Delete current user account and all associated recipes (cascade) */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description User account and all associated data deleted */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Missing or invalid token */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+            };
+        };
         options?: never;
         head?: never;
         patch?: never;
@@ -214,7 +280,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** List user recipes */
+        /** List all recipes saved by the current user */
         get: {
             parameters: {
                 query?: never;
@@ -233,17 +299,19 @@ export interface paths {
                         "application/json": components["schemas"]["Recipe"][];
                     };
                 };
-                /** @description Not logged in */
-                403: {
+                /** @description Missing or invalid token */
+                401: {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
                 };
             };
         };
         put?: never;
-        /** Save a recipe */
+        /** Save a recipe to the current user's collection */
         post: {
             parameters: {
                 query?: never;
@@ -257,19 +325,30 @@ export interface paths {
                 };
             };
             responses: {
-                /** @description Recipe saved */
+                /** @description Recipe saved successfully */
                 201: {
                     headers: {
                         [name: string]: unknown;
                     };
                     content?: never;
                 };
-                /** @description Not logged in */
-                403: {
+                /** @description Invalid recipe data */
+                400: {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+                /** @description Missing or invalid token */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
                 };
             };
         };
@@ -286,13 +365,13 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get recipe by ID */
+        /** Get a specific recipe by ID */
         get: {
             parameters: {
                 query?: never;
                 header?: never;
                 path: {
-                    recipeId: string;
+                    recipeId: number;
                 };
                 cookie?: never;
             };
@@ -307,12 +386,41 @@ export interface paths {
                         "application/json": components["schemas"]["Recipe"];
                     };
                 };
-                /** @description Not logged in */
+                /** @description Recipe ID is not a valid integer */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+                /** @description Missing or invalid token */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+                /** @description Recipe belongs to a different user */
                 403: {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+                /** @description Recipe not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
                 };
             };
         };
@@ -333,7 +441,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Generate recipes using AI */
+        /** Generate recipes using an LLM based on a prompt */
         post: {
             parameters: {
                 query?: never;
@@ -347,21 +455,41 @@ export interface paths {
                 };
             };
             responses: {
-                /** @description Generated recipes */
+                /** @description AI-generated recipes without IDs */
                 200: {
                     headers: {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["Recipe"][];
+                        "application/json": components["schemas"]["RecipeInput"][];
                     };
                 };
-                /** @description Not logged in */
-                403: {
+                /** @description Invalid request body */
+                400: {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+                /** @description Missing or invalid token */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+                /** @description GenAI service unavailable or returned an unparseable response */
+                502: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
                 };
             };
         };
@@ -380,7 +508,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Ask AI cooking assistant for help */
+        /** Ask the LLM a question about a recipe */
         post: {
             parameters: {
                 query?: never;
@@ -394,7 +522,7 @@ export interface paths {
                 };
             };
             responses: {
-                /** @description AI response */
+                /** @description AI-generated help text */
                 200: {
                     headers: {
                         [name: string]: unknown;
@@ -403,12 +531,32 @@ export interface paths {
                         "application/json": components["schemas"]["HelpResponse"];
                     };
                 };
-                /** @description Not logged in */
-                403: {
+                /** @description Invalid request body */
+                400: {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+                /** @description Missing or invalid token */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+                /** @description GenAI service unavailable or returned an unparseable response */
+                502: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
                 };
             };
         };
@@ -422,38 +570,51 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
-        RegisterRequest: {
-            username: string;
-            password: string;
+        ErrorResponse: {
+            message: string;
         };
-        LoginRequest: {
-            username: string;
-            password: string;
+        AuthResponse: {
+            /** @description JWT bearer token to include in subsequent requests */
+            token: string;
         };
+        AuthRequest: WithRequired<components["schemas"]["UserCredentials"], "username" | "password">;
         UserProfile: {
             username: string;
             preferences: components["schemas"]["UserPreferences"];
         };
-        UserProfileUpdate: {
-            username?: string;
-            password?: string;
+        /** @description At least one field must be provided */
+        UserProfileUpdate: components["schemas"]["UserCredentials"] & {
             preferences?: components["schemas"]["UserPreferences"];
         };
+        /** @description Reusable field definitions for username and password constraints */
+        UserCredentials: {
+            /** @description Alphanumeric, underscores, hyphens, and dots only */
+            username?: string;
+            password?: string;
+        };
         UserPreferences: {
-            diet?: string;
+            /** @description Dietary restriction or style (e.g. vegan, keto) */
+            diet?: string[];
+            /** @description List of ingredients the user is allergic to */
             allergies?: string[];
+            /** @description Free-form user context provided to the AI */
             aboutMe?: string[];
         };
         RecipeIngredient: {
-            quantity?: number;
-            unit?: string;
-            name?: string;
+            quantity: number;
+            /** @description Unit of measurement (e.g. g, ml, cup, tbsp) */
+            unit: string;
+            name: string;
         };
         RecipeNutrients: {
-            calories?: number;
-            protein?: number;
-            fat?: number;
-            carbs?: number;
+            /** @description Number of Calories (kcal) */
+            calories: number;
+            /** @description Protein in grams */
+            protein: number;
+            /** @description Fat in grams */
+            fat: number;
+            /** @description Carbohydrates in grams */
+            carbs: number;
         };
         RecipeInput: {
             title: string;
@@ -463,6 +624,7 @@ export interface components {
             nutrients?: components["schemas"]["RecipeNutrients"];
         };
         Recipe: components["schemas"]["RecipeInput"] & {
+            /** Format: int64 */
             id: number;
         };
         RecipeRequest: {
@@ -482,7 +644,7 @@ export interface components {
             prompt: string;
         };
         HelpResponse: {
-            response?: string;
+            response: string;
         };
     };
     responses: never;
@@ -492,4 +654,7 @@ export interface components {
     pathItems: never;
 }
 export type $defs = Record<string, never>;
+type WithRequired<T, K extends keyof T> = T & {
+    [P in K]-?: T[P];
+};
 export type operations = Record<string, never>;

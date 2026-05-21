@@ -13,6 +13,8 @@ spring:
       ddl-auto: ${JPA_DDL_AUTO:create-drop}
     show-sql: false
     open-in-view: false
+  mvc:
+    throw-exception-if-no-handler-found: true
   h2:
     console:
       enabled: false # http://localhost:8080/h2-console

@@ -9,6 +9,8 @@ import type { components } from '../api'
 import { useAuth } from '../auth'
 import { Button } from '../components/Button'
 import { PasswordInput } from '../components/PasswordInput'
+import { usePressPulse } from '../usePressPulse'
+import { errorMessage } from '../apiError'
 
 type UserProfile = components['schemas']['UserProfile']
 type UserProfileUpdate = components['schemas']['UserProfileUpdate']
@@ -26,16 +28,27 @@ const allergyPlaceholders = [
   'e.g. sesame',
 ]
 
+const dietPlaceholders = [
+  'e.g. vegetarian',
+  'e.g. keto',
+  'e.g. pescatarian',
+  'e.g. low-carb',
+]
+
 export function ProfilePage() {
   const { username, token, signOut, updateUsername } = useAuth()
   const navigate = useNavigate()
+
+  const [prefsBtnRef, pulsePrefs] = usePressPulse<HTMLButtonElement>()
+  const [usernameBtnRef, pulseUsername] = usePressPulse<HTMLButtonElement>()
+  const [passwordBtnRef, pulsePassword] = usePressPulse<HTMLButtonElement>()
 
   const [usernameDraft, setUsernameDraft] = useState<string | null>(null)
   const newUsername = usernameDraft ?? username ?? ''
   const [newPassword, setNewPassword] = useState('')
   const [repeatNewPassword, setRepeatNewPassword] = useState('')
   const [aboutMe, setAboutMe] = useState<string[]>([])
-  const [diet, setDiet] = useState('')
+  const [diet, setDiet] = useState<string[]>([''])
   const [allergies, setAllergies] = useState<string[]>(['', ''])
 
   const [prefsStatus, setPrefsStatus] = useState<{ kind: 'error' | 'ok'; msg: string } | null>(null)
@@ -58,12 +71,12 @@ export function ProfilePage() {
           navigate('/login')
           return
         }
-        if (!res.ok) throw new Error(`HTTP ${res.status}`)
+        if (!res.ok) throw new Error(await errorMessage(res, `HTTP ${res.status}`))
         const data = (await res.json()) as UserProfile
         if (cancelled) return
         const prefs = data.preferences ?? {}
         setAboutMe(prefs.aboutMe ?? [])
-        setDiet(prefs.diet ?? '')
+        setDiet(prefs.diet?.length ? prefs.diet : [''])
         setAllergies(prefs.allergies?.length ? prefs.allergies : ['', ''])
       })
       .catch((e) => {
@@ -88,18 +101,19 @@ export function ProfilePage() {
       navigate('/login')
       throw new Error('Session expired')
     }
-    if (res.status === 409) throw new Error('Username already taken')
-    if (res.status === 400) throw new Error('Invalid request')
-    if (!res.ok) throw new Error(`HTTP ${res.status}`)
+    if (res.status === 409) throw new Error(await errorMessage(res, 'Username already taken'))
+    if (res.status === 400) throw new Error(await errorMessage(res, 'Invalid request'))
+    if (!res.ok) throw new Error(await errorMessage(res, `HTTP ${res.status}`))
   }
 
   async function handleSavePreferences() {
+    pulsePrefs()
     setPrefsSaving(true)
     setPrefsStatus(null)
     try {
       await updateProfile({
         preferences: {
-          diet,
+          diet: diet.map((d) => d.trim()).filter((d) => d !== ''),
           allergies: allergies.map((a) => a.trim()).filter((a) => a !== ''),
           aboutMe: aboutMe.map((a) => a.trim()).filter((a) => a !== ''),
         },
@@ -113,6 +127,7 @@ export function ProfilePage() {
   }
 
   async function handleUpdateUsername() {
+    pulseUsername()
     const trimmedUsername = newUsername.trim()
     if (trimmedUsername === '' || trimmedUsername === username) {
       setUsernameStatus({ kind: 'error', msg: 'Enter a new username' })
@@ -134,6 +149,7 @@ export function ProfilePage() {
   }
 
   async function handleUpdatePassword() {
+    pulsePassword()
     if (!newPassword) {
       setPasswordStatus({ kind: 'error', msg: 'Enter a new password' })
       return
@@ -197,16 +213,39 @@ export function ProfilePage() {
             />
           </label>
 
-          <label className="flex flex-col gap-1">
+          <div className="flex flex-col gap-1">
             <span className="font-medium">Diet</span>
-            <input
-              type="text"
-              className="w-full border border-gray-300 rounded p-2"
-              value={diet}
-              onChange={(e) => setDiet(e.target.value)}
-              placeholder="e.g. vegetarian"
-            />
-          </label>
+            {diet.map((d, i) => (
+              <div key={i} className="flex items-center gap-2">
+                <input
+                  type="text"
+                  className="w-full border border-gray-300 rounded p-2"
+                  value={d}
+                  onChange={(e) =>
+                    setDiet(diet.map((x, j) => (j === i ? e.target.value : x)))
+                  }
+                  placeholder={dietPlaceholders[i % dietPlaceholders.length]}
+                />
+                <button
+                  type="button"
+                  className="cursor-pointer text-gray-400 hover:text-red-600 transition-transform duration-100 hover:scale-98"
+                  onClick={() => setDiet(diet.filter((_, j) => j !== i))}
+                >
+                  <TrashIcon className="h-5 w-5" />
+                </button>
+              </div>
+            ))}
+            <button
+              type="button"
+              className="flex items-center gap-2 self-center mt-1 cursor-pointer text-gray-500 transition-transform duration-100 hover:scale-98"
+              onClick={() => setDiet([...diet, ''])}
+            >
+              <span className="flex h-5 w-5 items-center justify-center rounded-full border border-gray-400">
+                <PlusIcon className="h-4 w-4 text-gray-400 stroke-2" />
+              </span>
+              add diet
+            </button>
+          </div>
 
           <div className="flex flex-col gap-1">
             <span className="font-medium">Allergies</span>
@@ -242,7 +281,7 @@ export function ProfilePage() {
             </button>
           </div>
 
-          <Button type="submit" className="self-center" disabled={prefsSaving}>
+          <Button ref={prefsBtnRef} type="submit" className="self-center" disabled={prefsSaving}>
             {prefsSaving ? 'Saving…' : 'Update taste preferences'}
           </Button>
 
@@ -275,7 +314,7 @@ export function ProfilePage() {
             />
           </label>
 
-          <Button type="submit" className="self-center" disabled={usernameSaving}>
+          <Button ref={usernameBtnRef} type="submit" className="self-center" disabled={usernameSaving}>
             {usernameSaving ? 'Saving…' : 'Update username'}
           </Button>
 
@@ -317,7 +356,7 @@ export function ProfilePage() {
             />
           </label>
 
-          <Button type="submit" className="self-center" disabled={passwordSaving}>
+          <Button ref={passwordBtnRef} type="submit" className="self-center" disabled={passwordSaving}>
             {passwordSaving ? 'Saving…' : 'Update password'}
           </Button>
 

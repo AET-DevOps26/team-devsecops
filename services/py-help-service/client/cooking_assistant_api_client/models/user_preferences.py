@@ -4,7 +4,6 @@ from collections.abc import Mapping
 from typing import Any, TypeVar, cast
 
 from attrs import define as _attrs_define
-from attrs import field as _attrs_field
 
 from ..types import UNSET, Unset
 
@@ -15,18 +14,19 @@ T = TypeVar("T", bound="UserPreferences")
 class UserPreferences:
     """
     Attributes:
-        diet (str | Unset):
-        allergies (list[str] | Unset):
-        about_me (list[str] | Unset):
+        diet (list[str] | Unset): Dietary restriction or style (e.g. vegan, keto)
+        allergies (list[str] | Unset): List of ingredients the user is allergic to
+        about_me (list[str] | Unset): Free-form user context provided to the AI
     """
 
-    diet: str | Unset = UNSET
+    diet: list[str] | Unset = UNSET
     allergies: list[str] | Unset = UNSET
     about_me: list[str] | Unset = UNSET
-    additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
-        diet = self.diet
+        diet: list[str] | Unset = UNSET
+        if not isinstance(self.diet, Unset):
+            diet = self.diet
 
         allergies: list[str] | Unset = UNSET
         if not isinstance(self.allergies, Unset):
@@ -37,7 +37,7 @@ class UserPreferences:
             about_me = self.about_me
 
         field_dict: dict[str, Any] = {}
-        field_dict.update(self.additional_properties)
+
         field_dict.update({})
         if diet is not UNSET:
             field_dict["diet"] = diet
@@ -51,7 +51,7 @@ class UserPreferences:
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
-        diet = d.pop("diet", UNSET)
+        diet = cast(list[str], d.pop("diet", UNSET))
 
         allergies = cast(list[str], d.pop("allergies", UNSET))
 
@@ -63,21 +63,4 @@ class UserPreferences:
             about_me=about_me,
         )
 
-        user_preferences.additional_properties = d
         return user_preferences
-
-    @property
-    def additional_keys(self) -> list[str]:
-        return list(self.additional_properties.keys())
-
-    def __getitem__(self, key: str) -> Any:
-        return self.additional_properties[key]
-
-    def __setitem__(self, key: str, value: Any) -> None:
-        self.additional_properties[key] = value
-
-    def __delitem__(self, key: str) -> None:
-        del self.additional_properties[key]
-
-    def __contains__(self, key: str) -> bool:
-        return key in self.additional_properties

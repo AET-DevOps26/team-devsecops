@@ -82,7 +82,7 @@ async def generate_recipes(request_data: dict[str, Any], dependencies=[Depends(v
 
         # 1. Extract Profile Context
         prefs = request.profile.preferences
-        diet = prefs.diet or "No specific diet"
+        diet = ", ".join(prefs.diet) if prefs.diet else "None"
         allergies = ", ".join(prefs.allergies) if prefs.allergies else "None"
         about = ", ".join(prefs.about_me) if prefs.about_me else "None"
 

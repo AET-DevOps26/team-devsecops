@@ -19,8 +19,10 @@ import java.util.Objects
  * @param password
  */
 data class LoginRequest(
+	@get:Size(min = 1)
 	@Schema(example = "null", required = true, description = "")
 	@get:JsonProperty("username", required = true) val username: kotlin.String,
+	@get:Size(min = 1)
 	@Schema(example = "null", required = true, description = "")
 	@get:JsonProperty("password", required = true) val password: kotlin.String,
 )

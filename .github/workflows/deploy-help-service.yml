@@ -2,7 +2,6 @@ name: Deploy Help Service
 
 on:
   push:
-    branches: [main]
     paths: ['services/py-help-service/**']
   workflow_dispatch:
 
@@ -28,6 +27,7 @@ jobs:
   # --- Step 2: CD (The Scalable Deployment) ---
   call-deploy:
     needs: [test]
+    if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
     uses: ./.github/workflows/reusable-deploy.yml
     with:
       service_name: py-help-service

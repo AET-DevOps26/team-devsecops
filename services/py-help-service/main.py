@@ -83,8 +83,9 @@ async def generate_help(request_data: dict[str, Any]):
         
         if request.profile and request.profile.preferences:
             prefs = request.profile.preferences
-            if prefs.diet:
-                context.append(f"The user follows a {prefs.diet} diet.")
+            diet = prefs.diet or []
+            if diet:
+                context.append(f"The user specifies the following diet: {', '.join(diet)}.")
     
             about_me = prefs.about_me or []
             if about_me:
