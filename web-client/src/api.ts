@@ -23,7 +23,7 @@ export interface paths {
             };
             requestBody: {
                 content: {
-                    "application/json": components["schemas"]["AuthenticationRequest"];
+                    "application/json": components["schemas"]["AuthRequest"];
                 };
             };
             responses: {
@@ -79,7 +79,7 @@ export interface paths {
             };
             requestBody: {
                 content: {
-                    "application/json": components["schemas"]["AuthenticationRequest"];
+                    "application/json": components["schemas"]["AuthRequest"];
                 };
             };
             responses: {
@@ -577,18 +577,20 @@ export interface components {
             /** @description JWT bearer token to include in subsequent requests */
             token: string;
         };
-        AuthenticationRequest: {
-            /** @description Alphanumeric, underscores, and hyphens only */
-            username: string;
-            password: string;
-        };
+        AuthRequest: WithRequired<components["schemas"]["UserCredentials"], "username" | "password">;
         UserProfile: {
             username: string;
             preferences: components["schemas"]["UserPreferences"];
         };
         /** @description At least one field must be provided */
-        UserProfileUpdate: components["schemas"]["AuthenticationRequest"] & {
+        UserProfileUpdate: components["schemas"]["UserCredentials"] & {
             preferences?: components["schemas"]["UserPreferences"];
+        };
+        /** @description Reusable field definitions for username and password constraints */
+        UserCredentials: {
+            /** @description Alphanumeric, underscores, and hyphens only */
+            username?: string;
+            password?: string;
         };
         UserPreferences: {
             /** @description Dietary restriction or style (e.g. vegan, keto) */
@@ -651,4 +653,7 @@ export interface components {
     pathItems: never;
 }
 export type $defs = Record<string, never>;
+type WithRequired<T, K extends keyof T> = T & {
+    [P in K]-?: T[P];
+};
 export type operations = Record<string, never>;

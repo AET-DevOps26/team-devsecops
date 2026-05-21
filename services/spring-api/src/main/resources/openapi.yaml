@@ -368,10 +368,9 @@ components:
           minLength: 1
           description: JWT bearer token to include in subsequent requests
 
-    RegisterRequest:
+    UserCredentialFields:
       type: object
-      required: [username, password]
-      additionalProperties: false
+      description: Reusable field definitions for username and password constraints
       properties:
         username:
           type: string
@@ -383,6 +382,12 @@ components:
           type: string
           minLength: 8
           maxLength: 128
+
+    RegisterRequest:
+      additionalProperties: false
+      required: [username, password]
+      allOf:
+        - $ref: "#/components/schemas/UserCredentialFields"
 
     LoginRequest:
       type: object
@@ -407,21 +412,14 @@ components:
           $ref: "#/components/schemas/UserPreferences"
 
     UserProfileUpdate:
-      type: object
       additionalProperties: false
       description: At least one field must be provided
-      properties:
-        username:
-          type: string
-          minLength: 1
-          maxLength: 64
-          pattern: "^[a-zA-Z0-9_-]+$"
-        password:
-          type: string
-          minLength: 8
-          maxLength: 128
-        preferences:
-          $ref: "#/components/schemas/UserPreferences"
+      allOf:
+        - $ref: "#/components/schemas/UserCredentialFields"
+        - type: object
+          properties:
+            preferences:
+              $ref: "#/components/schemas/UserPreferences"
 
     UserPreferences:
       type: object

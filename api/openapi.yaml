@@ -29,7 +29,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/AuthenticationRequest"
+              $ref: "#/components/schemas/AuthRequest"
       responses:
         "201":
           description: User created successfully
@@ -55,7 +55,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/AuthenticationRequest"
+              $ref: "#/components/schemas/AuthRequest"
       responses:
         "200":
           description: JWT token returned
@@ -368,21 +368,11 @@ components:
           minLength: 1
           description: JWT bearer token to include in subsequent requests
 
-    AuthenticationRequest:
-      type: object
-      required: [username, password]
+    AuthRequest:
       additionalProperties: false
-      properties:
-        username:
-          type: string
-          minLength: 1
-          maxLength: 64
-          pattern: "^[a-zA-Z0-9_-]+$"
-          description: Alphanumeric, underscores, and hyphens only
-        password:
-          type: string
-          minLength: 4
-          maxLength: 128
+      required: [username, password]
+      allOf:
+        - $ref: "#/components/schemas/UserCredentials"
 
     UserProfile:
       type: object
@@ -396,15 +386,29 @@ components:
           $ref: "#/components/schemas/UserPreferences"
 
     UserProfileUpdate:
-      type: object
       additionalProperties: false
       description: At least one field must be provided
       allOf:
-        - $ref: "#/components/schemas/AuthenticationRequest"
+        - $ref: "#/components/schemas/UserCredentials"
         - type: object
           properties:
             preferences:
               $ref: "#/components/schemas/UserPreferences"
+
+    UserCredentials:
+      type: object
+      description: Reusable field definitions for username and password constraints
+      properties:
+        username:
+          type: string
+          minLength: 1
+          maxLength: 64
+          pattern: "^[a-zA-Z0-9_-]+$"
+          description: Alphanumeric, underscores, and hyphens only
+        password:
+          type: string
+          minLength: 4
+          maxLength: 128
 
     UserPreferences:
       type: object

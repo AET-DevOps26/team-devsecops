@@ -3,8 +3,8 @@ package org.openapitools.api
 import com.fasterxml.jackson.databind.ObjectMapper
 import jakarta.validation.Valid
 import org.openapitools.entity.UserEntity
+import org.openapitools.model.AuthRequest
 import org.openapitools.model.AuthResponse
-import org.openapitools.model.AuthenticationRequest
 import org.openapitools.model.UserPreferences
 import org.openapitools.model.UserProfile
 import org.openapitools.model.UserProfileUpdate
@@ -32,7 +32,7 @@ class UsersApiController(
 	private val objectMapper: ObjectMapper,
 ) : UsersApi {
 	override fun usersRegisterPost(
-		@Valid registerRequest: AuthenticationRequest,
+		@Valid registerRequest: AuthRequest,
 	): ResponseEntity<Unit> {
 		if (userRepository.existsByUsername(registerRequest.username)) {
 			throw ConflictException("Username already taken")
@@ -48,7 +48,7 @@ class UsersApiController(
 	}
 
 	override fun usersLoginPost(
-		@Valid loginRequest: AuthenticationRequest,
+		@Valid loginRequest: AuthRequest,
 	): ResponseEntity<AuthResponse> {
 		try {
 			authManager.authenticate(

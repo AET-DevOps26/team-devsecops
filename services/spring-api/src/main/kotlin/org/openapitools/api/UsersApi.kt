@@ -19,8 +19,8 @@ import jakarta.validation.constraints.Min
 import jakarta.validation.constraints.NotNull
 import jakarta.validation.constraints.Pattern
 import jakarta.validation.constraints.Size
+import org.openapitools.model.AuthRequest
 import org.openapitools.model.AuthResponse
-import org.openapitools.model.AuthenticationRequest
 import org.openapitools.model.ErrorResponse
 import org.openapitools.model.UserProfile
 import org.openapitools.model.UserProfileUpdate
@@ -63,7 +63,7 @@ interface UsersApi {
 		consumes = ["application/json"],
 	)
 	fun usersLoginPost(
-		@Parameter(description = "", required = true) @Valid @RequestBody authenticationRequest: AuthenticationRequest,
+		@Parameter(description = "", required = true) @Valid @RequestBody authRequest: AuthRequest,
 	): ResponseEntity<AuthResponse> = ResponseEntity(HttpStatus.NOT_IMPLEMENTED)
 
 	@Operation(
@@ -202,7 +202,7 @@ interface UsersApi {
 		consumes = ["application/json"],
 	)
 	fun usersRegisterPost(
-		@Parameter(description = "", required = true) @Valid @RequestBody authenticationRequest: AuthenticationRequest,
+		@Parameter(description = "", required = true) @Valid @RequestBody authRequest: AuthRequest,
 	): ResponseEntity<Unit> = ResponseEntity(HttpStatus.NOT_IMPLEMENTED)
 
 	companion object {

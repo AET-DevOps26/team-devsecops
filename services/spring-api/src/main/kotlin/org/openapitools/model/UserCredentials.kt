@@ -11,16 +11,14 @@ import jakarta.validation.constraints.Min
 import jakarta.validation.constraints.NotNull
 import jakarta.validation.constraints.Pattern
 import jakarta.validation.constraints.Size
-import org.openapitools.model.UserPreferences
 import java.util.Objects
 
 /**
- * At least one field must be provided
+ * Reusable field definitions for username and password constraints
  * @param username Alphanumeric, underscores, and hyphens only
  * @param password
- * @param preferences
  */
-data class UserProfileUpdate(
+data class UserCredentials(
 	@get:Pattern(regexp = "^[a-zA-Z0-9_-]+$")
 	@get:Size(min = 1, max = 64)
 	@Schema(example = "null", description = "Alphanumeric, underscores, and hyphens only")
@@ -28,7 +26,4 @@ data class UserProfileUpdate(
 	@get:Size(min = 4, max = 128)
 	@Schema(example = "null", description = "")
 	@get:JsonProperty("password") val password: kotlin.String? = null,
-	@field:Valid
-	@Schema(example = "null", description = "")
-	@get:JsonProperty("preferences") val preferences: UserPreferences? = null,
 )
