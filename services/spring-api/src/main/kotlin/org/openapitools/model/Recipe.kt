@@ -25,17 +25,22 @@ import java.util.Objects
  * @param nutrients
  */
 data class Recipe(
+	@get:Size(min = 1, max = 255)
 	@Schema(example = "null", required = true, description = "")
 	@get:JsonProperty("title", required = true) val title: kotlin.String,
 	@field:Valid
+	@get:Size(min = 1)
 	@Schema(example = "null", required = true, description = "")
 	@get:JsonProperty("ingredients", required = true) val ingredients: kotlin.collections.List<RecipeIngredient>,
+	@get:Size(min = 1)
 	@Schema(example = "null", required = true, description = "")
 	@get:JsonProperty("instructions", required = true) val instructions: kotlin.collections.List<kotlin.String>,
+	@get:DecimalMin(value = "0.5")
 	@Schema(example = "null", required = true, description = "")
-	@get:JsonProperty("portions", required = true) val portions: kotlin.Int,
+	@get:JsonProperty("portions", required = true) val portions: java.math.BigDecimal,
+	@get:Min(value = 1L)
 	@Schema(example = "null", required = true, description = "")
-	@get:JsonProperty("id", required = true) val id: kotlin.Int,
+	@get:JsonProperty("id", required = true) val id: kotlin.Long,
 	@field:Valid
 	@Schema(example = "null", description = "")
 	@get:JsonProperty("nutrients") val nutrients: RecipeNutrients? = null,

@@ -15,18 +15,22 @@ import java.util.Objects
 
 /**
  *
- * @param calories
- * @param protein
- * @param fat
- * @param carbs
+ * @param calories Number of Calories (kcal)
+ * @param protein Protein in grams
+ * @param fat Fat in grams
+ * @param carbs Carbohydrates in grams
  */
 data class RecipeNutrients(
-	@Schema(example = "null", description = "")
-	@get:JsonProperty("calories") val calories: kotlin.Int? = null,
-	@Schema(example = "null", description = "")
-	@get:JsonProperty("protein") val protein: kotlin.Int? = null,
-	@Schema(example = "null", description = "")
-	@get:JsonProperty("fat") val fat: kotlin.Int? = null,
-	@Schema(example = "null", description = "")
-	@get:JsonProperty("carbs") val carbs: kotlin.Int? = null,
+	@get:Min(value = 0)
+	@Schema(example = "null", required = true, description = "Number of Calories (kcal)")
+	@get:JsonProperty("calories", required = true) val calories: kotlin.Int,
+	@get:Min(value = 0)
+	@Schema(example = "null", required = true, description = "Protein in grams")
+	@get:JsonProperty("protein", required = true) val protein: kotlin.Int,
+	@get:Min(value = 0)
+	@Schema(example = "null", required = true, description = "Fat in grams")
+	@get:JsonProperty("fat", required = true) val fat: kotlin.Int,
+	@get:Min(value = 0)
+	@Schema(example = "null", required = true, description = "Carbohydrates in grams")
+	@get:JsonProperty("carbs", required = true) val carbs: kotlin.Int,
 )

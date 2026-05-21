@@ -13,6 +13,7 @@ import type { components } from '../api'
 import { useAuth } from '../auth'
 import { formatQuantity } from '../recipeFormat'
 import { usePressPulse } from '../usePressPulse'
+import { errorMessage } from '../apiError'
 
 type Recipe = components['schemas']['Recipe']
 type HelpRequest = components['schemas']['HelpRequest']
@@ -120,7 +121,7 @@ function RecipeView({
         },
         body: JSON.stringify(body),
       })
-      if (!response.ok) throw new Error(`HTTP ${response.status}`)
+      if (!response.ok) throw new Error(await errorMessage(response, `HTTP ${response.status}`))
       const data = (await response.json()) as HelpResponse
       onAnswer({ question, answer: data.response ?? 'No response.' })
       setHelpPrompt('')

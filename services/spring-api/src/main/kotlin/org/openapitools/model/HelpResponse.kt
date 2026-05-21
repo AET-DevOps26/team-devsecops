@@ -18,6 +18,7 @@ import java.util.Objects
  * @param response
  */
 data class HelpResponse(
-	@Schema(example = "null", description = "")
-	@get:JsonProperty("response") val response: kotlin.String? = null,
+	@get:Size(min = 1)
+	@Schema(example = "null", required = true, description = "")
+	@get:JsonProperty("response", required = true) val response: kotlin.String,
 )

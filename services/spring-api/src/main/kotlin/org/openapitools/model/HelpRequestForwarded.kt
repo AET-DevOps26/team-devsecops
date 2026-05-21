@@ -28,6 +28,7 @@ data class HelpRequestForwarded(
 	@field:Valid
 	@Schema(example = "null", required = true, description = "")
 	@get:JsonProperty("recipe", required = true) val recipe: RecipeInput,
+	@get:Size(min = 1)
 	@Schema(example = "null", required = true, description = "")
 	@get:JsonProperty("prompt", required = true) val prompt: kotlin.String,
 )

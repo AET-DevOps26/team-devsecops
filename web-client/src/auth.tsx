@@ -1,5 +1,6 @@
 import { createContext, useContext, useState } from 'react'
 import type { ReactNode } from 'react'
+import { errorMessage } from './apiError'
 
 const TOKEN_KEY = 'auth_token'
 const USERNAME_KEY = 'auth_username'
@@ -12,8 +13,8 @@ async function loginRequest(username: string, password: string): Promise<string>
     headers: { 'content-type': 'application/json' },
     body: JSON.stringify({ username, password }),
   })
-  if (res.status === 401) throw new Error('Invalid username or password')
-  if (!res.ok) throw new Error(`Couldn't log in (HTTP ${res.status})`)
+  if (res.status === 401) throw new Error(await errorMessage(res, 'Invalid username or password'))
+  if (!res.ok) throw new Error(await errorMessage(res, `Couldn't log in (HTTP ${res.status})`))
   const data = (await res.json()) as { token: string }
   return data.token
 }
@@ -25,8 +26,8 @@ async function registerRequest(username: string, password: string): Promise<void
     headers: { 'content-type': 'application/json' },
     body: JSON.stringify({ username, password }),
   })
-  if (res.status === 409) throw new Error('Username already taken')
-  if (!res.ok) throw new Error(`Couldn't sign up (HTTP ${res.status})`)
+  if (res.status === 409) throw new Error(await errorMessage(res, 'Username already taken'))
+  if (!res.ok) throw new Error(await errorMessage(res, `Couldn't sign up (HTTP ${res.status})`))
 }
 
 async function logoutRequest(token: string): Promise<void> {

@@ -23,6 +23,7 @@ data class RecipeRequestForwarded(
 	@field:Valid
 	@Schema(example = "null", required = true, description = "")
 	@get:JsonProperty("profile", required = true) val profile: UserProfile,
+	@get:Size(min = 1)
 	@Schema(example = "null", required = true, description = "")
 	@get:JsonProperty("prompt", required = true) val prompt: kotlin.String,
 )

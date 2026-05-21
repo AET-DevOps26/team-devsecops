@@ -18,7 +18,7 @@ class RecipeEntity(
 	@Column(columnDefinition = "TEXT", nullable = false)
 	var instructions: String,
 
-	var portions: Int,
+	var portions: java.math.BigDecimal,
 	var nutrientKcal: Int,
 	var nutrientCarb: Int,
 	var nutrientProt: Int,

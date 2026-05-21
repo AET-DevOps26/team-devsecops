@@ -38,7 +38,7 @@ dependencies {
     implementation("tools.jackson.dataformat:jackson-dataformat-xml")
     implementation("tools.jackson.module:jackson-module-kotlin")
     implementation("org.springframework.data:spring-data-commons")
-    implementation("jakarta.validation:jakarta.validation-api")
+    implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("jakarta.annotation:jakarta.annotation-api:3.0.0")
 
     implementation("org.springframework.boot:spring-boot-starter-webflux")

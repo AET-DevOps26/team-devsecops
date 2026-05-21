@@ -3,6 +3,7 @@ package org.openapitools.security
 import org.openapitools.repository.UserRepository
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.http.MediaType
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
@@ -20,26 +21,28 @@ class SecurityConfig(
 	private val userRepository: UserRepository,
 	private val jwtUtils: JwtUtils,
 ) {
-
 	// BCrypt is the standard algorithm for hashing passwords
 	@Bean
 	fun passwordEncoder(): PasswordEncoder = BCryptPasswordEncoder()
 
 	// Tells Spring how to load a user by username — called during login to verify credentials
 	@Bean
-	fun userDetailsService(): UserDetailsService = UserDetailsService { username ->
-		val user = userRepository.findByUsername(username)
-			.orElseThrow { UsernameNotFoundException("User not found: $username") }
-		User.withUsername(user.username)
-			.password(user.password)
-			.roles("USER")
-			.build()
-	}
+	fun userDetailsService(): UserDetailsService =
+		UserDetailsService { username ->
+			val user =
+				userRepository
+					.findByUsername(username)
+					.orElseThrow { UsernameNotFoundException("User not found: $username") }
+			User
+				.withUsername(user.username)
+				.password(user.password)
+				.roles("USER")
+				.build()
+		}
 
 	// The AuthenticationManager is what processes a login attempt (username + password check)
 	@Bean
-	fun authenticationManager(config: AuthenticationConfiguration): AuthenticationManager =
-		config.authenticationManager
+	fun authenticationManager(config: AuthenticationConfiguration): AuthenticationManager = config.authenticationManager
 
 	@Bean
 	fun filterChain(http: HttpSecurity): SecurityFilterChain {
@@ -59,9 +62,20 @@ class SecurityConfig(
 						"/swagger-ui/**",
 						"/v3/api-docs/**",
 					).permitAll()
-					.anyRequest().authenticated() // all other routes require a valid JWT
-			}
-			.headers { it.frameOptions { fo -> fo.disable() } } // needed for H2 console iframe
+					.anyRequest()
+					.authenticated() // all other routes require a valid JWT
+			}.exceptionHandling { ex ->
+				ex.authenticationEntryPoint { _, response, _ ->
+					response.contentType = MediaType.APPLICATION_JSON_VALUE
+					response.status = 401
+					response.writer.write("""{"message":"Missing or invalid token"}""")
+				}
+				ex.accessDeniedHandler { _, response, _ ->
+					response.contentType = MediaType.APPLICATION_JSON_VALUE
+					response.status = 403
+					response.writer.write("""{"message":"Access denied"}""")
+				}
+			}.headers { it.frameOptions { fo -> fo.disable() } } // needed for H2 console iframe
 			.addFilterBefore(
 				JwtAuthFilter(jwtUtils, userRepository),
 				UsernamePasswordAuthenticationFilter::class.java,

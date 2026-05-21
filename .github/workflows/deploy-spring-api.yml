@@ -2,7 +2,6 @@ name: Deploy Spring API
 
 on:
   push:
-    branches: [main]
     paths: ['services/spring-api/**', '.github/workflows/deploy-spring-api.yml']
   workflow_dispatch:
 
@@ -23,6 +22,7 @@ jobs:
 
   deploy:
     needs: [build]
+    if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
     environment: production
     runs-on: ubuntu-latest
     steps:
