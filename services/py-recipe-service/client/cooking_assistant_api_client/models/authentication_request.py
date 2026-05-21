@@ -5,11 +5,11 @@ from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
 
-T = TypeVar("T", bound="RegisterRequest")
+T = TypeVar("T", bound="AuthenticationRequest")
 
 
 @_attrs_define
-class RegisterRequest:
+class AuthenticationRequest:
     """
     Attributes:
         username (str): Alphanumeric, underscores, and hyphens only
@@ -42,9 +42,9 @@ class RegisterRequest:
 
         password = d.pop("password")
 
-        register_request = cls(
+        authentication_request = cls(
             username=username,
             password=password,
         )
 
-        return register_request
+        return authentication_request

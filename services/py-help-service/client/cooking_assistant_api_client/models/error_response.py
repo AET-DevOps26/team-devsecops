@@ -5,31 +5,26 @@ from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
 
-T = TypeVar("T", bound="LoginRequest")
+T = TypeVar("T", bound="ErrorResponse")
 
 
 @_attrs_define
-class LoginRequest:
+class ErrorResponse:
     """
     Attributes:
-        username (str):
-        password (str):
+        message (str):
     """
 
-    username: str
-    password: str
+    message: str
 
     def to_dict(self) -> dict[str, Any]:
-        username = self.username
-
-        password = self.password
+        message = self.message
 
         field_dict: dict[str, Any] = {}
 
         field_dict.update(
             {
-                "username": username,
-                "password": password,
+                "message": message,
             }
         )
 
@@ -38,13 +33,10 @@ class LoginRequest:
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
-        username = d.pop("username")
+        message = d.pop("message")
 
-        password = d.pop("password")
-
-        login_request = cls(
-            username=username,
-            password=password,
+        error_response = cls(
+            message=message,
         )
 
-        return login_request
+        return error_response

@@ -15,10 +15,10 @@ import java.util.Objects
 
 /**
  *
- * @param prompt
+ * @param message
  */
-data class RecipeRequest(
-	@get:Size(min = 1, max = 4096)
+data class ErrorResponse(
+	@get:Size(min = 1)
 	@Schema(example = "null", required = true, description = "")
-	@get:JsonProperty("prompt", required = true) val prompt: kotlin.String,
+	@get:JsonProperty("message", required = true) val message: kotlin.String,
 )

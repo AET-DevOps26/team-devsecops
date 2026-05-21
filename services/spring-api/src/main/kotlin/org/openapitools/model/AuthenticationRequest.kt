@@ -15,10 +15,15 @@ import java.util.Objects
 
 /**
  *
- * @param prompt
+ * @param username Alphanumeric, underscores, and hyphens only
+ * @param password
  */
-data class RecipeRequest(
-	@get:Size(min = 1, max = 4096)
+data class AuthenticationRequest(
+	@get:Pattern(regexp = "^[a-zA-Z0-9_-]+$")
+	@get:Size(min = 1, max = 64)
+	@Schema(example = "null", required = true, description = "Alphanumeric, underscores, and hyphens only")
+	@get:JsonProperty("username", required = true) val username: kotlin.String,
+	@get:Size(min = 4, max = 128)
 	@Schema(example = "null", required = true, description = "")
-	@get:JsonProperty("prompt", required = true) val prompt: kotlin.String,
+	@get:JsonProperty("password", required = true) val password: kotlin.String,
 )

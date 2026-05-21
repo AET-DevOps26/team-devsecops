@@ -1,18 +1,19 @@
 from http import HTTPStatus
-from typing import Any, cast
+from typing import Any
 
 import httpx
 
 from ... import errors
 from ...client import AuthenticatedClient, Client
 from ...models.auth_response import AuthResponse
-from ...models.login_request import LoginRequest
+from ...models.authentication_request import AuthenticationRequest
+from ...models.error_response import ErrorResponse
 from ...types import Response
 
 
 def _get_kwargs(
     *,
-    body: LoginRequest,
+    body: AuthenticationRequest,
 ) -> dict[str, Any]:
     headers: dict[str, Any] = {}
 
@@ -29,14 +30,17 @@ def _get_kwargs(
     return _kwargs
 
 
-def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> Any | AuthResponse | None:
+def _parse_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> AuthResponse | ErrorResponse | None:
     if response.status_code == 200:
         response_200 = AuthResponse.from_dict(response.json())
 
         return response_200
 
     if response.status_code == 401:
-        response_401 = cast(Any, None)
+        response_401 = ErrorResponse.from_dict(response.json())
+
         return response_401
 
     if client.raise_on_unexpected_status:
@@ -45,7 +49,9 @@ def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Res
         return None
 
 
-def _build_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> Response[Any | AuthResponse]:
+def _build_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Response[AuthResponse | ErrorResponse]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -57,19 +63,19 @@ def _build_response(*, client: AuthenticatedClient | Client, response: httpx.Res
 def sync_detailed(
     *,
     client: AuthenticatedClient | Client,
-    body: LoginRequest,
-) -> Response[Any | AuthResponse]:
+    body: AuthenticationRequest,
+) -> Response[AuthResponse | ErrorResponse]:
     """Login and receive a JWT token
 
     Args:
-        body (LoginRequest):
+        body (AuthenticationRequest):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Any | AuthResponse]
+        Response[AuthResponse | ErrorResponse]
     """
 
     kwargs = _get_kwargs(
@@ -86,19 +92,19 @@ def sync_detailed(
 def sync(
     *,
     client: AuthenticatedClient | Client,
-    body: LoginRequest,
-) -> Any | AuthResponse | None:
+    body: AuthenticationRequest,
+) -> AuthResponse | ErrorResponse | None:
     """Login and receive a JWT token
 
     Args:
-        body (LoginRequest):
+        body (AuthenticationRequest):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Any | AuthResponse
+        AuthResponse | ErrorResponse
     """
 
     return sync_detailed(
@@ -110,19 +116,19 @@ def sync(
 async def asyncio_detailed(
     *,
     client: AuthenticatedClient | Client,
-    body: LoginRequest,
-) -> Response[Any | AuthResponse]:
+    body: AuthenticationRequest,
+) -> Response[AuthResponse | ErrorResponse]:
     """Login and receive a JWT token
 
     Args:
-        body (LoginRequest):
+        body (AuthenticationRequest):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Any | AuthResponse]
+        Response[AuthResponse | ErrorResponse]
     """
 
     kwargs = _get_kwargs(
@@ -137,19 +143,19 @@ async def asyncio_detailed(
 async def asyncio(
     *,
     client: AuthenticatedClient | Client,
-    body: LoginRequest,
-) -> Any | AuthResponse | None:
+    body: AuthenticationRequest,
+) -> AuthResponse | ErrorResponse | None:
     """Login and receive a JWT token
 
     Args:
-        body (LoginRequest):
+        body (AuthenticationRequest):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Any | AuthResponse
+        AuthResponse | ErrorResponse
     """
 
     return (

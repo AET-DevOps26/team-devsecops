@@ -20,8 +20,8 @@ import jakarta.validation.constraints.NotNull
 import jakarta.validation.constraints.Pattern
 import jakarta.validation.constraints.Size
 import org.openapitools.model.AuthResponse
-import org.openapitools.model.LoginRequest
-import org.openapitools.model.RegisterRequest
+import org.openapitools.model.AuthenticationRequest
+import org.openapitools.model.ErrorResponse
 import org.openapitools.model.UserProfile
 import org.openapitools.model.UserProfileUpdate
 import org.springframework.beans.factory.annotation.Autowired
@@ -48,7 +48,11 @@ interface UsersApi {
 				description = "JWT token returned",
 				content = [Content(schema = Schema(implementation = AuthResponse::class))],
 			),
-			ApiResponse(responseCode = "401", description = "Invalid username or password"),
+			ApiResponse(
+				responseCode = "401",
+				description = "Invalid username or password",
+				content = [Content(schema = Schema(implementation = ErrorResponse::class))],
+			),
 		],
 	)
 	@RequestMapping(
@@ -59,7 +63,7 @@ interface UsersApi {
 		consumes = ["application/json"],
 	)
 	fun usersLoginPost(
-		@Parameter(description = "", required = true) @Valid @RequestBody loginRequest: LoginRequest,
+		@Parameter(description = "", required = true) @Valid @RequestBody authenticationRequest: AuthenticationRequest,
 	): ResponseEntity<AuthResponse> = ResponseEntity(HttpStatus.NOT_IMPLEMENTED)
 
 	@Operation(
@@ -69,7 +73,11 @@ interface UsersApi {
 		description = """""",
 		responses = [
 			ApiResponse(responseCode = "200", description = "Logged out successfully"),
-			ApiResponse(responseCode = "401", description = "Missing or invalid token"),
+			ApiResponse(
+				responseCode = "401",
+				description = "Missing or invalid token",
+				content = [Content(schema = Schema(implementation = ErrorResponse::class))],
+			),
 		],
 		security = [ SecurityRequirement(name = "bearerAuth") ],
 	)
@@ -77,6 +85,7 @@ interface UsersApi {
 		method = [RequestMethod.POST],
 		// "/users/logout"
 		value = [PATH_USERS_LOGOUT_POST],
+		produces = ["application/json"],
 	)
 	fun usersLogoutPost(): ResponseEntity<Unit> = ResponseEntity(HttpStatus.NOT_IMPLEMENTED)
 
@@ -87,7 +96,11 @@ interface UsersApi {
 		description = """""",
 		responses = [
 			ApiResponse(responseCode = "204", description = "User account and all associated data deleted"),
-			ApiResponse(responseCode = "401", description = "Missing or invalid token"),
+			ApiResponse(
+				responseCode = "401",
+				description = "Missing or invalid token",
+				content = [Content(schema = Schema(implementation = ErrorResponse::class))],
+			),
 		],
 		security = [ SecurityRequirement(name = "bearerAuth") ],
 	)
@@ -95,6 +108,7 @@ interface UsersApi {
 		method = [RequestMethod.DELETE],
 		// "/users/profile"
 		value = [PATH_USERS_PROFILE_DELETE],
+		produces = ["application/json"],
 	)
 	fun usersProfileDelete(): ResponseEntity<Unit> = ResponseEntity(HttpStatus.NOT_IMPLEMENTED)
 
@@ -109,7 +123,11 @@ interface UsersApi {
 				description = "User profile and preferences",
 				content = [Content(schema = Schema(implementation = UserProfile::class))],
 			),
-			ApiResponse(responseCode = "401", description = "Missing or invalid token"),
+			ApiResponse(
+				responseCode = "401",
+				description = "Missing or invalid token",
+				content = [Content(schema = Schema(implementation = ErrorResponse::class))],
+			),
 		],
 		security = [ SecurityRequirement(name = "bearerAuth") ],
 	)
@@ -131,9 +149,18 @@ interface UsersApi {
 			ApiResponse(
 				responseCode = "400",
 				description = "Invalid request body (e.g. blank password, username contains invalid characters)",
+				content = [Content(schema = Schema(implementation = ErrorResponse::class))],
 			),
-			ApiResponse(responseCode = "401", description = "Missing or invalid token"),
-			ApiResponse(responseCode = "409", description = "Username already taken"),
+			ApiResponse(
+				responseCode = "401",
+				description = "Missing or invalid token",
+				content = [Content(schema = Schema(implementation = ErrorResponse::class))],
+			),
+			ApiResponse(
+				responseCode = "409",
+				description = "Username already taken",
+				content = [Content(schema = Schema(implementation = ErrorResponse::class))],
+			),
 		],
 		security = [ SecurityRequirement(name = "bearerAuth") ],
 	)
@@ -141,6 +168,7 @@ interface UsersApi {
 		method = [RequestMethod.PUT],
 		// "/users/profile"
 		value = [PATH_USERS_PROFILE_PUT],
+		produces = ["application/json"],
 		consumes = ["application/json"],
 	)
 	fun usersProfilePut(
@@ -157,18 +185,24 @@ interface UsersApi {
 			ApiResponse(
 				responseCode = "400",
 				description = "Invalid request body (e.g. blank username or password, username contains invalid characters)",
+				content = [Content(schema = Schema(implementation = ErrorResponse::class))],
 			),
-			ApiResponse(responseCode = "409", description = "Username already taken"),
+			ApiResponse(
+				responseCode = "409",
+				description = "Username already taken",
+				content = [Content(schema = Schema(implementation = ErrorResponse::class))],
+			),
 		],
 	)
 	@RequestMapping(
 		method = [RequestMethod.POST],
 		// "/users/register"
 		value = [PATH_USERS_REGISTER_POST],
+		produces = ["application/json"],
 		consumes = ["application/json"],
 	)
 	fun usersRegisterPost(
-		@Parameter(description = "", required = true) @Valid @RequestBody registerRequest: RegisterRequest,
+		@Parameter(description = "", required = true) @Valid @RequestBody authenticationRequest: AuthenticationRequest,
 	): ResponseEntity<Unit> = ResponseEntity(HttpStatus.NOT_IMPLEMENTED)
 
 	companion object {

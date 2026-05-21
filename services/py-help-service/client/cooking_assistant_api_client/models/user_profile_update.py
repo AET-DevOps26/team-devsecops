@@ -19,13 +19,13 @@ class UserProfileUpdate:
     """At least one field must be provided
 
     Attributes:
-        username (str | Unset):
-        password (str | Unset):
+        username (str): Alphanumeric, underscores, and hyphens only
+        password (str):
         preferences (UserPreferences | Unset):
     """
 
-    username: str | Unset = UNSET
-    password: str | Unset = UNSET
+    username: str
+    password: str
     preferences: UserPreferences | Unset = UNSET
 
     def to_dict(self) -> dict[str, Any]:
@@ -39,11 +39,12 @@ class UserProfileUpdate:
 
         field_dict: dict[str, Any] = {}
 
-        field_dict.update({})
-        if username is not UNSET:
-            field_dict["username"] = username
-        if password is not UNSET:
-            field_dict["password"] = password
+        field_dict.update(
+            {
+                "username": username,
+                "password": password,
+            }
+        )
         if preferences is not UNSET:
             field_dict["preferences"] = preferences
 
@@ -54,9 +55,9 @@ class UserProfileUpdate:
         from ..models.user_preferences import UserPreferences
 
         d = dict(src_dict)
-        username = d.pop("username", UNSET)
+        username = d.pop("username")
 
-        password = d.pop("password", UNSET)
+        password = d.pop("password")
 
         _preferences = d.pop("preferences", UNSET)
         preferences: UserPreferences | Unset

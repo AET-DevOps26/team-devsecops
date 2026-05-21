@@ -19,6 +19,7 @@ import jakarta.validation.constraints.Min
 import jakarta.validation.constraints.NotNull
 import jakarta.validation.constraints.Pattern
 import jakarta.validation.constraints.Size
+import org.openapitools.model.ErrorResponse
 import org.openapitools.model.HelpRequest
 import org.openapitools.model.HelpResponse
 import org.openapitools.model.RecipeInput
@@ -47,9 +48,21 @@ interface AIApi {
 				description = "AI-generated help text",
 				content = [Content(schema = Schema(implementation = HelpResponse::class))],
 			),
-			ApiResponse(responseCode = "400", description = "Invalid request body"),
-			ApiResponse(responseCode = "401", description = "Missing or invalid token"),
-			ApiResponse(responseCode = "502", description = "GenAI service unavailable or returned an unparseable response"),
+			ApiResponse(
+				responseCode = "400",
+				description = "Invalid request body",
+				content = [Content(schema = Schema(implementation = ErrorResponse::class))],
+			),
+			ApiResponse(
+				responseCode = "401",
+				description = "Missing or invalid token",
+				content = [Content(schema = Schema(implementation = ErrorResponse::class))],
+			),
+			ApiResponse(
+				responseCode = "502",
+				description = "GenAI service unavailable or returned an unparseable response",
+				content = [Content(schema = Schema(implementation = ErrorResponse::class))],
+			),
 		],
 		security = [ SecurityRequirement(name = "bearerAuth") ],
 	)
@@ -75,9 +88,21 @@ interface AIApi {
 				description = "AI-generated recipes without IDs",
 				content = [Content(array = ArraySchema(schema = Schema(implementation = RecipeInput::class)))],
 			),
-			ApiResponse(responseCode = "400", description = "Invalid request body"),
-			ApiResponse(responseCode = "401", description = "Missing or invalid token"),
-			ApiResponse(responseCode = "502", description = "GenAI service unavailable or returned an unparseable response"),
+			ApiResponse(
+				responseCode = "400",
+				description = "Invalid request body",
+				content = [Content(schema = Schema(implementation = ErrorResponse::class))],
+			),
+			ApiResponse(
+				responseCode = "401",
+				description = "Missing or invalid token",
+				content = [Content(schema = Schema(implementation = ErrorResponse::class))],
+			),
+			ApiResponse(
+				responseCode = "502",
+				description = "GenAI service unavailable or returned an unparseable response",
+				content = [Content(schema = Schema(implementation = ErrorResponse::class))],
+			),
 		],
 		security = [ SecurityRequirement(name = "bearerAuth") ],
 	)

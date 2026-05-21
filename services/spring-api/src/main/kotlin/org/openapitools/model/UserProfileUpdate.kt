@@ -16,18 +16,18 @@ import java.util.Objects
 
 /**
  * At least one field must be provided
- * @param username
+ * @param username Alphanumeric, underscores, and hyphens only
  * @param password
  * @param preferences
  */
 data class UserProfileUpdate(
 	@get:Pattern(regexp = "^[a-zA-Z0-9_-]+$")
 	@get:Size(min = 1, max = 64)
-	@Schema(example = "null", description = "")
-	@get:JsonProperty("username") val username: kotlin.String? = null,
+	@Schema(example = "null", required = true, description = "Alphanumeric, underscores, and hyphens only")
+	@get:JsonProperty("username", required = true) val username: kotlin.String,
 	@get:Size(min = 4, max = 128)
-	@Schema(example = "null", description = "")
-	@get:JsonProperty("password") val password: kotlin.String? = null,
+	@Schema(example = "null", required = true, description = "")
+	@get:JsonProperty("password", required = true) val password: kotlin.String,
 	@field:Valid
 	@Schema(example = "null", description = "")
 	@get:JsonProperty("preferences") val preferences: UserPreferences? = null,

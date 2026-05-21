@@ -1,10 +1,11 @@
 from http import HTTPStatus
-from typing import Any, cast
+from typing import Any
 
 import httpx
 
 from ... import errors
 from ...client import AuthenticatedClient, Client
+from ...models.error_response import ErrorResponse
 from ...models.help_request import HelpRequest
 from ...models.help_response import HelpResponse
 from ...types import Response
@@ -29,22 +30,27 @@ def _get_kwargs(
     return _kwargs
 
 
-def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> Any | HelpResponse | None:
+def _parse_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> ErrorResponse | HelpResponse | None:
     if response.status_code == 200:
         response_200 = HelpResponse.from_dict(response.json())
 
         return response_200
 
     if response.status_code == 400:
-        response_400 = cast(Any, None)
+        response_400 = ErrorResponse.from_dict(response.json())
+
         return response_400
 
     if response.status_code == 401:
-        response_401 = cast(Any, None)
+        response_401 = ErrorResponse.from_dict(response.json())
+
         return response_401
 
     if response.status_code == 502:
-        response_502 = cast(Any, None)
+        response_502 = ErrorResponse.from_dict(response.json())
+
         return response_502
 
     if client.raise_on_unexpected_status:
@@ -53,7 +59,9 @@ def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Res
         return None
 
 
-def _build_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> Response[Any | HelpResponse]:
+def _build_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Response[ErrorResponse | HelpResponse]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -66,7 +74,7 @@ def sync_detailed(
     *,
     client: AuthenticatedClient,
     body: HelpRequest,
-) -> Response[Any | HelpResponse]:
+) -> Response[ErrorResponse | HelpResponse]:
     """Ask the LLM a question about a recipe
 
     Args:
@@ -77,7 +85,7 @@ def sync_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Any | HelpResponse]
+        Response[ErrorResponse | HelpResponse]
     """
 
     kwargs = _get_kwargs(
@@ -95,7 +103,7 @@ def sync(
     *,
     client: AuthenticatedClient,
     body: HelpRequest,
-) -> Any | HelpResponse | None:
+) -> ErrorResponse | HelpResponse | None:
     """Ask the LLM a question about a recipe
 
     Args:
@@ -106,7 +114,7 @@ def sync(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Any | HelpResponse
+        ErrorResponse | HelpResponse
     """
 
     return sync_detailed(
@@ -119,7 +127,7 @@ async def asyncio_detailed(
     *,
     client: AuthenticatedClient,
     body: HelpRequest,
-) -> Response[Any | HelpResponse]:
+) -> Response[ErrorResponse | HelpResponse]:
     """Ask the LLM a question about a recipe
 
     Args:
@@ -130,7 +138,7 @@ async def asyncio_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Any | HelpResponse]
+        Response[ErrorResponse | HelpResponse]
     """
 
     kwargs = _get_kwargs(
@@ -146,7 +154,7 @@ async def asyncio(
     *,
     client: AuthenticatedClient,
     body: HelpRequest,
-) -> Any | HelpResponse | None:
+) -> ErrorResponse | HelpResponse | None:
     """Ask the LLM a question about a recipe
 
     Args:
@@ -157,7 +165,7 @@ async def asyncio(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Any | HelpResponse
+        ErrorResponse | HelpResponse
     """
 
     return (

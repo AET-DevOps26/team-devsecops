@@ -29,14 +29,22 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/RegisterRequest"
+              $ref: "#/components/schemas/AuthenticationRequest"
       responses:
         "201":
           description: User created successfully
         "400":
           description: Invalid request body (e.g. blank username or password, username contains invalid characters)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "409":
           description: Username already taken
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 
   /users/login:
     post:
@@ -47,7 +55,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/LoginRequest"
+              $ref: "#/components/schemas/AuthenticationRequest"
       responses:
         "200":
           description: JWT token returned
@@ -57,6 +65,10 @@ paths:
                 $ref: "#/components/schemas/AuthResponse"
         "401":
           description: Invalid username or password
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 
   /users/logout:
     post:
@@ -69,6 +81,10 @@ paths:
           description: Logged out successfully
         "401":
           description: Missing or invalid token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 
   /users/profile:
     get:
@@ -85,6 +101,10 @@ paths:
                 $ref: "#/components/schemas/UserProfile"
         "401":
           description: Missing or invalid token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
     put:
       tags: [Users]
       summary: Update user profile and preferences
@@ -101,10 +121,22 @@ paths:
           description: Profile and preferences updated
         "400":
           description: Invalid request body (e.g. blank password, username contains invalid characters)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "401":
           description: Missing or invalid token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "409":
           description: Username already taken
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
     delete:
       tags: [Users]
       summary: Delete current user account and all associated recipes (cascade)
@@ -115,6 +147,10 @@ paths:
           description: User account and all associated data deleted
         "401":
           description: Missing or invalid token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 
   # -------------------------
   # RECIPES
@@ -137,6 +173,10 @@ paths:
                   $ref: "#/components/schemas/Recipe"
         "401":
           description: Missing or invalid token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 
     post:
       tags: [Recipes]
@@ -154,8 +194,16 @@ paths:
           description: Recipe saved successfully
         "400":
           description: Invalid recipe data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "401":
           description: Missing or invalid token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 
   /recipes/{recipeId}:
     get:
@@ -180,12 +228,28 @@ paths:
                 $ref: "#/components/schemas/Recipe"
         "400":
           description: Recipe ID is not a valid integer
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "401":
           description: Missing or invalid token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "403":
           description: Recipe belongs to a different user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "404":
           description: Recipe not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 
   # -------------------------
   # AI
@@ -214,10 +278,22 @@ paths:
                   $ref: "#/components/schemas/RecipeInput"
         "400":
           description: Invalid request body
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "401":
           description: Missing or invalid token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "502":
           description: GenAI service unavailable or returned an unparseable response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 
   /ai/help:
     post:
@@ -240,10 +316,22 @@ paths:
                 $ref: "#/components/schemas/HelpResponse"
         "400":
           description: Invalid request body
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "401":
           description: Missing or invalid token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "502":
           description: GenAI service unavailable or returned an unparseable response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 
 # -------------------------
 # SECURITY
@@ -261,6 +349,15 @@ components:
   # -------------------------
 
   schemas:
+    ErrorResponse:
+      type: object
+      required: [message]
+      additionalProperties: false
+      properties:
+        message:
+          type: string
+          minLength: 1
+
     AuthResponse:
       type: object
       required: [token]
@@ -271,7 +368,7 @@ components:
           minLength: 1
           description: JWT bearer token to include in subsequent requests
 
-    RegisterRequest:
+    AuthenticationRequest:
       type: object
       required: [username, password]
       additionalProperties: false
@@ -286,18 +383,6 @@ components:
           type: string
           minLength: 4
           maxLength: 128
-
-    LoginRequest:
-      type: object
-      required: [username, password]
-      additionalProperties: false
-      properties:
-        username:
-          type: string
-          minLength: 1
-        password:
-          type: string
-          minLength: 1
 
     UserProfile:
       type: object
@@ -314,37 +399,29 @@ components:
       type: object
       additionalProperties: false
       description: At least one field must be provided
-      properties:
-        username:
-          type: string
-          minLength: 1
-          maxLength: 64
-          pattern: "^[a-zA-Z0-9_-]+$"
-        password:
-          type: string
-          minLength: 4
-          maxLength: 128
-        preferences:
-          $ref: "#/components/schemas/UserPreferences"
+      allOf:
+        - $ref: "#/components/schemas/AuthenticationRequest"
+        - type: object
+          properties:
+            preferences:
+              $ref: "#/components/schemas/UserPreferences"
 
     UserPreferences:
       type: object
       additionalProperties: false
       properties:
         diet:
-          type: string
+          type: ["string", "null"]
           description: Dietary restriction or style (e.g. vegan, keto)
         allergies:
-          type: array
+          type: ["array", "null"]
           items:
             type: string
-            minLength: 1
           description: List of ingredients the user is allergic to
         aboutMe:
-          type: array
+          type: ["array", "null"]
           items:
             type: string
-            minLength: 1
           description: Free-form user context provided to the AI
 
     RecipeIngredient:
@@ -431,7 +508,7 @@ components:
         prompt:
           type: string
           minLength: 1
-          maxLength: 2000
+          maxLength: 4096
 
     RecipeRequestForwarded:
       type: object
@@ -454,7 +531,7 @@ components:
         prompt:
           type: string
           minLength: 1
-          maxLength: 2000
+          maxLength: 4096
 
     HelpRequestForwarded:
       type: object

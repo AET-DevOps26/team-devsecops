@@ -19,6 +19,7 @@ import jakarta.validation.constraints.Min
 import jakarta.validation.constraints.NotNull
 import jakarta.validation.constraints.Pattern
 import jakarta.validation.constraints.Size
+import org.openapitools.model.ErrorResponse
 import org.openapitools.model.Recipe
 import org.openapitools.model.RecipeInput
 import org.springframework.beans.factory.annotation.Autowired
@@ -45,7 +46,11 @@ interface RecipesApi {
 				description = "List of user recipes",
 				content = [Content(array = ArraySchema(schema = Schema(implementation = Recipe::class)))],
 			),
-			ApiResponse(responseCode = "401", description = "Missing or invalid token"),
+			ApiResponse(
+				responseCode = "401",
+				description = "Missing or invalid token",
+				content = [Content(schema = Schema(implementation = ErrorResponse::class))],
+			),
 		],
 		security = [ SecurityRequirement(name = "bearerAuth") ],
 	)
@@ -64,8 +69,16 @@ interface RecipesApi {
 		description = """""",
 		responses = [
 			ApiResponse(responseCode = "201", description = "Recipe saved successfully"),
-			ApiResponse(responseCode = "400", description = "Invalid recipe data"),
-			ApiResponse(responseCode = "401", description = "Missing or invalid token"),
+			ApiResponse(
+				responseCode = "400",
+				description = "Invalid recipe data",
+				content = [Content(schema = Schema(implementation = ErrorResponse::class))],
+			),
+			ApiResponse(
+				responseCode = "401",
+				description = "Missing or invalid token",
+				content = [Content(schema = Schema(implementation = ErrorResponse::class))],
+			),
 		],
 		security = [ SecurityRequirement(name = "bearerAuth") ],
 	)
@@ -73,6 +86,7 @@ interface RecipesApi {
 		method = [RequestMethod.POST],
 		// "/recipes"
 		value = [PATH_RECIPES_POST],
+		produces = ["application/json"],
 		consumes = ["application/json"],
 	)
 	fun recipesPost(
@@ -90,10 +104,26 @@ interface RecipesApi {
 				description = "Recipe details",
 				content = [Content(schema = Schema(implementation = Recipe::class))],
 			),
-			ApiResponse(responseCode = "400", description = "Recipe ID is not a valid integer"),
-			ApiResponse(responseCode = "401", description = "Missing or invalid token"),
-			ApiResponse(responseCode = "403", description = "Recipe belongs to a different user"),
-			ApiResponse(responseCode = "404", description = "Recipe not found"),
+			ApiResponse(
+				responseCode = "400",
+				description = "Recipe ID is not a valid integer",
+				content = [Content(schema = Schema(implementation = ErrorResponse::class))],
+			),
+			ApiResponse(
+				responseCode = "401",
+				description = "Missing or invalid token",
+				content = [Content(schema = Schema(implementation = ErrorResponse::class))],
+			),
+			ApiResponse(
+				responseCode = "403",
+				description = "Recipe belongs to a different user",
+				content = [Content(schema = Schema(implementation = ErrorResponse::class))],
+			),
+			ApiResponse(
+				responseCode = "404",
+				description = "Recipe not found",
+				content = [Content(schema = Schema(implementation = ErrorResponse::class))],
+			),
 		],
 		security = [ SecurityRequirement(name = "bearerAuth") ],
 	)
