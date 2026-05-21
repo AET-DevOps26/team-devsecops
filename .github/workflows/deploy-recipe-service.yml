@@ -35,3 +35,4 @@ jobs:
     secrets:
       GCP_SA_KEY: ${{ secrets.RECIPE_SERVICE_SA_KEY }}
       GEMINI_API_KEY: ${{ secrets.RECIPE_SERVICE_KEY }}
+      INTERNAL_AUTH_SECRET:  ${{ secrets.INTERNAL_AUTH_SECRET }}
