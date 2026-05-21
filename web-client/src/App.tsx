@@ -7,6 +7,7 @@ import { LibraryPage } from './pages/LibraryPage'
 import { LoginPage } from './pages/LoginPage'
 import { NotFoundPage } from './pages/NotFoundPage'
 import { ProfilePage } from './pages/ProfilePage'
+import { RecipePage } from './pages/RecipePage'
 
 function RequireAuth({ children }: { children: ReactNode }) {
   const { token } = useAuth()
@@ -28,6 +29,7 @@ export default function App() {
             }
           >
             <Route path="/generate" element={<GeneratePage />} />
+            <Route path="/recipe" element={<RecipePage />} />
             <Route path="/library" element={<LibraryPage />} />
             <Route path="/profile" element={<ProfilePage />} />
           </Route>

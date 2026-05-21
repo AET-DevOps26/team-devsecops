@@ -7,3 +7,5 @@ openapi-python-client generate --path api/openapi.yaml --output-path services/py
 openapi-python-client generate --path api/openapi.yaml --output-path services/py-recipe-service/client --overwrite
 
 npx openapi-typescript api/openapi.yaml -o web-client/src/api.ts
+
+# Keep this script in sync with .gitattributes.
