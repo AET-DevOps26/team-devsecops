@@ -12,7 +12,7 @@ T = TypeVar("T", bound="RecipeNutrients")
 class RecipeNutrients:
     """
     Attributes:
-        calories (int):
+        calories (int): Number of Calories (kcal)
         protein (int): Protein in grams
         fat (int): Fat in grams
         carbs (int): Carbohydrates in grams

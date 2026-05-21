@@ -22,7 +22,7 @@ class Recipe:
         title (str):
         ingredients (list[RecipeIngredient]):
         instructions (list[str]):
-        portions (int):
+        portions (float):
         id (int):
         nutrients (RecipeNutrients | Unset):
     """
@@ -30,7 +30,7 @@ class Recipe:
     title: str
     ingredients: list[RecipeIngredient]
     instructions: list[str]
-    portions: int
+    portions: float
     id: int
     nutrients: RecipeNutrients | Unset = UNSET
 

@@ -588,17 +588,17 @@ export interface components {
         };
         /** @description Reusable field definitions for username and password constraints */
         UserCredentials: {
-            /** @description Alphanumeric, underscores, and hyphens only */
+            /** @description Alphanumeric, underscores, hyphens, and dots only */
             username?: string;
             password?: string;
         };
         UserPreferences: {
             /** @description Dietary restriction or style (e.g. vegan, keto) */
-            diet?: string | null;
+            diet?: string[];
             /** @description List of ingredients the user is allergic to */
-            allergies?: string[] | null;
+            allergies?: string[];
             /** @description Free-form user context provided to the AI */
-            aboutMe?: string[] | null;
+            aboutMe?: string[];
         };
         RecipeIngredient: {
             quantity: number;
@@ -607,6 +607,7 @@ export interface components {
             name: string;
         };
         RecipeNutrients: {
+            /** @description Number of Calories (kcal) */
             calories: number;
             /** @description Protein in grams */
             protein: number;

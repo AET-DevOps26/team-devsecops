@@ -403,8 +403,8 @@ components:
           type: string
           minLength: 1
           maxLength: 64
-          pattern: "^[a-zA-Z0-9_-]+$"
-          description: Alphanumeric, underscores, and hyphens only
+          pattern: "^[a-zA-Z0-9_.-]+$"
+          description: Alphanumeric, underscores, hyphens, and dots only
         password:
           type: string
           minLength: 4
@@ -415,15 +415,17 @@ components:
       additionalProperties: false
       properties:
         diet:
-          type: ["string", "null"]
+          type: array
+          items:
+            type: string
           description: Dietary restriction or style (e.g. vegan, keto)
         allergies:
-          type: ["array", "null"]
+          type: array
           items:
             type: string
           description: List of ingredients the user is allergic to
         aboutMe:
-          type: ["array", "null"]
+          type: array
           items:
             type: string
           description: Free-form user context provided to the AI
@@ -452,6 +454,7 @@ components:
         calories:
           type: integer
           minimum: 0
+          description: Number of Calories (kcal)
         protein:
           type: integer
           minimum: 0
@@ -486,8 +489,8 @@ components:
             minLength: 1
           minItems: 1
         portions:
-          type: integer
-          minimum: 1
+          type: number
+          minimum: 0.5
         nutrients:
           $ref: "#/components/schemas/RecipeNutrients"
 

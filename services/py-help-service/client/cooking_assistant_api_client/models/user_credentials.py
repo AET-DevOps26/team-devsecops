@@ -16,7 +16,7 @@ class UserCredentials:
     """Reusable field definitions for username and password constraints
 
     Attributes:
-        username (str | Unset): Alphanumeric, underscores, and hyphens only
+        username (str | Unset): Alphanumeric, underscores, hyphens, and dots only
         password (str | Unset):
     """
 

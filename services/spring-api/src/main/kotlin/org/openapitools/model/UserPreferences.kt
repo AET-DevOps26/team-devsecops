@@ -21,7 +21,7 @@ import java.util.Objects
  */
 data class UserPreferences(
 	@Schema(example = "null", description = "Dietary restriction or style (e.g. vegan, keto)")
-	@get:JsonProperty("diet") val diet: kotlin.String? = null,
+	@get:JsonProperty("diet") val diet: kotlin.collections.List<kotlin.String>? = null,
 	@Schema(example = "null", description = "List of ingredients the user is allergic to")
 	@get:JsonProperty("allergies") val allergies: kotlin.collections.List<kotlin.String>? = null,
 	@Schema(example = "null", description = "Free-form user context provided to the AI")

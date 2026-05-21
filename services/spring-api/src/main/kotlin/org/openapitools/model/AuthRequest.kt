@@ -15,13 +15,13 @@ import java.util.Objects
 
 /**
  *
- * @param username Alphanumeric, underscores, and hyphens only
+ * @param username Alphanumeric, underscores, hyphens, and dots only
  * @param password
  */
 data class AuthRequest(
-	@get:Pattern(regexp = "^[a-zA-Z0-9_-]+$")
+	@get:Pattern(regexp = "^[a-zA-Z0-9_.-]+$")
 	@get:Size(min = 1, max = 64)
-	@Schema(example = "null", required = true, description = "Alphanumeric, underscores, and hyphens only")
+	@Schema(example = "null", required = true, description = "Alphanumeric, underscores, hyphens, and dots only")
 	@get:JsonProperty("username", required = true) val username: kotlin.String,
 	@get:Size(min = 4, max = 128)
 	@Schema(example = "null", required = true, description = "")

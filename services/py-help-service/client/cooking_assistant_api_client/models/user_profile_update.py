@@ -19,7 +19,7 @@ class UserProfileUpdate:
     """At least one field must be provided
 
     Attributes:
-        username (str | Unset): Alphanumeric, underscores, and hyphens only
+        username (str | Unset): Alphanumeric, underscores, hyphens, and dots only
         password (str | Unset):
         preferences (UserPreferences | Unset):
     """

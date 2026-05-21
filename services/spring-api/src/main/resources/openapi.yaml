@@ -376,8 +376,8 @@ components:
           type: string
           minLength: 1
           maxLength: 64
-          pattern: "^[a-zA-Z0-9_-]+$"
-          description: Alphanumeric, underscores, and hyphens only
+          pattern: "^[a-zA-Z0-9_.-]+$"
+          description: Alphanumeric, underscores, hyphens, and dots only
         password:
           type: string
           minLength: 8

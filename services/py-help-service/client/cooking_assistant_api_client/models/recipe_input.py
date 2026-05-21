@@ -22,14 +22,14 @@ class RecipeInput:
         title (str):
         ingredients (list[RecipeIngredient]):
         instructions (list[str]):
-        portions (int):
+        portions (float):
         nutrients (RecipeNutrients | Unset):
     """
 
     title: str
     ingredients: list[RecipeIngredient]
     instructions: list[str]
-    portions: int
+    portions: float
     nutrients: RecipeNutrients | Unset = UNSET
 
     def to_dict(self) -> dict[str, Any]:
