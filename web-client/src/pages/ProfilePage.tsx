@@ -9,6 +9,7 @@ import type { components } from '../api'
 import { useAuth } from '../auth'
 import { Button } from '../components/Button'
 import { PasswordInput } from '../components/PasswordInput'
+import { usePressPulse } from '../usePressPulse'
 
 type UserProfile = components['schemas']['UserProfile']
 type UserProfileUpdate = components['schemas']['UserProfileUpdate']
@@ -29,6 +30,10 @@ const allergyPlaceholders = [
 export function ProfilePage() {
   const { username, token, signOut, updateUsername } = useAuth()
   const navigate = useNavigate()
+
+  const [prefsBtnRef, pulsePrefs] = usePressPulse<HTMLButtonElement>()
+  const [usernameBtnRef, pulseUsername] = usePressPulse<HTMLButtonElement>()
+  const [passwordBtnRef, pulsePassword] = usePressPulse<HTMLButtonElement>()
 
   const [usernameDraft, setUsernameDraft] = useState<string | null>(null)
   const newUsername = usernameDraft ?? username ?? ''
@@ -94,6 +99,7 @@ export function ProfilePage() {
   }
 
   async function handleSavePreferences() {
+    pulsePrefs()
     setPrefsSaving(true)
     setPrefsStatus(null)
     try {
@@ -113,6 +119,7 @@ export function ProfilePage() {
   }
 
   async function handleUpdateUsername() {
+    pulseUsername()
     const trimmedUsername = newUsername.trim()
     if (trimmedUsername === '' || trimmedUsername === username) {
       setUsernameStatus({ kind: 'error', msg: 'Enter a new username' })
@@ -134,6 +141,7 @@ export function ProfilePage() {
   }
 
   async function handleUpdatePassword() {
+    pulsePassword()
     if (!newPassword) {
       setPasswordStatus({ kind: 'error', msg: 'Enter a new password' })
       return
@@ -242,7 +250,7 @@ export function ProfilePage() {
             </button>
           </div>
 
-          <Button type="submit" className="self-center" disabled={prefsSaving}>
+          <Button ref={prefsBtnRef} type="submit" className="self-center" disabled={prefsSaving}>
             {prefsSaving ? 'Saving…' : 'Update taste preferences'}
           </Button>
 
@@ -275,7 +283,7 @@ export function ProfilePage() {
             />
           </label>
 
-          <Button type="submit" className="self-center" disabled={usernameSaving}>
+          <Button ref={usernameBtnRef} type="submit" className="self-center" disabled={usernameSaving}>
             {usernameSaving ? 'Saving…' : 'Update username'}
           </Button>
 
@@ -317,7 +325,7 @@ export function ProfilePage() {
             />
           </label>
 
-          <Button type="submit" className="self-center" disabled={passwordSaving}>
+          <Button ref={passwordBtnRef} type="submit" className="self-center" disabled={passwordSaving}>
             {passwordSaving ? 'Saving…' : 'Update password'}
           </Button>
 

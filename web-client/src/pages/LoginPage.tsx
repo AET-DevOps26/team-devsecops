@@ -4,6 +4,7 @@ import { Navigate } from 'react-router-dom'
 import { useAuth } from '../auth'
 import { Button } from '../components/Button'
 import { PasswordInput } from '../components/PasswordInput'
+import { usePressPulse } from '../usePressPulse'
 
 type Tab = 'login' | 'register'
 
@@ -15,9 +16,11 @@ export function LoginPage() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const { token, signIn, register } = useAuth()
+  const [submitRef, pulseSubmit] = usePressPulse<HTMLButtonElement>()
 
   const handleSubmit: SubmitEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault()
+    pulseSubmit()
     if (tab === 'register' && password !== repeatPassword) {
       setError('Passwords do not match')
       return
@@ -101,7 +104,7 @@ export function LoginPage() {
           </label>
         )}
 
-        <Button type="submit" className="self-start" disabled={loading}>
+        <Button ref={submitRef} type="submit" className="self-start" disabled={loading}>
           {loading ? 'Please wait…' : tab === 'login' ? 'Login' : 'Sign up'}
         </Button>
 
