@@ -15,14 +15,17 @@ import org.openapitools.model.UserPreferences
 import java.util.Objects
 
 /**
- *
+ * At least one field must be provided
  * @param username
  * @param password
  * @param preferences
  */
 data class UserProfileUpdate(
+	@get:Pattern(regexp = "^[a-zA-Z0-9_-]+$")
+	@get:Size(min = 1, max = 64)
 	@Schema(example = "null", description = "")
 	@get:JsonProperty("username") val username: kotlin.String? = null,
+	@get:Size(min = 4, max = 128)
 	@Schema(example = "null", description = "")
 	@get:JsonProperty("password") val password: kotlin.String? = null,
 	@field:Valid

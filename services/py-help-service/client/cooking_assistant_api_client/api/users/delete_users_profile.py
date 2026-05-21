@@ -11,15 +11,15 @@ from ...types import Response
 def _get_kwargs() -> dict[str, Any]:
 
     _kwargs: dict[str, Any] = {
-        "method": "post",
-        "url": "/users/logout",
+        "method": "delete",
+        "url": "/users/profile",
     }
 
     return _kwargs
 
 
 def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> Any | None:
-    if response.status_code == 200:
+    if response.status_code == 204:
         return None
 
     if response.status_code == 401:
@@ -44,7 +44,7 @@ def sync_detailed(
     *,
     client: AuthenticatedClient,
 ) -> Response[Any]:
-    """Logout
+    """Delete current user account and all associated recipes (cascade)
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -67,7 +67,7 @@ async def asyncio_detailed(
     *,
     client: AuthenticatedClient,
 ) -> Response[Any]:
-    """Logout
+    """Delete current user account and all associated recipes (cascade)
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.

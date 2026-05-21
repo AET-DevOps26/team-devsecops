@@ -36,7 +36,7 @@ import kotlin.collections.Map
 interface RecipesApi {
 	@Operation(
 		tags = ["Recipes"],
-		summary = "List user recipes",
+		summary = "List all recipes saved by the current user",
 		operationId = "recipesGet",
 		description = """""",
 		responses = [
@@ -45,7 +45,7 @@ interface RecipesApi {
 				description = "List of user recipes",
 				content = [Content(array = ArraySchema(schema = Schema(implementation = Recipe::class)))],
 			),
-			ApiResponse(responseCode = "403", description = "Not logged in"),
+			ApiResponse(responseCode = "401", description = "Missing or invalid token"),
 		],
 		security = [ SecurityRequirement(name = "bearerAuth") ],
 	)
@@ -59,12 +59,13 @@ interface RecipesApi {
 
 	@Operation(
 		tags = ["Recipes"],
-		summary = "Save a recipe",
+		summary = "Save a recipe to the current user's collection",
 		operationId = "recipesPost",
 		description = """""",
 		responses = [
-			ApiResponse(responseCode = "201", description = "Recipe saved"),
-			ApiResponse(responseCode = "403", description = "Not logged in"),
+			ApiResponse(responseCode = "201", description = "Recipe saved successfully"),
+			ApiResponse(responseCode = "400", description = "Invalid recipe data"),
+			ApiResponse(responseCode = "401", description = "Missing or invalid token"),
 		],
 		security = [ SecurityRequirement(name = "bearerAuth") ],
 	)
@@ -80,7 +81,7 @@ interface RecipesApi {
 
 	@Operation(
 		tags = ["Recipes"],
-		summary = "Get recipe by ID",
+		summary = "Get a specific recipe by ID",
 		operationId = "recipesRecipeIdGet",
 		description = """""",
 		responses = [
@@ -89,7 +90,10 @@ interface RecipesApi {
 				description = "Recipe details",
 				content = [Content(schema = Schema(implementation = Recipe::class))],
 			),
-			ApiResponse(responseCode = "403", description = "Not logged in"),
+			ApiResponse(responseCode = "400", description = "Recipe ID is not a valid integer"),
+			ApiResponse(responseCode = "401", description = "Missing or invalid token"),
+			ApiResponse(responseCode = "403", description = "Recipe belongs to a different user"),
+			ApiResponse(responseCode = "404", description = "Recipe not found"),
 		],
 		security = [ SecurityRequirement(name = "bearerAuth") ],
 	)
@@ -100,7 +104,7 @@ interface RecipesApi {
 		produces = ["application/json"],
 	)
 	fun recipesRecipeIdGet(
-		@Parameter(description = "", required = true) @PathVariable("recipeId") recipeId: kotlin.String,
+		@Min(value = 1L)@Parameter(description = "", required = true) @PathVariable("recipeId") recipeId: kotlin.Long,
 	): ResponseEntity<Recipe> = ResponseEntity(HttpStatus.NOT_IMPLEMENTED)
 
 	companion object {

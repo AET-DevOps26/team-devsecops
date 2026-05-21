@@ -11,7 +11,7 @@ from ...types import Response
 
 
 def _get_kwargs(
-    recipe_id: str,
+    recipe_id: int,
 ) -> dict[str, Any]:
 
     _kwargs: dict[str, Any] = {
@@ -30,9 +30,21 @@ def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Res
 
         return response_200
 
+    if response.status_code == 400:
+        response_400 = cast(Any, None)
+        return response_400
+
+    if response.status_code == 401:
+        response_401 = cast(Any, None)
+        return response_401
+
     if response.status_code == 403:
         response_403 = cast(Any, None)
         return response_403
+
+    if response.status_code == 404:
+        response_404 = cast(Any, None)
+        return response_404
 
     if client.raise_on_unexpected_status:
         raise errors.UnexpectedStatus(response.status_code, response.content)
@@ -50,14 +62,14 @@ def _build_response(*, client: AuthenticatedClient | Client, response: httpx.Res
 
 
 def sync_detailed(
-    recipe_id: str,
+    recipe_id: int,
     *,
     client: AuthenticatedClient,
 ) -> Response[Any | Recipe]:
-    """Get recipe by ID
+    """Get a specific recipe by ID
 
     Args:
-        recipe_id (str):
+        recipe_id (int):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -79,14 +91,14 @@ def sync_detailed(
 
 
 def sync(
-    recipe_id: str,
+    recipe_id: int,
     *,
     client: AuthenticatedClient,
 ) -> Any | Recipe | None:
-    """Get recipe by ID
+    """Get a specific recipe by ID
 
     Args:
-        recipe_id (str):
+        recipe_id (int):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -103,14 +115,14 @@ def sync(
 
 
 async def asyncio_detailed(
-    recipe_id: str,
+    recipe_id: int,
     *,
     client: AuthenticatedClient,
 ) -> Response[Any | Recipe]:
-    """Get recipe by ID
+    """Get a specific recipe by ID
 
     Args:
-        recipe_id (str):
+        recipe_id (int):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -130,14 +142,14 @@ async def asyncio_detailed(
 
 
 async def asyncio(
-    recipe_id: str,
+    recipe_id: int,
     *,
     client: AuthenticatedClient,
 ) -> Any | Recipe | None:
-    """Get recipe by ID
+    """Get a specific recipe by ID
 
     Args:
-        recipe_id (str):
+        recipe_id (int):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.

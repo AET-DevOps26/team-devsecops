@@ -93,7 +93,7 @@ class RecipesApiController(
 
 	private fun RecipeEntity.toApiModel() =
 		Recipe(
-			id = id.toInt(),
+			id = id,
 			title = title,
 			ingredients = objectMapper.readValue(ingredients, object : TypeReference<List<RecipeIngredient>>() {}),
 			instructions = objectMapper.readValue(instructions, object : TypeReference<List<String>>() {}),

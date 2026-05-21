@@ -15,10 +15,10 @@ import java.util.Objects
 
 /**
  *
- * @param response
+ * @param token JWT bearer token to include in subsequent requests
  */
-data class HelpResponse(
+data class AuthResponse(
 	@get:Size(min = 1)
-	@Schema(example = "null", required = true, description = "")
-	@get:JsonProperty("response", required = true) val response: kotlin.String,
+	@Schema(example = "null", required = true, description = "JWT bearer token to include in subsequent requests")
+	@get:JsonProperty("token", required = true) val token: kotlin.String,
 )

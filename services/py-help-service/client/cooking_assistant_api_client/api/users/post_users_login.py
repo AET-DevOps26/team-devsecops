@@ -1,10 +1,11 @@
 from http import HTTPStatus
-from typing import Any
+from typing import Any, cast
 
 import httpx
 
 from ... import errors
 from ...client import AuthenticatedClient, Client
+from ...models.auth_response import AuthResponse
 from ...models.login_request import LoginRequest
 from ...types import Response
 
@@ -28,12 +29,15 @@ def _get_kwargs(
     return _kwargs
 
 
-def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> Any | None:
+def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> Any | AuthResponse | None:
     if response.status_code == 200:
-        return None
+        response_200 = AuthResponse.from_dict(response.json())
+
+        return response_200
 
     if response.status_code == 401:
-        return None
+        response_401 = cast(Any, None)
+        return response_401
 
     if client.raise_on_unexpected_status:
         raise errors.UnexpectedStatus(response.status_code, response.content)
@@ -41,7 +45,7 @@ def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Res
         return None
 
 
-def _build_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> Response[Any]:
+def _build_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> Response[Any | AuthResponse]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -54,8 +58,8 @@ def sync_detailed(
     *,
     client: AuthenticatedClient | Client,
     body: LoginRequest,
-) -> Response[Any]:
-    """Login user and return JWT token
+) -> Response[Any | AuthResponse]:
+    """Login and receive a JWT token
 
     Args:
         body (LoginRequest):
@@ -65,7 +69,7 @@ def sync_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Any]
+        Response[Any | AuthResponse]
     """
 
     kwargs = _get_kwargs(
@@ -79,12 +83,12 @@ def sync_detailed(
     return _build_response(client=client, response=response)
 
 
-async def asyncio_detailed(
+def sync(
     *,
     client: AuthenticatedClient | Client,
     body: LoginRequest,
-) -> Response[Any]:
-    """Login user and return JWT token
+) -> Any | AuthResponse | None:
+    """Login and receive a JWT token
 
     Args:
         body (LoginRequest):
@@ -94,7 +98,31 @@ async def asyncio_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Any]
+        Any | AuthResponse
+    """
+
+    return sync_detailed(
+        client=client,
+        body=body,
+    ).parsed
+
+
+async def asyncio_detailed(
+    *,
+    client: AuthenticatedClient | Client,
+    body: LoginRequest,
+) -> Response[Any | AuthResponse]:
+    """Login and receive a JWT token
+
+    Args:
+        body (LoginRequest):
+
+    Raises:
+        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+        httpx.TimeoutException: If the request takes longer than Client.timeout.
+
+    Returns:
+        Response[Any | AuthResponse]
     """
 
     kwargs = _get_kwargs(
@@ -104,3 +132,29 @@ async def asyncio_detailed(
     response = await client.get_async_httpx_client().request(**kwargs)
 
     return _build_response(client=client, response=response)
+
+
+async def asyncio(
+    *,
+    client: AuthenticatedClient | Client,
+    body: LoginRequest,
+) -> Any | AuthResponse | None:
+    """Login and receive a JWT token
+
+    Args:
+        body (LoginRequest):
+
+    Raises:
+        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+        httpx.TimeoutException: If the request takes longer than Client.timeout.
+
+    Returns:
+        Any | AuthResponse
+    """
+
+    return (
+        await asyncio_detailed(
+            client=client,
+            body=body,
+        )
+    ).parsed

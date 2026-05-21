@@ -35,9 +35,17 @@ def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Res
 
         return response_200
 
-    if response.status_code == 403:
-        response_403 = cast(Any, None)
-        return response_403
+    if response.status_code == 400:
+        response_400 = cast(Any, None)
+        return response_400
+
+    if response.status_code == 401:
+        response_401 = cast(Any, None)
+        return response_401
+
+    if response.status_code == 502:
+        response_502 = cast(Any, None)
+        return response_502
 
     if client.raise_on_unexpected_status:
         raise errors.UnexpectedStatus(response.status_code, response.content)
@@ -59,7 +67,7 @@ def sync_detailed(
     client: AuthenticatedClient,
     body: HelpRequest,
 ) -> Response[Any | HelpResponse]:
-    """Ask AI cooking assistant for help
+    """Ask the LLM a question about a recipe
 
     Args:
         body (HelpRequest):
@@ -88,7 +96,7 @@ def sync(
     client: AuthenticatedClient,
     body: HelpRequest,
 ) -> Any | HelpResponse | None:
-    """Ask AI cooking assistant for help
+    """Ask the LLM a question about a recipe
 
     Args:
         body (HelpRequest):
@@ -112,7 +120,7 @@ async def asyncio_detailed(
     client: AuthenticatedClient,
     body: HelpRequest,
 ) -> Response[Any | HelpResponse]:
-    """Ask AI cooking assistant for help
+    """Ask the LLM a question about a recipe
 
     Args:
         body (HelpRequest):
@@ -139,7 +147,7 @@ async def asyncio(
     client: AuthenticatedClient,
     body: HelpRequest,
 ) -> Any | HelpResponse | None:
-    """Ask AI cooking assistant for help
+    """Ask the LLM a question about a recipe
 
     Args:
         body (HelpRequest):

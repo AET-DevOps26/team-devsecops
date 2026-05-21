@@ -30,9 +30,9 @@ def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Res
 
         return response_200
 
-    if response.status_code == 403:
-        response_403 = cast(Any, None)
-        return response_403
+    if response.status_code == 401:
+        response_401 = cast(Any, None)
+        return response_401
 
     if client.raise_on_unexpected_status:
         raise errors.UnexpectedStatus(response.status_code, response.content)
@@ -53,7 +53,7 @@ def sync_detailed(
     *,
     client: AuthenticatedClient,
 ) -> Response[Any | list[Recipe]]:
-    """List user recipes
+    """List all recipes saved by the current user
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -76,7 +76,7 @@ def sync(
     *,
     client: AuthenticatedClient,
 ) -> Any | list[Recipe] | None:
-    """List user recipes
+    """List all recipes saved by the current user
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -95,7 +95,7 @@ async def asyncio_detailed(
     *,
     client: AuthenticatedClient,
 ) -> Response[Any | list[Recipe]]:
-    """List user recipes
+    """List all recipes saved by the current user
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -116,7 +116,7 @@ async def asyncio(
     *,
     client: AuthenticatedClient,
 ) -> Any | list[Recipe] | None:
-    """List user recipes
+    """List all recipes saved by the current user
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.

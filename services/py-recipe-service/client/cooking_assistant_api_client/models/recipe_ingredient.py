@@ -4,9 +4,6 @@ from collections.abc import Mapping
 from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
-from attrs import field as _attrs_field
-
-from ..types import UNSET, Unset
 
 T = TypeVar("T", bound="RecipeIngredient")
 
@@ -15,15 +12,14 @@ T = TypeVar("T", bound="RecipeIngredient")
 class RecipeIngredient:
     """
     Attributes:
-        quantity (float | Unset):
-        unit (str | Unset):
-        name (str | Unset):
+        quantity (float):
+        unit (str): Unit of measurement (e.g. g, ml, cup, tbsp)
+        name (str):
     """
 
-    quantity: float | Unset = UNSET
-    unit: str | Unset = UNSET
-    name: str | Unset = UNSET
-    additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
+    quantity: float
+    unit: str
+    name: str
 
     def to_dict(self) -> dict[str, Any]:
         quantity = self.quantity
@@ -33,25 +29,25 @@ class RecipeIngredient:
         name = self.name
 
         field_dict: dict[str, Any] = {}
-        field_dict.update(self.additional_properties)
-        field_dict.update({})
-        if quantity is not UNSET:
-            field_dict["quantity"] = quantity
-        if unit is not UNSET:
-            field_dict["unit"] = unit
-        if name is not UNSET:
-            field_dict["name"] = name
+
+        field_dict.update(
+            {
+                "quantity": quantity,
+                "unit": unit,
+                "name": name,
+            }
+        )
 
         return field_dict
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
-        quantity = d.pop("quantity", UNSET)
+        quantity = d.pop("quantity")
 
-        unit = d.pop("unit", UNSET)
+        unit = d.pop("unit")
 
-        name = d.pop("name", UNSET)
+        name = d.pop("name")
 
         recipe_ingredient = cls(
             quantity=quantity,
@@ -59,21 +55,4 @@ class RecipeIngredient:
             name=name,
         )
 
-        recipe_ingredient.additional_properties = d
         return recipe_ingredient
-
-    @property
-    def additional_keys(self) -> list[str]:
-        return list(self.additional_properties.keys())
-
-    def __getitem__(self, key: str) -> Any:
-        return self.additional_properties[key]
-
-    def __setitem__(self, key: str, value: Any) -> None:
-        self.additional_properties[key] = value
-
-    def __delitem__(self, key: str) -> None:
-        del self.additional_properties[key]
-
-    def __contains__(self, key: str) -> bool:
-        return key in self.additional_properties

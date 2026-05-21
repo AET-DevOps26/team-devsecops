@@ -35,7 +35,7 @@ def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Res
     if response.status_code == 400:
         return None
 
-    if response.status_code == 403:
+    if response.status_code == 401:
         return None
 
     if response.status_code == 409:
@@ -64,7 +64,7 @@ def sync_detailed(
     """Update user profile and preferences
 
     Args:
-        body (UserProfileUpdate):
+        body (UserProfileUpdate): At least one field must be provided
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -93,7 +93,7 @@ async def asyncio_detailed(
     """Update user profile and preferences
 
     Args:
-        body (UserProfileUpdate):
+        body (UserProfileUpdate): At least one field must be provided
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.

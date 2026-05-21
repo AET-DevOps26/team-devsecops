@@ -32,7 +32,10 @@ def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Res
     if response.status_code == 201:
         return None
 
-    if response.status_code == 403:
+    if response.status_code == 400:
+        return None
+
+    if response.status_code == 401:
         return None
 
     if client.raise_on_unexpected_status:
@@ -55,7 +58,7 @@ def sync_detailed(
     client: AuthenticatedClient,
     body: RecipeInput,
 ) -> Response[Any]:
-    """Save a recipe
+    """Save a recipe to the current user's collection
 
     Args:
         body (RecipeInput):
@@ -84,7 +87,7 @@ async def asyncio_detailed(
     client: AuthenticatedClient,
     body: RecipeInput,
 ) -> Response[Any]:
-    """Save a recipe
+    """Save a recipe to the current user's collection
 
     Args:
         body (RecipeInput):

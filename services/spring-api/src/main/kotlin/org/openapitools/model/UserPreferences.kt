@@ -15,15 +15,15 @@ import java.util.Objects
 
 /**
  *
- * @param diet
- * @param allergies
- * @param aboutMe
+ * @param diet Dietary restriction or style (e.g. vegan, keto)
+ * @param allergies List of ingredients the user is allergic to
+ * @param aboutMe Free-form user context provided to the AI
  */
 data class UserPreferences(
-	@Schema(example = "null", description = "")
+	@Schema(example = "null", description = "Dietary restriction or style (e.g. vegan, keto)")
 	@get:JsonProperty("diet") val diet: kotlin.String? = null,
-	@Schema(example = "null", description = "")
+	@Schema(example = "null", description = "List of ingredients the user is allergic to")
 	@get:JsonProperty("allergies") val allergies: kotlin.collections.List<kotlin.String>? = null,
-	@Schema(example = "null", description = "")
+	@Schema(example = "null", description = "Free-form user context provided to the AI")
 	@get:JsonProperty("aboutMe") val aboutMe: kotlin.collections.List<kotlin.String>? = null,
 )

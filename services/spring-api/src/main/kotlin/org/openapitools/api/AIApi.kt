@@ -21,7 +21,7 @@ import jakarta.validation.constraints.Pattern
 import jakarta.validation.constraints.Size
 import org.openapitools.model.HelpRequest
 import org.openapitools.model.HelpResponse
-import org.openapitools.model.Recipe
+import org.openapitools.model.RecipeInput
 import org.openapitools.model.RecipeRequest
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
@@ -38,16 +38,18 @@ import kotlin.collections.Map
 interface AIApi {
 	@Operation(
 		tags = ["AI"],
-		summary = "Ask AI cooking assistant for help",
+		summary = "Ask the LLM a question about a recipe",
 		operationId = "aiHelpPost",
 		description = """""",
 		responses = [
 			ApiResponse(
 				responseCode = "200",
-				description = "AI response",
+				description = "AI-generated help text",
 				content = [Content(schema = Schema(implementation = HelpResponse::class))],
 			),
-			ApiResponse(responseCode = "403", description = "Not logged in"),
+			ApiResponse(responseCode = "400", description = "Invalid request body"),
+			ApiResponse(responseCode = "401", description = "Missing or invalid token"),
+			ApiResponse(responseCode = "502", description = "GenAI service unavailable or returned an unparseable response"),
 		],
 		security = [ SecurityRequirement(name = "bearerAuth") ],
 	)
@@ -64,16 +66,18 @@ interface AIApi {
 
 	@Operation(
 		tags = ["AI"],
-		summary = "Generate recipes using AI",
+		summary = "Generate recipes using an LLM based on a prompt",
 		operationId = "aiRecipesPost",
 		description = """""",
 		responses = [
 			ApiResponse(
 				responseCode = "200",
-				description = "Generated recipes",
-				content = [Content(array = ArraySchema(schema = Schema(implementation = Recipe::class)))],
+				description = "AI-generated recipes without IDs",
+				content = [Content(array = ArraySchema(schema = Schema(implementation = RecipeInput::class)))],
 			),
-			ApiResponse(responseCode = "403", description = "Not logged in"),
+			ApiResponse(responseCode = "400", description = "Invalid request body"),
+			ApiResponse(responseCode = "401", description = "Missing or invalid token"),
+			ApiResponse(responseCode = "502", description = "GenAI service unavailable or returned an unparseable response"),
 		],
 		security = [ SecurityRequirement(name = "bearerAuth") ],
 	)
@@ -86,7 +90,7 @@ interface AIApi {
 	)
 	fun aiRecipesPost(
 		@Parameter(description = "", required = true) @Valid @RequestBody recipeRequest: RecipeRequest,
-	): ResponseEntity<List<Recipe>> = ResponseEntity(HttpStatus.NOT_IMPLEMENTED)
+	): ResponseEntity<List<RecipeInput>> = ResponseEntity(HttpStatus.NOT_IMPLEMENTED)
 
 	companion object {
 		// for your own safety never directly reuse these path definitions in tests

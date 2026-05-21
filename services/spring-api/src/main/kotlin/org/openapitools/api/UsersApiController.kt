@@ -139,10 +139,26 @@ class UsersApiController(
 		return ResponseEntity(HttpStatus.OK)
 	}
 
+	@Operation(
+		summary = "Delete current user account and all associated recipes",
+		operationId = "usersProfileDelete",
+		responses = [ApiResponse(responseCode = "204", description = "User account and all associated data deleted")],
+		security = [SecurityRequirement(name = "bearerAuth")],
+	)
+	@RequestMapping(method = [RequestMethod.DELETE], value = [PATH_USERS_PROFILE_DELETE])
+	fun usersProfileDelete(
+		@AuthenticationPrincipal principal: UserDetails,
+	): ResponseEntity<Unit> {
+		val user = userRepository.findByUsername(principal.username).orElseThrow()
+		userRepository.delete(user)
+		return ResponseEntity(HttpStatus.NO_CONTENT)
+	}
+
 	companion object {
 		const val BASE_PATH: String = "/api/v1"
 		const val PATH_USERS_LOGIN_POST: String = "/users/login"
 		const val PATH_USERS_LOGOUT_POST: String = "/users/logout"
+		const val PATH_USERS_PROFILE_DELETE: String = "/users/profile"
 		const val PATH_USERS_PROFILE_GET: String = "/users/profile"
 		const val PATH_USERS_PROFILE_PUT: String = "/users/profile"
 		const val PATH_USERS_REGISTER_POST: String = "/users/register"

@@ -1,5 +1,6 @@
 """Contains all the data models used in inputs/outputs"""
 
+from .auth_response import AuthResponse
 from .help_request import HelpRequest
 from .help_request_forwarded import HelpRequestForwarded
 from .help_response import HelpResponse
@@ -16,6 +17,7 @@ from .user_profile import UserProfile
 from .user_profile_update import UserProfileUpdate
 
 __all__ = (
+    "AuthResponse",
     "HelpRequest",
     "HelpRequestForwarded",
     "HelpResponse",

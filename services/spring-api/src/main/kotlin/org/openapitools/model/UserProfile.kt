@@ -20,6 +20,7 @@ import java.util.Objects
  * @param preferences
  */
 data class UserProfile(
+	@get:Size(min = 1)
 	@Schema(example = "null", required = true, description = "")
 	@get:JsonProperty("username", required = true) val username: kotlin.String,
 	@field:Valid
