@@ -255,10 +255,10 @@ function RecipeView({
 				{/* Nutrients */}
         {recipe.nutrients && (
           <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-gray-600">
-            {recipe.nutrients.calories != null && <span>{recipe.nutrients.calories} kcal</span>}
-            {recipe.nutrients.protein != null && <span>{recipe.nutrients.protein}g protein</span>}
-            {recipe.nutrients.fat != null && <span>{recipe.nutrients.fat}g fat</span>}
-            {recipe.nutrients.carbs != null && <span>{recipe.nutrients.carbs}g carbs</span>}
+            {recipe.nutrients.calories != null && <span>{Math.round(recipe.nutrients.calories * scale)} kcal</span>}
+            {recipe.nutrients.protein != null && <span>{Math.round(recipe.nutrients.protein * scale)}g protein</span>}
+            {recipe.nutrients.fat != null && <span>{Math.round(recipe.nutrients.fat * scale)}g fat</span>}
+            {recipe.nutrients.carbs != null && <span>{Math.round(recipe.nutrients.carbs * scale)}g carbs</span>}
           </div>
         )}
       </article>
