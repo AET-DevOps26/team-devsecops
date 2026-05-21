@@ -5,6 +5,7 @@ import { useAuth } from '../auth'
 import { Button } from '../components/Button'
 import { formatQuantity } from '../recipeFormat'
 import { usePressPulse } from '../usePressPulse'
+import { errorMessage } from '../apiError'
 
 type Recipe = components['schemas']['Recipe']
 type RecipeRequest = components['schemas']['RecipeRequest']
@@ -42,7 +43,7 @@ export function GeneratePage() {
         },
         body: JSON.stringify(body),
       })
-      if (!response.ok) throw new Error(`HTTP ${response.status}`)
+      if (!response.ok) throw new Error(await errorMessage(response, `HTTP ${response.status}`))
       const data = (await response.json()) as Recipe[]
       setRecipes(data)
       setStatus(data.length === 0 ? 'No recipes returned.' : null)
