@@ -1,5 +1,9 @@
 # Cooking Assistant (Team DevSecOps)
 
+## Try it out!
+
+Deployed on GitHub pages & GCP: https://aet-devops26.github.io/team-devsecops
+
 ## Local development
 
 The full stack runs under Docker Compose with live-reload:
