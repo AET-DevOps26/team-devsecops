@@ -23,6 +23,8 @@ server:
   port: 8080
 
 ai:
+  hmac:
+    secret: ${INTERNAL_AUTH_SECRET}
   help:
     service:
       url: ${AI_HELP_SERVICE_URL:http://localhost:8091}
