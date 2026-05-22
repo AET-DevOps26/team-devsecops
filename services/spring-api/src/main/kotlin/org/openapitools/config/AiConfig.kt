@@ -21,7 +21,7 @@ class AiConfig {
 	@Value("\${ai.help.service.url:http://localhost:8091}")
 	private lateinit var aiHelpServiceUrl: String
 
-	@Value("\${internal.auth.secret}")
+	@Value("\${ai.hmac.secret}")
     private lateinit var internalAuthSecret: String
 
 	@Bean
