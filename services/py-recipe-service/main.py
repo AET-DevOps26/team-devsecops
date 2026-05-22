@@ -5,7 +5,7 @@ import json
 import time
 import traceback
 from typing import Any
-from fastapi import Depends, FastAPI, HTTPException, Header
+from fastapi import Depends, FastAPI, HTTPException, Header, Request
 from dotenv import load_dotenv
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.messages import HumanMessage, SystemMessage
@@ -24,13 +24,13 @@ if not SECRET_KEY_STR:
 SECRET_KEY_BYTES = SECRET_KEY_STR.encode('utf-8')
 
 async def verify_internal_hmac(
+    request: Request,
     x_internal_timestamp: str = Header(None), 
     x_internal_signature: str = Header(None)
 ):
     """
-    Validates that the incoming request contains an authentic HMAC signature
-    and checks against clock drift.
-    Caution: Redundant code in py-help-service and py-recipe service.
+    Validates that the incoming request contains an authentic HMAC signature bound to the timestamp and the request payload.
+    Caution: Redundant versions of this method in py-help-service and py-recipe service.
     """
     if not x_internal_timestamp or not x_internal_signature:
         raise HTTPException(
@@ -49,17 +49,23 @@ async def verify_internal_hmac(
     if abs(current_time - request_time) > 300:
         raise HTTPException(status_code=401, detail="Request token signature expired.")
 
-    # 3. Recalculate signature locally based on the timestamp they provided
-    expected_signature = hmac.new(
-        SECRET_KEY_BYTES, 
-        x_internal_timestamp.encode('utf-8'), 
-        hashlib.sha256
-    ).hexdigest()
+    # 3. Read the raw body bytes directly from the stream
+    body_bytes = await request.body()
 
-    # 4. Use constant-time comparison to completely prevent timing attacks
+    # 4. Recalculate signature locally by hashing both pieces together
+    # Using a separator byte like b'|' prevents boundary shifting bugs
+    hmac_context = hmac.new(SECRET_KEY_BYTES, digestmod=hashlib.sha256)
+    hmac_context.update(x_internal_timestamp.encode('utf-8'))
+    hmac_context.update(b'.') 
+    hmac_context.update(body_bytes)
+    
+    expected_signature = hmac_context.hexdigest()
+
+    # 5. Use constant-time comparison to completely prevent timing attacks
     if not hmac.compare_digest(expected_signature, x_internal_signature):
         raise HTTPException(status_code=403, detail="Forbidden: HMAC signature validation mismatch.")
-
+    
+    
 llm = ChatGoogleGenerativeAI(
     model="gemini-3.1-flash-lite-preview",
     google_api_key=os.getenv("SERVICE_API_KEY")
