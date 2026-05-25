@@ -18,13 +18,13 @@ app = FastAPI(title="Cooking Assistant GenAI Service")
 
 SECRET_KEY_STR = os.getenv("INTERNAL_AUTH_SECRET")
 if not SECRET_KEY_STR:
-    raise RuntimeError("CRITICAL: INTERNAL_AUTH_SECRET environment variable is missing!") 
+    raise RuntimeError("CRITICAL: INTERNAL_AUTH_SECRET environment variable is missing!")
 
 SECRET_KEY_BYTES = SECRET_KEY_STR.encode('utf-8')
 
 async def verify_internal_hmac(
     request: Request,
-    x_internal_timestamp: str = Header(None), 
+    x_internal_timestamp: str = Header(None),
     x_internal_signature: str = Header(None)
 ):
     """
@@ -57,7 +57,7 @@ async def verify_internal_hmac(
     hmac_context.update(x_internal_timestamp.encode('utf-8'))
     hmac_context.update(b'.')
     hmac_context.update(body_bytes)
-    
+
     expected_signature = hmac_context.hexdigest()
 
     # 5. Use constant-time comparison to completely prevent timing attacks
@@ -65,8 +65,11 @@ async def verify_internal_hmac(
         raise HTTPException(status_code=403, detail="Forbidden: HMAC signature validation mismatch.")
 
 llm = ChatGoogleGenerativeAI(
-    model="gemini-3.1-flash-lite-preview",
-    google_api_key=os.getenv("SERVICE_API_KEY")
+    model="gemini-3.1-flash-lite",
+    google_api_key=os.getenv("SERVICE_API_KEY"),
+    # Fail fast instead of retrying with long exponential backoff
+    max_retries=1,
+    timeout=60,
 )
 
 @app.get("/health")
@@ -75,29 +78,29 @@ def health_check():
 
 @app.post("/ai/help", dependencies=[Depends(verify_internal_hmac)])
 async def generate_help(request_data: dict[str, Any]):
-    
+
     try:
         request = HelpRequestForwarded.from_dict(request_data)
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Invalid request format: {str(e)}")
-    
+
     try:
         context = ["You are a professional culinary assistant."]
-        
+
         if request.profile and request.profile.preferences:
             prefs = request.profile.preferences
             diet = prefs.diet or []
             if diet:
                 context.append(f"The user specifies the following diet: {', '.join(diet)}.")
-    
+
             about_me = prefs.about_me or []
             if about_me:
-                context.append(f"The user specifies: {', '.join(about_me)}") 
+                context.append(f"The user specifies: {', '.join(about_me)}")
 
             allergies = prefs.allergies or []
             if allergies:
                 context.append(f"Important: The user is allergic to: {', '.join(allergies)}.")
-        
+
         if request.recipe:
             context.append(f"The user is currently looking at a recipe for '{request.recipe.title}'.")
 
@@ -109,6 +112,6 @@ async def generate_help(request_data: dict[str, Any]):
 
         help_response = HelpResponse(response=result.content)
         return help_response.to_dict()
-    
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

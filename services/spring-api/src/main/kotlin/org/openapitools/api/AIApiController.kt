@@ -18,6 +18,8 @@ import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.reactive.function.client.WebClient
+import java.time.Duration
+import java.util.concurrent.TimeoutException
 
 @RestController
 @Validated
@@ -28,6 +30,9 @@ class AIApiController(
 	private val userRepository: UserRepository,
 	private val objectMapper: ObjectMapper,
 ) : AIApi {
+	// Cap how long we wait on the GenAI service before returning an error
+	private val aiTimeout = Duration.ofSeconds(60)
+
 	override fun aiHelpPost(@Valid helpRequest: HelpRequest): ResponseEntity<HelpResponse> {
 		val user = userRepository.findByUsername(currentUsername()).orElseThrow()
 		val response =
@@ -38,6 +43,8 @@ class AIApiController(
 				.bodyValue(mapOf("profile" to user.toProfile(), "recipe" to helpRequest.recipe, "prompt" to helpRequest.prompt))
 				.retrieve()
 				.bodyToMono(HelpResponse::class.java)
+				.timeout(aiTimeout)
+				.onErrorMap(TimeoutException::class.java) { GatewayTimeoutException("GenAI service timed out") }
 				.block() ?: throw BadGatewayException("GenAI service unavailable or returned an unparseable response")
 		return ResponseEntity.ok(response)
 	}
@@ -52,6 +59,8 @@ class AIApiController(
 				.bodyValue(mapOf("profile" to user.toProfile(), "prompt" to recipeRequest.prompt))
 				.retrieve()
 				.bodyToMono(object : ParameterizedTypeReference<List<RecipeInput>>() {})
+				.timeout(aiTimeout)
+				.onErrorMap(TimeoutException::class.java) { GatewayTimeoutException("GenAI service timed out") }
 				.block() ?: throw BadGatewayException("GenAI service unavailable or returned an unparseable response")
 		return ResponseEntity.ok(recipes)
 	}
