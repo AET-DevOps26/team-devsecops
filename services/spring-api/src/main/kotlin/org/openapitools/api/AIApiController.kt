@@ -1,6 +1,5 @@
 package org.openapitools.api
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import jakarta.validation.Valid
 import org.openapitools.entity.UserEntity
 import org.openapitools.model.HelpRequest
@@ -20,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.reactive.function.client.WebClient
 import java.time.Duration
 import java.util.concurrent.TimeoutException
+import tools.jackson.databind.ObjectMapper
 
 @RestController
 @Validated
