@@ -95,6 +95,46 @@ interface RecipesApi {
 
 	@Operation(
 		tags = ["Recipes"],
+		summary = "Delete a saved recipe by ID",
+		operationId = "recipesRecipeIdDelete",
+		description = """""",
+		responses = [
+			ApiResponse(responseCode = "204", description = "Recipe deleted successfully"),
+			ApiResponse(
+				responseCode = "400",
+				description = "Recipe ID is not a valid integer",
+				content = [Content(schema = Schema(implementation = ErrorResponse::class))],
+			),
+			ApiResponse(
+				responseCode = "401",
+				description = "Missing or invalid token",
+				content = [Content(schema = Schema(implementation = ErrorResponse::class))],
+			),
+			ApiResponse(
+				responseCode = "403",
+				description = "Recipe belongs to a different user",
+				content = [Content(schema = Schema(implementation = ErrorResponse::class))],
+			),
+			ApiResponse(
+				responseCode = "404",
+				description = "Recipe not found",
+				content = [Content(schema = Schema(implementation = ErrorResponse::class))],
+			),
+		],
+		security = [ SecurityRequirement(name = "bearerAuth") ],
+	)
+	@RequestMapping(
+		method = [RequestMethod.DELETE],
+		// "/recipes/{recipeId}"
+		value = [PATH_RECIPES_RECIPE_ID_DELETE],
+		produces = ["application/json"],
+	)
+	fun recipesRecipeIdDelete(
+		@Min(value = 1L)@Parameter(description = "", required = true) @PathVariable("recipeId") recipeId: kotlin.Long,
+	): ResponseEntity<Unit> = ResponseEntity(HttpStatus.NOT_IMPLEMENTED)
+
+	@Operation(
+		tags = ["Recipes"],
 		summary = "Get a specific recipe by ID",
 		operationId = "recipesRecipeIdGet",
 		description = """""",
@@ -141,6 +181,7 @@ interface RecipesApi {
 		// for your own safety never directly reuse these path definitions in tests
 		const val PATH_RECIPES_GET: String = "/recipes"
 		const val PATH_RECIPES_POST: String = "/recipes"
+		const val PATH_RECIPES_RECIPE_ID_DELETE: String = "/recipes/{recipeId}"
 		const val PATH_RECIPES_RECIPE_ID_GET: String = "/recipes/{recipeId}"
 	}
 }

@@ -6,6 +6,7 @@ services/py-help-service/client/** linguist-generated=true
 services/py-recipe-service/client/** linguist-generated=true
 
 # kotlin-spring output
+services/spring-api/src/main/resources/openapi.yaml linguist-generated=true
 services/spring-api/src/main/kotlin/org/openapitools/api/*Api.kt linguist-generated=true
 services/spring-api/src/main/kotlin/org/openapitools/api/ApiUtil.kt linguist-generated=true
 services/spring-api/src/main/kotlin/org/openapitools/api/Exceptions.kt linguist-generated=true
