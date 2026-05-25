@@ -294,6 +294,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+        "504":
+          description: GenAI service timed out
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 
   /ai/help:
     post:
@@ -328,6 +334,12 @@ paths:
                 $ref: "#/components/schemas/ErrorResponse"
         "502":
           description: GenAI service unavailable or returned an unparseable response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "504":
+          description: GenAI service timed out
           content:
             application/json:
               schema:
