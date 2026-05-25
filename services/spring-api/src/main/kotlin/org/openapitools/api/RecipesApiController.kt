@@ -1,7 +1,5 @@
 package org.openapitools.api
 
-import com.fasterxml.jackson.core.type.TypeReference
-import com.fasterxml.jackson.databind.ObjectMapper
 import jakarta.validation.constraints.Min
 import org.openapitools.entity.RecipeEntity
 import org.openapitools.model.Recipe
@@ -16,6 +14,8 @@ import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+import tools.jackson.core.type.TypeReference
+import tools.jackson.databind.ObjectMapper
 
 @RestController
 @Validated

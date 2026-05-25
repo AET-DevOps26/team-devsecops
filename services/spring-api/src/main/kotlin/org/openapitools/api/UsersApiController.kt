@@ -1,6 +1,5 @@
 package org.openapitools.api
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import jakarta.validation.Valid
 import org.openapitools.entity.UserEntity
 import org.openapitools.model.AuthRequest
@@ -20,6 +19,7 @@ import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+import tools.jackson.databind.ObjectMapper
 
 @RestController
 @Validated
