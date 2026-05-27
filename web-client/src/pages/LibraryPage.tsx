@@ -22,7 +22,7 @@ export function LibraryPage() {
       try {
         const res = await apiFetch('/api/v1/recipes')
         if (!res.ok) throw new Error(await errorMessage(res, `HTTP ${res.status}`))
-        const data = (await res.json()) as Recipe[]
+        const data = ((await res.json()) as Recipe[]).reverse() // newest recipe first
         if (cancelled) return
         // keep the list so the recipe view can read it (incl. prev/next navigation)
         sessionStorage.setItem('library_recipes', JSON.stringify(data))
@@ -67,15 +67,16 @@ export function LibraryPage() {
   }
 
   return (
-    <>
+    <div className="columns-1 gap-4 md:columns-2 lg:columns-3">
       {recipes.map((recipe, i) => (
-        <RecipeCard
-          key={recipe.id}
-          recipe={recipe}
-          recipeId={recipe.id}
-          onOpen={() => navigate('/recipe', { state: { index: i, source: 'library' } })}
-        />
+        <div key={recipe.id} className="mb-4 break-inside-avoid">
+          <RecipeCard
+            recipe={recipe}
+            recipeId={recipe.id}
+            onOpen={() => navigate('/recipe', { state: { index: i, source: 'library' } })}
+          />
+        </div>
       ))}
-    </>
+    </div>
   )
 }

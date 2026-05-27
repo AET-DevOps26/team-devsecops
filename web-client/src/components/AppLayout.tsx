@@ -19,7 +19,7 @@ export function AppLayout() {
         <header className={`border-b border-gray-200 p-4 text-xl md:hidden ${bold ? 'font-bold' : ''}`}>
           {title}
         </header>
-        <main className="mx-auto w-full max-w-2xl p-6 pb-24 md:pb-6">
+        <main className={`mx-auto w-full p-6 pb-24 md:pb-6 ${pathname === '/library' ? 'max-w-6xl' : 'max-w-2xl'}`}>
           <div key={pathname} className="flex flex-col gap-4 animate-fade-in">
             <Outlet />
           </div>

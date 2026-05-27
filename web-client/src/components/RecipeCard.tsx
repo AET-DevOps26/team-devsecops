@@ -1,7 +1,7 @@
 import type { KeyboardEvent } from 'react'
 import type { components } from '../api'
 import { formatQuantity } from '../recipeFormat'
-import { SaveButton } from './SaveButton'
+import { RecipeSaveButton } from './RecipeSaveButton.tsx'
 
 type RecipeInput = components['schemas']['RecipeInput']
 
@@ -11,10 +11,12 @@ export function RecipeCard({
   recipe,
   onOpen,
   recipeId,
+  onSavedIdChange,
 }: {
   recipe: RecipeInput
   onOpen: () => void
   recipeId?: number
+  onSavedIdChange?: (id: number | undefined) => void
 }) {
   function handleKeyDown(e: KeyboardEvent) {
     if (e.key === 'Enter' || e.key === ' ') {
@@ -29,7 +31,7 @@ export function RecipeCard({
       tabIndex={0}
       onClick={onOpen}
       onKeyDown={handleKeyDown}
-      className="w-full text-left rounded-lg border border-gray-200 bg-white p-6 shadow-sm flex flex-col gap-3 cursor-pointer"
+      className="w-full text-left rounded-lg border border-gray-200 bg-white p-6 shadow-sm flex flex-col gap-3 cursor-pointer transition-transform duration-100 hover:scale-99"
     >
       <header className="flex items-baseline justify-between gap-3">
         <h2 className="text-lg font-bold">{recipe.title}</h2>
@@ -37,7 +39,12 @@ export function RecipeCard({
           <span className="text-sm text-gray-500 whitespace-nowrap">
             {recipe.portions} {recipe.portions === 1 ? 'portion' : 'portions'}
           </span>
-          <SaveButton recipe={recipe} recipeId={recipeId} className="-my-2" />
+          <RecipeSaveButton
+            recipe={recipe}
+            recipeId={recipeId}
+            onSavedIdChange={onSavedIdChange}
+            className="-my-2"
+          />
         </div>
       </header>
 

@@ -5,17 +5,17 @@ import { Button } from '../components/Button'
 import { RecipeCard } from '../components/RecipeCard'
 import { usePressPulse } from '../usePressPulse'
 import { errorMessage } from '../apiError'
-import { clearSavedRecipes } from '../savedRecipes'
 import { SessionExpiredError, useApi } from '../useApi'
 
-type Recipe = components['schemas']['Recipe']
+// id is stored on the recipe once it is saved
+type Recipe = components['schemas']['RecipeInput'] & { id?: number }
 type RecipeRequest = components['schemas']['RecipeRequest']
 
 export function GeneratePage() {
   const apiFetch = useApi()
   const navigate = useNavigate()
   const [generateBtnRef, pulseGenerate] = usePressPulse<HTMLButtonElement>()
-  const [prompt, setPrompt] = useState('')
+  const [prompt, setPrompt] = useState(() => sessionStorage.getItem('recipe_prompt') ?? '')
   // keep the last results so the list is restored when returning from a recipe page
   const [recipes, setRecipes] = useState<Recipe[]>(() => {
     const stored = sessionStorage.getItem('generated_recipes')
@@ -32,7 +32,7 @@ export function GeneratePage() {
     setLoading(true)
     setStatus('Generating recipes… (this might take a while)')
     setRecipes([])
-    clearSavedRecipes() // invalidate the "saved" markers from the previous run
+    sessionStorage.setItem('recipe_prompt', prompt)
     try {
       const body: RecipeRequest = { prompt }
       const response = await apiFetch('/api/v1/ai/recipes', {
@@ -52,13 +52,19 @@ export function GeneratePage() {
     }
   }
 
+  function handleSavedIdChange(index: number, newId: number | undefined) {
+    setRecipes((prev) => prev.map((prevRecipe, prevIndex) => (prevIndex === index ? { ...prevRecipe, id: newId } : prevRecipe)))
+  }
+
   return (
     <>
+      <h2 className="text-lg font-bold">What do you want to cook today?</h2>
       <textarea
         className="w-full min-h-32 border border-gray-300 rounded p-3"
         placeholder="What do you want to cook? (e.g. ingredients, cuisine, constraints)"
         value={prompt}
         onChange={(e) => setPrompt(e.target.value)}
+        onFocus={(e) => e.target.select()}
         onKeyDown={(e) => {
           if (e.key === 'Enter' && !e.shiftKey) {
             // on Enter: directly submit instead of adding a new line
@@ -82,11 +88,13 @@ export function GeneratePage() {
 
       {status && <p className="text-gray-600">{status}</p>}
 
-      {recipes.map((recipe, i) => (
+      {recipes.map((recipe, index) => (
         <RecipeCard
-          key={i}
+          key={index}
           recipe={recipe}
-          onOpen={() => navigate('/recipe', { state: { index: i, source: 'generated' } })}
+          recipeId={recipe.id}
+          onSavedIdChange={(newId) => handleSavedIdChange(index, newId)}
+          onOpen={() => navigate('/recipe', { state: {index, source: 'generated' } })}
         />
       ))}
     </>
