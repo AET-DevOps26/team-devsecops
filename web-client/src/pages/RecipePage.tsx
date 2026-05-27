@@ -10,17 +10,15 @@ import {
 import Markdown from 'react-markdown'
 import { Navigate, useLocation, useNavigate } from 'react-router-dom'
 import type { components } from '../api'
-import { useAuth } from '../auth'
 import { formatQuantity } from '../recipeFormat'
 import { usePressPulse } from '../usePressPulse'
 import { errorMessage } from '../apiError'
+import { SessionExpiredError, useApi } from '../useApi'
 
 type Recipe = components['schemas']['Recipe']
 type HelpRequest = components['schemas']['HelpRequest']
 type HelpResponse = components['schemas']['HelpResponse']
 type HelpEntry = { question: string; answer: string }
-
-const API_BASE = import.meta.env.VITE_API_BASE ?? ''
 
 function toggleSetItem(set: Set<number>, item: number): Set<number> {
   const next = new Set(set)
@@ -71,7 +69,7 @@ function RecipeView({
   onAnswer: (entry: HelpEntry) => void
 }) {
   const navigate = useNavigate()
-  const { token } = useAuth()
+  const apiFetch = useApi()
 
   const [portions, setPortions] = useState(recipe.portions)
   const [checkedIngredients, setCheckedIngredients] = useState<Set<number>>(new Set())
@@ -113,12 +111,9 @@ function RecipeView({
         },
         prompt: question,
       }
-      const response = await fetch(`${API_BASE}/api/v1/ai/help`, {
+      const response = await apiFetch('/api/v1/ai/help', {
         method: 'POST',
-        headers: {
-          'content-type': 'application/json',
-          authorization: `Bearer ${token}`,
-        },
+        headers: { 'content-type': 'application/json' },
         body: JSON.stringify(body),
       })
       if (!response.ok) throw new Error(await errorMessage(response, `HTTP ${response.status}`))
@@ -126,6 +121,7 @@ function RecipeView({
       onAnswer({ question, answer: data.response ?? 'No response.' })
       setHelpPrompt('')
     } catch (e) {
+      if (e instanceof SessionExpiredError) return
       setHelpError(`Error: ${e instanceof Error ? e.message : String(e)}`)
     } finally {
       setHelpLoading(false)

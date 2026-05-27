@@ -1,19 +1,17 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import type { components } from '../api'
-import { useAuth } from '../auth'
 import { Button } from '../components/Button'
 import { formatQuantity } from '../recipeFormat'
 import { usePressPulse } from '../usePressPulse'
 import { errorMessage } from '../apiError'
+import { SessionExpiredError, useApi } from '../useApi'
 
 type Recipe = components['schemas']['Recipe']
 type RecipeRequest = components['schemas']['RecipeRequest']
 
-const API_BASE = import.meta.env.VITE_API_BASE ?? ''
-
 export function GeneratePage() {
-  const { token } = useAuth()
+  const apiFetch = useApi()
   const navigate = useNavigate()
   const [generateBtnRef, pulseGenerate] = usePressPulse<HTMLButtonElement>()
   const [prompt, setPrompt] = useState('')
@@ -35,12 +33,9 @@ export function GeneratePage() {
     setRecipes([])
     try {
       const body: RecipeRequest = { prompt }
-      const response = await fetch(`${API_BASE}/api/v1/ai/recipes`, {
+      const response = await apiFetch('/api/v1/ai/recipes', {
         method: 'POST',
-        headers: {
-          'content-type': 'application/json',
-          authorization: `Bearer ${token}`,
-        },
+        headers: { 'content-type': 'application/json' },
         body: JSON.stringify(body),
       })
       if (!response.ok) throw new Error(await errorMessage(response, `HTTP ${response.status}`))
@@ -48,6 +43,7 @@ export function GeneratePage() {
       setRecipes(data)
       setStatus(data.length === 0 ? 'No recipes returned.' : null)
     } catch (e) {
+      if (e instanceof SessionExpiredError) return
       setStatus(`Error: ${e instanceof Error ? e.message : String(e)}`)
     } finally {
       setLoading(false)
