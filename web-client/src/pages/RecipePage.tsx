@@ -10,6 +10,7 @@ import {
 import Markdown from 'react-markdown'
 import { Navigate, useLocation, useNavigate } from 'react-router-dom'
 import type { components } from '../api'
+import { SaveButton } from '../components/SaveButton'
 import { formatQuantity } from '../recipeFormat'
 import { usePressPulse } from '../usePressPulse'
 import { errorMessage } from '../apiError'
@@ -19,6 +20,13 @@ type Recipe = components['schemas']['Recipe']
 type HelpRequest = components['schemas']['HelpRequest']
 type HelpResponse = components['schemas']['HelpResponse']
 type HelpEntry = { question: string; answer: string }
+
+// recipes opened from the generate page aren't saved yet; those from the library are
+type RecipeSource = 'generated' | 'library'
+const SOURCE_STORAGE_KEY: Record<RecipeSource, string> = {
+  generated: 'generated_recipes',
+  library: 'library_recipes',
+}
 
 function toggleSetItem(set: Set<number>, item: number): Set<number> {
   const next = new Set(set)
@@ -30,11 +38,13 @@ function toggleSetItem(set: Set<number>, item: number): Set<number> {
 // Wrapper that keeps the recipe list and the help histories
 export function RecipePage() {
   const location = useLocation()
+  const state = location.state as { index?: number; source?: RecipeSource } | null
+  const source: RecipeSource = state?.source ?? 'generated'
   const recipes = useMemo<Recipe[]>(() => {
-    const stored = sessionStorage.getItem('generated_recipes')
+    const stored = sessionStorage.getItem(SOURCE_STORAGE_KEY[source])
     return stored ? (JSON.parse(stored) as Recipe[]) : []
-  }, [])
-  const index = (location.state as { index?: number } | null)?.index ?? 0
+  }, [source])
+  const index = state?.index ?? 0
   const recipe = recipes[index]
 
   const [helpAnswers, setHelpAnswers] = useState<Record<number, HelpEntry[]>>({})
@@ -47,6 +57,7 @@ export function RecipePage() {
       recipe={recipe}
       recipes={recipes}
       index={index}
+      source={source}
       answers={helpAnswers[index] ?? []}
       onAnswer={(entry) =>
         setHelpAnswers((m) => ({ ...m, [index]: [entry, ...(m[index] ?? [])] }))
@@ -59,12 +70,14 @@ function RecipeView({
   recipe,
   recipes,
   index,
+  source,
   answers,
   onAnswer,
 }: {
   recipe: Recipe
   recipes: Recipe[]
   index: number
+  source: RecipeSource
   answers: HelpEntry[]
   onAnswer: (entry: HelpEntry) => void
 }) {
@@ -92,7 +105,8 @@ function RecipeView({
   }, [helpPrompt])
 
   const scale = recipe.portions ? portions / recipe.portions : 1
-  const navigateToRecipe = (index: number) => navigate('/recipe', { state: { index: index }, replace: true })
+  const navigateToRecipe = (index: number) =>
+    navigate('/recipe', { state: { index, source }, replace: true })
 
   async function handleGetHelp() {
     const question = helpPrompt.trim()
@@ -172,7 +186,10 @@ function RecipeView({
 
 				{/* Title & portion selector */}
         <header className="flex items-center justify-between gap-3">
-          <h2 className="text-lg font-bold">{recipe.title}</h2>
+          <div className="flex items-center gap-1">
+            <h2 className="text-lg font-bold">{recipe.title}</h2>
+            <SaveButton recipe={recipe} initiallySaved={source === 'library'} />
+          </div>
           <div className="flex items-center gap-2">
             <button
               type="button"
