@@ -236,6 +236,7 @@ class RecipesApiTest : ApiTestBase() {
 			).andExpect(status().isOk)
 			.andExpect(jsonPath("$.title").value("New Title"))
 			.andExpect(jsonPath("$.ingredients[0].name").value("pasta"))
+			.andExpect(jsonPath("$.nutrients.calories").value(400))
 	}
 
 	@Test

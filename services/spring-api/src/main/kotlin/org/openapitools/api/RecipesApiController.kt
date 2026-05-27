@@ -33,25 +33,24 @@ class RecipesApiController(
 
 	override fun recipesPost(recipeInput: RecipeInput): ResponseEntity<RecipeCreated> {
 		val user = userRepository.findByUsername(currentUsername()).orElseThrow()
-		val saved = recipeRepository.save(
-			RecipeEntity(
-				title = recipeInput.title,
-				ingredients = objectMapper.writeValueAsString(recipeInput.ingredients),
-				instructions = objectMapper.writeValueAsString(recipeInput.instructions),
-				portions = recipeInput.portions,
-				nutrientKcal = recipeInput.nutrients?.calories ?: 0,
-				nutrientCarb = recipeInput.nutrients?.carbs ?: 0,
-				nutrientProt = recipeInput.nutrients?.protein ?: 0,
-				nutrientFat = recipeInput.nutrients?.fat ?: 0,
-				user = user,
-			),
-		)
+		val saved =
+			recipeRepository.save(
+				RecipeEntity(
+					title = recipeInput.title,
+					ingredients = objectMapper.writeValueAsString(recipeInput.ingredients),
+					instructions = objectMapper.writeValueAsString(recipeInput.instructions),
+					portions = recipeInput.portions,
+					nutrientKcal = recipeInput.nutrients?.calories ?: 0,
+					nutrientCarb = recipeInput.nutrients?.carbs ?: 0,
+					nutrientProt = recipeInput.nutrients?.protein ?: 0,
+					nutrientFat = recipeInput.nutrients?.fat ?: 0,
+					user = user,
+				),
+			)
 		return ResponseEntity.status(HttpStatus.CREATED).body(RecipeCreated(id = saved.id))
 	}
 
-	override fun recipesRecipeIdGet(
-		recipeId: Long,
-	): ResponseEntity<Recipe> {
+	override fun recipesRecipeIdGet(recipeId: Long): ResponseEntity<Recipe> {
 		val entity = recipeRepository.findById(recipeId).orElseThrow { NotFoundException("Recipe not found") }
 		val user = userRepository.findByUsername(currentUsername()).orElseThrow()
 		if (entity.user.id != user.id) throw ForbiddenException("Recipe belongs to a different user")
@@ -70,17 +69,15 @@ class RecipesApiController(
 		recipeUpdate.instructions?.let { entity.instructions = objectMapper.writeValueAsString(it) }
 		recipeUpdate.portions?.let { entity.portions = it }
 		recipeUpdate.nutrients?.let {
-			entity.nutrientKcal = it.calories ?: entity.nutrientKcal
-			entity.nutrientCarb = it.carbs ?: entity.nutrientCarb
-			entity.nutrientProt = it.protein ?: entity.nutrientProt
-			entity.nutrientFat = it.fat ?: entity.nutrientFat
+			entity.nutrientKcal = it.calories
+			entity.nutrientCarb = it.carbs
+			entity.nutrientProt = it.protein
+			entity.nutrientFat = it.fat
 		}
 		return ResponseEntity.ok(recipeRepository.save(entity).toApiModel())
 	}
 
-	override fun recipesRecipeIdDelete(
-		recipeId: Long,
-	): ResponseEntity<Unit> {
+	override fun recipesRecipeIdDelete(recipeId: Long): ResponseEntity<Unit> {
 		val entity = recipeRepository.findById(recipeId).orElseThrow { NotFoundException("Recipe not found") }
 		val user = userRepository.findByUsername(currentUsername()).orElseThrow()
 		if (entity.user.id != user.id) throw ForbiddenException("Recipe belongs to a different user")
