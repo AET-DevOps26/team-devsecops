@@ -11,11 +11,10 @@ import { Button } from '../components/Button'
 import { PasswordInput } from '../components/PasswordInput'
 import { usePressPulse } from '../usePressPulse'
 import { errorMessage } from '../apiError'
+import { SessionExpiredError, useApi } from '../useApi'
 
 type UserProfile = components['schemas']['UserProfile']
 type UserProfileUpdate = components['schemas']['UserProfileUpdate']
-
-const API_BASE = import.meta.env.VITE_API_BASE ?? ''
 
 const allergyPlaceholders = [
   'e.g. peanuts',
@@ -36,7 +35,8 @@ const dietPlaceholders = [
 ]
 
 export function ProfilePage() {
-  const { username, token, signOut, updateUsername } = useAuth()
+  const { username, signOut, updateUsername } = useAuth()
+  const apiFetch = useApi()
   const navigate = useNavigate()
 
   const [prefsBtnRef, pulsePrefs] = usePressPulse<HTMLButtonElement>()
@@ -60,17 +60,9 @@ export function ProfilePage() {
 
 	// fetch the currently stored user profile
   useEffect(() => {
-    if (!token) return
     let cancelled = false
-    fetch(`${API_BASE}/api/v1/users/profile`, {
-      headers: { authorization: `Bearer ${token}` },
-    })
+    apiFetch('/api/v1/users/profile')
       .then(async (res) => {
-        if (res.status === 403 || res.status === 401) {
-          signOut()
-          navigate('/login')
-          return
-        }
         if (!res.ok) throw new Error(await errorMessage(res, `HTTP ${res.status}`))
         const data = (await res.json()) as UserProfile
         if (cancelled) return
@@ -80,27 +72,20 @@ export function ProfilePage() {
         setAllergies(prefs.allergies?.length ? prefs.allergies : ['', ''])
       })
       .catch((e) => {
-        if (!cancelled) setPrefsStatus({ kind: 'error', msg: e instanceof Error ? e.message : String(e) })
+        if (cancelled || e instanceof SessionExpiredError) return
+        setPrefsStatus({ kind: 'error', msg: e instanceof Error ? e.message : String(e) })
       })
     return () => {
       cancelled = true
     }
-  }, [token, signOut, navigate])
+  }, [apiFetch])
 
   async function updateProfile(body: UserProfileUpdate): Promise<void> {
-    const res = await fetch(`${API_BASE}/api/v1/users/profile`, {
+    const res = await apiFetch('/api/v1/users/profile', {
       method: 'PUT',
-      headers: {
-        'content-type': 'application/json',
-        authorization: `Bearer ${token}`,
-      },
+      headers: { 'content-type': 'application/json' },
       body: JSON.stringify(body),
     })
-    if (res.status === 403 || res.status === 401) {
-      signOut()
-      navigate('/login')
-      throw new Error('Session expired')
-    }
     if (res.status === 409) throw new Error(await errorMessage(res, 'Username already taken'))
     if (res.status === 400) throw new Error(await errorMessage(res, 'Invalid request'))
     if (!res.ok) throw new Error(await errorMessage(res, `HTTP ${res.status}`))
@@ -120,6 +105,7 @@ export function ProfilePage() {
       })
       setPrefsStatus({ kind: 'ok', msg: 'Preferences saved' })
     } catch (e) {
+      if (e instanceof SessionExpiredError) return
       setPrefsStatus({ kind: 'error', msg: e instanceof Error ? e.message : String(e) })
     } finally {
       setPrefsSaving(false)
@@ -142,6 +128,7 @@ export function ProfilePage() {
       setUsernameDraft(null)
       setUsernameStatus({ kind: 'ok', msg: 'Username updated' })
     } catch (e) {
+      if (e instanceof SessionExpiredError) return
       setUsernameStatus({ kind: 'error', msg: e instanceof Error ? e.message : String(e) })
     } finally {
       setUsernameSaving(false)
@@ -167,6 +154,7 @@ export function ProfilePage() {
       setRepeatNewPassword('')
       setPasswordStatus({ kind: 'ok', msg: 'Password updated' })
     } catch (e) {
+      if (e instanceof SessionExpiredError) return
       setPasswordStatus({ kind: 'error', msg: e instanceof Error ? e.message : String(e) })
     } finally {
       setPasswordSaving(false)
