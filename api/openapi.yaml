@@ -192,6 +192,10 @@ paths:
       responses:
         "201":
           description: Recipe saved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RecipeCreated"
         "400":
           description: Invalid recipe data
           content:
@@ -250,6 +254,57 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+    put:
+      tags: [Recipes]
+      summary: Update a saved recipe by ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: recipeId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RecipeUpdate"
+      responses:
+        "200":
+          description: Recipe updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Recipe"
+        "400":
+          description: Invalid recipe data or non-integer ID
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Missing or invalid token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Recipe belongs to a different user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Recipe not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
     delete:
       tags: [Recipes]
       summary: Delete a saved recipe by ID
@@ -533,6 +588,41 @@ components:
           minimum: 0.5
         nutrients:
           $ref: "#/components/schemas/RecipeNutrients"
+
+    RecipeUpdate:
+      type: object
+      additionalProperties: false
+      description: At least one field must be provided
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 255
+        ingredients:
+          type: array
+          items:
+            $ref: "#/components/schemas/RecipeIngredient"
+          minItems: 1
+        instructions:
+          type: array
+          items:
+            type: string
+            minLength: 1
+          minItems: 1
+        portions:
+          type: number
+          minimum: 0.5
+        nutrients:
+          $ref: "#/components/schemas/RecipeNutrients"
+
+    RecipeCreated:
+      type: object
+      required: [id]
+      properties:
+        id:
+          type: integer
+          format: int64
+          minimum: 1
 
     Recipe:
       type: object

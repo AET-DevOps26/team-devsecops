@@ -330,7 +330,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["RecipeCreated"];
+                    };
                 };
                 /** @description Invalid recipe data */
                 400: {
@@ -424,7 +426,69 @@ export interface paths {
                 };
             };
         };
-        put?: never;
+        /** Update a saved recipe by ID */
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    recipeId: number;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["RecipeUpdate"];
+                };
+            };
+            responses: {
+                /** @description Recipe updated successfully */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Recipe"];
+                    };
+                };
+                /** @description Invalid recipe data or non-integer ID */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+                /** @description Missing or invalid token */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+                /** @description Recipe belongs to a different user */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+                /** @description Recipe not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+            };
+        };
         post?: never;
         /** Delete a saved recipe by ID */
         delete: {
@@ -678,6 +742,18 @@ export interface components {
             instructions: string[];
             portions: number;
             nutrients?: components["schemas"]["RecipeNutrients"];
+        };
+        /** @description At least one field must be provided */
+        RecipeUpdate: {
+            title?: string;
+            ingredients?: components["schemas"]["RecipeIngredient"][];
+            instructions?: string[];
+            portions?: number;
+            nutrients?: components["schemas"]["RecipeNutrients"];
+        };
+        RecipeCreated: {
+            /** Format: int64 */
+            id: number;
         };
         Recipe: components["schemas"]["RecipeInput"] & {
             /** Format: int64 */

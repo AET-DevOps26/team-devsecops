@@ -32,15 +32,15 @@ class UsersApiController(
 	private val objectMapper: ObjectMapper,
 ) : UsersApi {
 	override fun usersRegisterPost(
-		@Valid registerRequest: AuthRequest,
+		@Valid authRequest: AuthRequest,
 	): ResponseEntity<Unit> {
-		if (userRepository.existsByUsername(registerRequest.username)) {
+		if (userRepository.existsByUsername(authRequest.username)) {
 			throw ConflictException("Username already taken")
 		}
 		userRepository.save(
 			UserEntity(
-				username = registerRequest.username,
-				password = passwordEncoder.encode(registerRequest.password)!!,
+				username = authRequest.username,
+				password = passwordEncoder.encode(authRequest.password)!!,
 				preferences = objectMapper.writeValueAsString(UserPreferences()),
 			),
 		)
@@ -48,16 +48,16 @@ class UsersApiController(
 	}
 
 	override fun usersLoginPost(
-		@Valid loginRequest: AuthRequest,
+		@Valid authRequest: AuthRequest,
 	): ResponseEntity<AuthResponse> {
 		try {
 			authManager.authenticate(
-				UsernamePasswordAuthenticationToken(loginRequest.username, loginRequest.password),
+				UsernamePasswordAuthenticationToken(authRequest.username, authRequest.password),
 			)
 		} catch (e: BadCredentialsException) {
 			throw UnauthorizedException("Invalid username or password")
 		}
-		val user = userRepository.findByUsername(loginRequest.username).orElseThrow()
+		val user = userRepository.findByUsername(authRequest.username).orElseThrow()
 		return ResponseEntity.ok(AuthResponse(token = jwtUtils.generateToken(user.id)))
 	}
 

@@ -1,11 +1,12 @@
 package org.openapitools.api
 
-import jakarta.validation.constraints.Min
 import org.openapitools.entity.RecipeEntity
 import org.openapitools.model.Recipe
+import org.openapitools.model.RecipeCreated
 import org.openapitools.model.RecipeIngredient
 import org.openapitools.model.RecipeInput
 import org.openapitools.model.RecipeNutrients
+import org.openapitools.model.RecipeUpdate
 import org.openapitools.repository.RecipeRepository
 import org.openapitools.repository.UserRepository
 import org.springframework.http.HttpStatus
@@ -30,9 +31,9 @@ class RecipesApiController(
 		return ResponseEntity.ok(recipeRepository.findByUserId(user.id).map { it.toApiModel() })
 	}
 
-	override fun recipesPost(recipeInput: RecipeInput): ResponseEntity<Unit> {
+	override fun recipesPost(recipeInput: RecipeInput): ResponseEntity<RecipeCreated> {
 		val user = userRepository.findByUsername(currentUsername()).orElseThrow()
-		recipeRepository.save(
+		val saved = recipeRepository.save(
 			RecipeEntity(
 				title = recipeInput.title,
 				ingredients = objectMapper.writeValueAsString(recipeInput.ingredients),
@@ -45,11 +46,11 @@ class RecipesApiController(
 				user = user,
 			),
 		)
-		return ResponseEntity(HttpStatus.CREATED)
+		return ResponseEntity.status(HttpStatus.CREATED).body(RecipeCreated(id = saved.id))
 	}
 
 	override fun recipesRecipeIdGet(
-		@Min(1) recipeId: Long,
+		recipeId: Long,
 	): ResponseEntity<Recipe> {
 		val entity = recipeRepository.findById(recipeId).orElseThrow { NotFoundException("Recipe not found") }
 		val user = userRepository.findByUsername(currentUsername()).orElseThrow()
@@ -57,8 +58,28 @@ class RecipesApiController(
 		return ResponseEntity.ok(entity.toApiModel())
 	}
 
+	override fun recipesRecipeIdPut(
+		recipeId: Long,
+		recipeUpdate: RecipeUpdate,
+	): ResponseEntity<Recipe> {
+		val entity = recipeRepository.findById(recipeId).orElseThrow { NotFoundException("Recipe not found") }
+		val user = userRepository.findByUsername(currentUsername()).orElseThrow()
+		if (entity.user.id != user.id) throw ForbiddenException("Recipe belongs to a different user")
+		recipeUpdate.title?.let { entity.title = it }
+		recipeUpdate.ingredients?.let { entity.ingredients = objectMapper.writeValueAsString(it) }
+		recipeUpdate.instructions?.let { entity.instructions = objectMapper.writeValueAsString(it) }
+		recipeUpdate.portions?.let { entity.portions = it }
+		recipeUpdate.nutrients?.let {
+			entity.nutrientKcal = it.calories ?: entity.nutrientKcal
+			entity.nutrientCarb = it.carbs ?: entity.nutrientCarb
+			entity.nutrientProt = it.protein ?: entity.nutrientProt
+			entity.nutrientFat = it.fat ?: entity.nutrientFat
+		}
+		return ResponseEntity.ok(recipeRepository.save(entity).toApiModel())
+	}
+
 	override fun recipesRecipeIdDelete(
-		@Min(1) recipeId: Long,
+		recipeId: Long,
 	): ResponseEntity<Unit> {
 		val entity = recipeRepository.findById(recipeId).orElseThrow { NotFoundException("Recipe not found") }
 		val user = userRepository.findByUsername(currentUsername()).orElseThrow()
