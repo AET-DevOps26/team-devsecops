@@ -1,82 +1,240 @@
-// package org.openapitools.api
+package org.openapitools.api
 
-// import org.junit.jupiter.api.Test
-// import org.openapitools.model.LoginRequest
-// import org.openapitools.model.RegisterRequest
-// import org.openapitools.model.UserProfile
-// import org.springframework.http.ResponseEntity
+import org.junit.jupiter.api.Test
+import org.springframework.http.MediaType
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
-// class UsersApiTest {
-// 	private val api: UsersApiController = UsersApiController()
+class UsersApiTest : ApiTestBase() {
+	// --- Register ---
 
-// 	/**
-// 	 * To test UsersApiController.usersLoginPost
-// 	 *
-// 	 * @throws ApiException
-// 	 *          if the Api call fails
-// 	 */
-// 	@Test
-// 	fun usersLoginPostTest() {
-// 		val loginRequest: LoginRequest = TODO()
+	@Test
+	fun `register - valid data returns 201`() {
+		mockMvc
+			.perform(
+				post("/api/v1/users/register")
+					.contentType(MediaType.APPLICATION_JSON)
+					.content("""{"username":"newuser","password":"validpass123"}"""),
+			).andExpect(status().isCreated)
+	}
 
-// 		val response: ResponseEntity<Unit> = api.usersLoginPost(loginRequest)
+	@Test
+	fun `register - duplicate username returns 409`() {
+		register("dupeuser")
+		mockMvc
+			.perform(
+				post("/api/v1/users/register")
+					.contentType(MediaType.APPLICATION_JSON)
+					.content("""{"username":"dupeuser","password":"validpass123"}"""),
+			).andExpect(status().isConflict)
+			.andExpect(jsonPath("$.message").exists())
+	}
 
-// 		// TODO: test validations
-// 	}
+	@Test
+	fun `register - password too short returns 400`() {
+		mockMvc
+			.perform(
+				post("/api/v1/users/register")
+					.contentType(MediaType.APPLICATION_JSON)
+					.content("""{"username":"validuser","password":"abc"}"""),
+			).andExpect(status().isBadRequest)
+			.andExpect(jsonPath("$.message").value("password: size must be between 4 and 128"))
+	}
 
-// 	/**
-// 	 * To test UsersApiController.usersLogoutPost
-// 	 *
-// 	 * @throws ApiException
-// 	 *          if the Api call fails
-// 	 */
-// 	@Test
-// 	fun usersLogoutPostTest() {
-// 		val response: ResponseEntity<Unit> = api.usersLogoutPost()
+	@Test
+	fun `register - invalid username pattern returns 400`() {
+		mockMvc
+			.perform(
+				post("/api/v1/users/register")
+					.contentType(MediaType.APPLICATION_JSON)
+					.content("""{"username":"bad user!","password":"validpass123"}"""),
+			).andExpect(status().isBadRequest)
+			.andExpect(jsonPath("$.message").exists())
+	}
 
-// 		// TODO: test validations
-// 	}
+	@Test
+	fun `register - missing body returns 400`() {
+		mockMvc
+			.perform(
+				post("/api/v1/users/register")
+					.contentType(MediaType.APPLICATION_JSON),
+			).andExpect(status().isBadRequest)
+			.andExpect(jsonPath("$.message").exists())
+	}
 
-// 	/**
-// 	 * To test UsersApiController.usersProfileGet
-// 	 *
-// 	 * @throws ApiException
-// 	 *          if the Api call fails
-// 	 */
-// 	@Test
-// 	fun usersProfileGetTest() {
-// 		val response: ResponseEntity<UserProfile> = api.usersProfileGet()
+	// --- Login ---
 
-// 		// TODO: test validations
-// 	}
+	@Test
+	fun `login - valid credentials returns 200 with token`() {
+		register("logintest", "testpassword")
+		mockMvc
+			.perform(
+				post("/api/v1/users/login")
+					.contentType(MediaType.APPLICATION_JSON)
+					.content("""{"username":"logintest","password":"testpassword"}"""),
+			).andExpect(status().isOk)
+			.andExpect(jsonPath("$.token").isString)
+			.andExpect(jsonPath("$.token").isNotEmpty)
+	}
 
-// 	/**
-// 	 * To test UsersApiController.usersProfilePut
-// 	 *
-// 	 * @throws ApiException
-// 	 *          if the Api call fails
-// 	 */
-// 	@Test
-// 	fun usersProfilePutTest() {
-// 		val userProfile: UserProfile = TODO()
+	@Test
+	fun `login - wrong password returns 401`() {
+		register("logintest2", "correctpass")
+		mockMvc
+			.perform(
+				post("/api/v1/users/login")
+					.contentType(MediaType.APPLICATION_JSON)
+					.content("""{"username":"logintest2","password":"wrongpass"}"""),
+			).andExpect(status().isUnauthorized)
+			.andExpect(jsonPath("$.message").exists())
+	}
 
-// 		val response: ResponseEntity<Unit> = api.usersProfilePut(userProfile)
+	@Test
+	fun `login - unknown user returns 401`() {
+		mockMvc
+			.perform(
+				post("/api/v1/users/login")
+					.contentType(MediaType.APPLICATION_JSON)
+					.content("""{"username":"nobody","password":"whatever"}"""),
+			).andExpect(status().isUnauthorized)
+	}
 
-// 		// TODO: test validations
-// 	}
+	@Test
+	fun `login - missing body returns 400`() {
+		mockMvc
+			.perform(
+				post("/api/v1/users/login")
+					.contentType(MediaType.APPLICATION_JSON),
+			).andExpect(status().isBadRequest)
+			.andExpect(jsonPath("$.message").exists())
+	}
 
-// 	/**
-// 	 * To test UsersApiController.usersRegisterPost
-// 	 *
-// 	 * @throws ApiException
-// 	 *          if the Api call fails
-// 	 */
-// 	@Test
-// 	fun usersRegisterPostTest() {
-// 		val registerRequest: RegisterRequest = TODO()
+	// --- Logout ---
 
-// 		val response: ResponseEntity<Unit> = api.usersRegisterPost(registerRequest)
+	@Test
+	fun `logout - authenticated returns 200`() {
+		val token = register()
+		mockMvc
+			.perform(
+				post("/api/v1/users/logout")
+					.header("Authorization", "Bearer $token"),
+			).andExpect(status().isOk)
+	}
 
-// 		// TODO: test validations
-// 	}
-// }
+	@Test
+	fun `logout - unauthenticated returns 401`() {
+		mockMvc
+			.perform(post("/api/v1/users/logout"))
+			.andExpect(status().isUnauthorized)
+			.andExpect(jsonPath("$.message").exists())
+	}
+
+	// --- Profile GET ---
+
+	@Test
+	fun `profile get - returns username and preferences`() {
+		val token = register("profileuser", "testpass1234")
+		mockMvc
+			.perform(
+				get("/api/v1/users/profile")
+					.header("Authorization", "Bearer $token"),
+			).andExpect(status().isOk)
+			.andExpect(jsonPath("$.username").value("profileuser"))
+			.andExpect(jsonPath("$.preferences").exists())
+	}
+
+	@Test
+	fun `profile get - unauthenticated returns 401`() {
+		mockMvc
+			.perform(get("/api/v1/users/profile"))
+			.andExpect(status().isUnauthorized)
+			.andExpect(jsonPath("$.message").exists())
+	}
+
+	// --- Profile PUT ---
+
+	@Test
+	fun `profile put - update username succeeds`() {
+		val token = register("oldname", "testpass1234")
+		mockMvc
+			.perform(
+				put("/api/v1/users/profile")
+					.header("Authorization", "Bearer $token")
+					.contentType(MediaType.APPLICATION_JSON)
+					.content("""{"username":"newname"}"""),
+			).andExpect(status().isOk)
+	}
+
+	@Test
+	fun `profile put - update password succeeds`() {
+		val token = register("passuser", "oldpassword")
+		mockMvc
+			.perform(
+				put("/api/v1/users/profile")
+					.header("Authorization", "Bearer $token")
+					.contentType(MediaType.APPLICATION_JSON)
+					.content("""{"password":"newpassword"}"""),
+			).andExpect(status().isOk)
+	}
+
+	@Test
+	fun `profile put - update preferences succeeds`() {
+		val token = register()
+		mockMvc
+			.perform(
+				put("/api/v1/users/profile")
+					.header("Authorization", "Bearer $token")
+					.contentType(MediaType.APPLICATION_JSON)
+					.content("""{"preferences":{"diet":["vegan"],"allergies":["nuts"],"aboutMe":["I love cooking"]}}"""),
+			).andExpect(status().isOk)
+	}
+
+	@Test
+	fun `profile put - username conflict returns 409`() {
+		register("taken", "testpass1234")
+		val token = register("other", "testpass1234")
+		mockMvc
+			.perform(
+				put("/api/v1/users/profile")
+					.header("Authorization", "Bearer $token")
+					.contentType(MediaType.APPLICATION_JSON)
+					.content("""{"username":"taken"}"""),
+			).andExpect(status().isConflict)
+			.andExpect(jsonPath("$.message").exists())
+	}
+
+	@Test
+	fun `profile put - unauthenticated returns 401`() {
+		mockMvc
+			.perform(
+				put("/api/v1/users/profile")
+					.contentType(MediaType.APPLICATION_JSON)
+					.content("""{"username":"test"}"""),
+			).andExpect(status().isUnauthorized)
+	}
+
+	// --- Profile DELETE ---
+
+	@Test
+	fun `profile delete - returns 204 and removes user`() {
+		val token = register("todelete", "testpass1234")
+		mockMvc
+			.perform(
+				delete("/api/v1/users/profile")
+					.header("Authorization", "Bearer $token"),
+			).andExpect(status().isNoContent)
+
+		assert(userRepository.findByUsername("todelete").isEmpty)
+	}
+
+	@Test
+	fun `profile delete - unauthenticated returns 401`() {
+		mockMvc
+			.perform(delete("/api/v1/users/profile"))
+			.andExpect(status().isUnauthorized)
+	}
+}
