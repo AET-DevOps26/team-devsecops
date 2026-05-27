@@ -1,4 +1,4 @@
-name: Deploy Recipe Service
+name: Recipe Service - Deploy
 
 on:
   push:

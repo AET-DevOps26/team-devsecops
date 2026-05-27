@@ -1,7 +1,10 @@
-name: Web Client CI
+name: Web Client - Lint and Build
 
 on:
+  pull_request:
+    paths: ['web-client/**', '.github/workflows/web-client-ci.yml']
   push:
+    branches: [main]
     paths: ['web-client/**', '.github/workflows/web-client-ci.yml']
 
 jobs:
