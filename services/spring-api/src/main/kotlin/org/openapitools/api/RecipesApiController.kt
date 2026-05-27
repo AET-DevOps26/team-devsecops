@@ -57,6 +57,16 @@ class RecipesApiController(
 		return ResponseEntity.ok(entity.toApiModel())
 	}
 
+	override fun recipesRecipeIdDelete(
+		@Min(1) recipeId: Long,
+	): ResponseEntity<Unit> {
+		val entity = recipeRepository.findById(recipeId).orElseThrow { NotFoundException("Recipe not found") }
+		val user = userRepository.findByUsername(currentUsername()).orElseThrow()
+		if (entity.user.id != user.id) throw ForbiddenException("Recipe belongs to a different user")
+		recipeRepository.delete(entity)
+		return ResponseEntity(HttpStatus.NO_CONTENT)
+	}
+
 	private fun currentUsername(): String = SecurityContextHolder.getContext().authentication!!.name
 
 	private fun RecipeEntity.toApiModel() =
