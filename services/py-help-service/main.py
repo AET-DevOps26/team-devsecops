@@ -1,3 +1,4 @@
+import asyncio
 import hashlib
 import hmac
 import os
@@ -67,9 +68,7 @@ async def verify_internal_hmac(
 llm = ChatGoogleGenerativeAI(
     model="gemini-3.1-flash-lite",
     google_api_key=os.getenv("SERVICE_API_KEY"),
-    # Fail fast instead of retrying with long exponential backoff
-    max_retries=1,
-    timeout=60,
+    timeout=30,
 )
 
 @app.get("/health")
@@ -108,10 +107,12 @@ async def generate_help(request_data: dict[str, Any]):
         system_prompt = SystemMessage(content=" ".join(context))
         user_prompt = HumanMessage(content=request.prompt)
 
-        result = llm.invoke([system_prompt, user_prompt])
+        result = await asyncio.wait_for(llm.ainvoke([system_prompt, user_prompt]), timeout=60)
 
         help_response = HelpResponse(response=result.content)
         return help_response.to_dict()
 
+    except asyncio.TimeoutError:
+        raise HTTPException(status_code=504, detail="LLM connection timed out.")
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
