@@ -8,6 +8,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      checks: write
+      pull-requests: write
     steps:
       - uses: actions/checkout@v4
 
@@ -19,6 +22,14 @@ jobs:
 
       - name: Build
         run: cd services/spring-api && ./gradlew build --no-daemon
+
+      - name: Publish test results
+        uses: dorny/test-reporter@v1
+        if: always()
+        with:
+          name: Spring API Tests
+          path: services/spring-api/build/test-results/test/*.xml
+          reporter: java-junit
 
   deploy:
     needs: [build]
