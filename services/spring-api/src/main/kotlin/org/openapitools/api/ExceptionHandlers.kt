@@ -22,6 +22,7 @@ class ForbiddenException(msg: String) : ApiException(msg, 403)
 class ConflictException(msg: String) : ApiException(msg, 409)
 class UnauthorizedException(msg: String) : ApiException(msg, 401)
 class BadGatewayException(msg: String) : ApiException(msg, 502)
+class GatewayTimeoutException(msg: String) : ApiException(msg, 504)
 
 // Takes priority over the generated DefaultExceptionHandler in Exceptions.kt
 @Order(Ordered.HIGHEST_PRECEDENCE)

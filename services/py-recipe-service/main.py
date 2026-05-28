@@ -1,3 +1,4 @@
+import asyncio
 import hashlib
 import hmac
 import os
@@ -19,13 +20,13 @@ app = FastAPI(title="Cooking Assistant GenAI Service")
 
 SECRET_KEY_STR = os.getenv("INTERNAL_AUTH_SECRET")
 if not SECRET_KEY_STR:
-    raise RuntimeError("CRITICAL: INTERNAL_AUTH_SECRET environment variable is missing!") 
+    raise RuntimeError("CRITICAL: INTERNAL_AUTH_SECRET environment variable is missing!")
 
 SECRET_KEY_BYTES = SECRET_KEY_STR.encode('utf-8')
 
 async def verify_internal_hmac(
     request: Request,
-    x_internal_timestamp: str = Header(None), 
+    x_internal_timestamp: str = Header(None),
     x_internal_signature: str = Header(None)
 ):
     """
@@ -56,19 +57,20 @@ async def verify_internal_hmac(
     # Using a separator byte like b'|' prevents boundary shifting bugs
     hmac_context = hmac.new(SECRET_KEY_BYTES, digestmod=hashlib.sha256)
     hmac_context.update(x_internal_timestamp.encode('utf-8'))
-    hmac_context.update(b'.') 
+    hmac_context.update(b'.')
     hmac_context.update(body_bytes)
-    
+
     expected_signature = hmac_context.hexdigest()
 
     # 5. Use constant-time comparison to completely prevent timing attacks
     if not hmac.compare_digest(expected_signature, x_internal_signature):
         raise HTTPException(status_code=403, detail="Forbidden: HMAC signature validation mismatch.")
-    
-    
+
+
 llm = ChatGoogleGenerativeAI(
-    model="gemini-3.1-flash-lite-preview",
-    google_api_key=os.getenv("SERVICE_API_KEY")
+    model="gemini-3.1-flash-lite",
+    google_api_key=os.getenv("SERVICE_API_KEY"),
+    timeout=30,
 )
 
 @app.get("/health")
@@ -115,8 +117,8 @@ async def generate_recipes(request_data: dict[str, Any]):
             SystemMessage(content=system_prompt),
             HumanMessage(content=f"Generate 3 distinct recipes for: {request.prompt}")
         ]
-        
-        response = llm.invoke(messages)
+
+        response = await asyncio.wait_for(llm.ainvoke(messages), timeout=60)
 
         # 4. Parse and Validate
         # Clean markdown formatting if present
@@ -134,6 +136,8 @@ async def generate_recipes(request_data: dict[str, Any]):
 
         return data
 
+    except asyncio.TimeoutError:
+        raise HTTPException(status_code=504, detail="LLM connection timed out.")
     except Exception as e:
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))

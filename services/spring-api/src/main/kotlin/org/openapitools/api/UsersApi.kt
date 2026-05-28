@@ -79,7 +79,7 @@ interface UsersApi {
 				content = [Content(schema = Schema(implementation = ErrorResponse::class))],
 			),
 		],
-		security = [ SecurityRequirement(name = "bearerAuth") ],
+		security = [SecurityRequirement(name = "bearerAuth")],
 	)
 	@RequestMapping(
 		method = [RequestMethod.POST],
@@ -102,7 +102,7 @@ interface UsersApi {
 				content = [Content(schema = Schema(implementation = ErrorResponse::class))],
 			),
 		],
-		security = [ SecurityRequirement(name = "bearerAuth") ],
+		security = [SecurityRequirement(name = "bearerAuth")],
 	)
 	@RequestMapping(
 		method = [RequestMethod.DELETE],
@@ -129,7 +129,7 @@ interface UsersApi {
 				content = [Content(schema = Schema(implementation = ErrorResponse::class))],
 			),
 		],
-		security = [ SecurityRequirement(name = "bearerAuth") ],
+		security = [SecurityRequirement(name = "bearerAuth")],
 	)
 	@RequestMapping(
 		method = [RequestMethod.GET],
@@ -162,7 +162,7 @@ interface UsersApi {
 				content = [Content(schema = Schema(implementation = ErrorResponse::class))],
 			),
 		],
-		security = [ SecurityRequirement(name = "bearerAuth") ],
+		security = [SecurityRequirement(name = "bearerAuth")],
 	)
 	@RequestMapping(
 		method = [RequestMethod.PUT],

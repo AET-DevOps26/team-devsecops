@@ -63,8 +63,13 @@ interface AIApi {
 				description = "GenAI service unavailable or returned an unparseable response",
 				content = [Content(schema = Schema(implementation = ErrorResponse::class))],
 			),
+			ApiResponse(
+				responseCode = "504",
+				description = "GenAI service timed out",
+				content = [Content(schema = Schema(implementation = ErrorResponse::class))],
+			),
 		],
-		security = [ SecurityRequirement(name = "bearerAuth") ],
+		security = [SecurityRequirement(name = "bearerAuth")],
 	)
 	@RequestMapping(
 		method = [RequestMethod.POST],
@@ -103,8 +108,13 @@ interface AIApi {
 				description = "GenAI service unavailable or returned an unparseable response",
 				content = [Content(schema = Schema(implementation = ErrorResponse::class))],
 			),
+			ApiResponse(
+				responseCode = "504",
+				description = "GenAI service timed out",
+				content = [Content(schema = Schema(implementation = ErrorResponse::class))],
+			),
 		],
-		security = [ SecurityRequirement(name = "bearerAuth") ],
+		security = [SecurityRequirement(name = "bearerAuth")],
 	)
 	@RequestMapping(
 		method = [RequestMethod.POST],

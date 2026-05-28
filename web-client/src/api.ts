@@ -611,6 +611,15 @@ export interface paths {
                         "application/json": components["schemas"]["ErrorResponse"];
                     };
                 };
+                /** @description GenAI service timed out */
+                504: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
             };
         };
         delete?: never;
@@ -671,6 +680,15 @@ export interface paths {
                 };
                 /** @description GenAI service unavailable or returned an unparseable response */
                 502: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+                /** @description GenAI service timed out */
+                504: {
                     headers: {
                         [name: string]: unknown;
                     };
