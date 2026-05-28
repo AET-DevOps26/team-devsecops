@@ -1,4 +1,4 @@
-name: Deploy Spring API
+name: Spring API - Deploy
 
 on:
   push:

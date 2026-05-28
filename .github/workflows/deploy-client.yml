@@ -1,4 +1,4 @@
-name: Deploy Web Client to Pages
+name: Web Client - Deploy to GitHub Pages
 
 on:
   push:

@@ -1,8 +1,10 @@
-name: Deploy PR Preview to Cloudflare Pages
+name: Web Client - Deploy to Cloudflare Pages
 on:
     pull_request:
         types: [ opened, synchronize, reopened, closed ]
-        paths: [ 'web-client/**' ]
+        paths:
+            - 'web-client/**'
+            - '!web-client/src/api.ts' # this one is generated from the spec
 
 jobs:
     deploy:
