@@ -21,7 +21,9 @@ import jakarta.validation.constraints.Pattern
 import jakarta.validation.constraints.Size
 import org.openapitools.model.ErrorResponse
 import org.openapitools.model.Recipe
+import org.openapitools.model.RecipeCreated
 import org.openapitools.model.RecipeInput
+import org.openapitools.model.RecipeUpdate
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
@@ -68,7 +70,11 @@ interface RecipesApi {
 		operationId = "recipesPost",
 		description = """""",
 		responses = [
-			ApiResponse(responseCode = "201", description = "Recipe saved successfully"),
+			ApiResponse(
+				responseCode = "201",
+				description = "Recipe saved successfully",
+				content = [Content(schema = Schema(implementation = RecipeCreated::class))],
+			),
 			ApiResponse(
 				responseCode = "400",
 				description = "Invalid recipe data",
@@ -91,7 +97,7 @@ interface RecipesApi {
 	)
 	fun recipesPost(
 		@Parameter(description = "", required = true) @Valid @RequestBody recipeInput: RecipeInput,
-	): ResponseEntity<Unit> = ResponseEntity(HttpStatus.NOT_IMPLEMENTED)
+	): ResponseEntity<RecipeCreated> = ResponseEntity(HttpStatus.NOT_IMPLEMENTED)
 
 	@Operation(
 		tags = ["Recipes"],
@@ -177,11 +183,58 @@ interface RecipesApi {
 		@Min(value = 1L)@Parameter(description = "", required = true) @PathVariable("recipeId") recipeId: kotlin.Long,
 	): ResponseEntity<Recipe> = ResponseEntity(HttpStatus.NOT_IMPLEMENTED)
 
+	@Operation(
+		tags = ["Recipes"],
+		summary = "Update a saved recipe by ID",
+		operationId = "recipesRecipeIdPut",
+		description = """""",
+		responses = [
+			ApiResponse(
+				responseCode = "200",
+				description = "Recipe updated successfully",
+				content = [Content(schema = Schema(implementation = Recipe::class))],
+			),
+			ApiResponse(
+				responseCode = "400",
+				description = "Invalid recipe data or non-integer ID",
+				content = [Content(schema = Schema(implementation = ErrorResponse::class))],
+			),
+			ApiResponse(
+				responseCode = "401",
+				description = "Missing or invalid token",
+				content = [Content(schema = Schema(implementation = ErrorResponse::class))],
+			),
+			ApiResponse(
+				responseCode = "403",
+				description = "Recipe belongs to a different user",
+				content = [Content(schema = Schema(implementation = ErrorResponse::class))],
+			),
+			ApiResponse(
+				responseCode = "404",
+				description = "Recipe not found",
+				content = [Content(schema = Schema(implementation = ErrorResponse::class))],
+			),
+		],
+		security = [ SecurityRequirement(name = "bearerAuth") ],
+	)
+	@RequestMapping(
+		method = [RequestMethod.PUT],
+		// "/recipes/{recipeId}"
+		value = [PATH_RECIPES_RECIPE_ID_PUT],
+		produces = ["application/json"],
+		consumes = ["application/json"],
+	)
+	fun recipesRecipeIdPut(
+		@Min(value = 1L)@Parameter(description = "", required = true) @PathVariable("recipeId") recipeId: kotlin.Long,
+		@Parameter(description = "", required = true) @Valid @RequestBody recipeUpdate: RecipeUpdate,
+	): ResponseEntity<Recipe> = ResponseEntity(HttpStatus.NOT_IMPLEMENTED)
+
 	companion object {
 		// for your own safety never directly reuse these path definitions in tests
 		const val PATH_RECIPES_GET: String = "/recipes"
 		const val PATH_RECIPES_POST: String = "/recipes"
 		const val PATH_RECIPES_RECIPE_ID_DELETE: String = "/recipes/{recipeId}"
 		const val PATH_RECIPES_RECIPE_ID_GET: String = "/recipes/{recipeId}"
+		const val PATH_RECIPES_RECIPE_ID_PUT: String = "/recipes/{recipeId}"
 	}
 }

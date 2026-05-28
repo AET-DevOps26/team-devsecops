@@ -1,11 +1,12 @@
 from http import HTTPStatus
-from typing import Any, cast
+from typing import Any
 
 import httpx
 
 from ... import errors
 from ...client import AuthenticatedClient, Client
 from ...models.error_response import ErrorResponse
+from ...models.recipe_created import RecipeCreated
 from ...models.recipe_input import RecipeInput
 from ...types import Response
 
@@ -29,9 +30,12 @@ def _get_kwargs(
     return _kwargs
 
 
-def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> Any | ErrorResponse | None:
+def _parse_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> ErrorResponse | RecipeCreated | None:
     if response.status_code == 201:
-        response_201 = cast(Any, None)
+        response_201 = RecipeCreated.from_dict(response.json())
+
         return response_201
 
     if response.status_code == 400:
@@ -50,7 +54,9 @@ def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Res
         return None
 
 
-def _build_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> Response[Any | ErrorResponse]:
+def _build_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Response[ErrorResponse | RecipeCreated]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -63,7 +69,7 @@ def sync_detailed(
     *,
     client: AuthenticatedClient,
     body: RecipeInput,
-) -> Response[Any | ErrorResponse]:
+) -> Response[ErrorResponse | RecipeCreated]:
     """Save a recipe to the current user's collection
 
     Args:
@@ -74,7 +80,7 @@ def sync_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Any | ErrorResponse]
+        Response[ErrorResponse | RecipeCreated]
     """
 
     kwargs = _get_kwargs(
@@ -92,7 +98,7 @@ def sync(
     *,
     client: AuthenticatedClient,
     body: RecipeInput,
-) -> Any | ErrorResponse | None:
+) -> ErrorResponse | RecipeCreated | None:
     """Save a recipe to the current user's collection
 
     Args:
@@ -103,7 +109,7 @@ def sync(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Any | ErrorResponse
+        ErrorResponse | RecipeCreated
     """
 
     return sync_detailed(
@@ -116,7 +122,7 @@ async def asyncio_detailed(
     *,
     client: AuthenticatedClient,
     body: RecipeInput,
-) -> Response[Any | ErrorResponse]:
+) -> Response[ErrorResponse | RecipeCreated]:
     """Save a recipe to the current user's collection
 
     Args:
@@ -127,7 +133,7 @@ async def asyncio_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Any | ErrorResponse]
+        Response[ErrorResponse | RecipeCreated]
     """
 
     kwargs = _get_kwargs(
@@ -143,7 +149,7 @@ async def asyncio(
     *,
     client: AuthenticatedClient,
     body: RecipeInput,
-) -> Any | ErrorResponse | None:
+) -> ErrorResponse | RecipeCreated | None:
     """Save a recipe to the current user's collection
 
     Args:
@@ -154,7 +160,7 @@ async def asyncio(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Any | ErrorResponse
+        ErrorResponse | RecipeCreated
     """
 
     return (
