@@ -1,3 +1,4 @@
+/// <reference types="vitest/config" />
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
@@ -5,6 +6,18 @@ import tailwindcss from '@tailwindcss/vite'
 export default defineConfig({
   base: '/team-devsecops/',
   plugins: [react(), tailwindcss()],
+  test: {
+    environment: 'jsdom',
+    globals: true,
+    setupFiles: ['./tests/setup.ts'],
+    css: false,
+    include: ['tests/**/*.test.{ts,tsx}'],
+    exclude: ['tests/e2e/**', 'node_modules/**', 'dist/**'],
+    reporters: [
+      'default',
+      ['junit', { outputFile: 'test-results/vitest-junit.xml' }],
+    ],
+  },
   server: {
 		// mappings when running in dev mode
     proxy: {
