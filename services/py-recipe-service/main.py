@@ -54,7 +54,7 @@ async def verify_internal_hmac(
     body_bytes = await request.body()
 
     # 4. Recalculate signature locally by hashing both pieces together
-    # Using a separator byte like b'|' prevents boundary shifting bugs
+    # Using a separator byte like b'.' prevents boundary shifting bugs
     hmac_context = hmac.new(SECRET_KEY_BYTES, digestmod=hashlib.sha256)
     hmac_context.update(x_internal_timestamp.encode('utf-8'))
     hmac_context.update(b'.')
@@ -67,24 +67,29 @@ async def verify_internal_hmac(
         raise HTTPException(status_code=403, detail="Forbidden: HMAC signature validation mismatch.")
 
 
-llm = ChatGoogleGenerativeAI(
-    model="gemini-3.1-flash-lite",
-    google_api_key=os.getenv("SERVICE_API_KEY"),
-    timeout=30,
-)
+def get_llm():
+    return ChatGoogleGenerativeAI(
+        model="gemini-3.1-flash-lite",
+        google_api_key=os.getenv("SERVICE_API_KEY"),
+        timeout=30,
+    )
 
 @app.get("/health")
 def health_check():
     return {"status": "healthy"}
 
 @app.post("/ai/recipes", dependencies=[Depends(verify_internal_hmac)])
-async def generate_recipes(request_data: dict[str, Any]):
+async def generate_recipes(request_data: dict[str, Any], llm: ChatGoogleGenerativeAI = Depends(get_llm)):
+    
     try:
+        request = RecipeRequestForwarded.from_dict(request_data)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Invalid request format: {str(e)}")
 
-        try:
-            request = RecipeRequestForwarded.from_dict(request_data)
-        except Exception as e:
-            raise HTTPException(status_code=400, detail=f"Invalid request format: {str(e)}")
+    if not request.profile or not request.profile.preferences:
+        raise HTTPException(status_code=400, detail="Missing required profile preferences.")
+    
+    try:
 
         # 1. Extract Profile Context
         prefs = request.profile.preferences
