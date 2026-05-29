@@ -66,7 +66,7 @@ def test_generate_help_success(mock_llm):
     assert response.json()["response"] == "Add a pinch of salt."
     mock_llm.ainvoke.assert_called_once()
 
-def test_generate_help_invalid_payload():
+def test_generate_help_invalid_payload(mock_llm):
     
     # preferences field missing
     payload = {

@@ -1,0 +1,38 @@
+name: Help Service - Deploy
+
+on:
+  push:
+    paths: ['services/py-help-service/**']
+  workflow_dispatch:
+
+jobs:
+  # --- Step 1: CI (Quality Check) ---
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Run Linting
+        run: |
+          cd services/py-help-service
+          pip install flake8
+          # Check for syntax errors and undefined names
+          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+
+  # --- Step 2: CD (The Scalable Deployment) ---
+  call-deploy:
+    needs: [test]
+    if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
+    uses: ./.github/workflows/reusable-deploy.yml
+    with:
+      service_name: py-help-service
+      service_dir: services/py-help-service
+    secrets:
+      GCP_SA_KEY: ${{ secrets.HELP_SERVICE_SA_KEY }}
+      GEMINI_API_KEY: ${{ secrets.HELP_SERVICE_KEY }}
+      INTERNAL_AUTH_SECRET:  ${{ secrets.INTERNAL_AUTH_SECRET }}

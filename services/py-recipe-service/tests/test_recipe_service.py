@@ -62,7 +62,7 @@ def test_generate_recipes_success(mock_llm):
     mock_llm.ainvoke.assert_called_once()
 
 
-def test_generate_recipes_invalid_payload():
+def test_generate_recipes_invalid_payload(mock_llm):
     
     # preferences field missing
     payload = {
