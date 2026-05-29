@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { flushSync } from 'react-dom'
 import { Link, useNavigate } from 'react-router-dom'
 import { BookOpenIcon } from '@heroicons/react/24/outline'
 import { BoltIcon, BookmarkIcon } from '@heroicons/react/24/solid'
@@ -69,10 +70,30 @@ export function LibraryPage() {
   return (
     <div className="columns-1 gap-4 md:columns-2 lg:columns-3">
       {recipes.map((recipe, i) => (
-        <div key={recipe.id} className="mb-4 break-inside-avoid">
+        <div
+          key={recipe.id}
+          className="mb-4 break-inside-avoid"
+          style={{ viewTransitionName: `recipe-card-${recipe.id}` }}
+        >
           <RecipeCard
             recipe={recipe}
             recipeId={recipe.id}
+            onSavedIdChange={(newId) => {
+              if (newId != null) return
+
+							// this recipe got deleted, make the others rearrange with a smooth transition
+              const apply = () => {
+                flushSync(() => {
+                  setRecipes((prev) => {
+                    const next = prev.filter((r) => r.id !== recipe.id)
+                    sessionStorage.setItem('library_recipes', JSON.stringify(next))
+                    return next
+                  })
+                })
+              }
+              if (document.startViewTransition) document.startViewTransition(apply)
+              else apply()
+            }}
             onOpen={() => navigate('/recipe', { state: { index: i, source: 'library' } })}
           />
         </div>

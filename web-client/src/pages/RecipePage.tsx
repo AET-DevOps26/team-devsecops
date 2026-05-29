@@ -205,7 +205,12 @@ function RecipeView({
         <header className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-1">
             <h2 className="text-lg font-bold">{recipe.title}</h2>
-            <RecipeSaveButton recipe={recipe} recipeId={recipe.id} onSavedIdChange={onSavedIdChange} />
+            <RecipeSaveButton
+              recipe={recipe}
+              recipeId={recipe.id}
+              onSavedIdChange={onSavedIdChange}
+              onDeleted={() => navigate(source === 'library' ? '/library' : '/generate')}
+            />
           </div>
           <div className="flex items-center gap-2">
             <button
