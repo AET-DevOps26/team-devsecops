@@ -26,6 +26,9 @@ jobs:
 
   test:
     runs-on: ubuntu-latest
+    permissions:
+      checks: write
+      pull-requests: write
     defaults:
       run:
         working-directory: services/py-help-service
@@ -49,3 +52,11 @@ jobs:
           SERVICE_API_KEY: ${{ secrets.SERVICE_API_KEY }}
         run: |
           pytest --junitxml=report.xml
+
+      - name: Publish test results
+        uses: dorny/test-reporter@v1
+        if: always() # This ensures it runs even if tests fail
+        with:
+          name: Help Service Tests
+          path: services/py-help-service/report.xml
+          reporter: java-junit
