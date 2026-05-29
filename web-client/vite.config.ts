@@ -13,6 +13,10 @@ export default defineConfig({
     css: false,
     include: ['tests/**/*.test.{ts,tsx}'],
     exclude: ['tests/e2e/**', 'node_modules/**', 'dist/**'],
+    reporters: [
+      'default',
+      ['junit', { outputFile: 'test-results/vitest-junit.xml' }],
+    ],
   },
   server: {
 		// mappings when running in dev mode

@@ -8,7 +8,10 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
-  reporter: 'list',
+  reporter: [
+    ['list'],
+    ['junit', { outputFile: 'test-results/playwright-junit.xml' }],
+  ],
   use: {
     baseURL: BASE,
     trace: 'on-first-retry',
