@@ -1,8 +1,10 @@
-import { useRef, useState } from 'react'
-import type { MouseEvent } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import type { MouseEvent, RefObject } from 'react'
+import { createPortal } from 'react-dom'
 import {
   BookmarkIcon as BookmarkOutline,
   TrashIcon as TrashOutline,
+  XMarkIcon,
 } from '@heroicons/react/24/outline'
 import {
   BookmarkIcon as BookmarkSolid,
@@ -20,24 +22,35 @@ export function RecipeSaveButton({
   recipeId,
   onSavedIdChange,
   onDeleted,
+  confirmContainer,
   className = '',
 }: {
   recipe: RecipeInput
   recipeId?: number
   onSavedIdChange?: (id: number | undefined) => void
   onDeleted?: () => void
+  // When set, the confirm dialog is scoped (absolute) to this element instead of covering the whole viewport
+  confirmContainer?: RefObject<HTMLElement | null>
   className?: string
 }) {
   const apiFetch = useApi()
   const [savedId, setSavedId] = useState<number | undefined>(recipeId)
   const [saving, setSaving] = useState(false)
   const [failed, setFailed] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const [confirming, setConfirming] = useState(false)
   const [suppressTrash, setSuppressTrash] = useState(false)
   const hoveredRef = useRef(false)
   const saved = savedId != null
 	// suppress trash icon until mouse left the bookmark icon after click
   const showTrash = saved && !suppressTrash
+
+  // auto-dismiss the error toast after a few seconds
+  useEffect(() => {
+    if (!error) return
+    const timer = setTimeout(() => setError(null), 5000)
+    return () => clearTimeout(timer)
+  }, [error])
 
   function handleClick(e: MouseEvent) {
     e.stopPropagation()
@@ -52,10 +65,11 @@ export function RecipeSaveButton({
   async function runSave() {
     setSaving(true)
     setFailed(false)
+    setError(null)
     try {
       if (savedId != null) {
         const res = await apiFetch(`/api/v1/recipes/${savedId}`, { method: 'DELETE' })
-        if (!res.ok) throw new Error(await errorMessage(res, `HTTP ${res.status}`))
+        if (!res.ok) throw new Error(await errorMessage(res, 'Could not remove the recipe.'))
 
 				// mark as non-stored in sessionStorage
 				for (const key of ['generated_recipes', 'library_recipes']) {
@@ -82,7 +96,7 @@ export function RecipeSaveButton({
           headers: { 'content-type': 'application/json' },
           body: JSON.stringify(body),
         })
-        if (!res.ok) throw new Error(await errorMessage(res, `HTTP ${res.status}`))
+        if (!res.ok) throw new Error(await errorMessage(res, 'Could not save the recipe.'))
         const { id } = (await res.json()) as RecipeCreated
         setSavedId(id)
         onSavedIdChange?.(id)
@@ -91,6 +105,7 @@ export function RecipeSaveButton({
     } catch (e) {
       if (e instanceof SessionExpiredError) return
       setFailed(true)
+      setError(e instanceof Error ? e.message : 'Something went wrong.')
     } finally {
       setSaving(false)
     }
@@ -143,41 +158,65 @@ export function RecipeSaveButton({
         </span>
       </button>
 
-			{/* Deletion confimation dialog */}
-      {confirming && (
-        <div
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="recipe-delete-title"
-          onClick={cancelDelete}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
-        >
+      {confirming &&
+        createPortal(
           <div
-            onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-sm rounded-lg bg-white p-6 shadow-xl"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="recipe-delete-title"
+            onClick={cancelDelete}
+            className={`z-50 flex items-center justify-center bg-black/40 p-4 ${
+              confirmContainer ? 'absolute inset-0' : 'fixed inset-0'
+            }`}
           >
-            <h2 id="recipe-delete-title" className="text-lg font-medium text-gray-900">
-              Delete recipe from library?
-            </h2>
-            <div className="mt-6 flex justify-end gap-2">
+            <div
+              onClick={(e) => e.stopPropagation()}
+              className="w-full max-w-sm rounded-lg bg-white p-6 shadow-xl"
+            >
+              <h2 id="recipe-delete-title" className="text-lg font-medium text-gray-900">
+                Delete recipe from library?
+              </h2>
+              <div className="mt-6 flex justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={cancelDelete}
+                  className="px-4 py-2 rounded text-gray-700 cursor-pointer hover:bg-gray-100"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={confirmDelete}
+                  className="px-4 py-2 rounded bg-red-500 text-white cursor-pointer hover:bg-red-600"
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+          </div>,
+          confirmContainer?.current ?? document.body,
+        )}
+
+      {error &&
+        createPortal(
+          <div className="pointer-events-none fixed inset-x-0 bottom-4 z-50 flex justify-center px-4">
+            <div
+              role="alert"
+              className="pointer-events-auto flex max-w-md items-start gap-3 rounded-lg bg-red-600 px-4 py-3 text-sm text-white shadow-lg"
+            >
+              <span>{error}</span>
               <button
                 type="button"
-                onClick={cancelDelete}
-                className="px-4 py-2 rounded text-gray-700 cursor-pointer hover:bg-gray-100"
+                onClick={() => setError(null)}
+                aria-label="Dismiss"
+                className="-mr-1 shrink-0 cursor-pointer text-white/80 hover:text-white"
               >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={confirmDelete}
-                className="px-4 py-2 rounded bg-red-500 text-white cursor-pointer hover:bg-red-600"
-              >
-                Delete
+                <XMarkIcon className="h-5 w-5" />
               </button>
             </div>
-          </div>
-        </div>
-      )}
+          </div>,
+          document.body,
+        )}
     </>
   )
 }

@@ -1,3 +1,4 @@
+import { useRef } from 'react'
 import type { KeyboardEvent } from 'react'
 import type { components } from '../api'
 import { formatQuantity } from '../recipeFormat'
@@ -18,6 +19,8 @@ export function RecipeCard({
   recipeId?: number
   onSavedIdChange?: (id: number | undefined) => void
 }) {
+  const cardRef = useRef<HTMLDivElement>(null)
+
   function handleKeyDown(e: KeyboardEvent) {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault()
@@ -27,11 +30,12 @@ export function RecipeCard({
 
   return (
     <div
+      ref={cardRef}
       role="button"
       tabIndex={0}
       onClick={onOpen}
       onKeyDown={handleKeyDown}
-      className="w-full text-left rounded-lg border border-gray-200 bg-white p-6 shadow-sm flex flex-col gap-3 cursor-pointer transition-transform duration-100 hover:scale-99"
+      className="relative w-full text-left rounded-lg border border-gray-200 bg-white p-6 shadow-sm flex flex-col gap-3 cursor-pointer transition-transform duration-100 hover:scale-99"
     >
       <header className="flex items-baseline justify-between gap-3">
         <h2 className="text-lg font-bold">{recipe.title}</h2>
@@ -43,6 +47,7 @@ export function RecipeCard({
             recipe={recipe}
             recipeId={recipeId}
             onSavedIdChange={onSavedIdChange}
+            confirmContainer={cardRef}
             className="-my-2"
           />
         </div>
