@@ -51,9 +51,9 @@ async def verify_internal_hmac(
 
     # 3. Read the raw body bytes directly from the stream
     body_bytes = await request.body()
-
+    
     # 4. Recalculate signature locally by hashing both pieces together
-    # Using a separator byte like b'|' prevents boundary shifting bugs
+    # Using a separator byte like b'.' prevents boundary shifting bugs
     hmac_context = hmac.new(SECRET_KEY_BYTES, digestmod=hashlib.sha256)
     hmac_context.update(x_internal_timestamp.encode('utf-8'))
     hmac_context.update(b'.')
@@ -65,18 +65,19 @@ async def verify_internal_hmac(
     if not hmac.compare_digest(expected_signature, x_internal_signature):
         raise HTTPException(status_code=403, detail="Forbidden: HMAC signature validation mismatch.")
 
-llm = ChatGoogleGenerativeAI(
-    model="gemini-3.1-flash-lite",
-    google_api_key=os.getenv("SERVICE_API_KEY"),
-    timeout=30,
-)
+def get_llm():
+    return ChatGoogleGenerativeAI(
+        model="gemini-3.1-flash-lite",
+        google_api_key=os.getenv("SERVICE_API_KEY"),
+        timeout=30,
+    )
 
 @app.get("/health")
 def health_check():
     return {"status": "healthy"}
 
 @app.post("/ai/help", dependencies=[Depends(verify_internal_hmac)])
-async def generate_help(request_data: dict[str, Any]):
+async def generate_help(request_data: dict[str, Any], llm: ChatGoogleGenerativeAI = Depends(get_llm)):
 
     try:
         request = HelpRequestForwarded.from_dict(request_data)
