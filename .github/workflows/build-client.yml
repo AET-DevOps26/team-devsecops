@@ -1,4 +1,4 @@
-name: Web Client - Lint, Build, Test
+name: Web Client - Lint & Test
 
 on:
   pull_request:
@@ -8,7 +8,7 @@ on:
     paths: ['web-client/**', '.github/workflows/build-client.yml']
 
 jobs:
-  lint-build-test:
+  lint:
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -28,6 +28,24 @@ jobs:
 
       - name: Lint
         run: npm run lint
+
+  build-test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web-client
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+          cache-dependency-path: web-client/package-lock.json
+
+      - name: Install
+        run: npm ci
 
       - name: Build
         run: npm run build

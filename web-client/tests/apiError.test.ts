@@ -10,12 +10,20 @@ function jsonResponse(body: unknown): Response {
 describe('errorMessage', () => {
   it('returns the server message when present', async () => {
     const res = jsonResponse({ message: 'Username already taken' })
-    expect(await errorMessage(res, 'fallback')).toBe('Username already taken')
+
+    const message = await errorMessage(res, 'fallback')
+
+    expect(message).toBe('Username already taken')
   })
 
   it('falls back when the body is missing a message or unparseable', async () => {
-    expect(await errorMessage(jsonResponse({ message: '   ' }), 'fallback')).toBe('fallback')
+    const whitespaceMessage = jsonResponse({ message: '   ' })
     const garbage = new Response('not json', { status: 500 })
-    expect(await errorMessage(garbage, 'fallback')).toBe('fallback')
+
+    const fromWhitespace = await errorMessage(whitespaceMessage, 'fallback')
+    const fromGarbage = await errorMessage(garbage, 'fallback')
+
+    expect(fromWhitespace).toBe('fallback')
+    expect(fromGarbage).toBe('fallback')
   })
 })

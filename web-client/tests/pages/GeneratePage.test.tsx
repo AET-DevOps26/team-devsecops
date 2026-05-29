@@ -12,7 +12,7 @@ const recipe: Recipe = {
   id: 1,
   title: 'Tomato Pasta',
   portions: 2,
-  ingredients: [{ name: 'tomato', quantity: 4, unit: '' }],
+  ingredients: [{ name: 'tomato', quantity: 4, unit: 'pcs' }],
   instructions: ['boil pasta', 'add sauce'],
   nutrients: { calories: 0, protein: 0, fat: 0, carbs: 0 },
 }
@@ -28,7 +28,7 @@ afterEach(() => {
 })
 
 function render() {
-  return renderWithProviders(
+  renderWithProviders(
     <Routes>
       <Route path="/generate" element={<GeneratePage />} />
     </Routes>,
@@ -39,7 +39,9 @@ function render() {
 describe('GeneratePage', () => {
   it('restores previously generated recipes from sessionStorage', () => {
     sessionStorage.setItem('generated_recipes', JSON.stringify([recipe]))
+
     render()
+
     expect(screen.getByText('Tomato Pasta')).toBeInTheDocument()
     expect(screen.getByText('2 portions')).toBeInTheDocument()
   })

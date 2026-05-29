@@ -16,7 +16,7 @@ afterEach(() => {
 })
 
 function renderLogin(opts?: Parameters<typeof renderWithProviders>[1]) {
-  return renderWithProviders(
+  renderWithProviders(
     <Routes>
       <Route path="/login" element={<LoginPage />} />
       <Route path="/generate" element={<div>generate page</div>} />
@@ -33,6 +33,7 @@ describe('LoginPage', () => {
     await user.type(screen.getByLabelText('Username'), 'alice')
     await user.type(screen.getByLabelText('Password'), 'one')
     await user.type(screen.getByLabelText('Repeat password'), 'two')
+
     await user.click(screen.getByRole('button', { name: 'Sign up' }))
 
     expect(await screen.findByText('Passwords do not match')).toBeInTheDocument()
@@ -43,10 +44,9 @@ describe('LoginPage', () => {
     fetchMock.mockResolvedValueOnce(jsonResponse({ message: 'Nope' }, { status: 401 }))
     const user = userEvent.setup()
     renderLogin()
-
     await user.type(screen.getByLabelText('Username'), 'alice')
     await user.type(screen.getByLabelText('Password'), 'wrong')
-    // both the active tab and the submit button render "Login"; submit via Enter to disambiguate
+
     await user.keyboard('{Enter}')
 
     expect(await screen.findByText('Nope')).toBeInTheDocument()
@@ -54,6 +54,7 @@ describe('LoginPage', () => {
 
   it('redirects to /generate when already signed in', async () => {
     renderLogin({ token: { value: 'tkn', username: 'alice' } })
+
     await waitFor(() => expect(screen.getByText('generate page')).toBeInTheDocument())
   })
 })

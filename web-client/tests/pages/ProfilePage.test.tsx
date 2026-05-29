@@ -16,7 +16,7 @@ afterEach(() => {
 })
 
 function render() {
-  return renderWithProviders(
+  renderWithProviders(
     <Routes>
       <Route path="/profile" element={<ProfilePage />} />
       <Route path="/login" element={<div>login page</div>} />
@@ -25,7 +25,6 @@ function render() {
   )
 }
 
-// the page issues a GET on mount; route any GET to a stub profile
 function defaultProfileFetch(body: { username: string }) {
   fetchMock.mockImplementation((_input, init) => {
     const method = init?.method ?? 'GET'
@@ -41,9 +40,9 @@ describe('ProfilePage', () => {
     defaultProfileFetch({ username: 'alice' })
     const user = userEvent.setup()
     render()
-
     await user.type(screen.getByLabelText('New password'), 'aaa')
     await user.type(screen.getByLabelText('Repeat new password'), 'bbb')
+
     await user.click(screen.getByRole('button', { name: 'Update password' }))
 
     expect(await screen.findByText('Passwords do not match')).toBeInTheDocument()
@@ -54,10 +53,10 @@ describe('ProfilePage', () => {
     defaultProfileFetch({ username: 'alice' })
     const user = userEvent.setup()
     render()
-
     // fill only the first allergy slot; the second stays empty
     const allergyInputs = await screen.findAllByPlaceholderText(/e\.g\. (peanuts|shellfish)/i)
     await user.type(allergyInputs[0], 'peanuts')
+
     await user.click(screen.getByRole('button', { name: 'Update taste preferences' }))
 
     await waitFor(() => {
@@ -83,10 +82,10 @@ describe('ProfilePage', () => {
     })
     const user = userEvent.setup()
     render()
-
     const usernameField = await screen.findByLabelText('New username')
     await user.clear(usernameField)
     await user.type(usernameField, 'bob')
+
     await user.click(screen.getByRole('button', { name: 'Update username' }))
 
     expect(await screen.findByText('Username already taken')).toBeInTheDocument()
