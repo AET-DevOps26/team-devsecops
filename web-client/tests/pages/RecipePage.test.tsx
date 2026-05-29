@@ -36,8 +36,8 @@ describe('RecipePage', () => {
 		const user = userEvent.setup()
 		render(0)
 
-		// baseline: 4 tomato, 500 kcal at 2 portions
-		expect(screen.getByText(/4 tomato/i)).toBeInTheDocument()
+		// baseline: 4 pcs tomato, 500 kcal at 2 portions
+		expect(screen.getByText(/4 pcs tomato/i)).toBeInTheDocument()
 		expect(screen.getByText('500 kcal')).toBeInTheDocument()
 
 		const inc = screen.getByRole('button', {name: 'Increase portions'})
@@ -46,7 +46,7 @@ describe('RecipePage', () => {
 		await user.click(inc) // 3.5
 		await user.click(inc) // 4
 
-		expect(screen.getByText(/8 tomato/i)).toBeInTheDocument()
+		expect(screen.getByText(/8 pcs tomato/i)).toBeInTheDocument()
 		expect(screen.getByText('1000 kcal')).toBeInTheDocument()
 	})
 
