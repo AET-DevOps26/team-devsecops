@@ -48,4 +48,4 @@ jobs:
           INTERNAL_AUTH_SECRET: ${{ secrets.INTERNAL_AUTH_SECRET }}
           SERVICE_API_KEY: ${{ secrets.SERVICE_API_KEY }}
         run: |
-          pytest
+          pytest --junitxml=report.xml

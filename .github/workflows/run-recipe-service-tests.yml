@@ -48,4 +48,12 @@ jobs:
           INTERNAL_AUTH_SECRET: ${{ secrets.INTERNAL_AUTH_SECRET }}
           SERVICE_API_KEY: ${{ secrets.SERVICE_API_KEY }}
         run: |
-          pytest
+          pytest --junitxml=report.xml
+
+      - name: Publish test results
+        uses: dorny/test-reporter@v1
+        if: always() # This ensures it runs even if tests fail
+        with:
+          name: Recipe Service Tests
+          path: services/py-recipe-service/report.xml
+          reporter: java-junit
