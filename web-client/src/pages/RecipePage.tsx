@@ -1,4 +1,4 @@
-import { useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { useLayoutEffect, useRef, useState } from 'react'
 import {
   ArrowPathIcon,
   ArrowRightIcon,
@@ -10,15 +10,27 @@ import {
 import Markdown from 'react-markdown'
 import { Navigate, useLocation, useNavigate } from 'react-router-dom'
 import type { components } from '../api'
+import { RecipeSaveButton } from '../components/RecipeSaveButton.tsx'
 import { formatQuantity } from '../recipeFormat'
 import { usePressPulse } from '../usePressPulse'
 import { errorMessage } from '../apiError'
 import { SessionExpiredError, useApi } from '../useApi'
 
-type Recipe = components['schemas']['Recipe']
+type Recipe = components['schemas']['RecipeInput'] & { id?: number }
 type HelpRequest = components['schemas']['HelpRequest']
 type HelpResponse = components['schemas']['HelpResponse']
 type HelpEntry = { question: string; answer: string }
+
+type RecipeSource = 'generated' | 'library'
+const SOURCE_STORAGE_KEY: Record<RecipeSource, string> = {
+  generated: 'generated_recipes',
+  library: 'library_recipes',
+}
+
+function readRecipes(source: RecipeSource): Recipe[] {
+  const stored = sessionStorage.getItem(SOURCE_STORAGE_KEY[source])
+  return stored ? (JSON.parse(stored) as Recipe[]) : []
+}
 
 function toggleSetItem(set: Set<number>, item: number): Set<number> {
   const next = new Set(set)
@@ -30,14 +42,26 @@ function toggleSetItem(set: Set<number>, item: number): Set<number> {
 // Wrapper that keeps the recipe list and the help histories
 export function RecipePage() {
   const location = useLocation()
-  const recipes = useMemo<Recipe[]>(() => {
-    const stored = sessionStorage.getItem('generated_recipes')
-    return stored ? (JSON.parse(stored) as Recipe[]) : []
-  }, [])
-  const index = (location.state as { index?: number } | null)?.index ?? 0
+  const state = location.state as { index?: number; source?: RecipeSource } | null
+  const source: RecipeSource = state?.source ?? 'generated'
+  const [recipes, setRecipes] = useState<Recipe[]>(() => readRecipes(source))
+  const [loadedSource, setLoadedSource] = useState(source)
+  if (loadedSource !== source) {
+    setLoadedSource(source)
+    setRecipes(readRecipes(source))
+  }
+  const index = state?.index ?? 0
   const recipe = recipes[index]
 
   const [helpAnswers, setHelpAnswers] = useState<Record<number, HelpEntry[]>>({})
+
+  function handleSavedIdChange(newId: number | undefined) {
+    setRecipes((prev) => {
+      const next = prev.map((prevRecipe, prevIndex) => (prevIndex === index ? { ...prevRecipe, id: newId } : prevRecipe))
+      sessionStorage.setItem(SOURCE_STORAGE_KEY[source], JSON.stringify(next))
+      return next
+    })
+  }
 
   if (!recipe) return <Navigate to="/generate" replace />
 
@@ -47,6 +71,8 @@ export function RecipePage() {
       recipe={recipe}
       recipes={recipes}
       index={index}
+      source={source}
+      onSavedIdChange={handleSavedIdChange}
       answers={helpAnswers[index] ?? []}
       onAnswer={(entry) =>
         setHelpAnswers((m) => ({ ...m, [index]: [entry, ...(m[index] ?? [])] }))
@@ -59,12 +85,16 @@ function RecipeView({
   recipe,
   recipes,
   index,
+  source,
+  onSavedIdChange,
   answers,
   onAnswer,
 }: {
   recipe: Recipe
   recipes: Recipe[]
   index: number
+  source: RecipeSource
+  onSavedIdChange: (id: number | undefined) => void
   answers: HelpEntry[]
   onAnswer: (entry: HelpEntry) => void
 }) {
@@ -92,7 +122,8 @@ function RecipeView({
   }, [helpPrompt])
 
   const scale = recipe.portions ? portions / recipe.portions : 1
-  const navigateToRecipe = (index: number) => navigate('/recipe', { state: { index: index }, replace: true })
+  const navigateToRecipe = (index: number) =>
+    navigate('/recipe', { state: { index, source }, replace: true })
 
   async function handleGetHelp() {
     const question = helpPrompt.trim()
@@ -172,7 +203,15 @@ function RecipeView({
 
 				{/* Title & portion selector */}
         <header className="flex items-center justify-between gap-3">
-          <h2 className="text-lg font-bold">{recipe.title}</h2>
+          <div className="flex items-center gap-1">
+            <h2 className="text-lg font-bold">{recipe.title}</h2>
+            <RecipeSaveButton
+              recipe={recipe}
+              recipeId={recipe.id}
+              onSavedIdChange={onSavedIdChange}
+              onDeleted={() => navigate(source === 'library' ? '/library' : '/generate')}
+            />
+          </div>
           <div className="flex items-center gap-2">
             <button
               type="button"
