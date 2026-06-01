@@ -1,11 +1,11 @@
-import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import type { components } from '../api'
-import { Button } from '../components/Button'
-import { RecipeCard } from '../components/RecipeCard'
-import { usePressPulse } from '../usePressPulse'
-import { errorMessage } from '../apiError'
-import { SessionExpiredError, useApi } from '../useApi'
+import {useEffect, useState} from 'react'
+import {useNavigate} from 'react-router-dom'
+import type {components} from '../api'
+import {Button} from '../components/Button'
+import {RecipeCard} from '../components/RecipeCard'
+import {usePressPulse} from '../usePressPulse'
+import {errorMessage} from '../apiError'
+import {SessionExpiredError, useApi} from '../useApi'
 
 // id is stored on the recipe once it is saved
 type Recipe = components['schemas']['RecipeInput'] & { id?: number }
@@ -24,6 +24,12 @@ export function GeneratePage() {
   const [status, setStatus] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
 
+	// Confirm the session is still valid
+	useEffect(() => {
+		// on failure, this will automatically redirect to /login
+		apiFetch('/users/profile')
+	}, [apiFetch])
+
   useEffect(() => {
     sessionStorage.setItem('generated_recipes', JSON.stringify(recipes))
   }, [recipes])
@@ -35,7 +41,7 @@ export function GeneratePage() {
     sessionStorage.setItem('recipe_prompt', prompt)
     try {
       const body: RecipeRequest = { prompt }
-      const response = await apiFetch('/api/v1/ai/recipes', {
+		const response = await apiFetch('/ai/recipes', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify(body),
@@ -94,7 +100,7 @@ export function GeneratePage() {
           recipe={recipe}
           recipeId={recipe.id}
           onSavedIdChange={(newId) => handleSavedIdChange(index, newId)}
-          onOpen={() => navigate('/recipe', { state: {index, source: 'generated' } })}
+          onOpen={() => navigate('/generate/recipe', {state: {index}})}
         />
       ))}
     </>

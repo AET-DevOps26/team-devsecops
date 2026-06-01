@@ -61,7 +61,7 @@ export function ProfilePage() {
 	// fetch the currently stored user profile
   useEffect(() => {
     let cancelled = false
-    apiFetch('/api/v1/users/profile')
+    apiFetch('/users/profile')
       .then(async (res) => {
         if (!res.ok) throw new Error(await errorMessage(res, `HTTP ${res.status}`))
         const data = (await res.json()) as UserProfile
@@ -81,7 +81,7 @@ export function ProfilePage() {
   }, [apiFetch])
 
   async function updateProfile(body: UserProfileUpdate): Promise<void> {
-    const res = await apiFetch('/api/v1/users/profile', {
+    const res = await apiFetch('/users/profile', {
       method: 'PUT',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify(body),

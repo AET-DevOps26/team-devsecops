@@ -21,6 +21,7 @@ const fetchMock = vi.fn<typeof fetch>()
 
 beforeEach(() => {
   vi.stubGlobal('fetch', fetchMock)
+  fetchMock.mockResolvedValueOnce(jsonResponse({ username: 'alice' }))
 })
 afterEach(() => {
   fetchMock.mockReset()
