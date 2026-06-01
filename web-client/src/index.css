@@ -36,14 +36,15 @@
     }
   }
 
-  /* checkmark dismissal once a field is saved and idle again */
-  --animate-fade-out: fade-out 400ms ease-in forwards;
+  /* checkmark holds for a moment once a field is saved, then fades away */
+  --animate-fade-out: fade-out 1500ms ease-in forwards;
   @keyframes fade-out {
-    from {
+    0%,
+    66% {
       opacity: 1;
       transform: scale(1);
     }
-    to {
+    100% {
       opacity: 0;
       transform: scale(0.6);
     }

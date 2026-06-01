@@ -110,25 +110,68 @@ describe('ProfilePage', () => {
       ).toBeNull()
     })
 
-    it('shows a spinner while typing, then saves the trimmed value after a pause and flashes a check that fades out', async () => {
-      defaultProfileFetch({ username: 'alice' })
+    it('shows no spinner while typing, spins only once the request is sent, then flashes a check that fades out', async () => {
+      // PUTs resolve only when we say so, so we can observe the spinner appear
+      // exactly when the request goes out (not while typing)
+      const pending: Array<() => void> = []
+      fetchMock.mockImplementation((_input, init) => {
+        const method = init?.method ?? 'GET'
+        if (method === 'GET') {
+          return Promise.resolve(jsonResponse({ username: 'alice', preferences: {} }))
+        }
+        return new Promise<Response>((resolve) => {
+          pending.push(() => resolve(jsonResponse({})))
+        })
+      })
       const user = userEvent.setup()
       await renderSettled()
 
       await user.type(screen.getByLabelText('About me'), '  spicy food  ')
 
-      // spinner is showing immediately and nothing has been sent yet
-      expect(status()).toBe('saving')
+      // while typing: no spinner yet and nothing has been sent
+      expect(status()).toBe('idle')
       expect(putCalls()).toHaveLength(0)
 
       // once the user pauses, the request goes out with the trimmed value
-      await waitFor(() => expect(putCalls()).toHaveLength(1), { timeout: 2000 })
+      await waitFor(() => expect(pending).toHaveLength(1), { timeout: 2000 })
       expect(lastPutBody().preferences.aboutMe).toEqual(['spicy food'])
+      // the spinner only appears once the request outlasts its grace period
+      await waitFor(() => expect(status()).toBe('saving'), { timeout: 2000 })
 
       // the green check appears...
+      await resolveAndFlush(pending[0])
       await waitFor(() => expect(status()).toBe('saved'))
-      // ...and clears itself shortly after
-      await waitFor(() => expect(activeIndicator()).toBeNull(), { timeout: 2000 })
+      // ...lingers, then clears itself
+      await waitFor(() => expect(activeIndicator()).toBeNull(), { timeout: 3000 })
+    })
+
+    it('never flashes the spinner for a save that finishes within the grace period', async () => {
+      // the PUT resolves immediately — well inside the spinner grace period
+      defaultProfileFetch({ username: 'alice' })
+      const user = userEvent.setup()
+      await renderSettled()
+
+      // record every status the indicator passes through
+      const seen = new Set<string>()
+      const observer = new MutationObserver((mutations) => {
+        for (const m of mutations) {
+          const value = (m.target as Element).getAttribute?.('data-status')
+          if (value) seen.add(value)
+        }
+      })
+      observer.observe(document.body, {
+        subtree: true,
+        attributes: true,
+        attributeFilter: ['data-status'],
+      })
+
+      await user.type(screen.getByLabelText('About me'), 'fast')
+      await waitFor(() => expect(putCalls()).toHaveLength(1), { timeout: 2000 })
+      await waitFor(() => expect(seen.has('saved')).toBe(true), { timeout: 2000 })
+      observer.disconnect()
+
+      // it went straight from idle to the check — no spinner in between
+      expect(seen.has('saving')).toBe(false)
     })
 
     it('debounces a burst of keystrokes into a single request', async () => {
@@ -179,7 +222,7 @@ describe('ProfilePage', () => {
       await user.type(aboutMe, 'a')
       // first request fires after the debounce and is now in flight
       await waitFor(() => expect(pending).toHaveLength(1), { timeout: 2000 })
-      expect(status()).toBe('saving')
+      await waitFor(() => expect(status()).toBe('saving'), { timeout: 2000 })
 
       // user keeps typing before the server answers
       await user.type(aboutMe, 'b')
@@ -195,7 +238,7 @@ describe('ProfilePage', () => {
       await waitFor(() => expect(status()).toBe('saved'))
     })
 
-    it('surfaces a server error when the save fails', async () => {
+    it('shows a warning sign and message when the save fails, and clears it on the next edit', async () => {
       fetchMock.mockImplementation((_input, init) => {
         const method = init?.method ?? 'GET'
         if (method === 'GET') {
@@ -206,13 +249,40 @@ describe('ProfilePage', () => {
       const user = userEvent.setup()
       await renderSettled()
 
-      await user.type(screen.getByLabelText('About me'), 'spicy')
+      const aboutMe = screen.getByLabelText('About me')
+      await user.type(aboutMe, 'spicy')
 
-      // the error is surfaced and the spinner is gone
+      // the message is surfaced and a warning sign sits beside the field
       await waitFor(() => expect(screen.getByText('Server on fire')).toBeInTheDocument(), {
         timeout: 2000,
       })
-      expect(activeIndicator()).toBeNull()
+      expect(status()).toBe('error')
+      expect(screen.getByTestId('save-error')).toBeInTheDocument()
+
+      // resuming typing clears the warning (no spinner until the next send)
+      await user.type(aboutMe, '!')
+      expect(status()).toBe('idle')
+    })
+
+    it('reports an unreachable server in plain language', async () => {
+      fetchMock.mockImplementation((_input, init) => {
+        const method = init?.method ?? 'GET'
+        if (method === 'GET') {
+          return Promise.resolve(jsonResponse({ username: 'alice', preferences: {} }))
+        }
+        // what fetch throws when the server is down / connection refused
+        return Promise.reject(new TypeError('Failed to fetch'))
+      })
+      const user = userEvent.setup()
+      await renderSettled()
+
+      await user.type(screen.getByLabelText('About me'), 'spicy')
+
+      await waitFor(
+        () => expect(screen.getByText("Couldn't reach the server")).toBeInTheDocument(),
+        { timeout: 2000 },
+      )
+      expect(screen.getByTestId('save-error')).toBeInTheDocument()
     })
   })
 })

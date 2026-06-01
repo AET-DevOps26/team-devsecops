@@ -1,19 +1,21 @@
-import { CheckIcon } from '@heroicons/react/24/outline'
+import { CheckIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline'
 
-export type SaveStatus = 'idle' | 'saving' | 'resaving' | 'saved'
+export type SaveStatus = 'idle' | 'saving' | 'resaving' | 'saved' | 'error'
 
 const labels: Record<SaveStatus, string> = {
   idle: '',
   saving: 'Saving…',
   resaving: 'Saved, saving latest changes…',
   saved: 'Saved',
+  error: 'Could not save',
 }
 
-// Spinner / check overlay shown beside an autosaved field.
-//  - saving:   spinner only (typing or request in flight)
+// Spinner / check / warning overlay shown beside an autosaved field.
+//  - saving:   spinner only (a request is in flight)
 //  - resaving: spinner with a check in its centre (a save landed but newer
 //              edits are still being persisted)
-//  - saved:    green check that fades out once everything is persisted
+//  - saved:    green check that lingers, then fades out
+//  - error:    amber warning sign that stays until the next edit
 export function SaveIndicator({
   status,
   className = '',
@@ -41,6 +43,12 @@ export function SaveIndicator({
         <CheckIcon
           data-testid="save-check"
           className="h-5 w-5 text-green-600 stroke-[3] animate-fade-out"
+        />
+      )}
+      {status === 'error' && (
+        <ExclamationTriangleIcon
+          data-testid="save-error"
+          className="h-5 w-5 text-amber-500 stroke-[2.5] animate-fade-in"
         />
       )}
     </span>

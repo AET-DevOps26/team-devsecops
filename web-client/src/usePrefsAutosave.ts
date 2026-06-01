@@ -2,10 +2,13 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import type { SaveStatus } from './components/SaveIndicator'
 
 // How long to wait after the last keystroke before persisting.
-const SAVE_DELAY_MS = 800
-// How long the green check lingers (matches the fade-out animation) before
-// the indicator clears.
-const CHECKMARK_MS = 600
+const SAVE_DELAY_MS = 400
+// How long a request may run before we bother showing the spinner — fast saves
+// finish within this window and never flicker one.
+const SPINNER_DELAY_MS = 300
+// How long the green check lingers (it holds, then fades — matches the
+// fade-out animation) before the indicator clears.
+const CHECKMARK_MS = 1500
 
 // Drives debounced autosave for a set of named fields that share a single
 // payload (here: the whole taste-preferences object). Each field gets its own
@@ -15,9 +18,14 @@ export function usePrefsAutosave<P>(options: {
   save: (payload: P) => Promise<void>
   onError: (error: unknown) => void
   delay?: number
+  spinnerDelay?: number
   checkmarkMs?: number
 }) {
-  const { delay = SAVE_DELAY_MS, checkmarkMs = CHECKMARK_MS } = options
+  const {
+    delay = SAVE_DELAY_MS,
+    spinnerDelay = SPINNER_DELAY_MS,
+    checkmarkMs = CHECKMARK_MS,
+  } = options
   // Keep the latest callbacks in refs so the timer-driven logic never closes
   // over a stale version.
   const saveRef = useRef(options.save)
@@ -37,6 +45,7 @@ export function usePrefsAutosave<P>(options: {
   const dirtyRef = useRef<Set<string>>(new Set())
   const inFlightRef = useRef(false)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const spinnerTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const fadeRef = useRef<Record<string, ReturnType<typeof setTimeout>>>({})
   // Reassigned every render; invoked indirectly via timers so it always sees
   // the freshest closure.
@@ -70,12 +79,24 @@ export function usePrefsAutosave<P>(options: {
     fields.forEach((f) => {
       savingVersionRef.current[f] = versionRef.current[f] ?? 0
     })
+
+    // Reveal the spinner only if the request is still running after a short
+    // grace period — fast saves never flicker one. A field mid-resave keeps its
+    // check-in-middle.
+    if (spinnerTimerRef.current) clearTimeout(spinnerTimerRef.current)
+    spinnerTimerRef.current = setTimeout(() => {
+      fields.forEach((f) => {
+        if (statusesRef.current[f] !== 'resaving') apply(f, 'saving')
+      })
+    }, spinnerDelay)
+
     const payload = payloadRef.current as P
 
     inFlightRef.current = true
     saveRef.current(payload)
       .then(
         () => {
+          if (spinnerTimerRef.current) clearTimeout(spinnerTimerRef.current)
           fields.forEach((f) => {
             // Did the user keep editing this field while the request was in
             // flight? If so, keep spinning but flash the check in the middle.
@@ -89,9 +110,10 @@ export function usePrefsAutosave<P>(options: {
           })
         },
         (err: unknown) => {
-          // Drop the spinner and surface the error; the value stays in the
+          if (spinnerTimerRef.current) clearTimeout(spinnerTimerRef.current)
+          // Surface a warning on the affected fields; the value stays in the
           // input, so the next keystroke retries it (no auto-retry loop).
-          fields.forEach((f) => apply(f, 'idle'))
+          fields.forEach((f) => apply(f, 'error'))
           onErrorRef.current(err)
         },
       )
@@ -109,7 +131,13 @@ export function usePrefsAutosave<P>(options: {
       payloadRef.current = payload
       versionRef.current[field] = (versionRef.current[field] ?? 0) + 1
       dirtyRef.current.add(field)
-      if (statusesRef.current[field] !== 'resaving') apply(field, 'saving')
+      // Resuming typing clears a finished check / warning right away; no spinner
+      // is shown until the request is actually sent.
+      const current = statusesRef.current[field]
+      if (current === 'saved' || current === 'error') {
+        if (fadeRef.current[field]) clearTimeout(fadeRef.current[field])
+        apply(field, 'idle')
+      }
       scheduleFlush()
     },
     [apply, scheduleFlush],
@@ -126,6 +154,7 @@ export function usePrefsAutosave<P>(options: {
   useEffect(
     () => () => {
       if (debounceRef.current) clearTimeout(debounceRef.current)
+      if (spinnerTimerRef.current) clearTimeout(spinnerTimerRef.current)
       Object.values(fadeRef.current).forEach(clearTimeout)
     },
     [],

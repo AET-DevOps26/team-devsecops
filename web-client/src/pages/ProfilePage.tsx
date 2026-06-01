@@ -23,6 +23,10 @@ type PrefsDraft = { aboutMe: string[]; diet: string[]; allergies: string[] }
 
 const trimList = (xs: string[]) => xs.map((x) => x.trim()).filter((x) => x !== '')
 
+// Abort a profile save that the server never answers, so the indicator can't
+// stay stuck on the spinner forever.
+const SAVE_TIMEOUT_MS = 8000
+
 const allergyPlaceholders = [
   'e.g. peanuts',
   'e.g. shellfish',
@@ -86,11 +90,23 @@ export function ProfilePage() {
   }, [apiFetch])
 
   async function updateProfile(body: UserProfileUpdate): Promise<void> {
-    const res = await apiFetch('/api/v1/users/profile', {
-      method: 'PUT',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify(body),
-    })
+    let res: Response
+    try {
+      res = await apiFetch('/api/v1/users/profile', {
+        method: 'PUT',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify(body),
+        // Don't let a dead/unreachable server leave the save spinner hanging.
+        signal: AbortSignal.timeout(SAVE_TIMEOUT_MS),
+      })
+    } catch (e) {
+      // A timed-out request (DOMException) or a refused/unreachable connection
+      // (fetch rejects with a TypeError) both mean: the server isn't there.
+      if ((e instanceof DOMException && e.name === 'TimeoutError') || e instanceof TypeError) {
+        throw new Error("Couldn't reach the server", { cause: e })
+      }
+      throw e
+    }
     if (res.status === 409) throw new Error(await errorMessage(res, 'Username already taken'))
     if (res.status === 400) throw new Error(await errorMessage(res, 'Invalid request'))
     if (!res.ok) throw new Error(await errorMessage(res, `HTTP ${res.status}`))
