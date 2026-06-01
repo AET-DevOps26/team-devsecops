@@ -9,12 +9,19 @@ import type { components } from '../api'
 import { useAuth } from '../auth'
 import { Button } from '../components/Button'
 import { PasswordInput } from '../components/PasswordInput'
+import { SaveIndicator } from '../components/SaveIndicator'
 import { usePressPulse } from '../usePressPulse'
+import { usePrefsAutosave } from '../usePrefsAutosave'
 import { errorMessage } from '../apiError'
 import { SessionExpiredError, useApi } from '../useApi'
 
 type UserProfile = components['schemas']['UserProfile']
 type UserProfileUpdate = components['schemas']['UserProfileUpdate']
+
+// raw (un-trimmed) preferences as held by the inputs
+type PrefsDraft = { aboutMe: string[]; diet: string[]; allergies: string[] }
+
+const trimList = (xs: string[]) => xs.map((x) => x.trim()).filter((x) => x !== '')
 
 const allergyPlaceholders = [
   'e.g. peanuts',
@@ -39,7 +46,6 @@ export function ProfilePage() {
   const apiFetch = useApi()
   const navigate = useNavigate()
 
-  const [prefsBtnRef, pulsePrefs] = usePressPulse<HTMLButtonElement>()
   const [usernameBtnRef, pulseUsername] = usePressPulse<HTMLButtonElement>()
   const [passwordBtnRef, pulsePassword] = usePressPulse<HTMLButtonElement>()
 
@@ -54,7 +60,6 @@ export function ProfilePage() {
   const [prefsStatus, setPrefsStatus] = useState<{ kind: 'error' | 'ok'; msg: string } | null>(null)
   const [usernameStatus, setUsernameStatus] = useState<{ kind: 'error' | 'ok'; msg: string } | null>(null)
   const [passwordStatus, setPasswordStatus] = useState<{ kind: 'error' | 'ok'; msg: string } | null>(null)
-  const [prefsSaving, setPrefsSaving] = useState(false)
   const [usernameSaving, setUsernameSaving] = useState(false)
   const [passwordSaving, setPasswordSaving] = useState(false)
 
@@ -91,25 +96,25 @@ export function ProfilePage() {
     if (!res.ok) throw new Error(await errorMessage(res, `HTTP ${res.status}`))
   }
 
-  async function handleSavePreferences() {
-    pulsePrefs()
-    setPrefsSaving(true)
-    setPrefsStatus(null)
-    try {
-      await updateProfile({
+  const { statuses: prefsStatuses, notifyEdit } = usePrefsAutosave<PrefsDraft>({
+    save: (draft) =>
+      updateProfile({
         preferences: {
-          diet: diet.map((d) => d.trim()).filter((d) => d !== ''),
-          allergies: allergies.map((a) => a.trim()).filter((a) => a !== ''),
-          aboutMe: aboutMe.map((a) => a.trim()).filter((a) => a !== ''),
+          diet: trimList(draft.diet),
+          allergies: trimList(draft.allergies),
+          aboutMe: trimList(draft.aboutMe),
         },
-      })
-      setPrefsStatus({ kind: 'ok', msg: 'Preferences saved' })
-    } catch (e) {
-      if (e instanceof SessionExpiredError) return
-      setPrefsStatus({ kind: 'error', msg: e instanceof Error ? e.message : String(e) })
-    } finally {
-      setPrefsSaving(false)
-    }
+      }),
+    onError: (err) => {
+      if (err instanceof SessionExpiredError) return
+      setPrefsStatus({ kind: 'error', msg: err instanceof Error ? err.message : String(err) })
+    },
+  })
+
+  // record an edit to one preferences field and (debounced) autosave the lot
+  function editPrefs(field: string, draft: PrefsDraft) {
+    setPrefsStatus(null)
+    notifyEdit(field, draft)
   }
 
   async function handleUpdateUsername() {
@@ -181,43 +186,60 @@ export function ProfilePage() {
       </div>
 
       <div className="w-full max-w-md rounded-lg border border-gray-200 bg-white p-6 shadow-sm self-center md:self-start">
-        <form
-          className="flex flex-col gap-4"
-          onSubmit={(e) => {
-            e.preventDefault()
-            handleSavePreferences()
-          }}
-        >
+        {/* taste preferences autosave as you type — no submit button */}
+        <div className="flex flex-col gap-4">
           <h2 className="text-lg font-bold">Taste preferences</h2>
 
           <label className="flex flex-col gap-1">
             <span className="font-medium">About me</span>
-            <textarea
-              className="w-full border border-gray-300 rounded p-2"
-              rows={3}
-              value={aboutMe[0] ?? ''}
-              onChange={(e) => setAboutMe([e.target.value])}
-              placeholder="e.g. I cook for a family of four and love spicy food"
-            />
+            <div className="relative">
+              <textarea
+                className="w-full border border-gray-300 rounded p-2 pr-9"
+                rows={3}
+                value={aboutMe[0] ?? ''}
+                onChange={(e) => {
+                  const next = [e.target.value]
+                  setAboutMe(next)
+                  editPrefs('aboutMe', { aboutMe: next, diet, allergies })
+                }}
+                placeholder="e.g. I cook for a family of four and love spicy food"
+              />
+              <SaveIndicator
+                status={prefsStatuses['aboutMe'] ?? 'idle'}
+                className="absolute right-2 top-2"
+              />
+            </div>
           </label>
 
           <div className="flex flex-col gap-1">
             <span className="font-medium">Diet</span>
             {diet.map((d, i) => (
               <div key={i} className="flex items-center gap-2">
-                <input
-                  type="text"
-                  className="w-full border border-gray-300 rounded p-2"
-                  value={d}
-                  onChange={(e) =>
-                    setDiet(diet.map((x, j) => (j === i ? e.target.value : x)))
-                  }
-                  placeholder={dietPlaceholders[i % dietPlaceholders.length]}
-                />
+                <div className="relative flex-1">
+                  <input
+                    type="text"
+                    className="w-full border border-gray-300 rounded p-2 pr-9"
+                    value={d}
+                    onChange={(e) => {
+                      const next = diet.map((x, j) => (j === i ? e.target.value : x))
+                      setDiet(next)
+                      editPrefs(`diet:${i}`, { aboutMe, diet: next, allergies })
+                    }}
+                    placeholder={dietPlaceholders[i % dietPlaceholders.length]}
+                  />
+                  <SaveIndicator
+                    status={prefsStatuses[`diet:${i}`] ?? 'idle'}
+                    className="absolute right-2 top-1/2 -translate-y-1/2"
+                  />
+                </div>
                 <button
                   type="button"
                   className="cursor-pointer text-gray-400 hover:text-red-600 transition-transform duration-100 hover:scale-98"
-                  onClick={() => setDiet(diet.filter((_, j) => j !== i))}
+                  onClick={() => {
+                    const next = diet.filter((_, j) => j !== i)
+                    setDiet(next)
+                    editPrefs('diet', { aboutMe, diet: next, allergies })
+                  }}
                 >
                   <TrashIcon className="h-5 w-5" />
                 </button>
@@ -239,19 +261,31 @@ export function ProfilePage() {
             <span className="font-medium">Allergies</span>
             {allergies.map((allergy, i) => (
               <div key={i} className="flex items-center gap-2">
-                <input
-                  type="text"
-                  className="w-full border border-gray-300 rounded p-2"
-                  value={allergy}
-                  onChange={(e) =>
-                    setAllergies(allergies.map((a, j) => (j === i ? e.target.value : a)))
-                  }
-                  placeholder={allergyPlaceholders[i % allergyPlaceholders.length]}
-                />
+                <div className="relative flex-1">
+                  <input
+                    type="text"
+                    className="w-full border border-gray-300 rounded p-2 pr-9"
+                    value={allergy}
+                    onChange={(e) => {
+                      const next = allergies.map((a, j) => (j === i ? e.target.value : a))
+                      setAllergies(next)
+                      editPrefs(`allergies:${i}`, { aboutMe, diet, allergies: next })
+                    }}
+                    placeholder={allergyPlaceholders[i % allergyPlaceholders.length]}
+                  />
+                  <SaveIndicator
+                    status={prefsStatuses[`allergies:${i}`] ?? 'idle'}
+                    className="absolute right-2 top-1/2 -translate-y-1/2"
+                  />
+                </div>
                 <button
                   type="button"
                   className="cursor-pointer text-gray-400 hover:text-red-600 transition-transform duration-100 hover:scale-98"
-                  onClick={() => setAllergies(allergies.filter((_, j) => j !== i))}
+                  onClick={() => {
+                    const next = allergies.filter((_, j) => j !== i)
+                    setAllergies(next)
+                    editPrefs('allergies', { aboutMe, diet, allergies: next })
+                  }}
                 >
                   <TrashIcon className="h-5 w-5" />
                 </button>
@@ -269,16 +303,12 @@ export function ProfilePage() {
             </button>
           </div>
 
-          <Button ref={prefsBtnRef} type="submit" className="self-center" disabled={prefsSaving}>
-            {prefsSaving ? 'Saving…' : 'Update taste preferences'}
-          </Button>
-
           {prefsStatus && (
             <p className={prefsStatus.kind === 'error' ? 'text-red-600' : 'text-green-600'}>
               {prefsStatus.msg}
             </p>
           )}
-        </form>
+        </div>
       </div>
 
       <div className="w-full max-w-md rounded-lg border border-gray-200 bg-white p-6 shadow-sm self-center md:self-start">
