@@ -46,7 +46,7 @@ export function GeneratePage() {
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify(body),
       })
-      if (!response.ok) throw new Error(await errorMessage(response, `HTTP ${response.status}`))
+      if (!response.ok) throw new Error(await errorMessage(response))
       const data = (await response.json()) as Recipe[]
       setRecipes(data)
       setStatus(data.length === 0 ? 'No recipes returned.' : null)

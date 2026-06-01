@@ -69,7 +69,7 @@ export function RecipeSaveButton({
     try {
       if (savedId != null) {
         const res = await apiFetch(`/recipes/${savedId}`, { method: 'DELETE' })
-        if (!res.ok) throw new Error(await errorMessage(res, 'Could not remove the recipe.'))
+        if (!res.ok) throw new Error(await errorMessage(res))
 
 				// mark as non-stored if in the generated-recipes list
 				const stored = sessionStorage.getItem('generated_recipes')
@@ -95,7 +95,7 @@ export function RecipeSaveButton({
           headers: { 'content-type': 'application/json' },
           body: JSON.stringify(body),
         })
-        if (!res.ok) throw new Error(await errorMessage(res, 'Could not save the recipe.'))
+        if (!res.ok) throw new Error(await errorMessage(res))
         const { id } = (await res.json()) as RecipeCreated
         setSavedId(id)
         onSavedIdChange?.(id)

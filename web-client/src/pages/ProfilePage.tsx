@@ -63,7 +63,7 @@ export function ProfilePage() {
     let cancelled = false
     apiFetch('/users/profile')
       .then(async (res) => {
-        if (!res.ok) throw new Error(await errorMessage(res, `HTTP ${res.status}`))
+        if (!res.ok) throw new Error(await errorMessage(res))
         const data = (await res.json()) as UserProfile
         if (cancelled) return
         const prefs = data.preferences ?? {}
@@ -86,9 +86,7 @@ export function ProfilePage() {
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify(body),
     })
-    if (res.status === 409) throw new Error(await errorMessage(res, 'Username already taken'))
-    if (res.status === 400) throw new Error(await errorMessage(res, 'Invalid request'))
-    if (!res.ok) throw new Error(await errorMessage(res, `HTTP ${res.status}`))
+    if (!res.ok) throw new Error(await errorMessage(res))
   }
 
   async function handleSavePreferences() {

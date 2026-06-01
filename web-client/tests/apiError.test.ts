@@ -11,19 +11,16 @@ describe('errorMessage', () => {
   it('returns the server message when present', async () => {
     const res = jsonResponse({ message: 'Username already taken' })
 
-    const message = await errorMessage(res, 'fallback')
+    const message = await errorMessage(res)
 
     expect(message).toBe('Username already taken')
   })
 
-  it('falls back when the body is missing a message or unparseable', async () => {
-    const whitespaceMessage = jsonResponse({ message: '   ' })
+  it('falls back to a status message when the body has no usable message', async () => {
+    const whitespaceMessage = jsonResponse({ message: '   ' }) // status 400
     const garbage = new Response('not json', { status: 500 })
 
-    const fromWhitespace = await errorMessage(whitespaceMessage, 'fallback')
-    const fromGarbage = await errorMessage(garbage, 'fallback')
-
-    expect(fromWhitespace).toBe('fallback')
-    expect(fromGarbage).toBe('fallback')
+    expect(await errorMessage(whitespaceMessage)).toBe('An error occured. (HTTP 400)')
+    expect(await errorMessage(garbage)).toBe('An error occured. (HTTP 500)')
   })
 })

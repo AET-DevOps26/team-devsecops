@@ -23,7 +23,7 @@ export function LibraryPage() {
 		async function load() {
 			try {
 				const res = await apiFetch('/recipes')
-				if (!res.ok) throw new Error(await errorMessage(res, `HTTP ${res.status}`))
+				if (!res.ok) throw new Error(await errorMessage(res))
 				const data = ((await res.json()) as Recipe[]).reverse() // newest recipe first
 				if (cancelled) return
 				setRecipes(data)

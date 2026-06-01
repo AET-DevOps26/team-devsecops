@@ -101,7 +101,7 @@ function LibraryRecipePage() {
           if (!cancelled) setPhase('notfound')
           return
         }
-        if (!res.ok) throw new Error(await errorMessage(res, `HTTP ${res.status}`))
+        if (!res.ok) throw new Error(await errorMessage(res))
         const data = (await res.json()) as Recipe
         if (cancelled) return
         setRecipe(data)
@@ -188,7 +188,7 @@ function RecipeView({
   }, [helpPrompt])
 
   const scale = recipe.portions ? portions / recipe.portions : 1
-  const pages = pagination &&  ? pagination : null
+  const pages = pagination && pagination.count > 1 ? pagination : null
 
   async function handleGetHelp() {
     const question = helpPrompt.trim()
@@ -212,7 +212,7 @@ function RecipeView({
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify(body),
       })
-      if (!response.ok) throw new Error(await errorMessage(response, `HTTP ${response.status}`))
+      if (!response.ok) throw new Error(await errorMessage(response))
       const data = (await response.json()) as HelpResponse
       onAnswer({ question, answer: data.response ?? 'No response.' })
       setHelpPrompt('')
