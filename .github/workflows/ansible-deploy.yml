@@ -1,0 +1,32 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Ansible
+        run: pip install ansible
+
+      - name: Setup SSH Key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          # Add the VM's host key to known_hosts to avoid the "Are you sure you want to continue connecting?" prompt
+          ssh-keyscan -H 135.116.196.120 >> ~/.ssh/known_hosts
+
+      - name: Run Playbook
+        run: |
+          ansible-playbook -i infra/inventory.ini ansible/site.yml \
+          --private-key ~/.ssh/id_rsa \
+          -u azureuser \
+          -e "RECIPE_SERVICE_KEY=${{ secrets.RECIPE_SERVICE_KEY }}" \
+          -e "INTERNAL_AUTH_SECRET=${{ secrets.INTERNAL_AUTH_SECRET }}"

@@ -1,0 +1,72 @@
+---
+- name: Deploy Real App
+  hosts: web
+  become: yes
+  vars_files:
+    - local_secrets.yml  # Ansible will load this if it exists
+
+  tasks:
+    - name: Ensure basic dependencies are installed
+      apt:
+        name: [git, python3-docker, python3-pip]
+        state: present
+        update_cache: yes
+    
+    - name: Install Docker via official script
+      shell: curl -fsSL https://get.docker.com -o get-docker.sh && sh get-docker.sh
+      args:
+        creates: /usr/bin/docker
+
+    - name: Check if docker-compose exists
+      stat:
+        path: /usr/local/bin/docker-compose
+      register: compose_bin
+
+    - name: Install legacy docker-compose
+      get_url:
+        url: https://github.com/docker/compose/releases/latest/download/docker-compose-Linux-x86_64
+        dest: /usr/local/bin/docker-compose
+        mode: '0755'
+      when: not compose_bin.stat.exists
+
+    - name: Clone application repository
+      git:
+        repo: 'https://github.com/AET-DevOps26/team-devsecops'
+        dest: /var/www/app
+        version: main
+        force: yes
+
+    - name: Copy docker-compose file to server
+      copy:
+        src: ../infra/docker-compose.yml
+        dest: /var/www/app/infra/docker-compose.yml
+
+    - name: Copy nginx configuration
+      copy:
+        src: ../infra/nginx.conf
+        dest: /var/www/app/infra/nginx.conf
+
+    - name: Create .env file from template
+      template:
+        src: ../infra/.env.j2
+        dest: /var/www/app/infra/.env
+        mode: '0644'
+        owner: azureuser
+
+    - name: Ensure previous containers are stopped
+      command: /usr/local/bin/docker-compose down
+      args:
+        chdir: /var/www/app/infra
+      ignore_errors: yes
+
+    - name: Bring up application with Docker Compose
+      command: /usr/local/bin/docker-compose up -d --build
+      args:
+        chdir: /var/www/app/infra
+      register: compose_output
+      failed_when: false  # This prevents the playbook from stopping on error
+
+    - name: Show Docker logs if deployment fails
+      debug:
+        var: compose_output.stdout_lines
+      when: compose_output.failed

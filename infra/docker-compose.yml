@@ -1,0 +1,64 @@
+networks:
+  frontend:
+  backend:
+
+services:
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    networks:
+      - frontend
+      - backend
+    depends_on:
+      - web-client
+      - spring-api
+
+  py-recipe-service:
+    build: ../services/py-recipe-service
+    env_file: .env
+    expose:
+      - "8080"
+    networks:
+      - backend
+    environment:
+      SERVICE_API_KEY: ${RECIPE_SERVICE_KEY}
+      INTERNAL_AUTH_SECRET: ${INTERNAL_AUTH_SECRET}
+
+  py-help-service:
+    build: ../services/py-help-service
+    env_file: .env
+    expose:
+      - "8080"
+    networks:
+      - backend
+    environment:
+      SERVICE_API_KEY: ${HELP_SERVICE_KEY}
+      INTERNAL_AUTH_SECRET: ${INTERNAL_AUTH_SECRET}
+
+  spring-api:
+    build: ../services/spring-api
+    env_file: .env
+    expose:
+      - "8080"
+    networks:
+      - backend
+    environment:
+      AI_RECIPE_SERVICE_URL: http://py-recipe-service:8080
+      AI_HELP_SERVICE_URL: http://py-help-service:8080
+      INTERNAL_AUTH_SECRET: ${INTERNAL_AUTH_SECRET}
+    depends_on:
+      - py-help-service
+      - py-recipe-service
+
+  web-client:
+    build: ../web-client
+    expose:
+      - "8080"
+    networks:
+      - frontend
+      - backend
+    depends_on:
+      - spring-api
