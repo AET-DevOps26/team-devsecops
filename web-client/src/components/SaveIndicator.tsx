@@ -10,12 +10,6 @@ const labels: Record<SaveStatus, string> = {
   error: 'Could not save',
 }
 
-// Spinner / check / warning overlay shown beside an autosaved field.
-//  - saving:   spinner only (a request is in flight)
-//  - resaving: spinner with a check in its centre (a save landed but newer
-//              edits are still being persisted)
-//  - saved:    green check that lingers, then fades out
-//  - error:    amber warning sign that stays until the next edit
 export function SaveIndicator({
   status,
   className = '',

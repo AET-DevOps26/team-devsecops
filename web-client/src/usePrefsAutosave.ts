@@ -4,16 +4,11 @@ import type { SaveStatus } from './components/SaveIndicator'
 // How long to wait after the last keystroke before persisting.
 const SAVE_DELAY_MS = 400
 // How long a request may run before we bother showing the spinner — fast saves
-// finish within this window and never flicker one.
+// finish within this window
 const SPINNER_DELAY_MS = 300
-// How long the green check lingers (it holds, then fades — matches the
-// fade-out animation) before the indicator clears.
+// How long the green checkmark lingers before the indicator clears.
 const CHECKMARK_MS = 1500
 
-// Drives debounced autosave for a set of named fields that share a single
-// payload (here: the whole taste-preferences object). Each field gets its own
-// status so the spinner / checkmark can be rendered next to the input the user
-// is actually editing, even though one request persists everything at once.
 export function usePrefsAutosave<P>(options: {
   save: (payload: P) => Promise<void>
   onError: (error: unknown) => void
@@ -26,8 +21,6 @@ export function usePrefsAutosave<P>(options: {
     spinnerDelay = SPINNER_DELAY_MS,
     checkmarkMs = CHECKMARK_MS,
   } = options
-  // Keep the latest callbacks in refs so the timer-driven logic never closes
-  // over a stale version.
   const saveRef = useRef(options.save)
   const onErrorRef = useRef(options.onError)
 
@@ -47,8 +40,6 @@ export function usePrefsAutosave<P>(options: {
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const spinnerTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const fadeRef = useRef<Record<string, ReturnType<typeof setTimeout>>>({})
-  // Reassigned every render; invoked indirectly via timers so it always sees
-  // the freshest closure.
   const flushRef = useRef<() => void>(() => {})
 
   const scheduleFlush = useCallback(() => {
@@ -80,9 +71,6 @@ export function usePrefsAutosave<P>(options: {
       savingVersionRef.current[f] = versionRef.current[f] ?? 0
     })
 
-    // Reveal the spinner only if the request is still running after a short
-    // grace period — fast saves never flicker one. A field mid-resave keeps its
-    // check-in-middle.
     if (spinnerTimerRef.current) clearTimeout(spinnerTimerRef.current)
     spinnerTimerRef.current = setTimeout(() => {
       fields.forEach((f) => {
@@ -98,8 +86,6 @@ export function usePrefsAutosave<P>(options: {
         () => {
           if (spinnerTimerRef.current) clearTimeout(spinnerTimerRef.current)
           fields.forEach((f) => {
-            // Did the user keep editing this field while the request was in
-            // flight? If so, keep spinning but flash the check in the middle.
             const settled = (versionRef.current[f] ?? 0) === savingVersionRef.current[f]
             if (settled) {
               apply(f, 'saved')
