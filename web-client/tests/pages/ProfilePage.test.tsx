@@ -1,5 +1,5 @@
 import { Route, Routes } from 'react-router-dom'
-import { act, screen, waitFor } from '@testing-library/react'
+import { act, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, vi } from 'vitest'
 import { ProfilePage } from '../../src/pages/ProfilePage'
@@ -283,6 +283,65 @@ describe('ProfilePage', () => {
         { timeout: 2000 },
       )
       expect(screen.getByTestId('save-error')).toBeInTheDocument()
+    })
+
+    // the trash button for a row
+    const trashIn = (input: HTMLElement) =>
+      within(input.closest('.relative')!.parentElement as HTMLElement).getByRole('button')
+
+    it('disables a row while its deletion is in flight and only drops it once the server confirms', async () => {
+      const pending: Array<() => void> = []
+      fetchMock.mockImplementation((_input, init) => {
+        const method = init?.method ?? 'GET'
+        if (method === 'GET') {
+          return Promise.resolve(
+            jsonResponse({ username: 'alice', preferences: { diet: ['vegan', 'keto'] } }),
+          )
+        }
+        return new Promise<Response>((resolve) => {
+          pending.push(() => resolve(jsonResponse({})))
+        })
+      })
+      const user = userEvent.setup()
+      await renderSettled()
+
+      const vegan = screen.getByDisplayValue('vegan')
+      await user.click(trashIn(vegan))
+
+      // the row stays on screen but disabled until the server answers
+      expect(vegan).toBeDisabled()
+      expect(trashIn(vegan)).toBeDisabled()
+      // the PUT persists the list without the deleted row
+      await waitFor(() => expect(pending).toHaveLength(1), { timeout: 2000 })
+      expect(lastPutBody().preferences.diet).toEqual(['keto'])
+
+      // only once it succeeds does the row leave the list
+      await resolveAndFlush(pending[0])
+      expect(screen.queryByDisplayValue('vegan')).toBeNull()
+      expect(screen.getByDisplayValue('keto')).toBeInTheDocument()
+    })
+
+    it('brings a row back and shows the error when its deletion fails', async () => {
+      fetchMock.mockImplementation((_input, init) => {
+        const method = init?.method ?? 'GET'
+        if (method === 'GET') {
+          return Promise.resolve(
+            jsonResponse({ username: 'alice', preferences: { diet: ['vegan', 'keto'] } }),
+          )
+        }
+        return Promise.resolve(jsonResponse({ message: 'Nope' }, { status: 500 }))
+      })
+      const user = userEvent.setup()
+      await renderSettled()
+
+      const vegan = screen.getByDisplayValue('vegan')
+      await user.click(trashIn(vegan))
+
+      await waitFor(() => expect(screen.getByText('Nope')).toBeInTheDocument(), { timeout: 2000 })
+      // the row is still there and interactive again
+      expect(vegan).toBeInTheDocument()
+      expect(vegan).not.toBeDisabled()
+      expect(trashIn(vegan)).not.toBeDisabled()
     })
   })
 })

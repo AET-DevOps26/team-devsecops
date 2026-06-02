@@ -18,13 +18,14 @@ import { SessionExpiredError, useApi } from '../useApi'
 type UserProfile = components['schemas']['UserProfile']
 type UserProfileUpdate = components['schemas']['UserProfileUpdate']
 
-// raw (un-trimmed) preferences as held by the inputs
+// un-trimmed preferences as held by the inputs
 type PrefsDraft = { aboutMe: string[]; diet: string[]; allergies: string[] }
 
 const trimList = (xs: string[]) => xs.map((x) => x.trim()).filter((x) => x !== '')
 
-// Abort a profile save that the server never answers, so the indicator can't
-// stay stuck on the spinner forever.
+const arrayWithout = (array: string[], index: number | null) =>
+  index === null ? array : array.filter((_, i) => i !== index)
+
 const SAVE_TIMEOUT_MS = 8000
 
 const allergyPlaceholders = [
@@ -60,6 +61,8 @@ export function ProfilePage() {
   const [aboutMe, setAboutMe] = useState<string[]>([])
   const [diet, setDiet] = useState<string[]>([''])
   const [allergies, setAllergies] = useState<string[]>(['', ''])
+  const [pendingDietDeletion, setPendingDietDeletion] = useState<number | null>(null)
+  const [pendingAllergyDeletion, setPendingAllergyDeletion] = useState<number | null>(null)
 
   const [prefsStatus, setPrefsStatus] = useState<{ kind: 'error' | 'ok'; msg: string } | null>(null)
   const [usernameStatus, setUsernameStatus] = useState<{ kind: 'error' | 'ok'; msg: string } | null>(null)
@@ -96,12 +99,9 @@ export function ProfilePage() {
         method: 'PUT',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify(body),
-        // Don't let a dead/unreachable server leave the save spinner hanging.
         signal: AbortSignal.timeout(SAVE_TIMEOUT_MS),
       })
     } catch (e) {
-      // A timed-out request (DOMException) or a refused/unreachable connection
-      // (fetch rejects with a TypeError) both mean: the server isn't there.
       if ((e instanceof DOMException && e.name === 'TimeoutError') || e instanceof TypeError) {
         throw new Error("Couldn't reach the server", { cause: e })
       }
@@ -112,25 +112,56 @@ export function ProfilePage() {
     if (!res.ok) throw new Error(await errorMessage(res, `HTTP ${res.status}`))
   }
 
+  const savePrefs = (draft: PrefsDraft) =>
+    updateProfile({
+      preferences: {
+        diet: trimList(draft.diet),
+        allergies: trimList(draft.allergies),
+        aboutMe: trimList(draft.aboutMe),
+      },
+    })
+
   const { statuses: prefsStatuses, notifyEdit } = usePrefsAutosave<PrefsDraft>({
-    save: (draft) =>
-      updateProfile({
-        preferences: {
-          diet: trimList(draft.diet),
-          allergies: trimList(draft.allergies),
-          aboutMe: trimList(draft.aboutMe),
-        },
-      }),
+    save: savePrefs,
     onError: (err) => {
       if (err instanceof SessionExpiredError) return
       setPrefsStatus({ kind: 'error', msg: err instanceof Error ? err.message : String(err) })
     },
   })
 
-  // record an edit to one preferences field and (debounced) autosave the lot
+  // preferences without those that are currently being delted
+  const livePrefs = (overrides: Partial<PrefsDraft> = {}): PrefsDraft => ({
+    aboutMe: overrides.aboutMe ?? aboutMe,
+    diet: arrayWithout(overrides.diet ?? diet, pendingDietDeletion),
+    allergies: arrayWithout(overrides.allergies ?? allergies, pendingAllergyDeletion),
+  })
+
   function editPrefs(field: string, draft: PrefsDraft) {
     setPrefsStatus(null)
     notifyEdit(field, draft)
+  }
+
+  async function deleteRow(list: 'diet' | 'allergies', index: number) {
+    const setPending = list === 'diet' ? setPendingDietDeletion : setPendingAllergyDeletion
+    const setValues = list === 'diet' ? setDiet : setAllergies
+
+    setPending(index)
+    setPrefsStatus(null)
+    try {
+      await savePrefs(
+        livePrefs(
+          list === 'diet'
+            ? { diet: arrayWithout(diet, index) }
+            : { allergies: arrayWithout(allergies, index) },
+        ),
+      )
+      setValues((cur) => cur.filter((_, i) => i !== index))
+      setPending(null)
+    } catch (e) {
+      setPending(null)
+      if (e instanceof SessionExpiredError) return
+      setPrefsStatus({ kind: 'error', msg: e instanceof Error ? e.message : String(e) })
+    }
   }
 
   async function handleUpdateUsername() {
@@ -216,7 +247,7 @@ export function ProfilePage() {
                 onChange={(e) => {
                   const next = [e.target.value]
                   setAboutMe(next)
-                  editPrefs('aboutMe', { aboutMe: next, diet, allergies })
+                  editPrefs('aboutMe', livePrefs({ aboutMe: next }))
                 }}
                 placeholder="e.g. I cook for a family of four and love spicy food"
               />
@@ -230,16 +261,20 @@ export function ProfilePage() {
           <div className="flex flex-col gap-1">
             <span className="font-medium">Diet</span>
             {diet.map((d, i) => (
-              <div key={i} className="flex items-center gap-2">
+              <div
+                key={i}
+                className={`flex items-center gap-2 ${pendingDietDeletion === i ? 'opacity-50' : ''}`}
+              >
                 <div className="relative flex-1">
                   <input
                     type="text"
-                    className="w-full border border-gray-300 rounded p-2 pr-9"
+                    className="w-full border border-gray-300 rounded p-2 pr-9 disabled:bg-gray-100"
                     value={d}
+                    disabled={pendingDietDeletion === i}
                     onChange={(e) => {
                       const next = diet.map((x, j) => (j === i ? e.target.value : x))
                       setDiet(next)
-                      editPrefs(`diet:${i}`, { aboutMe, diet: next, allergies })
+                      editPrefs(`diet:${i}`, livePrefs({ diet: next }))
                     }}
                     placeholder={dietPlaceholders[i % dietPlaceholders.length]}
                   />
@@ -250,12 +285,9 @@ export function ProfilePage() {
                 </div>
                 <button
                   type="button"
-                  className="cursor-pointer text-gray-400 hover:text-red-600 transition-transform duration-100 hover:scale-98"
-                  onClick={() => {
-                    const next = diet.filter((_, j) => j !== i)
-                    setDiet(next)
-                    editPrefs('diet', { aboutMe, diet: next, allergies })
-                  }}
+                  className="cursor-pointer text-gray-400 hover:text-red-600 transition-transform duration-100 hover:scale-98 disabled:cursor-not-allowed disabled:text-gray-300 disabled:hover:text-gray-300 disabled:hover:scale-100"
+                  disabled={pendingDietDeletion !== null}
+                  onClick={() => deleteRow('diet', i)}
                 >
                   <TrashIcon className="h-5 w-5" />
                 </button>
@@ -276,16 +308,20 @@ export function ProfilePage() {
           <div className="flex flex-col gap-1">
             <span className="font-medium">Allergies</span>
             {allergies.map((allergy, i) => (
-              <div key={i} className="flex items-center gap-2">
+              <div
+                key={i}
+                className={`flex items-center gap-2 ${pendingAllergyDeletion === i ? 'opacity-50' : ''}`}
+              >
                 <div className="relative flex-1">
                   <input
                     type="text"
-                    className="w-full border border-gray-300 rounded p-2 pr-9"
+                    className="w-full border border-gray-300 rounded p-2 pr-9 disabled:bg-gray-100"
                     value={allergy}
+                    disabled={pendingAllergyDeletion === i}
                     onChange={(e) => {
                       const next = allergies.map((a, j) => (j === i ? e.target.value : a))
                       setAllergies(next)
-                      editPrefs(`allergies:${i}`, { aboutMe, diet, allergies: next })
+                      editPrefs(`allergies:${i}`, livePrefs({ allergies: next }))
                     }}
                     placeholder={allergyPlaceholders[i % allergyPlaceholders.length]}
                   />
@@ -296,12 +332,9 @@ export function ProfilePage() {
                 </div>
                 <button
                   type="button"
-                  className="cursor-pointer text-gray-400 hover:text-red-600 transition-transform duration-100 hover:scale-98"
-                  onClick={() => {
-                    const next = allergies.filter((_, j) => j !== i)
-                    setAllergies(next)
-                    editPrefs('allergies', { aboutMe, diet, allergies: next })
-                  }}
+                  className="cursor-pointer text-gray-400 hover:text-red-600 transition-transform duration-100 hover:scale-98 disabled:cursor-not-allowed disabled:text-gray-300 disabled:hover:text-gray-300 disabled:hover:scale-100"
+                  disabled={pendingAllergyDeletion !== null}
+                  onClick={() => deleteRow('allergies', i)}
                 >
                   <TrashIcon className="h-5 w-5" />
                 </button>
