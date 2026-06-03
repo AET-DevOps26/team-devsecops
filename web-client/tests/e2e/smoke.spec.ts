@@ -39,7 +39,7 @@ test('login -> generate -> open recipe -> log out', async ({page}) => {
 	await page.getByRole('button', {name: 'Generate'}).click()
 
 	await page.getByRole('button', {name: /Tomato Pasta/}).click()
-	await expect(page).toHaveURL(/\/recipe$/)
+	await expect(page).toHaveURL(/\/generate\/recipe$/)
 	await expect(page.getByRole('heading', {name: 'Tomato Pasta'})).toBeVisible()
 
 	await page.goto('profile')

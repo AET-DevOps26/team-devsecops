@@ -29,8 +29,9 @@ export default function App() {
             }
           >
             <Route path="/generate" element={<GeneratePage />} />
-            <Route path="/recipe" element={<RecipePage />} />
+            <Route path="/generate/recipe" element={<RecipePage />} />
             <Route path="/library" element={<LibraryPage />} />
+            <Route path="/library/recipe/:recipeId" element={<RecipePage />} />
             <Route path="/profile" element={<ProfilePage />} />
           </Route>
           <Route path="*" element={<NotFoundPage />} />

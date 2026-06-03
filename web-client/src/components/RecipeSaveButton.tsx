@@ -68,16 +68,15 @@ export function RecipeSaveButton({
     setError(null)
     try {
       if (savedId != null) {
-        const res = await apiFetch(`/api/v1/recipes/${savedId}`, { method: 'DELETE' })
-        if (!res.ok) throw new Error(await errorMessage(res, 'Could not remove the recipe.'))
+        const res = await apiFetch(`/recipes/${savedId}`, { method: 'DELETE' })
+        if (!res.ok) throw new Error(await errorMessage(res))
 
-				// mark as non-stored in sessionStorage
-				for (const key of ['generated_recipes', 'library_recipes']) {
-					const stored = sessionStorage.getItem(key)
-					if (!stored) continue
+				// mark as non-stored if in the generated-recipes list
+				const stored = sessionStorage.getItem('generated_recipes')
+				if (stored) {
 					const recipes = JSON.parse(stored) as { id?: number }[]
 					const next = recipes.map((r) => (r.id === savedId ? { ...r, id: undefined } : r))
-					sessionStorage.setItem(key, JSON.stringify(next))
+					sessionStorage.setItem('generated_recipes', JSON.stringify(next))
 				}
 
         setSavedId(undefined)
@@ -91,12 +90,12 @@ export function RecipeSaveButton({
           portions: recipe.portions,
           nutrients: recipe.nutrients,
         }
-        const res = await apiFetch('/api/v1/recipes', {
+        const res = await apiFetch('/recipes', {
           method: 'POST',
           headers: { 'content-type': 'application/json' },
           body: JSON.stringify(body),
         })
-        if (!res.ok) throw new Error(await errorMessage(res, 'Could not save the recipe.'))
+        if (!res.ok) throw new Error(await errorMessage(res))
         const { id } = (await res.json()) as RecipeCreated
         setSavedId(id)
         onSavedIdChange?.(id)

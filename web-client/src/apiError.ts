@@ -3,9 +3,9 @@ import type { components } from './api'
 type ErrorResponse = components['schemas']['ErrorResponse']
 
 /**
- * Reads the server's ErrorResponse `message` from a failed response body.
+ * Returns the server's ErrorResponse `message` from a failed response body.
  */
-export async function errorMessage(res: Response, fallback: string): Promise<string> {
+export async function errorMessage(res: Response): Promise<string> {
   try {
     const data = (await res.json()) as Partial<ErrorResponse>
     if (typeof data?.message === 'string' && data.message.trim() !== '') {
@@ -14,5 +14,5 @@ export async function errorMessage(res: Response, fallback: string): Promise<str
   } catch {
     // fall through
   }
-  return fallback
+  return `An error occured. (HTTP ${res.status})`
 }

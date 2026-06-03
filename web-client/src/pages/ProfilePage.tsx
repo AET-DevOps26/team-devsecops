@@ -61,9 +61,9 @@ export function ProfilePage() {
 	// fetch the currently stored user profile
   useEffect(() => {
     let cancelled = false
-    apiFetch('/api/v1/users/profile')
+    apiFetch('/users/profile')
       .then(async (res) => {
-        if (!res.ok) throw new Error(await errorMessage(res, `HTTP ${res.status}`))
+        if (!res.ok) throw new Error(await errorMessage(res))
         const data = (await res.json()) as UserProfile
         if (cancelled) return
         const prefs = data.preferences ?? {}
@@ -81,14 +81,12 @@ export function ProfilePage() {
   }, [apiFetch])
 
   async function updateProfile(body: UserProfileUpdate): Promise<void> {
-    const res = await apiFetch('/api/v1/users/profile', {
+    const res = await apiFetch('/users/profile', {
       method: 'PUT',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify(body),
     })
-    if (res.status === 409) throw new Error(await errorMessage(res, 'Username already taken'))
-    if (res.status === 400) throw new Error(await errorMessage(res, 'Invalid request'))
-    if (!res.ok) throw new Error(await errorMessage(res, `HTTP ${res.status}`))
+    if (!res.ok) throw new Error(await errorMessage(res))
   }
 
   async function handleSavePreferences() {
