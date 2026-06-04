@@ -1,0 +1,30 @@
+---
+# Headless service required by the StatefulSet (spec.serviceName).
+# Gives each pod a stable DNS name: postgres-0.postgres-headless.app.svc.cluster.local
+# Used internally by K8s for StatefulSet pod identity — not for app connections.
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-headless
+  namespace: app
+spec:
+  clusterIP: None
+  selector:
+    app: postgres
+  ports:
+    - port: 5432
+      targetPort: 5432
+---
+# Regular ClusterIP service for application connections.
+# spring-api connects to "postgres:5432" — this is what resolves.
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+  namespace: app
+spec:
+  selector:
+    app: postgres
+  ports:
+    - port: 5432
+      targetPort: 5432

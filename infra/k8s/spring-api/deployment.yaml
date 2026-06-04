@@ -1,0 +1,50 @@
+---
+# Image pushed to GHCR by .github/workflows/deploy-k8s.yml.
+# CI replaces :latest with the actual git SHA before applying.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: spring-api
+  namespace: app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: spring-api
+  template:
+    metadata:
+      labels:
+        app: spring-api
+        monitoring: "true"
+    spec:
+      containers:
+        - name: spring-api
+          image: ghcr.io/aet-devops26/team-devsecops/spring-api:latest
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: spring-api-config
+            - secretRef:
+                name: spring-api-secret
+          resources:
+            requests:
+              cpu: 250m
+              memory: 384Mi
+            limits:
+              cpu: 500m
+              memory: 768Mi
+          # Spring Boot Actuator health probes — liveness checks JVM only, readiness checks JVM + DataSource
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8080
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            failureThreshold: 6
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 5

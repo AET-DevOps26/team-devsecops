@@ -1,0 +1,44 @@
+---
+# Production nginx image (final stage in web-client/Dockerfile).
+# nginx.conf is baked into the image and proxies /api/ to spring-api:8080 server-side.
+# "spring-api" resolves via Kubernetes DNS (search domain: app.svc.cluster.local).
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-client
+  namespace: app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: web-client
+  template:
+    metadata:
+      labels:
+        app: web-client
+        monitoring: "true"
+    spec:
+      containers:
+        - name: web-client
+          image: ghcr.io/aet-devops26/team-devsecops/web-client:latest
+          ports:
+            - containerPort: 8080
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
+          livenessProbe:
+            httpGet:
+              path: /team-devsecops/
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /team-devsecops/
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 5

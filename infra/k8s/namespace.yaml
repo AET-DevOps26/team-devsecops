@@ -1,0 +1,14 @@
+---
+# Two namespaces per best_practices.md:
+#   app        — all four microservices + database
+#   monitoring — Prometheus & Grafana (deployed separately, later)
+#
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: app
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: monitoring

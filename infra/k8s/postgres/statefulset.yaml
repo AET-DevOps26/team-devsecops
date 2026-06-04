@@ -1,0 +1,72 @@
+---
+# StatefulSet (not Deployment) because:
+#   - Provides a stable, predictable pod name (postgres-0) for DNS
+#   - Ensures ordered, graceful shutdown (important for data integrity)
+#   - volumeClaimTemplates creates a PVC that survives pod restarts
+#
+# PGDATA is a subdirectory of the mount point — PostgreSQL refuses to init in
+# a non-empty directory, and Kubernetes mounts create a "lost+found" entry.
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres
+  namespace: app
+spec:
+  serviceName: postgres-headless
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+        monitoring: "true"
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:16-alpine
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_DB
+              value: recipesdb
+            # POSTGRES_USER intentionally omitted — PostgreSQL defaults to "postgres"
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: password
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
+          volumeMounts:
+            - name: postgres-data
+              mountPath: /var/lib/postgresql/data
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 300m
+              memory: 512Mi
+          livenessProbe:
+            exec:
+              command: ["pg_isready", "-U", "postgres", "-d", "recipesdb"]
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            failureThreshold: 6
+          readinessProbe:
+            exec:
+              command: ["pg_isready", "-U", "postgres", "-d", "recipesdb"]
+            initialDelaySeconds: 10
+            periodSeconds: 5
+  volumeClaimTemplates:
+    - metadata:
+        name: postgres-data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        # Longhorn provides replicated block storage in Rancher
+        storageClassName: longhorn
+        resources:
+          requests:
+            storage: 5Gi
