@@ -49,6 +49,12 @@
         mode: '0644'
         owner: azureuser
 
+    - name: Create nginx.conf from template
+      template:
+        src: ../infra/nginx.conf.j2
+        dest: /var/www/app/infra/nginx.conf
+        mode: '0644'
+
     - name: Ensure previous containers are stopped
       command: /usr/local/bin/docker-compose down
       args:

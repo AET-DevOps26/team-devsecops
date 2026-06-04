@@ -1,6 +1,6 @@
 server {
     listen 80;
-    server_name client.135.116.56.81.nip.io;
+    server_name client.{{ inventory_hostname }}.nip.io;
     location / {
         proxy_pass http://web-client:8080;
         proxy_set_header Host $host;
@@ -15,7 +15,7 @@ server {
 
 server {
     listen 80;
-    server_name api.135.116.56.81.nip.io;
+    server_name api.{{ inventory_hostname }}.nip.io;
     location / {
         proxy_pass http://spring-api:8080;
         proxy_set_header Host $host;
