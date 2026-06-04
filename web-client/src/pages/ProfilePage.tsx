@@ -9,12 +9,24 @@ import type { components } from '../api'
 import { useAuth } from '../auth'
 import { Button } from '../components/Button'
 import { PasswordInput } from '../components/PasswordInput'
+import { SaveIndicator } from '../components/SaveIndicator'
 import { usePressPulse } from '../usePressPulse'
+import { usePrefsAutosave } from '../usePrefsAutosave'
 import { errorMessage } from '../apiError'
 import { SessionExpiredError, useApi } from '../useApi'
 
 type UserProfile = components['schemas']['UserProfile']
 type UserProfileUpdate = components['schemas']['UserProfileUpdate']
+
+// un-trimmed preferences as held by the inputs
+type PrefsDraft = { aboutMe: string[]; diet: string[]; allergies: string[] }
+
+const trimList = (xs: string[]) => xs.map((x) => x.trim()).filter((x) => x !== '')
+
+const arrayWithout = (array: string[], index: number | null) =>
+  index === null ? array : array.filter((_, i) => i !== index)
+
+const SAVE_TIMEOUT_MS = 8000
 
 const allergyPlaceholders = [
   'e.g. peanuts',
@@ -39,7 +51,6 @@ export function ProfilePage() {
   const apiFetch = useApi()
   const navigate = useNavigate()
 
-  const [prefsBtnRef, pulsePrefs] = usePressPulse<HTMLButtonElement>()
   const [usernameBtnRef, pulseUsername] = usePressPulse<HTMLButtonElement>()
   const [passwordBtnRef, pulsePassword] = usePressPulse<HTMLButtonElement>()
 
@@ -50,11 +61,12 @@ export function ProfilePage() {
   const [aboutMe, setAboutMe] = useState<string[]>([])
   const [diet, setDiet] = useState<string[]>([''])
   const [allergies, setAllergies] = useState<string[]>(['', ''])
+  const [pendingDietDeletion, setPendingDietDeletion] = useState<number | null>(null)
+  const [pendingAllergyDeletion, setPendingAllergyDeletion] = useState<number | null>(null)
 
   const [prefsStatus, setPrefsStatus] = useState<{ kind: 'error' | 'ok'; msg: string } | null>(null)
   const [usernameStatus, setUsernameStatus] = useState<{ kind: 'error' | 'ok'; msg: string } | null>(null)
   const [passwordStatus, setPasswordStatus] = useState<{ kind: 'error' | 'ok'; msg: string } | null>(null)
-  const [prefsSaving, setPrefsSaving] = useState(false)
   const [usernameSaving, setUsernameSaving] = useState(false)
   const [passwordSaving, setPasswordSaving] = useState(false)
 
@@ -80,33 +92,79 @@ export function ProfilePage() {
     }
   }, [apiFetch])
 
-  async function updateProfile(body: UserProfileUpdate): Promise<void> {
-    const res = await apiFetch('/users/profile', {
-      method: 'PUT',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify(body),
-    })
-    if (!res.ok) throw new Error(await errorMessage(res))
+  async function updateProfile(body: UserProfileUpdate, keepalive = false): Promise<void> {
+    let res: Response
+    try {
+      res = await apiFetch('/users/profile', {
+        method: 'PUT',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify(body),
+        // keepalive lets a save fired on reload/close outlive the page
+        ...(keepalive ? { keepalive: true } : { signal: AbortSignal.timeout(SAVE_TIMEOUT_MS) }),
+      })
+    } catch (e) {
+      if ((e instanceof DOMException && e.name === 'TimeoutError') || e instanceof TypeError) {
+        throw new Error("Couldn't reach the server", { cause: e })
+      }
+      throw e
+    }
+    if (res.status === 409) throw new Error(await errorMessage(res, 'Username already taken'))
+    if (res.status === 400) throw new Error(await errorMessage(res, 'Invalid request'))
+    if (!res.ok) throw new Error(await errorMessage(res, `HTTP ${res.status}`))
   }
 
-  async function handleSavePreferences() {
-    pulsePrefs()
-    setPrefsSaving(true)
+  const savePrefs = (draft: PrefsDraft, keepalive = false) =>
+    updateProfile(
+      {
+        preferences: {
+          diet: trimList(draft.diet),
+          allergies: trimList(draft.allergies),
+          aboutMe: trimList(draft.aboutMe),
+        },
+      },
+      keepalive,
+    )
+
+  const { statuses: prefsStatuses, notifyEdit } = usePrefsAutosave<PrefsDraft>({
+    save: savePrefs,
+    onError: (err) => {
+      if (err instanceof SessionExpiredError) return
+      setPrefsStatus({ kind: 'error', msg: err instanceof Error ? err.message : String(err) })
+    },
+  })
+
+  // preferences without those that are currently being delted
+  const livePrefs = (overrides: Partial<PrefsDraft> = {}): PrefsDraft => ({
+    aboutMe: overrides.aboutMe ?? aboutMe,
+    diet: arrayWithout(overrides.diet ?? diet, pendingDietDeletion),
+    allergies: arrayWithout(overrides.allergies ?? allergies, pendingAllergyDeletion),
+  })
+
+  function editPrefs(field: string, draft: PrefsDraft) {
+    setPrefsStatus(null)
+    notifyEdit(field, draft)
+  }
+
+  async function deleteRow(list: 'diet' | 'allergies', index: number) {
+    const setPending = list === 'diet' ? setPendingDietDeletion : setPendingAllergyDeletion
+    const setValues = list === 'diet' ? setDiet : setAllergies
+
+    setPending(index)
     setPrefsStatus(null)
     try {
-      await updateProfile({
-        preferences: {
-          diet: diet.map((d) => d.trim()).filter((d) => d !== ''),
-          allergies: allergies.map((a) => a.trim()).filter((a) => a !== ''),
-          aboutMe: aboutMe.map((a) => a.trim()).filter((a) => a !== ''),
-        },
-      })
-      setPrefsStatus({ kind: 'ok', msg: 'Preferences saved' })
+      await savePrefs(
+        livePrefs(
+          list === 'diet'
+            ? { diet: arrayWithout(diet, index) }
+            : { allergies: arrayWithout(allergies, index) },
+        ),
+      )
+      setValues((cur) => cur.filter((_, i) => i !== index))
+      setPending(null)
     } catch (e) {
+      setPending(null)
       if (e instanceof SessionExpiredError) return
       setPrefsStatus({ kind: 'error', msg: e instanceof Error ? e.message : String(e) })
-    } finally {
-      setPrefsSaving(false)
     }
   }
 
@@ -179,43 +237,61 @@ export function ProfilePage() {
       </div>
 
       <div className="w-full max-w-md rounded-lg border border-gray-200 bg-white p-6 shadow-sm self-center md:self-start">
-        <form
-          className="flex flex-col gap-4"
-          onSubmit={(e) => {
-            e.preventDefault()
-            handleSavePreferences()
-          }}
-        >
+        {/* taste preferences autosave as you type — no submit button */}
+        <div className="flex flex-col gap-4">
           <h2 className="text-lg font-bold">Taste preferences</h2>
 
           <label className="flex flex-col gap-1">
             <span className="font-medium">About me</span>
-            <textarea
-              className="w-full border border-gray-300 rounded p-2"
-              rows={3}
-              value={aboutMe[0] ?? ''}
-              onChange={(e) => setAboutMe([e.target.value])}
-              placeholder="e.g. I cook for a family of four and love spicy food"
-            />
+            <div className="relative">
+              <textarea
+                className="w-full border border-gray-300 rounded p-2 pr-9"
+                rows={3}
+                value={aboutMe[0] ?? ''}
+                onChange={(e) => {
+                  const next = [e.target.value]
+                  setAboutMe(next)
+                  editPrefs('aboutMe', livePrefs({ aboutMe: next }))
+                }}
+                placeholder="e.g. I cook for a family of four and love spicy food"
+              />
+              <SaveIndicator
+                status={prefsStatuses['aboutMe'] ?? 'idle'}
+                className="absolute right-2 top-2"
+              />
+            </div>
           </label>
 
           <div className="flex flex-col gap-1">
             <span className="font-medium">Diet</span>
             {diet.map((d, i) => (
-              <div key={i} className="flex items-center gap-2">
-                <input
-                  type="text"
-                  className="w-full border border-gray-300 rounded p-2"
-                  value={d}
-                  onChange={(e) =>
-                    setDiet(diet.map((x, j) => (j === i ? e.target.value : x)))
-                  }
-                  placeholder={dietPlaceholders[i % dietPlaceholders.length]}
-                />
+              <div
+                key={i}
+                className={`flex items-center gap-2 ${pendingDietDeletion === i ? 'opacity-50' : ''}`}
+              >
+                <div className="relative flex-1">
+                  <input
+                    type="text"
+                    className="w-full border border-gray-300 rounded p-2 pr-9 disabled:bg-gray-100"
+                    value={d}
+                    disabled={pendingDietDeletion === i}
+                    onChange={(e) => {
+                      const next = diet.map((x, j) => (j === i ? e.target.value : x))
+                      setDiet(next)
+                      editPrefs(`diet:${i}`, livePrefs({ diet: next }))
+                    }}
+                    placeholder={dietPlaceholders[i % dietPlaceholders.length]}
+                  />
+                  <SaveIndicator
+                    status={prefsStatuses[`diet:${i}`] ?? 'idle'}
+                    className="absolute right-2 top-1/2 -translate-y-1/2"
+                  />
+                </div>
                 <button
                   type="button"
-                  className="cursor-pointer text-gray-400 hover:text-red-600 transition-transform duration-100 hover:scale-98"
-                  onClick={() => setDiet(diet.filter((_, j) => j !== i))}
+                  className="cursor-pointer text-gray-400 hover:text-red-600 transition-transform duration-100 hover:scale-98 disabled:cursor-not-allowed disabled:text-gray-300 disabled:hover:text-gray-300 disabled:hover:scale-100"
+                  disabled={pendingDietDeletion !== null}
+                  onClick={() => deleteRow('diet', i)}
                 >
                   <TrashIcon className="h-5 w-5" />
                 </button>
@@ -236,20 +312,33 @@ export function ProfilePage() {
           <div className="flex flex-col gap-1">
             <span className="font-medium">Allergies</span>
             {allergies.map((allergy, i) => (
-              <div key={i} className="flex items-center gap-2">
-                <input
-                  type="text"
-                  className="w-full border border-gray-300 rounded p-2"
-                  value={allergy}
-                  onChange={(e) =>
-                    setAllergies(allergies.map((a, j) => (j === i ? e.target.value : a)))
-                  }
-                  placeholder={allergyPlaceholders[i % allergyPlaceholders.length]}
-                />
+              <div
+                key={i}
+                className={`flex items-center gap-2 ${pendingAllergyDeletion === i ? 'opacity-50' : ''}`}
+              >
+                <div className="relative flex-1">
+                  <input
+                    type="text"
+                    className="w-full border border-gray-300 rounded p-2 pr-9 disabled:bg-gray-100"
+                    value={allergy}
+                    disabled={pendingAllergyDeletion === i}
+                    onChange={(e) => {
+                      const next = allergies.map((a, j) => (j === i ? e.target.value : a))
+                      setAllergies(next)
+                      editPrefs(`allergies:${i}`, livePrefs({ allergies: next }))
+                    }}
+                    placeholder={allergyPlaceholders[i % allergyPlaceholders.length]}
+                  />
+                  <SaveIndicator
+                    status={prefsStatuses[`allergies:${i}`] ?? 'idle'}
+                    className="absolute right-2 top-1/2 -translate-y-1/2"
+                  />
+                </div>
                 <button
                   type="button"
-                  className="cursor-pointer text-gray-400 hover:text-red-600 transition-transform duration-100 hover:scale-98"
-                  onClick={() => setAllergies(allergies.filter((_, j) => j !== i))}
+                  className="cursor-pointer text-gray-400 hover:text-red-600 transition-transform duration-100 hover:scale-98 disabled:cursor-not-allowed disabled:text-gray-300 disabled:hover:text-gray-300 disabled:hover:scale-100"
+                  disabled={pendingAllergyDeletion !== null}
+                  onClick={() => deleteRow('allergies', i)}
                 >
                   <TrashIcon className="h-5 w-5" />
                 </button>
@@ -267,16 +356,12 @@ export function ProfilePage() {
             </button>
           </div>
 
-          <Button ref={prefsBtnRef} type="submit" className="self-center" disabled={prefsSaving}>
-            {prefsSaving ? 'Saving…' : 'Update taste preferences'}
-          </Button>
-
           {prefsStatus && (
             <p className={prefsStatus.kind === 'error' ? 'text-red-600' : 'text-green-600'}>
               {prefsStatus.msg}
             </p>
           )}
-        </form>
+        </div>
       </div>
 
       <div className="w-full max-w-md rounded-lg border border-gray-200 bg-white p-6 shadow-sm self-center md:self-start">
