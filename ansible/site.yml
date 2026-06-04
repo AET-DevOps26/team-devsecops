@@ -29,13 +29,18 @@
         mode: '0755'
       when: not compose_bin.stat.exists
 
+    - name: Force clean any untracked blocking files
+      command: git clean -fdx
+      args:
+        chdir: /var/www/app
+      ignore_errors: yes
+
     - name: Clone application repository
       git:
         repo: 'https://github.com/AET-DevOps26/team-devsecops'
         dest: /var/www/app
         version: "{{ app_branch | default('main') }}"
         force: yes
-        clean: yes
 
     - name: Create .env file from template
       template:
