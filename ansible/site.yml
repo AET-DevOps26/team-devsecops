@@ -35,6 +35,7 @@
         dest: /var/www/app
         version: "{{ app_branch | default('main') }}"
         force: yes
+        clean: yes
 
     - name: Create .env file from template
       template:
