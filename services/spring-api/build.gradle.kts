@@ -60,6 +60,9 @@ dependencies {
     runtimeOnly("org.postgresql:postgresql")
     runtimeOnly("com.google.cloud.sql:postgres-socket-factory:1.21.0")
 
+    // Observability
+    implementation("org.springframework.boot:spring-boot-starter-actuator")
+
     // Auth
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("io.jsonwebtoken:jjwt-api:0.12.6")

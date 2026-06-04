@@ -61,6 +61,7 @@ class SecurityConfig(
 						"/h2-console/**",
 						"/swagger-ui/**",
 						"/v3/api-docs/**",
+						"/actuator/health/**",
 					).permitAll()
 					.anyRequest()
 					.authenticated() // all other routes require a valid JWT

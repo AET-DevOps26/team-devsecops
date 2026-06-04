@@ -32,6 +32,17 @@ ai:
     service:
       url: ${AI_RECIPE_SERVICE_URL:http://localhost:8090}
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health  # only /actuator/health is exposed, not info/metrics/env/etc.
+  endpoint:
+    health:
+      probes:
+        enabled: true   # creates /actuator/health/liveness and /actuator/health/readiness
+      show-details: never  # don't leak datasource URL or other internals in the response
+
 app:
   jwt:
     secret: ${JWT_SECRET:local-dev-secret-change-this-in-production-use-env-var}
