@@ -55,6 +55,6 @@ jobs:
           ansible-playbook -i infra/inventory.ini ansible/site.yml \
           -u azureuser \
           -e "app_branch=${{ github.head_ref || github.ref_name }}" \
-          -e "HELP_SERVICE_KEY=${{ secrets.HELP_SERVICE_KEY }}" \
-          -e "RECIPE_SERVICE_KEY=${{ secrets.RECIPE_SERVICE_KEY }}" \
-          -e "INTERNAL_AUTH_SECRET=${{ secrets.INTERNAL_AUTH_SECRET }}"
+          -e "help_service_key=${{ secrets.HELP_SERVICE_KEY }}" \
+          -e "recipe_service_key=${{ secrets.RECIPE_SERVICE_KEY }}" \
+          -e "internal_auth_secret=${{ secrets.INTERNAL_AUTH_SECRET }}"
