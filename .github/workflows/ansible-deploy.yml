@@ -1,6 +1,16 @@
 name: Deploy to Production
 
 on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'web-client/**'
+      - 'services/**'
+      - 'infra/**'
+      - 'ansible/**'
+      - '.github/workflows/ansible-deploy.yml'
+
   push:
     branches:
       - main
@@ -9,7 +19,9 @@ on:
       - 'services/**'
       - 'infra/**'
       - 'ansible/**'
-      - '.github/workflows/deploy.yml'
+      - '.github/workflows/ansible-deploy.yml'
+
+  workflow_dispatch:
 
 jobs:
   deploy:
@@ -18,21 +30,30 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+          cache: 'pip'
+
       - name: Set up Ansible
         run: pip install ansible
 
-      - name: Setup SSH Key
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          # Add the VM's host key to known_hosts to avoid the "Are you sure you want to continue connecting?" prompt
-          ssh-keyscan -H 135.116.196.120 >> ~/.ssh/known_hosts
+      - name: Install SSH Key
+        uses: shimataro/ssh-key-action@v2
+        with:
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          name: id_rsa
+          known_hosts: 'placeholder' # Will be overwritten by ssh-keyscan next
 
+      - name: Scan VM Host Key
+        run: |
+          ssh-keyscan -H 135.116.196.120 >> ~/.ssh/known_hosts
+        
       - name: Run Playbook
         run: |
           ansible-playbook -i infra/inventory.ini ansible/site.yml \
-          --private-key ~/.ssh/id_rsa \
           -u azureuser \
+          -e "HELP_SERVICE_KEY=${{ secrets.HELP_SERVICE_KEY }}" \
           -e "RECIPE_SERVICE_KEY=${{ secrets.RECIPE_SERVICE_KEY }}" \
           -e "INTERNAL_AUTH_SECRET=${{ secrets.INTERNAL_AUTH_SECRET }}"
