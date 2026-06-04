@@ -1,5 +1,5 @@
 import {Route, Routes} from 'react-router-dom'
-import {act, screen, waitFor, within} from '@testing-library/react'
+import {act, cleanup, screen, waitFor, within} from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import {afterEach, beforeEach, vi} from 'vitest'
 import {ProfilePage} from '../../src/pages/ProfilePage'
@@ -266,6 +266,37 @@ describe('ProfilePage', () => {
 				{timeout: 2000},
 			)
 			expect(screen.getByTestId('save-error')).toBeInTheDocument()
+		})
+
+		it('flushes a pending edit on pagehide (reload/tab close)', async () => {
+			defaultProfileFetch({username: 'alice'})
+			const user = userEvent.setup()
+			await renderSettled()
+
+			// type and leave immediately — still inside the debounce, nothing sent
+			await user.type(screen.getByLabelText('About me'), 'last words')
+			expect(putCalls()).toHaveLength(0)
+
+			await resolveAndFlush(() => window.dispatchEvent(new Event('pagehide')))
+
+			expect(putCalls()).toHaveLength(1)
+			expect(lastPutBody().preferences.aboutMe).toEqual(['last words'])
+			// keepalive lets the request outlive the unloading document
+			expect(putCalls()[0][1]?.keepalive).toBe(true)
+		})
+
+		it('flushes a pending edit when the page unmounts (switching pages)', async () => {
+			defaultProfileFetch({username: 'alice'})
+			const user = userEvent.setup()
+			await renderSettled()
+
+			await user.type(screen.getByLabelText('About me'), 'unsaved')
+			expect(putCalls()).toHaveLength(0)
+
+			await resolveAndFlush(() => cleanup())
+
+			expect(putCalls()).toHaveLength(1)
+			expect(lastPutBody().preferences.aboutMe).toEqual(['unsaved'])
 		})
 
 		// the trash button for a row

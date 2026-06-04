@@ -10,7 +10,7 @@ const SPINNER_DELAY_MS = 300
 const CHECKMARK_MS = 1500
 
 export function usePrefsAutosave<P>(options: {
-  save: (payload: P) => Promise<void>
+  save: (payload: P, keepalive?: boolean) => Promise<void>
   onError: (error: unknown) => void
   delay?: number
   spinnerDelay?: number
@@ -111,6 +111,16 @@ export function usePrefsAutosave<P>(options: {
       })
   }
 
+  const savePendingEditsNow = useCallback(() => {
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current)
+      debounceRef.current = null
+    }
+    if (inFlightRef.current || dirtyRef.current.size === 0) return
+    dirtyRef.current = new Set()
+    saveRef.current(payloadRef.current as P, true).catch((err) => onErrorRef.current(err))
+  }, [])
+
   // Call on every edit of `field`, passing the full latest payload.
   const notifyEdit = useCallback(
     (field: string, payload: P) => {
@@ -137,9 +147,18 @@ export function usePrefsAutosave<P>(options: {
     flushRef.current = flush
   })
 
+	// Save pending edits when the user navigates
+  useEffect(() => {
+    const onPageHide = () => savePendingEditsNow()
+    window.addEventListener('pagehide', onPageHide)
+    return () => {
+      window.removeEventListener('pagehide', onPageHide)
+      savePendingEditsNow()
+    }
+  }, [savePendingEditsNow])
+
   useEffect(
     () => () => {
-      if (debounceRef.current) clearTimeout(debounceRef.current)
       if (spinnerTimerRef.current) clearTimeout(spinnerTimerRef.current)
       Object.values(fadeRef.current).forEach(clearTimeout)
     },

@@ -92,14 +92,15 @@ export function ProfilePage() {
     }
   }, [apiFetch])
 
-  async function updateProfile(body: UserProfileUpdate): Promise<void> {
+  async function updateProfile(body: UserProfileUpdate, keepalive = false): Promise<void> {
     let res: Response
     try {
       res = await apiFetch('/users/profile', {
         method: 'PUT',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify(body),
-        signal: AbortSignal.timeout(SAVE_TIMEOUT_MS),
+        // keepalive lets a save fired on reload/close outlive the page
+        ...(keepalive ? { keepalive: true } : { signal: AbortSignal.timeout(SAVE_TIMEOUT_MS) }),
       })
     } catch (e) {
       if ((e instanceof DOMException && e.name === 'TimeoutError') || e instanceof TypeError) {
@@ -112,14 +113,17 @@ export function ProfilePage() {
     if (!res.ok) throw new Error(await errorMessage(res, `HTTP ${res.status}`))
   }
 
-  const savePrefs = (draft: PrefsDraft) =>
-    updateProfile({
-      preferences: {
-        diet: trimList(draft.diet),
-        allergies: trimList(draft.allergies),
-        aboutMe: trimList(draft.aboutMe),
+  const savePrefs = (draft: PrefsDraft, keepalive = false) =>
+    updateProfile(
+      {
+        preferences: {
+          diet: trimList(draft.diet),
+          allergies: trimList(draft.allergies),
+          aboutMe: trimList(draft.aboutMe),
+        },
       },
-    })
+      keepalive,
+    )
 
   const { statuses: prefsStatuses, notifyEdit } = usePrefsAutosave<PrefsDraft>({
     save: savePrefs,
