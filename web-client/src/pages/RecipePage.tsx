@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import {
   ArrowPathIcon,
   ArrowRightIcon,
@@ -8,7 +8,7 @@ import {
   PlusIcon,
 } from '@heroicons/react/24/outline'
 import Markdown from 'react-markdown'
-import { Navigate, useLocation, useNavigate } from 'react-router-dom'
+import { Link, Navigate, useLocation, useNavigate, useParams } from 'react-router-dom'
 import type { components } from '../api'
 import { RecipeSaveButton } from '../components/RecipeSaveButton.tsx'
 import { formatQuantity } from '../recipeFormat'
@@ -21,14 +21,12 @@ type HelpRequest = components['schemas']['HelpRequest']
 type HelpResponse = components['schemas']['HelpResponse']
 type HelpEntry = { question: string; answer: string }
 
-type RecipeSource = 'generated' | 'library'
-const SOURCE_STORAGE_KEY: Record<RecipeSource, string> = {
-  generated: 'generated_recipes',
-  library: 'library_recipes',
-}
+type Pagination = { index: number; count: number; onNavigate: (index: number) => void }
 
-function readRecipes(source: RecipeSource): Recipe[] {
-  const stored = sessionStorage.getItem(SOURCE_STORAGE_KEY[source])
+const GENERATED_STORAGE_KEY = 'generated_recipes'
+
+function readGenerated(): Recipe[] {
+  const stored = sessionStorage.getItem(GENERATED_STORAGE_KEY)
   return stored ? (JSON.parse(stored) as Recipe[]) : []
 }
 
@@ -39,26 +37,24 @@ function toggleSetItem(set: Set<number>, item: number): Set<number> {
   return next
 }
 
-// Wrapper that keeps the recipe list and the help histories
 export function RecipePage() {
-  const location = useLocation()
-  const state = location.state as { index?: number; source?: RecipeSource } | null
-  const source: RecipeSource = state?.source ?? 'generated'
-  const [recipes, setRecipes] = useState<Recipe[]>(() => readRecipes(source))
-  const [loadedSource, setLoadedSource] = useState(source)
-  if (loadedSource !== source) {
-    setLoadedSource(source)
-    setRecipes(readRecipes(source))
-  }
-  const index = state?.index ?? 0
-  const recipe = recipes[index]
+  const { pathname } = useLocation()
+  return pathname.startsWith('/library/') ? <LibraryRecipePage key={pathname} /> : <GeneratedRecipePage />
+}
 
+// Generated recipes live in sessionStorage and are paged through by list index in router state.
+function GeneratedRecipePage() {
+  const location = useLocation()
+  const navigate = useNavigate()
+  const index = (location.state as { index?: number } | null)?.index ?? 0
+  const [recipes, setRecipes] = useState<Recipe[]>(() => readGenerated())
   const [helpAnswers, setHelpAnswers] = useState<Record<number, HelpEntry[]>>({})
+  const recipe = recipes[index]
 
   function handleSavedIdChange(newId: number | undefined) {
     setRecipes((prev) => {
       const next = prev.map((prevRecipe, prevIndex) => (prevIndex === index ? { ...prevRecipe, id: newId } : prevRecipe))
-      sessionStorage.setItem(SOURCE_STORAGE_KEY[source], JSON.stringify(next))
+      sessionStorage.setItem(GENERATED_STORAGE_KEY, JSON.stringify(next))
       return next
     })
   }
@@ -69,34 +65,104 @@ export function RecipePage() {
     <RecipeView
       key={index}
       recipe={recipe}
-      recipes={recipes}
-      index={index}
-      source={source}
+      parentPath="/generate"
       onSavedIdChange={handleSavedIdChange}
       answers={helpAnswers[index] ?? []}
-      onAnswer={(entry) =>
-        setHelpAnswers((m) => ({ ...m, [index]: [entry, ...(m[index] ?? [])] }))
+      onAnswer={(entry) => setHelpAnswers((m) => ({ ...m, [index]: [entry, ...(m[index] ?? [])] }))}
+      pagination={{
+        index,
+        count: recipes.length,
+        onNavigate: (i) => navigate('/generate/recipe', { state: { index: i }, replace: true }),
+      }}
+    />
+  )
+}
+
+// Saved recipes are fetched by id on every view, so the API is always the source of truth.
+function LibraryRecipePage() {
+  const params = useParams()
+  const location = useLocation()
+  const navigate = useNavigate()
+  const recipeId = Number(params.recipeId)
+  const recipeIdsInLibrary = (location.state as { ids?: number[] } | null)?.ids
+  const apiFetch = useApi()
+  const [recipe, setRecipe] = useState<Recipe | null>(null)
+  const [phase, setPhase] = useState<'loading' | 'ready' | 'notfound' | 'error'>('loading')
+  const [error, setError] = useState<string | null>(null)
+  const [answers, setAnswers] = useState<HelpEntry[]>([])
+
+  useEffect(() => {
+    let cancelled = false
+    async function load() {
+      try {
+        const res = await apiFetch(`/recipes/${recipeId}`)
+        // 401/403 are handled by apiFetch (redirects to /login)
+        if (res.status === 404) {
+          if (!cancelled) setPhase('notfound')
+          return
+        }
+        if (!res.ok) throw new Error(await errorMessage(res))
+        const data = (await res.json()) as Recipe
+        if (cancelled) return
+        setRecipe(data)
+        setPhase('ready')
+      } catch (e) {
+        if (cancelled || e instanceof SessionExpiredError) return
+        setError(`Error: ${e instanceof Error ? e.message : String(e)}`)
+        setPhase('error')
       }
+    }
+    load()
+    return () => {
+      cancelled = true
+    }
+  }, [apiFetch, recipeId])
+
+  if (phase === 'loading') return <p className="text-gray-500">Loading…</p>
+  if (phase === 'error') return <p className="text-red-600">{error}</p>
+  if (phase === 'notfound' || !recipe) {
+    return (
+      <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4 text-center">
+        <h2 className="text-lg font-bold">Recipe not found</h2>
+        <p className="max-w-xs text-gray-500">This recipe doesn't exist or has been removed.</p>
+        <Link to="/library" className="text-orange-600 hover:underline">
+          Back to library
+        </Link>
+      </div>
+    )
+  }
+
+  const idx = recipeIdsInLibrary ? recipeIdsInLibrary.indexOf(recipeId) : -1
+  const pagination =
+    recipeIdsInLibrary && recipeIdsInLibrary.length > 1 && idx >= 0
+      ? { index: idx, count: recipeIdsInLibrary.length, onNavigate: (i: number) => navigate(`/library/recipe/${recipeIdsInLibrary[i]}`, { state: { ids: recipeIdsInLibrary } }) }
+      : undefined
+
+  return (
+    <RecipeView
+      recipe={recipe}
+      parentPath="/library"
+      answers={answers}
+      onAnswer={(entry) => setAnswers((a) => [entry, ...a])}
+      pagination={pagination}
     />
   )
 }
 
 function RecipeView({
   recipe,
-  recipes,
-  index,
-  source,
+  parentPath,
   onSavedIdChange,
   answers,
   onAnswer,
+  pagination,
 }: {
   recipe: Recipe
-  recipes: Recipe[]
-  index: number
-  source: RecipeSource
-  onSavedIdChange: (id: number | undefined) => void
+  parentPath: string
+  onSavedIdChange?: (id: number | undefined) => void
   answers: HelpEntry[]
   onAnswer: (entry: HelpEntry) => void
+  pagination?: Pagination
 }) {
   const navigate = useNavigate()
   const apiFetch = useApi()
@@ -122,8 +188,7 @@ function RecipeView({
   }, [helpPrompt])
 
   const scale = recipe.portions ? portions / recipe.portions : 1
-  const navigateToRecipe = (index: number) =>
-    navigate('/recipe', { state: { index, source }, replace: true })
+  const pages = pagination && pagination.count > 1 ? pagination : null
 
   async function handleGetHelp() {
     const question = helpPrompt.trim()
@@ -142,12 +207,12 @@ function RecipeView({
         },
         prompt: question,
       }
-      const response = await apiFetch('/api/v1/ai/help', {
+      const response = await apiFetch('/ai/help', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify(body),
       })
-      if (!response.ok) throw new Error(await errorMessage(response, `HTTP ${response.status}`))
+      if (!response.ok) throw new Error(await errorMessage(response))
       const data = (await response.json()) as HelpResponse
       onAnswer({ question, answer: data.response ?? 'No response.' })
       setHelpPrompt('')
@@ -161,11 +226,11 @@ function RecipeView({
 
   return (
     <>
-			{/* Back to /generate */}
+			{/* Back to the section list */}
       <button
         type="button"
         className="flex items-center gap-1 self-start text-gray-500 cursor-pointer transition-transform duration-100 hover:scale-98"
-        onClick={() => navigate(-1)}
+        onClick={() => navigate(parentPath)}
       >
         <ChevronLeftIcon className="h-5 w-5" />
         Back
@@ -174,13 +239,13 @@ function RecipeView({
       <article className="relative w-full rounded-lg border border-gray-200 bg-white p-6 shadow-sm flex flex-col gap-4">
 
 				{/* previous / next recipe (desktop) */}
-        {recipes.length > 1 && (
+        {pages && (
           <>
             <button
               type="button"
               className="hidden lg:flex absolute top-1/2 -left-16 -translate-y-1/2 flex-col items-center gap-1 cursor-pointer text-gray-500 transition-transform duration-100 hover:scale-95 disabled:opacity-40 disabled:hover:scale-100"
-              onClick={() => navigateToRecipe(index - 1)}
-              disabled={index <= 0}
+              onClick={() => pages.onNavigate(pages.index - 1)}
+              disabled={pages.index <= 0}
             >
               <span className="flex h-9 w-9 items-center justify-center rounded-full border border-gray-300 bg-white text-gray-600 shadow-sm">
                 <ChevronLeftIcon className="h-5 w-5" />
@@ -190,8 +255,8 @@ function RecipeView({
             <button
               type="button"
               className="hidden lg:flex absolute top-1/2 -right-16 -translate-y-1/2 flex-col items-center gap-1 cursor-pointer text-gray-500 transition-transform duration-100 hover:scale-95 disabled:opacity-40 disabled:hover:scale-100"
-              onClick={() => navigateToRecipe(index + 1)}
-              disabled={index >= recipes.length - 1}
+              onClick={() => pages.onNavigate(pages.index + 1)}
+              disabled={pages.index >= pages.count - 1}
             >
               <span className="flex h-9 w-9 items-center justify-center rounded-full border border-gray-300 bg-white text-gray-600 shadow-sm">
                 <ChevronRightIcon className="h-5 w-5" />
@@ -209,7 +274,7 @@ function RecipeView({
               recipe={recipe}
               recipeId={recipe.id}
               onSavedIdChange={onSavedIdChange}
-              onDeleted={() => navigate(source === 'library' ? '/library' : '/generate')}
+              onDeleted={() => navigate(parentPath)}
             />
           </div>
           <div className="flex items-center gap-2">
@@ -364,26 +429,26 @@ function RecipeView({
       ))}
 
 			{/* previous / next recipe (mobile) */}
-			{recipes.length > 1 && (
+			{pages && (
         <div className="pointer-events-none fixed inset-x-0 bottom-20 z-20 flex justify-center px-4 md:left-56 lg:hidden">
           <div className="pointer-events-auto flex items-center gap-3 rounded-full border border-gray-200 bg-white/90 py-2 pl-2 pr-2 shadow-lg backdrop-blur">
             <button
               type="button"
               className="flex h-8 w-8 items-center justify-center cursor-pointer text-gray-600 transition-transform duration-100 hover:scale-95 disabled:opacity-40 disabled:hover:scale-100"
-              onClick={() => navigateToRecipe(index - 1)}
-              disabled={index <= 0}
+              onClick={() => pages.onNavigate(pages.index - 1)}
+              disabled={pages.index <= 0}
               aria-label="Previous recipe"
             >
               <ChevronLeftIcon className="h-5 w-5" />
             </button>
             <span className="text-sm text-gray-500 tabular-nums">
-              {index + 1} of {recipes.length}
+              {pages.index + 1} of {pages.count}
             </span>
             <button
               type="button"
               className="flex h-8 w-8 items-center justify-center cursor-pointer text-gray-600 transition-transform duration-100 hover:scale-95 disabled:opacity-40 disabled:hover:scale-100"
-              onClick={() => navigateToRecipe(index + 1)}
-              disabled={index >= recipes.length - 1}
+              onClick={() => pages.onNavigate(pages.index + 1)}
+              disabled={pages.index >= pages.count - 1}
               aria-label="Next recipe"
             >
               <ChevronRightIcon className="h-5 w-5" />
@@ -393,7 +458,7 @@ function RecipeView({
       )}
 
       {/* room to scroll the last card above the floating prev/next bar */}
-      {recipes.length > 1 && <div aria-hidden className="h-24 lg:hidden" />}
+      {pages && <div aria-hidden className="h-24 lg:hidden" />}
     </>
   )
 }

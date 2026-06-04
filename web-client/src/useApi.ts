@@ -1,7 +1,7 @@
 import { useCallback } from 'react'
 import { useAuth } from './auth'
 
-const API_BASE = import.meta.env.VITE_API_BASE ?? ''
+const API_BASE = (import.meta.env.VITE_API_BASE ?? '') + '/api/v1'
 
 export class SessionExpiredError extends Error {
   constructor() {
