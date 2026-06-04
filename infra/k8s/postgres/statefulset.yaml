@@ -30,7 +30,7 @@ spec:
             - containerPort: 5432
           env:
             - name: POSTGRES_DB
-              value: recipesdb
+              value: cooking
             # POSTGRES_USER intentionally omitted — PostgreSQL defaults to "postgres"
             - name: POSTGRES_PASSWORD
               valueFrom:
@@ -51,13 +51,13 @@ spec:
               memory: 512Mi
           livenessProbe:
             exec:
-              command: ["pg_isready", "-U", "postgres", "-d", "recipesdb"]
+              command: ["pg_isready", "-U", "postgres", "-d", "cooking"]
             initialDelaySeconds: 30
             periodSeconds: 10
             failureThreshold: 6
           readinessProbe:
             exec:
-              command: ["pg_isready", "-U", "postgres", "-d", "recipesdb"]
+              command: ["pg_isready", "-U", "postgres", "-d", "cooking"]
             initialDelaySeconds: 10
             periodSeconds: 5
   volumeClaimTemplates:
@@ -66,7 +66,7 @@ spec:
       spec:
         accessModes: ["ReadWriteOnce"]
         # Longhorn provides replicated block storage in Rancher
-        storageClassName: longhorn
+        # storageClassName: longhorn # use if Longhorn is installed (check with kubectl get storageclass)
         resources:
           requests:
             storage: 5Gi

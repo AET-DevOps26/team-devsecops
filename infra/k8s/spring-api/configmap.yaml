@@ -8,7 +8,7 @@ metadata:
   name: spring-api-config
   namespace: app
 data:
-  DB_URL: "jdbc:postgresql://postgres:5432/recipesdb"
+  DB_URL: "jdbc:postgresql://postgres:5432/cooking"
   DB_USER: "postgres"
   AI_HELP_SERVICE_URL: "http://py-help-service:8080"
   AI_RECIPE_SERVICE_URL: "http://py-recipe-service:8080"
