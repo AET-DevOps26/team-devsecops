@@ -33,7 +33,7 @@
       git:
         repo: 'https://github.com/AET-DevOps26/team-devsecops'
         dest: /var/www/app
-        version: main
+        version: "{{ app_branch | default('main') }}"
         force: yes
 
     - name: Create .env file from template
