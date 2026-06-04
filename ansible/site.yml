@@ -55,14 +55,19 @@
         chdir: /var/www/app/infra
       ignore_errors: yes
 
-    - name: Bring up application with Docker Compose
-      command: /usr/local/bin/docker-compose up -d --build
-      args:
-        chdir: /var/www/app/infra
-      register: compose_output
-      failed_when: false  # This prevents the playbook from stopping on error
+    - name: Attempt Docker Deployment
+      block:
+        - name: Bring up application with Docker Compose
+          command: /usr/local/bin/docker-compose up -d --build
+          args:
+            chdir: /var/www/app/infra
+          register: compose_output
 
-    - name: Show Docker logs if deployment fails
-      debug:
-        var: compose_output.stdout_lines
-      when: compose_output.failed
+      rescue:
+        - name: Show Docker logs if deployment fails
+          debug:
+            var: compose_output.stdout_lines
+
+        - name: Fail the playbook so GitHub knows it failed
+          fail:
+            msg: "docker-compose up failed!"
