@@ -14,14 +14,8 @@ class CorsConfig {
 	@Bean
 	fun corsConfigurationSource(): CorsConfigurationSource {
 		val config = CorsConfiguration().apply {
-			allowedOriginPatterns = listOf(
-				"https://aet-devops26.github.io",
-				"http://localhost:8080",
-				"http://127.0.0.1:8080",
-				"http://0.0.0.0:8080",
-				"https://*.team-devsecops.pages.dev",
-			)
-			allowedMethods = listOf("GET", "POST", "PUT")
+			allowedOriginPatterns = listOf("*")
+			allowedMethods = listOf("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH")
 			allowedHeaders = listOf("*")
 		}
 		return UrlBasedCorsConfigurationSource().apply {

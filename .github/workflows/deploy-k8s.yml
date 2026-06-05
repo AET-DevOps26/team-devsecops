@@ -152,4 +152,4 @@ jobs:
           echo "=== Ingress ==="
           kubectl get ingress -n app
           echo ""
-          echo "URL: https://devsecops.stud.k8s.aet.tum.de/"
+          echo "URL: https://devsecops.stud.k8s.aet.cit.tum.de/"
