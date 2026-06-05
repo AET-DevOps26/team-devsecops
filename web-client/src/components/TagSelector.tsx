@@ -59,6 +59,7 @@ export function TagSelector({selectedTags, onChange}: TagSelectorProps) {
                   <button
                     key={tag.id}
                     type="button"
+                    aria-pressed={active}
                     onClick={() => toggle(tag.id)}
                     className={`px-3 py-1 rounded-full border text-sm cursor-pointer transition-colors ${
                       active ? 'bg-orange-500 text-white border-orange-500' : tint

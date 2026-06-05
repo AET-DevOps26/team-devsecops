@@ -15,7 +15,7 @@ import {SessionExpiredError, useApi} from '../useApi'
 type Recipe = components['schemas']['RecipeInput'] & { id?: number }
 type RecipeRequest = components['schemas']['RecipeRequest']
 
-interface RecipeGenerationContext {
+export interface RecipeGenerationContext {
 	prompt: string
 	setPrompt: Dispatch<SetStateAction<string>>
 	selectedTags: string[]
