@@ -65,7 +65,7 @@ function GeneratedRecipePage() {
     <RecipeView
       key={index}
       recipe={recipe}
-      parentPath="/generate"
+      parentPath="/generate/results"
       onSavedIdChange={handleSavedIdChange}
       answers={helpAnswers[index] ?? []}
       onAnswer={(entry) => setHelpAnswers((m) => ({ ...m, [index]: [entry, ...(m[index] ?? [])] }))}

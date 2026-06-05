@@ -35,4 +35,21 @@
       transform: scale(0.92);
     }
   }
+
+  /* translate stays within the layout's 1.5rem padding so the slide never adds a scrollbar */
+  --animate-slide-from-right: slide-from-right 220ms ease-out;
+  @keyframes slide-from-right {
+    from {
+      opacity: 0;
+      transform: translateX(1.5rem);
+    }
+  }
+
+  --animate-slide-from-left: slide-from-left 220ms ease-out;
+  @keyframes slide-from-left {
+    from {
+      opacity: 0;
+      transform: translateX(-1.5rem);
+    }
+  }
 }

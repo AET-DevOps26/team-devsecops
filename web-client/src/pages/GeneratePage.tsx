@@ -1,8 +1,12 @@
 import {useEffect, useState} from 'react'
-import {useNavigate} from 'react-router-dom'
+import type {Dispatch, SetStateAction} from 'react'
+import {Outlet, useLocation, useNavigate, useOutletContext} from 'react-router-dom'
+import {ChevronRightIcon, PencilSquareIcon} from '@heroicons/react/24/outline'
 import type {components} from '../api'
 import {Button} from '../components/Button'
 import {RecipeCard} from '../components/RecipeCard'
+import {TagSelector} from '../components/TagSelector'
+import {tagsById} from '../recipeFormat'
 import {usePressPulse} from '../usePressPulse'
 import {errorMessage} from '../apiError'
 import {SessionExpiredError, useApi} from '../useApi'
@@ -11,18 +15,43 @@ import {SessionExpiredError, useApi} from '../useApi'
 type Recipe = components['schemas']['RecipeInput'] & { id?: number }
 type RecipeRequest = components['schemas']['RecipeRequest']
 
-export function GeneratePage() {
-  const apiFetch = useApi()
-  const navigate = useNavigate()
-  const [generateBtnRef, pulseGenerate] = usePressPulse<HTMLButtonElement>()
-  const [prompt, setPrompt] = useState(() => sessionStorage.getItem('recipe_prompt') ?? '')
-  // keep the last results so the list is restored when returning from a recipe page
-  const [recipes, setRecipes] = useState<Recipe[]>(() => {
-    const stored = sessionStorage.getItem('generated_recipes')
-    return stored ? (JSON.parse(stored) as Recipe[]) : []
-  })
-  const [status, setStatus] = useState<string | null>(null)
-  const [loading, setLoading] = useState(false)
+interface RecipeGenerationContext {
+	prompt: string
+	setPrompt: Dispatch<SetStateAction<string>>
+	selectedTags: string[]
+	setSelectedTags: Dispatch<SetStateAction<string[]>>
+	recipes: Recipe[]
+	setRecipes: Dispatch<SetStateAction<Recipe[]>>
+	status: string | null
+	loading: boolean
+	generate: () => void
+}
+
+const VIEW_ORDER = {options: 0, results: 1, recipe: 2} as const
+
+function viewName(pathname: string): keyof typeof VIEW_ORDER {
+	if (pathname.startsWith('/generate/results')) return 'results'
+	if (pathname.startsWith('/generate/recipe')) return 'recipe'
+	return 'options'
+}
+
+export function GenerateFlow() {
+	const apiFetch = useApi()
+	const navigate = useNavigate()
+	const {pathname} = useLocation()
+
+	const [prompt, setPrompt] = useState(() => sessionStorage.getItem('recipe_prompt') ?? '')
+	const [selectedTags, setSelectedTags] = useState<string[]>(() => {
+		const stored = sessionStorage.getItem('recipe_tags')
+		return stored ? (JSON.parse(stored) as string[]) : []
+	})
+	// keep the last results so the list is restored when returning from a recipe page
+	const [recipes, setRecipes] = useState<Recipe[]>(() => {
+		const stored = sessionStorage.getItem('generated_recipes')
+		return stored ? (JSON.parse(stored) as Recipe[]) : []
+	})
+	const [status, setStatus] = useState<string | null>(null)
+	const [loading, setLoading] = useState(false)
 
 	// Confirm the session is still valid
 	useEffect(() => {
@@ -30,79 +59,172 @@ export function GeneratePage() {
 		apiFetch('/users/profile')
 	}, [apiFetch])
 
-  useEffect(() => {
-    sessionStorage.setItem('generated_recipes', JSON.stringify(recipes))
-  }, [recipes])
+	useEffect(() => {
+		sessionStorage.setItem('generated_recipes', JSON.stringify(recipes))
+	}, [recipes])
 
-  async function handleGenerate() {
-    setLoading(true)
-    setStatus('Generating recipes… (this might take a while)')
-    setRecipes([])
-    sessionStorage.setItem('recipe_prompt', prompt)
-    try {
-      const body: RecipeRequest = { prompt }
-		const response = await apiFetch('/ai/recipes', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify(body),
-      })
-      if (!response.ok) throw new Error(await errorMessage(response))
-      const data = (await response.json()) as Recipe[]
-      setRecipes(data)
-      setStatus(data.length === 0 ? 'No recipes returned.' : null)
-    } catch (e) {
-      if (e instanceof SessionExpiredError) return
-      setStatus(`Error: ${e instanceof Error ? e.message : String(e)}`)
-    } finally {
-      setLoading(false)
-    }
-  }
+	async function generate() {
+		setLoading(true)
+		setStatus('Generating recipes… (this might take a while)')
+		setRecipes([])
+		sessionStorage.setItem('recipe_prompt', prompt)
+		sessionStorage.setItem('recipe_tags', JSON.stringify(selectedTags))
+		navigate('/generate/results')
+		try {
+			const tagLabels = selectedTags.map((id) => tagsById.get(id)?.label).filter(Boolean)
+			const fullPrompt = tagLabels.length > 0 ? `${prompt}\n\nPreferences: ${tagLabels.join(', ')}` : prompt
+			const body: RecipeRequest = {prompt: fullPrompt}
+			const response = await apiFetch('/ai/recipes', {
+				method: 'POST',
+				headers: {'content-type': 'application/json'},
+				body: JSON.stringify(body),
+			})
+			if (!response.ok) throw new Error(await errorMessage(response))
+			const data = (await response.json()) as Recipe[]
+			setRecipes(data)
+			setStatus(data.length === 0 ? 'No recipes returned.' : null)
+		} catch (e) {
+			if (e instanceof SessionExpiredError) return
+			setStatus(`Error: ${e instanceof Error ? e.message : String(e)}`)
+		} finally {
+			setLoading(false)
+		}
+	}
 
-  function handleSavedIdChange(index: number, newId: number | undefined) {
-    setRecipes((prev) => prev.map((prevRecipe, prevIndex) => (prevIndex === index ? { ...prevRecipe, id: newId } : prevRecipe)))
-  }
+	const view = viewName(pathname)
+	const [prevView, setPrevView] = useState(view)
+	const [slideDirectionBack, setSlideDirectionBack] = useState(false)
+	if (view !== prevView) {
+		setSlideDirectionBack(VIEW_ORDER[view] < VIEW_ORDER[prevView])
+		setPrevView(view)
+	}
 
-  return (
-    <>
-      <h2 className="text-lg font-bold">What do you want to cook today?</h2>
-      <textarea
-        className="w-full min-h-32 border border-gray-300 rounded p-3"
-        placeholder="What do you want to cook? (e.g. ingredients, cuisine, constraints)"
-        value={prompt}
-        onChange={(e) => setPrompt(e.target.value)}
-        onFocus={(e) => e.target.select()}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter' && !e.shiftKey) {
-            // on Enter: directly submit instead of adding a new line
-            e.preventDefault()
-            if (!loading && prompt.trim() !== '') {
-              pulseGenerate()
-              handleGenerate()
-            }
-          }
-        }}
-      />
-      <Button
-        ref={generateBtnRef}
-        type="button"
-        className="self-start"
-        onClick={handleGenerate}
-        disabled={loading || prompt.trim() === ''}
-      >
-        {loading ? 'Generating…' : 'Generate'}
-      </Button>
+	const context: RecipeGenerationContext = {
+		prompt, setPrompt, selectedTags, setSelectedTags, recipes, setRecipes, status, loading, generate,
+	}
 
-      {status && <p className="text-gray-600">{status}</p>}
+	return (
+		<div
+			key={view}
+			className={`flex flex-col gap-4 ${slideDirectionBack ? 'animate-slide-from-left' : 'animate-slide-from-right'}`}
+		>
+			<Outlet context={context}/>
+		</div>
+	)
+}
 
-      {recipes.map((recipe, index) => (
-        <RecipeCard
-          key={index}
-          recipe={recipe}
-          recipeId={recipe.id}
-          onSavedIdChange={(newId) => handleSavedIdChange(index, newId)}
-          onOpen={() => navigate('/generate/recipe', {state: {index}})}
-        />
-      ))}
-    </>
-  )
+export function GeneratePage() {
+	const navigate = useNavigate()
+	const {
+		prompt,
+		setPrompt,
+		selectedTags,
+		setSelectedTags,
+		recipes,
+		loading,
+		generate
+	} = useOutletContext<RecipeGenerationContext>()
+	const [generateBtnRef, pulseGenerate] = usePressPulse<HTMLButtonElement>()
+
+	return (
+		<>
+			<div className="flex items-center justify-between gap-3">
+				<h2 className="text-lg font-bold">What do you want to cook today?</h2>
+				{recipes.length > 0 && (
+					<button
+						type="button"
+						className="flex shrink-0 items-center gap-1 text-sm text-gray-500 cursor-pointer transition-transform duration-100 hover:scale-98"
+						onClick={() => navigate('/generate/results')}
+					>
+						View recipes
+						<ChevronRightIcon className="h-4 w-4"/>
+					</button>
+				)}
+			</div>
+			<textarea
+				className="w-full min-h-32 border border-gray-300 rounded p-3"
+				placeholder="Type what you think (optional)"
+				value={prompt}
+				onChange={(e) => setPrompt(e.target.value)}
+				onFocus={(e) => e.target.select()}
+				onKeyDown={(e) => {
+					if (e.key === 'Enter' && !e.shiftKey) {
+						// on Enter: directly submit instead of adding a new line
+						e.preventDefault()
+						if (!loading && (prompt.trim() !== '' || selectedTags.length > 0)) {
+							pulseGenerate()
+							generate()
+						}
+					}
+				}}
+			/>
+
+			<TagSelector selectedTags={selectedTags} onChange={setSelectedTags}/>
+
+			<Button
+				ref={generateBtnRef}
+				type="button"
+				className="self-center"
+				onClick={generate}
+				disabled={loading || (prompt.trim() === '' && selectedTags.length === 0)}
+			>
+				{loading ? 'Generating…' : 'Generate'}
+			</Button>
+		</>
+	)
+}
+
+export function GenerateResultsPage() {
+	const navigate = useNavigate()
+	const {prompt, selectedTags, recipes, status, setRecipes} = useOutletContext<RecipeGenerationContext>()
+
+	function handleSavedIdChange(index: number, newId: number | undefined) {
+		setRecipes((prev) => prev.map((prevRecipe, prevIndex) => (prevIndex === index ? {
+			...prevRecipe,
+			id: newId
+		} : prevRecipe)))
+	}
+
+	return (
+		<>
+			<div className="flex items-start justify-between gap-3 rounded-lg border border-gray-200 bg-gray-50 p-3">
+				<div className="flex min-w-0 flex-col gap-2">
+					{prompt.trim() !== '' && <p className="text-sm text-gray-700 line-clamp-2">{prompt}</p>}
+					{selectedTags.length > 0 && (
+						<div className="flex flex-wrap gap-1.5">
+							{selectedTags.map((id) => (
+								<span key={id}
+								      className="rounded-full border border-gray-200 bg-white px-2 py-0.5 text-xs text-gray-600">
+                  {tagsById.get(id)?.label ?? id}
+                </span>
+							))}
+						</div>
+					)}
+					{prompt.trim() === '' && selectedTags.length === 0 && (
+						<p className="text-sm text-gray-400">No options selected</p>
+					)}
+				</div>
+				<button
+					type="button"
+					className="flex shrink-0 items-center gap-1 self-start text-sm text-gray-500 cursor-pointer transition-transform duration-100 hover:scale-98"
+					onClick={() => navigate('/generate')}
+				>
+					<PencilSquareIcon className="h-4 w-4"/>
+					Edit
+				</button>
+			</div>
+
+			{status && <p className="text-gray-600">{status}</p>}
+
+			{recipes.map((recipe, index) => (
+				<RecipeCard
+					key={index}
+					recipe={recipe}
+					recipeId={recipe.id}
+					onSavedIdChange={(newId) => handleSavedIdChange(index, newId)}
+					onOpen={() => navigate('/generate/recipe', {state: {index}})}
+				/>
+			))}
+		</>
+	)
 }
