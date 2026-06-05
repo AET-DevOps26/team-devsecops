@@ -1,0 +1,2480 @@
+{
+  "facets": [
+    {
+      "id": "meal-type",
+      "label": "Type of Meal",
+      "defaultTags": [
+        "dinner",
+        "lunch",
+        "breakfast",
+        "dessert",
+        "snack",
+        "appetizer"
+      ]
+    },
+    {
+      "id": "cuisine",
+      "label": "Cuisine",
+      "defaultTags": [
+        "italian",
+        "chinese",
+        "mexican",
+        "indian",
+        "american",
+        "japanese",
+        "thai",
+        "mediterranean",
+        "french",
+        "korean",
+        "vietnamese",
+        "latin-american",
+        "british",
+        "german"
+      ]
+    },
+    {
+      "id": "ingredient",
+      "label": "Main Ingredient",
+      "defaultTags": [
+        "chicken",
+        "beef",
+        "pork",
+        "eggs",
+        "cheese",
+        "pasta",
+        "vegetables",
+        "fish"
+      ]
+    },
+    {
+      "id": "occasion",
+      "label": "Occasion & Season",
+      "defaultTags": [
+        "weeknight",
+        "party",
+        "bbq",
+        "festival",
+        "summer",
+        "winter",
+        "spring",
+        "autumn"
+      ]
+    },
+    {
+      "id": "method",
+      "label": "Cooking Method",
+      "defaultTags": [
+        "baking",
+        "grilling",
+        "frying",
+        "air-fryer",
+        "slow-cooker",
+        "one-pot",
+        "steaming",
+        "no-cook"
+      ]
+    }
+  ],
+  "tags": [
+    {
+      "id": "dinner",
+      "label": "Dinner",
+      "categoryId": "meal-type",
+      "reveals": [
+        "burger",
+        "casserole",
+        "curry",
+        "main-course",
+        "pasta",
+        "pizza",
+        "roast",
+        "side-dish",
+        "stir-fry"
+      ]
+    },
+    {
+      "id": "lunch",
+      "label": "Lunch",
+      "categoryId": "meal-type",
+      "reveals": [
+        "bowls",
+        "burger",
+        "pizza",
+        "salad",
+        "sandwich",
+        "soup",
+        "wrap"
+      ]
+    },
+    {
+      "id": "breakfast",
+      "label": "Breakfast",
+      "categoryId": "meal-type",
+      "reveals": [
+        "breakfast-bowl",
+        "brunch",
+        "eggs",
+        "muffins",
+        "oatmeal",
+        "pancakes",
+        "smoothie"
+      ]
+    },
+    {
+      "id": "dessert",
+      "label": "Dessert",
+      "categoryId": "meal-type",
+      "reveals": [
+        "brownies",
+        "cake",
+        "cheesecake",
+        "chocolate",
+        "cookies",
+        "ice-cream",
+        "pie",
+        "pudding"
+      ]
+    },
+    {
+      "id": "snack",
+      "label": "Snack",
+      "categoryId": "meal-type",
+      "reveals": [
+        "chips-crisps",
+        "dip",
+        "drinks",
+        "energy-balls",
+        "finger-food",
+        "popcorn",
+        "smoothie"
+      ]
+    },
+    {
+      "id": "appetizer",
+      "label": "Appetizer",
+      "categoryId": "meal-type",
+      "reveals": [
+        "bruschetta",
+        "dip",
+        "finger-food",
+        "soup",
+        "spring-rolls"
+      ]
+    },
+    {
+      "id": "pizza",
+      "label": "Pizza",
+      "categoryId": "meal-type",
+      "reveals": [
+        "cheese"
+      ]
+    },
+    {
+      "id": "burger",
+      "label": "Burger",
+      "categoryId": "meal-type",
+      "reveals": [
+        "beef"
+      ]
+    },
+    {
+      "id": "sandwich",
+      "label": "Sandwich",
+      "categoryId": "meal-type",
+      "reveals": [
+        "wrap"
+      ]
+    },
+    {
+      "id": "salad",
+      "label": "Salad",
+      "categoryId": "meal-type",
+      "reveals": [
+        "leafy-greens",
+        "vegetables"
+      ]
+    },
+    {
+      "id": "soup",
+      "label": "Soup",
+      "categoryId": "meal-type",
+      "reveals": [
+        "stew",
+        "vegetables"
+      ]
+    },
+    {
+      "id": "stir-fry",
+      "label": "Stir Fry",
+      "categoryId": "meal-type",
+      "reveals": [
+        "noodles",
+        "rice",
+        "tofu"
+      ]
+    },
+    {
+      "id": "curry",
+      "label": "Curry",
+      "categoryId": "meal-type",
+      "reveals": [
+        "chickpeas",
+        "lentils",
+        "rice"
+      ]
+    },
+    {
+      "id": "cake",
+      "label": "Cake",
+      "categoryId": "meal-type",
+      "reveals": [
+        "chocolate"
+      ]
+    },
+    {
+      "id": "cookies",
+      "label": "Cookies & Biscuits",
+      "categoryId": "meal-type",
+      "reveals": [
+        "chocolate"
+      ]
+    },
+    {
+      "id": "pancakes",
+      "label": "Pancakes",
+      "categoryId": "meal-type",
+      "reveals": []
+    },
+    {
+      "id": "wrap",
+      "label": "Wraps & Rolls",
+      "categoryId": "meal-type",
+      "reveals": []
+    },
+    {
+      "id": "roast",
+      "label": "Roast",
+      "categoryId": "meal-type",
+      "reveals": [
+        "duck",
+        "turkey"
+      ]
+    },
+    {
+      "id": "stew",
+      "label": "Stew",
+      "categoryId": "meal-type",
+      "reveals": []
+    },
+    {
+      "id": "casserole",
+      "label": "Casserole & Bake",
+      "categoryId": "meal-type",
+      "reveals": []
+    },
+    {
+      "id": "pie",
+      "label": "Pie",
+      "categoryId": "meal-type",
+      "reveals": []
+    },
+    {
+      "id": "smoothie",
+      "label": "Smoothie & Shake",
+      "categoryId": "meal-type",
+      "reveals": []
+    },
+    {
+      "id": "ice-cream",
+      "label": "Ice Cream",
+      "categoryId": "meal-type",
+      "reveals": []
+    },
+    {
+      "id": "bread",
+      "label": "Bread",
+      "categoryId": "meal-type",
+      "reveals": []
+    },
+    {
+      "id": "brunch",
+      "label": "Brunch",
+      "categoryId": "meal-type",
+      "reveals": [
+        "eggs",
+        "french-toast",
+        "pancakes",
+        "quiche",
+        "waffles"
+      ]
+    },
+    {
+      "id": "main-course",
+      "label": "Main Course",
+      "categoryId": "meal-type",
+      "reveals": [
+        "casserole",
+        "curry",
+        "roast",
+        "stir-fry"
+      ]
+    },
+    {
+      "id": "side-dish",
+      "label": "Side Dish",
+      "categoryId": "meal-type",
+      "reveals": [
+        "bread",
+        "potatoes",
+        "rice",
+        "roasted-veg",
+        "salad",
+        "vegetables"
+      ]
+    },
+    {
+      "id": "dip",
+      "label": "Dips & Spreads",
+      "categoryId": "meal-type",
+      "reveals": []
+    },
+    {
+      "id": "finger-food",
+      "label": "Finger Food",
+      "categoryId": "meal-type",
+      "reveals": [
+        "dip"
+      ]
+    },
+    {
+      "id": "muffins",
+      "label": "Muffins & Scones",
+      "categoryId": "meal-type",
+      "reveals": []
+    },
+    {
+      "id": "oatmeal",
+      "label": "Oatmeal & Porridge",
+      "categoryId": "meal-type",
+      "reveals": []
+    },
+    {
+      "id": "cheesecake",
+      "label": "Cheesecake",
+      "categoryId": "meal-type",
+      "reveals": []
+    },
+    {
+      "id": "brownies",
+      "label": "Brownies & Slices",
+      "categoryId": "meal-type",
+      "reveals": []
+    },
+    {
+      "id": "waffles",
+      "label": "Waffles",
+      "categoryId": "meal-type",
+      "reveals": []
+    },
+    {
+      "id": "french-toast",
+      "label": "French Toast",
+      "categoryId": "meal-type",
+      "reveals": []
+    },
+    {
+      "id": "quiche",
+      "label": "Quiche & Savoury Tart",
+      "categoryId": "meal-type",
+      "reveals": [
+        "eggs"
+      ]
+    },
+    {
+      "id": "drinks",
+      "label": "Drinks",
+      "categoryId": "meal-type",
+      "reveals": [
+        "cocktail",
+        "coffee",
+        "mocktail",
+        "smoothie",
+        "tea"
+      ]
+    },
+    {
+      "id": "coffee",
+      "label": "Coffee Drinks",
+      "categoryId": "meal-type",
+      "reveals": []
+    },
+    {
+      "id": "tea",
+      "label": "Tea",
+      "categoryId": "meal-type",
+      "reveals": []
+    },
+    {
+      "id": "bruschetta",
+      "label": "Bruschetta",
+      "categoryId": "meal-type",
+      "reveals": []
+    },
+    {
+      "id": "spring-rolls",
+      "label": "Spring Rolls",
+      "categoryId": "meal-type",
+      "reveals": []
+    },
+    {
+      "id": "popcorn",
+      "label": "Popcorn",
+      "categoryId": "meal-type",
+      "reveals": []
+    },
+    {
+      "id": "pudding",
+      "label": "Puddings",
+      "categoryId": "meal-type",
+      "reveals": []
+    },
+    {
+      "id": "breakfast-bowl",
+      "label": "Breakfast Bowls",
+      "categoryId": "meal-type",
+      "reveals": []
+    },
+    {
+      "id": "bowls",
+      "label": "Bowls",
+      "categoryId": "meal-type",
+      "reveals": []
+    },
+    {
+      "id": "roasted-veg",
+      "label": "Roasted Vegetables",
+      "categoryId": "meal-type",
+      "reveals": []
+    },
+    {
+      "id": "chips-crisps",
+      "label": "Chips & Crisps",
+      "categoryId": "meal-type",
+      "reveals": []
+    },
+    {
+      "id": "energy-balls",
+      "label": "Energy Balls",
+      "categoryId": "meal-type",
+      "reveals": []
+    },
+    {
+      "id": "cocktail",
+      "label": "Cocktail",
+      "categoryId": "meal-type",
+      "reveals": [
+        "mocktail"
+      ]
+    },
+    {
+      "id": "mocktail",
+      "label": "Mocktail",
+      "categoryId": "meal-type",
+      "reveals": []
+    },
+    {
+      "id": "italian",
+      "label": "Italian",
+      "categoryId": "cuisine",
+      "reveals": [
+        "french",
+        "gnocchi",
+        "lasagna",
+        "mediterranean",
+        "pasta",
+        "risotto",
+        "sicilian",
+        "tiramisu",
+        "tomatoes",
+        "tuscan"
+      ]
+    },
+    {
+      "id": "chinese",
+      "label": "Chinese",
+      "categoryId": "cuisine",
+      "reveals": [
+        "cantonese",
+        "congee",
+        "dumplings",
+        "fried-rice",
+        "korean",
+        "noodles",
+        "rice",
+        "sichuan",
+        "sweet-sour",
+        "thai",
+        "tofu",
+        "vietnamese"
+      ]
+    },
+    {
+      "id": "mexican",
+      "label": "Mexican",
+      "categoryId": "cuisine",
+      "reveals": [
+        "avocado",
+        "beans",
+        "burritos",
+        "corn",
+        "enchiladas",
+        "guacamole",
+        "latin-american",
+        "mole",
+        "oaxacan",
+        "quesadilla",
+        "spanish",
+        "tacos",
+        "tamale"
+      ]
+    },
+    {
+      "id": "indian",
+      "label": "Indian",
+      "categoryId": "cuisine",
+      "reveals": [
+        "biryani",
+        "butter-chicken",
+        "chickpeas",
+        "dal",
+        "lentils",
+        "middle-eastern",
+        "naan",
+        "north-indian",
+        "pakistani",
+        "paneer",
+        "punjabi",
+        "rice",
+        "south-indian",
+        "sri-lankan",
+        "tandoori",
+        "tikka-masala"
+      ]
+    },
+    {
+      "id": "american",
+      "label": "American",
+      "categoryId": "cuisine",
+      "reveals": [
+        "british",
+        "caribbean",
+        "comfort-food",
+        "cornbread",
+        "fried-chicken",
+        "mac-and-cheese",
+        "southern"
+      ]
+    },
+    {
+      "id": "japanese",
+      "label": "Japanese",
+      "categoryId": "cuisine",
+      "reveals": [
+        "korean",
+        "miso",
+        "noodles",
+        "onigiri",
+        "ramen",
+        "rice",
+        "sushi",
+        "tempura",
+        "teriyaki",
+        "tofu",
+        "tonkatsu",
+        "udon"
+      ]
+    },
+    {
+      "id": "thai",
+      "label": "Thai",
+      "categoryId": "cuisine",
+      "reveals": [
+        "coconut",
+        "coconut-curry",
+        "noodles",
+        "pad-thai",
+        "rice",
+        "tom-yum",
+        "vietnamese"
+      ]
+    },
+    {
+      "id": "mediterranean",
+      "label": "Mediterranean",
+      "categoryId": "cuisine",
+      "reveals": [
+        "chickpeas",
+        "couscous",
+        "falafel",
+        "feta",
+        "greek",
+        "gyros",
+        "hummus",
+        "middle-eastern",
+        "moroccan",
+        "olive-oil",
+        "seafood",
+        "spanish",
+        "tabbouleh"
+      ]
+    },
+    {
+      "id": "french",
+      "label": "French",
+      "categoryId": "cuisine",
+      "reveals": [
+        "baking",
+        "british",
+        "cheese",
+        "coq-au-vin",
+        "crepes",
+        "croissant",
+        "german",
+        "provencal",
+        "ratatouille"
+      ]
+    },
+    {
+      "id": "korean",
+      "label": "Korean",
+      "categoryId": "cuisine",
+      "reveals": [
+        "beef",
+        "bibimbap",
+        "bulgogi",
+        "kimchi",
+        "korean-bbq",
+        "rice",
+        "tofu"
+      ]
+    },
+    {
+      "id": "vietnamese",
+      "label": "Vietnamese",
+      "categoryId": "cuisine",
+      "reveals": [
+        "banh-mi",
+        "herbs",
+        "noodles",
+        "pho",
+        "rice"
+      ]
+    },
+    {
+      "id": "latin-american",
+      "label": "Latin American",
+      "categoryId": "cuisine",
+      "reveals": [
+        "argentine",
+        "brazilian",
+        "cassava",
+        "empanada",
+        "peruvian"
+      ]
+    },
+    {
+      "id": "british",
+      "label": "British",
+      "categoryId": "cuisine",
+      "reveals": [
+        "comfort-food",
+        "fish-chips",
+        "scones",
+        "shepherds-pie"
+      ]
+    },
+    {
+      "id": "german",
+      "label": "German",
+      "categoryId": "cuisine",
+      "reveals": [
+        "pork",
+        "potatoes",
+        "sauerkraut",
+        "sausage",
+        "schnitzel",
+        "spaetzle"
+      ]
+    },
+    {
+      "id": "brazilian",
+      "label": "Brazilian",
+      "categoryId": "cuisine",
+      "reveals": [
+        "feijoada",
+        "pao-de-queijo"
+      ]
+    },
+    {
+      "id": "peruvian",
+      "label": "Peruvian",
+      "categoryId": "cuisine",
+      "reveals": [
+        "ceviche"
+      ]
+    },
+    {
+      "id": "argentine",
+      "label": "Argentine",
+      "categoryId": "cuisine",
+      "reveals": [
+        "asado"
+      ]
+    },
+    {
+      "id": "pakistani",
+      "label": "Pakistani",
+      "categoryId": "cuisine",
+      "reveals": []
+    },
+    {
+      "id": "sri-lankan",
+      "label": "Sri Lankan",
+      "categoryId": "cuisine",
+      "reveals": []
+    },
+    {
+      "id": "greek",
+      "label": "Greek",
+      "categoryId": "cuisine",
+      "reveals": [
+        "feta",
+        "gyros",
+        "lamb",
+        "moussaka",
+        "olive-oil",
+        "souvlaki",
+        "tzatziki"
+      ]
+    },
+    {
+      "id": "spanish",
+      "label": "Spanish",
+      "categoryId": "cuisine",
+      "reveals": [
+        "gazpacho",
+        "paella",
+        "portuguese",
+        "rice",
+        "seafood",
+        "tapas",
+        "tortilla-espanola"
+      ]
+    },
+    {
+      "id": "turkish",
+      "label": "Turkish",
+      "categoryId": "cuisine",
+      "reveals": []
+    },
+    {
+      "id": "moroccan",
+      "label": "Moroccan",
+      "categoryId": "cuisine",
+      "reveals": [
+        "chickpeas",
+        "couscous",
+        "lamb",
+        "tagine"
+      ]
+    },
+    {
+      "id": "egyptian",
+      "label": "Egyptian",
+      "categoryId": "cuisine",
+      "reveals": [
+        "koshari"
+      ]
+    },
+    {
+      "id": "portuguese",
+      "label": "Portuguese",
+      "categoryId": "cuisine",
+      "reveals": [
+        "pastel-de-nata"
+      ]
+    },
+    {
+      "id": "sushi",
+      "label": "Sushi",
+      "categoryId": "cuisine",
+      "reveals": [
+        "rice",
+        "seafood"
+      ]
+    },
+    {
+      "id": "ramen",
+      "label": "Ramen",
+      "categoryId": "cuisine",
+      "reveals": [
+        "noodles"
+      ]
+    },
+    {
+      "id": "tacos",
+      "label": "Tacos",
+      "categoryId": "cuisine",
+      "reveals": []
+    },
+    {
+      "id": "burritos",
+      "label": "Burritos",
+      "categoryId": "cuisine",
+      "reveals": []
+    },
+    {
+      "id": "pad-thai",
+      "label": "Pad Thai",
+      "categoryId": "cuisine",
+      "reveals": []
+    },
+    {
+      "id": "pho",
+      "label": "Pho",
+      "categoryId": "cuisine",
+      "reveals": []
+    },
+    {
+      "id": "dumplings",
+      "label": "Dumplings",
+      "categoryId": "cuisine",
+      "reveals": []
+    },
+    {
+      "id": "hummus",
+      "label": "Hummus",
+      "categoryId": "cuisine",
+      "reveals": [
+        "chickpeas"
+      ]
+    },
+    {
+      "id": "falafel",
+      "label": "Falafel",
+      "categoryId": "cuisine",
+      "reveals": []
+    },
+    {
+      "id": "kebab",
+      "label": "Kebab",
+      "categoryId": "cuisine",
+      "reveals": []
+    },
+    {
+      "id": "shawarma",
+      "label": "Shawarma",
+      "categoryId": "cuisine",
+      "reveals": []
+    },
+    {
+      "id": "kimchi",
+      "label": "Kimchi",
+      "categoryId": "cuisine",
+      "reveals": []
+    },
+    {
+      "id": "bibimbap",
+      "label": "Bibimbap",
+      "categoryId": "cuisine",
+      "reveals": []
+    },
+    {
+      "id": "korean-bbq",
+      "label": "Korean BBQ",
+      "categoryId": "cuisine",
+      "reveals": []
+    },
+    {
+      "id": "bulgogi",
+      "label": "Bulgogi",
+      "categoryId": "cuisine",
+      "reveals": []
+    },
+    {
+      "id": "teriyaki",
+      "label": "Teriyaki",
+      "categoryId": "cuisine",
+      "reveals": []
+    },
+    {
+      "id": "tempura",
+      "label": "Tempura",
+      "categoryId": "cuisine",
+      "reveals": []
+    },
+    {
+      "id": "miso",
+      "label": "Miso Soup",
+      "categoryId": "cuisine",
+      "reveals": []
+    },
+    {
+      "id": "udon",
+      "label": "Udon",
+      "categoryId": "cuisine",
+      "reveals": []
+    },
+    {
+      "id": "butter-chicken",
+      "label": "Butter chicken",
+      "categoryId": "cuisine",
+      "reveals": []
+    },
+    {
+      "id": "tikka-masala",
+      "label": "Tikka Masala",
+      "categoryId": "cuisine",
+      "reveals": []
+    },
+    {
+      "id": "biryani",
+      "label": "Biryani",
+      "categoryId": "cuisine",
+      "reveals": []
+    },
+    {
+      "id": "naan",
+      "label": "Naan",
+      "categoryId": "cuisine",
+      "reveals": []
+    },
+    {
+      "id": "tandoori",
+      "label": "Tandoori",
+      "categoryId": "cuisine",
+      "reveals": []
+    },
+    {
+      "id": "dal",
+      "label": "Dal",
+      "categoryId": "cuisine",
+      "reveals": []
+    },
+    {
+      "id": "dosa",
+      "label": "Dosa",
+      "categoryId": "cuisine",
+      "reveals": []
+    },
+    {
+      "id": "idli",
+      "label": "Idli",
+      "categoryId": "cuisine",
+      "reveals": []
+    },
+    {
+      "id": "paella",
+      "label": "Paella",
+      "categoryId": "cuisine",
+      "reveals": []
+    },
+    {
+      "id": "tapas",
+      "label": "Tapas",
+      "categoryId": "cuisine",
+      "reveals": []
+    },
+    {
+      "id": "gazpacho",
+      "label": "Gazpacho",
+      "categoryId": "cuisine",
+      "reveals": []
+    },
+    {
+      "id": "tabbouleh",
+      "label": "Tabbouleh",
+      "categoryId": "cuisine",
+      "reveals": []
+    },
+    {
+      "id": "mezze",
+      "label": "Mezze",
+      "categoryId": "cuisine",
+      "reveals": []
+    },
+    {
+      "id": "baba-ganoush",
+      "label": "Baba ganoush",
+      "categoryId": "cuisine",
+      "reveals": []
+    },
+    {
+      "id": "couscous",
+      "label": "Couscous",
+      "categoryId": "cuisine",
+      "reveals": []
+    },
+    {
+      "id": "tagine",
+      "label": "Tagine",
+      "categoryId": "cuisine",
+      "reveals": []
+    },
+    {
+      "id": "guacamole",
+      "label": "Guacamole",
+      "categoryId": "cuisine",
+      "reveals": []
+    },
+    {
+      "id": "quesadilla",
+      "label": "Quesadilla",
+      "categoryId": "cuisine",
+      "reveals": []
+    },
+    {
+      "id": "enchiladas",
+      "label": "Enchiladas",
+      "categoryId": "cuisine",
+      "reveals": []
+    },
+    {
+      "id": "mac-and-cheese",
+      "label": "Mac & Cheese",
+      "categoryId": "cuisine",
+      "reveals": [
+        "cheese",
+        "pasta"
+      ]
+    },
+    {
+      "id": "fried-chicken",
+      "label": "Fried Chicken",
+      "categoryId": "cuisine",
+      "reveals": []
+    },
+    {
+      "id": "southern",
+      "label": "Southern (US)",
+      "categoryId": "cuisine",
+      "reveals": [
+        "cajun"
+      ]
+    },
+    {
+      "id": "cajun",
+      "label": "Cajun & Creole",
+      "categoryId": "cuisine",
+      "reveals": []
+    },
+    {
+      "id": "cornbread",
+      "label": "Cornbread",
+      "categoryId": "cuisine",
+      "reveals": []
+    },
+    {
+      "id": "comfort-food",
+      "label": "Comfort Food",
+      "categoryId": "cuisine",
+      "reveals": [
+        "mac-and-cheese"
+      ]
+    },
+    {
+      "id": "caribbean",
+      "label": "Caribbean",
+      "categoryId": "cuisine",
+      "reveals": [
+        "beans",
+        "coconut",
+        "rice"
+      ]
+    },
+    {
+      "id": "fish-chips",
+      "label": "Fish & Chips",
+      "categoryId": "cuisine",
+      "reveals": []
+    },
+    {
+      "id": "shepherds-pie",
+      "label": "Shepherd's Pie",
+      "categoryId": "cuisine",
+      "reveals": []
+    },
+    {
+      "id": "scones",
+      "label": "Scones",
+      "categoryId": "cuisine",
+      "reveals": []
+    },
+    {
+      "id": "croissant",
+      "label": "Croissant",
+      "categoryId": "cuisine",
+      "reveals": []
+    },
+    {
+      "id": "crepes",
+      "label": "Crepes",
+      "categoryId": "cuisine",
+      "reveals": []
+    },
+    {
+      "id": "tiramisu",
+      "label": "Tiramisu",
+      "categoryId": "cuisine",
+      "reveals": []
+    },
+    {
+      "id": "ratatouille",
+      "label": "Ratatouille",
+      "categoryId": "cuisine",
+      "reveals": []
+    },
+    {
+      "id": "coq-au-vin",
+      "label": "Coq au Vin",
+      "categoryId": "cuisine",
+      "reveals": []
+    },
+    {
+      "id": "provencal",
+      "label": "Provencal",
+      "categoryId": "cuisine",
+      "reveals": []
+    },
+    {
+      "id": "sicilian",
+      "label": "Sicilian",
+      "categoryId": "cuisine",
+      "reveals": []
+    },
+    {
+      "id": "tuscan",
+      "label": "Tuscan",
+      "categoryId": "cuisine",
+      "reveals": []
+    },
+    {
+      "id": "north-indian",
+      "label": "North Indian",
+      "categoryId": "cuisine",
+      "reveals": []
+    },
+    {
+      "id": "south-indian",
+      "label": "South Indian",
+      "categoryId": "cuisine",
+      "reveals": [
+        "dosa",
+        "idli"
+      ]
+    },
+    {
+      "id": "punjabi",
+      "label": "Punjabi",
+      "categoryId": "cuisine",
+      "reveals": []
+    },
+    {
+      "id": "coconut-curry",
+      "label": "Coconut Curry",
+      "categoryId": "cuisine",
+      "reveals": []
+    },
+    {
+      "id": "sweet-sour",
+      "label": "Sweet & Sour",
+      "categoryId": "cuisine",
+      "reveals": []
+    },
+    {
+      "id": "char-siu",
+      "label": "BBQ pork (char siu)",
+      "categoryId": "cuisine",
+      "reveals": []
+    },
+    {
+      "id": "mapo-tofu",
+      "label": "Mapo tofu",
+      "categoryId": "cuisine",
+      "reveals": []
+    },
+    {
+      "id": "cantonese",
+      "label": "Cantonese",
+      "categoryId": "cuisine",
+      "reveals": [
+        "char-siu"
+      ]
+    },
+    {
+      "id": "sichuan",
+      "label": "Sichuan",
+      "categoryId": "cuisine",
+      "reveals": [
+        "mapo-tofu"
+      ]
+    },
+    {
+      "id": "congee",
+      "label": "Rice porridge (congee)",
+      "categoryId": "cuisine",
+      "reveals": []
+    },
+    {
+      "id": "tonkatsu",
+      "label": "Pork cutlet (tonkatsu)",
+      "categoryId": "cuisine",
+      "reveals": []
+    },
+    {
+      "id": "onigiri",
+      "label": "Rice ball (onigiri)",
+      "categoryId": "cuisine",
+      "reveals": []
+    },
+    {
+      "id": "tom-yum",
+      "label": "Tom Yum",
+      "categoryId": "cuisine",
+      "reveals": []
+    },
+    {
+      "id": "banh-mi",
+      "label": "Banh Mi",
+      "categoryId": "cuisine",
+      "reveals": []
+    },
+    {
+      "id": "schnitzel",
+      "label": "Schnitzel",
+      "categoryId": "cuisine",
+      "reveals": []
+    },
+    {
+      "id": "spaetzle",
+      "label": "Spaetzle",
+      "categoryId": "cuisine",
+      "reveals": []
+    },
+    {
+      "id": "sauerkraut",
+      "label": "Sauerkraut",
+      "categoryId": "cuisine",
+      "reveals": []
+    },
+    {
+      "id": "tortilla-espanola",
+      "label": "Spanish Tortilla",
+      "categoryId": "cuisine",
+      "reveals": []
+    },
+    {
+      "id": "tzatziki",
+      "label": "Tzatziki",
+      "categoryId": "cuisine",
+      "reveals": []
+    },
+    {
+      "id": "gyros",
+      "label": "Gyros",
+      "categoryId": "cuisine",
+      "reveals": []
+    },
+    {
+      "id": "souvlaki",
+      "label": "Souvlaki",
+      "categoryId": "cuisine",
+      "reveals": []
+    },
+    {
+      "id": "moussaka",
+      "label": "Moussaka",
+      "categoryId": "cuisine",
+      "reveals": []
+    },
+    {
+      "id": "levantine",
+      "label": "Levantine",
+      "categoryId": "cuisine",
+      "reveals": []
+    },
+    {
+      "id": "middle-eastern",
+      "label": "Middle Eastern",
+      "categoryId": "cuisine",
+      "reveals": [
+        "baba-ganoush",
+        "chickpeas",
+        "couscous",
+        "egyptian",
+        "falafel",
+        "hummus",
+        "kebab",
+        "lamb",
+        "levantine",
+        "mezze",
+        "rice",
+        "shawarma",
+        "tabbouleh",
+        "turkish"
+      ]
+    },
+    {
+      "id": "oaxacan",
+      "label": "Oaxacan",
+      "categoryId": "cuisine",
+      "reveals": []
+    },
+    {
+      "id": "mole",
+      "label": "Mole",
+      "categoryId": "cuisine",
+      "reveals": []
+    },
+    {
+      "id": "tamale",
+      "label": "Tamale",
+      "categoryId": "cuisine",
+      "reveals": []
+    },
+    {
+      "id": "empanada",
+      "label": "Empanada",
+      "categoryId": "cuisine",
+      "reveals": []
+    },
+    {
+      "id": "ceviche",
+      "label": "Ceviche",
+      "categoryId": "cuisine",
+      "reveals": []
+    },
+    {
+      "id": "feijoada",
+      "label": "Feijoada (bean stew)",
+      "categoryId": "cuisine",
+      "reveals": []
+    },
+    {
+      "id": "asado",
+      "label": "Asado (barbecue)",
+      "categoryId": "cuisine",
+      "reveals": []
+    },
+    {
+      "id": "pastel-de-nata",
+      "label": "Custard tart",
+      "categoryId": "cuisine",
+      "reveals": []
+    },
+    {
+      "id": "pao-de-queijo",
+      "label": "Cheese bread",
+      "categoryId": "cuisine",
+      "reveals": []
+    },
+    {
+      "id": "koshari",
+      "label": "Koshari",
+      "categoryId": "cuisine",
+      "reveals": []
+    },
+    {
+      "id": "chicken",
+      "label": "Chicken",
+      "categoryId": "ingredient",
+      "reveals": [
+        "chicken-breast",
+        "chicken-thigh",
+        "wings"
+      ]
+    },
+    {
+      "id": "beef",
+      "label": "Beef",
+      "categoryId": "ingredient",
+      "reveals": [
+        "brisket",
+        "ground-beef",
+        "meatballs",
+        "mince",
+        "steak"
+      ]
+    },
+    {
+      "id": "pork",
+      "label": "Pork",
+      "categoryId": "ingredient",
+      "reveals": [
+        "bacon",
+        "ham",
+        "pork-chop",
+        "pulled-pork",
+        "sausage"
+      ]
+    },
+    {
+      "id": "eggs",
+      "label": "Eggs",
+      "categoryId": "ingredient",
+      "reveals": [
+        "frittata",
+        "omelette",
+        "scrambled-eggs"
+      ]
+    },
+    {
+      "id": "cheese",
+      "label": "Cheese",
+      "categoryId": "ingredient",
+      "reveals": [
+        "cheddar",
+        "feta",
+        "halloumi",
+        "mozzarella",
+        "paneer"
+      ]
+    },
+    {
+      "id": "pasta",
+      "label": "Pasta",
+      "categoryId": "ingredient",
+      "reveals": [
+        "gnocchi",
+        "lasagna",
+        "penne",
+        "ravioli",
+        "spaghetti"
+      ]
+    },
+    {
+      "id": "vegetables",
+      "label": "Vegetables",
+      "categoryId": "ingredient",
+      "reveals": [
+        "broccoli",
+        "carrots",
+        "cauliflower",
+        "eggplant",
+        "fruit",
+        "herbs",
+        "leafy-greens",
+        "mushrooms",
+        "peppers",
+        "potatoes",
+        "spinach",
+        "tomatoes",
+        "zucchini"
+      ]
+    },
+    {
+      "id": "fish",
+      "label": "Fish",
+      "categoryId": "ingredient",
+      "reveals": [
+        "cod",
+        "salmon",
+        "seafood",
+        "tuna"
+      ]
+    },
+    {
+      "id": "rice",
+      "label": "Rice",
+      "categoryId": "ingredient",
+      "reveals": [
+        "fried-rice",
+        "rice-bowl",
+        "risotto"
+      ]
+    },
+    {
+      "id": "potatoes",
+      "label": "Potatoes",
+      "categoryId": "ingredient",
+      "reveals": [
+        "fries",
+        "mashed-potatoes",
+        "sweet-potato"
+      ]
+    },
+    {
+      "id": "tomatoes",
+      "label": "Tomatoes",
+      "categoryId": "ingredient",
+      "reveals": []
+    },
+    {
+      "id": "chicken-breast",
+      "label": "Chicken Breast",
+      "categoryId": "ingredient",
+      "reveals": []
+    },
+    {
+      "id": "ground-beef",
+      "label": "Ground Beef",
+      "categoryId": "ingredient",
+      "reveals": []
+    },
+    {
+      "id": "chicken-thigh",
+      "label": "Chicken Thigh",
+      "categoryId": "ingredient",
+      "reveals": []
+    },
+    {
+      "id": "salmon",
+      "label": "Salmon",
+      "categoryId": "ingredient",
+      "reveals": []
+    },
+    {
+      "id": "shrimp",
+      "label": "Shrimp",
+      "categoryId": "ingredient",
+      "reveals": []
+    },
+    {
+      "id": "prawns",
+      "label": "Prawns",
+      "categoryId": "ingredient",
+      "reveals": []
+    },
+    {
+      "id": "tuna",
+      "label": "Tuna",
+      "categoryId": "ingredient",
+      "reveals": []
+    },
+    {
+      "id": "bacon",
+      "label": "Bacon",
+      "categoryId": "ingredient",
+      "reveals": []
+    },
+    {
+      "id": "sausage",
+      "label": "Sausage",
+      "categoryId": "ingredient",
+      "reveals": []
+    },
+    {
+      "id": "ham",
+      "label": "Ham",
+      "categoryId": "ingredient",
+      "reveals": []
+    },
+    {
+      "id": "steak",
+      "label": "Steak",
+      "categoryId": "ingredient",
+      "reveals": []
+    },
+    {
+      "id": "lamb",
+      "label": "Lamb",
+      "categoryId": "ingredient",
+      "reveals": [
+        "lamb-chops",
+        "lamb-curry"
+      ]
+    },
+    {
+      "id": "lamb-chops",
+      "label": "Lamb Chops",
+      "categoryId": "ingredient",
+      "reveals": []
+    },
+    {
+      "id": "lamb-curry",
+      "label": "Lamb Curry",
+      "categoryId": "ingredient",
+      "reveals": []
+    },
+    {
+      "id": "mushrooms",
+      "label": "Mushrooms",
+      "categoryId": "ingredient",
+      "reveals": [
+        "risotto"
+      ]
+    },
+    {
+      "id": "spinach",
+      "label": "Spinach",
+      "categoryId": "ingredient",
+      "reveals": [
+        "leafy-greens"
+      ]
+    },
+    {
+      "id": "broccoli",
+      "label": "Broccoli",
+      "categoryId": "ingredient",
+      "reveals": []
+    },
+    {
+      "id": "carrots",
+      "label": "Carrots",
+      "categoryId": "ingredient",
+      "reveals": []
+    },
+    {
+      "id": "cauliflower",
+      "label": "Cauliflower",
+      "categoryId": "ingredient",
+      "reveals": []
+    },
+    {
+      "id": "peppers",
+      "label": "Peppers",
+      "categoryId": "ingredient",
+      "reveals": []
+    },
+    {
+      "id": "corn",
+      "label": "Corn",
+      "categoryId": "ingredient",
+      "reveals": []
+    },
+    {
+      "id": "avocado",
+      "label": "Avocado",
+      "categoryId": "ingredient",
+      "reveals": []
+    },
+    {
+      "id": "tofu",
+      "label": "Tofu",
+      "categoryId": "ingredient",
+      "reveals": [
+        "buddha-bowl",
+        "tempeh"
+      ]
+    },
+    {
+      "id": "beans",
+      "label": "Beans",
+      "categoryId": "ingredient",
+      "reveals": [
+        "black-beans",
+        "chickpeas",
+        "kidney-beans",
+        "lentils"
+      ]
+    },
+    {
+      "id": "lentils",
+      "label": "Lentils",
+      "categoryId": "ingredient",
+      "reveals": []
+    },
+    {
+      "id": "chickpeas",
+      "label": "Chickpeas",
+      "categoryId": "ingredient",
+      "reveals": []
+    },
+    {
+      "id": "noodles",
+      "label": "Noodles",
+      "categoryId": "ingredient",
+      "reveals": []
+    },
+    {
+      "id": "spaghetti",
+      "label": "Spaghetti",
+      "categoryId": "ingredient",
+      "reveals": []
+    },
+    {
+      "id": "penne",
+      "label": "Penne",
+      "categoryId": "ingredient",
+      "reveals": []
+    },
+    {
+      "id": "lasagna",
+      "label": "Lasagna",
+      "categoryId": "ingredient",
+      "reveals": []
+    },
+    {
+      "id": "risotto",
+      "label": "Risotto",
+      "categoryId": "ingredient",
+      "reveals": []
+    },
+    {
+      "id": "gnocchi",
+      "label": "Gnocchi",
+      "categoryId": "ingredient",
+      "reveals": []
+    },
+    {
+      "id": "ravioli",
+      "label": "Ravioli",
+      "categoryId": "ingredient",
+      "reveals": []
+    },
+    {
+      "id": "fried-rice",
+      "label": "Fried Rice",
+      "categoryId": "ingredient",
+      "reveals": []
+    },
+    {
+      "id": "mozzarella",
+      "label": "Mozzarella",
+      "categoryId": "ingredient",
+      "reveals": []
+    },
+    {
+      "id": "cheddar",
+      "label": "Cheddar",
+      "categoryId": "ingredient",
+      "reveals": []
+    },
+    {
+      "id": "feta",
+      "label": "Feta",
+      "categoryId": "ingredient",
+      "reveals": []
+    },
+    {
+      "id": "paneer",
+      "label": "Paneer",
+      "categoryId": "ingredient",
+      "reveals": []
+    },
+    {
+      "id": "halloumi",
+      "label": "Halloumi",
+      "categoryId": "ingredient",
+      "reveals": []
+    },
+    {
+      "id": "chocolate",
+      "label": "Chocolate",
+      "categoryId": "ingredient",
+      "reveals": []
+    },
+    {
+      "id": "fruit",
+      "label": "Fruit",
+      "categoryId": "ingredient",
+      "reveals": [
+        "apple",
+        "banana",
+        "berries",
+        "lemon"
+      ]
+    },
+    {
+      "id": "apple",
+      "label": "Apple",
+      "categoryId": "ingredient",
+      "reveals": []
+    },
+    {
+      "id": "banana",
+      "label": "Banana",
+      "categoryId": "ingredient",
+      "reveals": []
+    },
+    {
+      "id": "berries",
+      "label": "Berries",
+      "categoryId": "ingredient",
+      "reveals": []
+    },
+    {
+      "id": "lemon",
+      "label": "Lemon",
+      "categoryId": "ingredient",
+      "reveals": []
+    },
+    {
+      "id": "coconut",
+      "label": "Coconut",
+      "categoryId": "ingredient",
+      "reveals": []
+    },
+    {
+      "id": "herbs",
+      "label": "Fresh Herbs",
+      "categoryId": "ingredient",
+      "reveals": []
+    },
+    {
+      "id": "olive-oil",
+      "label": "Olive Oil",
+      "categoryId": "ingredient",
+      "reveals": []
+    },
+    {
+      "id": "eggplant",
+      "label": "Eggplant",
+      "categoryId": "ingredient",
+      "reveals": []
+    },
+    {
+      "id": "zucchini",
+      "label": "Zucchini",
+      "categoryId": "ingredient",
+      "reveals": []
+    },
+    {
+      "id": "sweet-potato",
+      "label": "Sweet Potato",
+      "categoryId": "ingredient",
+      "reveals": []
+    },
+    {
+      "id": "mashed-potatoes",
+      "label": "Mashed Potatoes",
+      "categoryId": "ingredient",
+      "reveals": []
+    },
+    {
+      "id": "fries",
+      "label": "Fries",
+      "categoryId": "ingredient",
+      "reveals": []
+    },
+    {
+      "id": "cod",
+      "label": "Cod",
+      "categoryId": "ingredient",
+      "reveals": []
+    },
+    {
+      "id": "seafood",
+      "label": "Seafood",
+      "categoryId": "ingredient",
+      "reveals": [
+        "cod",
+        "crab",
+        "mussels",
+        "prawns",
+        "salmon",
+        "shrimp",
+        "squid",
+        "tuna"
+      ]
+    },
+    {
+      "id": "crab",
+      "label": "Crab",
+      "categoryId": "ingredient",
+      "reveals": []
+    },
+    {
+      "id": "mussels",
+      "label": "Mussels",
+      "categoryId": "ingredient",
+      "reveals": []
+    },
+    {
+      "id": "squid",
+      "label": "Squid & Calamari",
+      "categoryId": "ingredient",
+      "reveals": []
+    },
+    {
+      "id": "duck",
+      "label": "Duck",
+      "categoryId": "ingredient",
+      "reveals": []
+    },
+    {
+      "id": "turkey",
+      "label": "Turkey",
+      "categoryId": "ingredient",
+      "reveals": [
+        "ground-turkey"
+      ]
+    },
+    {
+      "id": "ground-turkey",
+      "label": "Ground Turkey",
+      "categoryId": "ingredient",
+      "reveals": []
+    },
+    {
+      "id": "pork-chop",
+      "label": "Pork Chop",
+      "categoryId": "ingredient",
+      "reveals": []
+    },
+    {
+      "id": "pulled-pork",
+      "label": "Pulled Pork",
+      "categoryId": "ingredient",
+      "reveals": []
+    },
+    {
+      "id": "brisket",
+      "label": "Brisket",
+      "categoryId": "ingredient",
+      "reveals": []
+    },
+    {
+      "id": "wings",
+      "label": "Chicken Wings",
+      "categoryId": "ingredient",
+      "reveals": []
+    },
+    {
+      "id": "meatballs",
+      "label": "Meatballs",
+      "categoryId": "ingredient",
+      "reveals": []
+    },
+    {
+      "id": "mince",
+      "label": "Mince",
+      "categoryId": "ingredient",
+      "reveals": []
+    },
+    {
+      "id": "scrambled-eggs",
+      "label": "Scrambled Eggs",
+      "categoryId": "ingredient",
+      "reveals": []
+    },
+    {
+      "id": "omelette",
+      "label": "Omelette",
+      "categoryId": "ingredient",
+      "reveals": []
+    },
+    {
+      "id": "frittata",
+      "label": "Frittata",
+      "categoryId": "ingredient",
+      "reveals": []
+    },
+    {
+      "id": "black-beans",
+      "label": "Black Beans",
+      "categoryId": "ingredient",
+      "reveals": []
+    },
+    {
+      "id": "kidney-beans",
+      "label": "Kidney Beans",
+      "categoryId": "ingredient",
+      "reveals": []
+    },
+    {
+      "id": "quinoa",
+      "label": "Quinoa",
+      "categoryId": "ingredient",
+      "reveals": []
+    },
+    {
+      "id": "tempeh",
+      "label": "Tempeh",
+      "categoryId": "ingredient",
+      "reveals": []
+    },
+    {
+      "id": "cassava",
+      "label": "Cassava",
+      "categoryId": "ingredient",
+      "reveals": []
+    },
+    {
+      "id": "buddha-bowl",
+      "label": "Buddha Bowl",
+      "categoryId": "ingredient",
+      "reveals": [
+        "quinoa"
+      ]
+    },
+    {
+      "id": "rice-bowl",
+      "label": "Rice Bowls",
+      "categoryId": "ingredient",
+      "reveals": []
+    },
+    {
+      "id": "leafy-greens",
+      "label": "Leafy Greens",
+      "categoryId": "ingredient",
+      "reveals": []
+    },
+    {
+      "id": "weeknight",
+      "label": "Weeknight",
+      "categoryId": "occasion",
+      "reveals": [
+        "30-minute",
+        "budget",
+        "kids",
+        "meal-prep",
+        "one-pot",
+        "quick"
+      ]
+    },
+    {
+      "id": "party",
+      "label": "Party",
+      "categoryId": "occasion",
+      "reveals": [
+        "brunch-party",
+        "date-night",
+        "dinner-party",
+        "potluck"
+      ]
+    },
+    {
+      "id": "bbq",
+      "label": "BBQ",
+      "categoryId": "occasion",
+      "reveals": [
+        "grilling",
+        "skewers",
+        "summer"
+      ]
+    },
+    {
+      "id": "festival",
+      "label": "Holiday",
+      "categoryId": "occasion",
+      "reveals": [
+        "christmas",
+        "day-of-the-dead",
+        "diwali",
+        "easter",
+        "eid",
+        "festa-junina",
+        "halloween",
+        "lunar-new-year",
+        "new-year",
+        "ramadan",
+        "thanksgiving",
+        "valentines"
+      ]
+    },
+    {
+      "id": "summer",
+      "label": "Summer",
+      "categoryId": "occasion",
+      "reveals": [
+        "grilling",
+        "picnic"
+      ]
+    },
+    {
+      "id": "winter",
+      "label": "Winter",
+      "categoryId": "occasion",
+      "reveals": []
+    },
+    {
+      "id": "spring",
+      "label": "Spring",
+      "categoryId": "occasion",
+      "reveals": [
+        "asparagus"
+      ]
+    },
+    {
+      "id": "autumn",
+      "label": "Autumn",
+      "categoryId": "occasion",
+      "reveals": [
+        "pumpkin"
+      ]
+    },
+    {
+      "id": "christmas",
+      "label": "Christmas",
+      "categoryId": "occasion",
+      "reveals": [
+        "holiday-baking"
+      ]
+    },
+    {
+      "id": "halloween",
+      "label": "Halloween",
+      "categoryId": "occasion",
+      "reveals": [
+        "treats"
+      ]
+    },
+    {
+      "id": "thanksgiving",
+      "label": "Thanksgiving",
+      "categoryId": "occasion",
+      "reveals": [
+        "holiday-baking"
+      ]
+    },
+    {
+      "id": "easter",
+      "label": "Easter",
+      "categoryId": "occasion",
+      "reveals": [
+        "holiday-baking"
+      ]
+    },
+    {
+      "id": "new-year",
+      "label": "New Year's Eve",
+      "categoryId": "occasion",
+      "reveals": []
+    },
+    {
+      "id": "valentines",
+      "label": "Valentine's Day",
+      "categoryId": "occasion",
+      "reveals": []
+    },
+    {
+      "id": "date-night",
+      "label": "Date Night",
+      "categoryId": "occasion",
+      "reveals": []
+    },
+    {
+      "id": "dinner-party",
+      "label": "Dinner Party",
+      "categoryId": "occasion",
+      "reveals": []
+    },
+    {
+      "id": "brunch-party",
+      "label": "Brunch Party",
+      "categoryId": "occasion",
+      "reveals": []
+    },
+    {
+      "id": "picnic",
+      "label": "Picnic",
+      "categoryId": "occasion",
+      "reveals": []
+    },
+    {
+      "id": "potluck",
+      "label": "Potluck",
+      "categoryId": "occasion",
+      "reveals": []
+    },
+    {
+      "id": "kids",
+      "label": "Kid-Friendly",
+      "categoryId": "occasion",
+      "reveals": []
+    },
+    {
+      "id": "meal-prep",
+      "label": "Meal Prep",
+      "categoryId": "occasion",
+      "reveals": [
+        "batch-cooking",
+        "bento",
+        "budget",
+        "one-pot"
+      ]
+    },
+    {
+      "id": "batch-cooking",
+      "label": "Batch cooking",
+      "categoryId": "occasion",
+      "reveals": []
+    },
+    {
+      "id": "quick",
+      "label": "Quick & Easy",
+      "categoryId": "occasion",
+      "reveals": [
+        "15-minute",
+        "30-minute",
+        "5-ingredient",
+        "no-cook",
+        "one-pan",
+        "sheet-pan"
+      ]
+    },
+    {
+      "id": "30-minute",
+      "label": "30-Minute Meals",
+      "categoryId": "occasion",
+      "reveals": [
+        "one-pan",
+        "quick"
+      ]
+    },
+    {
+      "id": "holiday-baking",
+      "label": "Holiday Baking",
+      "categoryId": "occasion",
+      "reveals": [
+        "baking"
+      ]
+    },
+    {
+      "id": "treats",
+      "label": "Treats",
+      "categoryId": "occasion",
+      "reveals": []
+    },
+    {
+      "id": "diwali",
+      "label": "Diwali",
+      "categoryId": "occasion",
+      "reveals": []
+    },
+    {
+      "id": "eid",
+      "label": "Eid",
+      "categoryId": "occasion",
+      "reveals": []
+    },
+    {
+      "id": "ramadan",
+      "label": "Ramadan",
+      "categoryId": "occasion",
+      "reveals": []
+    },
+    {
+      "id": "lunar-new-year",
+      "label": "Lunar New Year",
+      "categoryId": "occasion",
+      "reveals": []
+    },
+    {
+      "id": "day-of-the-dead",
+      "label": "Day of the Dead",
+      "categoryId": "occasion",
+      "reveals": []
+    },
+    {
+      "id": "festa-junina",
+      "label": "Festa Junina",
+      "categoryId": "occasion",
+      "reveals": []
+    },
+    {
+      "id": "bento",
+      "label": "Bento / lunchbox",
+      "categoryId": "occasion",
+      "reveals": []
+    },
+    {
+      "id": "asparagus",
+      "label": "Asparagus",
+      "categoryId": "occasion",
+      "reveals": []
+    },
+    {
+      "id": "pumpkin",
+      "label": "Pumpkin",
+      "categoryId": "occasion",
+      "reveals": []
+    },
+    {
+      "id": "baking",
+      "label": "Baking",
+      "categoryId": "method",
+      "reveals": [
+        "roasting",
+        "sheet-pan"
+      ]
+    },
+    {
+      "id": "grilling",
+      "label": "Grilling & BBQ",
+      "categoryId": "method",
+      "reveals": [
+        "grilled-veg",
+        "skewers",
+        "sous-vide"
+      ]
+    },
+    {
+      "id": "frying",
+      "label": "Frying",
+      "categoryId": "method",
+      "reveals": [
+        "deep-frying"
+      ]
+    },
+    {
+      "id": "air-fryer",
+      "label": "Air Fryer",
+      "categoryId": "method",
+      "reveals": [
+        "crispy"
+      ]
+    },
+    {
+      "id": "slow-cooker",
+      "label": "Slow Cooker",
+      "categoryId": "method",
+      "reveals": [
+        "braising",
+        "instant-pot",
+        "make-ahead",
+        "pulled"
+      ]
+    },
+    {
+      "id": "one-pot",
+      "label": "One-Pot",
+      "categoryId": "method",
+      "reveals": [
+        "instant-pot",
+        "one-pan",
+        "sheet-pan"
+      ]
+    },
+    {
+      "id": "steaming",
+      "label": "Steaming",
+      "categoryId": "method",
+      "reveals": []
+    },
+    {
+      "id": "no-cook",
+      "label": "No-Cook",
+      "categoryId": "method",
+      "reveals": [
+        "overnight-oats",
+        "raw"
+      ]
+    },
+    {
+      "id": "roasting",
+      "label": "Roasting",
+      "categoryId": "method",
+      "reveals": []
+    },
+    {
+      "id": "deep-frying",
+      "label": "Deep-frying",
+      "categoryId": "method",
+      "reveals": []
+    },
+    {
+      "id": "instant-pot",
+      "label": "Instant Pot / Pressure Cooker",
+      "categoryId": "method",
+      "reveals": []
+    },
+    {
+      "id": "sheet-pan",
+      "label": "Sheet Pan / Tray Bake",
+      "categoryId": "method",
+      "reveals": [
+        "one-pan"
+      ]
+    },
+    {
+      "id": "one-pan",
+      "label": "One-Pan",
+      "categoryId": "method",
+      "reveals": []
+    },
+    {
+      "id": "braising",
+      "label": "Braising",
+      "categoryId": "method",
+      "reveals": []
+    },
+    {
+      "id": "skewers",
+      "label": "Skewers & Kebabs",
+      "categoryId": "method",
+      "reveals": []
+    },
+    {
+      "id": "grilled-veg",
+      "label": "Grilled Vegetables",
+      "categoryId": "method",
+      "reveals": []
+    },
+    {
+      "id": "crispy",
+      "label": "Crispy",
+      "categoryId": "method",
+      "reveals": []
+    },
+    {
+      "id": "raw",
+      "label": "Raw / No-Bake",
+      "categoryId": "method",
+      "reveals": []
+    },
+    {
+      "id": "sous-vide",
+      "label": "Sous Vide",
+      "categoryId": "method",
+      "reveals": []
+    },
+    {
+      "id": "budget",
+      "label": "Budget-Friendly",
+      "categoryId": "method",
+      "reveals": [
+        "5-ingredient",
+        "make-ahead",
+        "pantry"
+      ]
+    },
+    {
+      "id": "make-ahead",
+      "label": "Make-Ahead",
+      "categoryId": "method",
+      "reveals": [
+        "freezer-friendly"
+      ]
+    },
+    {
+      "id": "freezer-friendly",
+      "label": "Freezer-Friendly",
+      "categoryId": "method",
+      "reveals": []
+    },
+    {
+      "id": "overnight-oats",
+      "label": "Overnight Oats",
+      "categoryId": "method",
+      "reveals": []
+    },
+    {
+      "id": "pulled",
+      "label": "Pulled / Shredded",
+      "categoryId": "method",
+      "reveals": []
+    },
+    {
+      "id": "15-minute",
+      "label": "15-Minute Meals",
+      "categoryId": "method",
+      "reveals": []
+    },
+    {
+      "id": "5-ingredient",
+      "label": "5-Ingredient",
+      "categoryId": "method",
+      "reveals": [
+        "budget"
+      ]
+    },
+    {
+      "id": "pantry",
+      "label": "Pantry Staples",
+      "categoryId": "method",
+      "reveals": []
+    }
+  ]
+}
