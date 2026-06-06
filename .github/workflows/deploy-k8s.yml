@@ -1,61 +1,34 @@
 name: Deploy to Kubernetes
 
 on:
+  # Auto-deploy after any per-service CI workflow succeeds on main.
+  workflow_run:
+    workflows:
+      - "Spring API"
+      - "Python Help Service"
+      - "Python Recipe Service"
+      - "Web Client"
+    types: [completed]
+    branches: [main]
+  # Also trigger on K8s manifest changes and for manual/release runs.
   push:
-    # branches: [main]
+    branches: [main]
     paths:
-      - "services/**"
-      - "web-client/**"
-      - "infra/k8s/**"
-      - ".github/workflows/deploy-k8s.yml"
+      - 'infra/k8s/**'
+      - '.github/workflows/deploy-k8s.yml'
+  workflow_call:
   workflow_dispatch:
 
+# Queue concurrent deploys rather than running them in parallel.
+concurrency:
+  group: deploy-k8s
+  cancel-in-progress: false
+
 jobs:
-  # ── Build all four images and push to GHCR ──────────────────────────────────
-  build-images:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
-    strategy:
-      matrix:
-        include:
-          - service: spring-api
-            context: services/spring-api
-          - service: py-recipe-service
-            context: services/py-recipe-service
-          - service: py-help-service
-            context: services/py-help-service
-          - service: web-client
-            context: web-client
-            # No --target needed: the final (nginx) stage is the production image.
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Log in to GHCR
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Lowercase image prefix
-        run: echo "IMAGE_PREFIX=ghcr.io/$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
-
-      - name: Build and push ${{ matrix.service }}
-        uses: docker/build-push-action@v6
-        with:
-          context: ${{ matrix.context }}
-          push: true
-          # Two tags: one pinned to the commit SHA (immutable), one :latest (convenience).
-          # The deploy step uses the SHA tag so rollbacks are exact.
-          tags: |
-            ${{ env.IMAGE_PREFIX }}/${{ matrix.service }}:${{ github.sha }}
-            ${{ env.IMAGE_PREFIX }}/${{ matrix.service }}:latest
-
-  # ── Apply manifests to the Rancher cluster ───────────────────────────────────
   deploy:
-    needs: build-images
+    # For workflow_run: skip if the upstream CI failed or was cancelled.
+    # For all other triggers (push, workflow_call, workflow_dispatch): always run.
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     environment: kubernetes
 
@@ -74,9 +47,8 @@ jobs:
       - name: Apply namespaces
         run: kubectl apply -f infra/k8s/namespace.yaml
 
-      # Secrets are created imperatively (not from the .example.yaml templates).
       # --dry-run=client -o yaml | kubectl apply -f - is idempotent: creates on first
-      # run, updates on subsequent runs, never errors if already exists.
+      # run, updates on subsequent runs, never errors if the secret already exists.
       #
       # Required GitHub Secrets (Settings → Secrets and variables → Actions):
       #   DB_PASSWORD          — PostgreSQL password
@@ -84,7 +56,7 @@ jobs:
       #   INTERNAL_AUTH_SECRET — shared HMAC key between spring-api and python services
       #   HELP_SERVICE_KEY     — Gemini API key for py-help-service
       #   RECIPE_SERVICE_KEY   — Gemini API key for py-recipe-service
-      #   KUBE_CONFIG          — base64-encoded kubeconfig from Rancher (base64 -w0)
+      #   KUBE_CONFIG          — base64-encoded kubeconfig (base64 -w0 on Linux)
       - name: Upsert K8s secrets
         run: |
           kubectl create secret generic postgres-secret -n app \
@@ -107,22 +79,6 @@ jobs:
             --from-literal=INTERNAL_AUTH_SECRET="${{ secrets.INTERNAL_AUTH_SECRET }}" \
             --dry-run=client -o yaml | kubectl apply -f -
 
-      - name: Pin image tags to current commit SHA
-        # Replace :latest in the checked-out manifests with the exact SHA before applying.
-        # This ensures the cluster runs exactly the images built in the job above.
-        run: |
-          REPO=$(echo "ghcr.io/${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
-          SHA="${{ github.sha }}"
-
-          sed -i "s|ghcr.io/aet-devops26/team-devsecops/spring-api:latest|${REPO}/spring-api:${SHA}|g" \
-            infra/k8s/spring-api/deployment.yaml
-          sed -i "s|ghcr.io/aet-devops26/team-devsecops/py-recipe-service:latest|${REPO}/py-recipe-service:${SHA}|g" \
-            infra/k8s/py-recipe-service/deployment.yaml
-          sed -i "s|ghcr.io/aet-devops26/team-devsecops/py-help-service:latest|${REPO}/py-help-service:${SHA}|g" \
-            infra/k8s/py-help-service/deployment.yaml
-          sed -i "s|ghcr.io/aet-devops26/team-devsecops/web-client:latest|${REPO}/web-client:${SHA}|g" \
-            infra/k8s/web-client/deployment.yaml
-
       - name: Deploy PostgreSQL (StatefulSet)
         run: kubectl apply -f infra/k8s/postgres/
 
@@ -136,6 +92,13 @@ jobs:
           kubectl apply -f infra/k8s/py-help-service/
           kubectl apply -f infra/k8s/web-client/
           kubectl apply -f infra/k8s/ingress.yaml
+
+      - name: Restart deployments to pull latest images
+        run: |
+          kubectl rollout restart deployment/spring-api -n app
+          kubectl rollout restart deployment/py-recipe-service -n app
+          kubectl rollout restart deployment/py-help-service -n app
+          kubectl rollout restart deployment/web-client -n app
 
       - name: Wait for rollouts
         run: |

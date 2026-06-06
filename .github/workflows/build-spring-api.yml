@@ -1,10 +1,10 @@
-name: Python Recipe Service
+name: Spring API
 
 on:
   push:
     paths:
-      - 'services/py-recipe-service/**'
-      - '.github/workflows/run-recipe-service-tests.yml'
+      - 'services/spring-api/**'
+      - '.github/workflows/build-spring-api.yml'
   workflow_dispatch:
   workflow_call:
     inputs:
@@ -13,22 +13,19 @@ on:
         default: false
 
 jobs:
-
   lint:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: services/py-recipe-service
+        working-directory: services/spring-api
     steps:
       - uses: actions/checkout@v4
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-      - name: Install Linting Tool
-        run: pip install ruff
-      - name: Run Ruff Linting
-        run: ruff format .
+      - name: Download ktlint
+        run: |
+          curl -sSLo ktlint "https://github.com/ktlint/ktlint/releases/latest/download/ktlint"
+          chmod +x ktlint
+      - name: Run ktlint
+        run: ./ktlint -F 'src/**/*.kt'
 
   test:
     runs-on: ubuntu-latest
@@ -37,34 +34,22 @@ jobs:
       pull-requests: write
     defaults:
       run:
-        working-directory: services/py-recipe-service
+        working-directory: services/spring-api
     steps:
       - uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - uses: actions/setup-java@v4
         with:
-          python-version: '3.11'
-
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install -r dev-requirements.txt
-
-      - name: Run pytest
-        env:
-          INTERNAL_AUTH_SECRET: ${{ secrets.INTERNAL_AUTH_SECRET }}
-          SERVICE_API_KEY: ${{ secrets.SERVICE_API_KEY }}
-        run: |
-          pytest --junitxml=report.xml
-
+          distribution: temurin
+          java-version: '17'
+          cache: gradle
+      - name: Run tests
+        run: ./gradlew test
       - name: Publish test results
         uses: dorny/test-reporter@v1
         if: always()
         with:
-          name: Recipe Service Tests
-          path: services/py-recipe-service/report.xml
+          name: Spring API Tests
+          path: services/spring-api/build/test-results/test/*.xml
           reporter: java-junit
 
   build:
@@ -87,8 +72,8 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
-          context: services/py-recipe-service
+          context: services/spring-api
           push: ${{ github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch' || inputs.push_image == true }}
           tags: |
-            ${{ env.IMAGE_PREFIX }}/py-recipe-service:${{ github.sha }}
-            ${{ env.IMAGE_PREFIX }}/py-recipe-service:latest
+            ${{ env.IMAGE_PREFIX }}/spring-api:${{ github.sha }}
+            ${{ env.IMAGE_PREFIX }}/spring-api:latest
