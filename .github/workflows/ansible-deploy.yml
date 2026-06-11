@@ -1,0 +1,50 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'web-client/**'
+      - 'services/**'
+      - 'infra/**'
+      - 'ansible/**'
+      - '.github/workflows/ansible-deploy.yml'
+
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+          cache: 'pip'
+
+      - name: Set up Ansible
+        run: pip install ansible
+
+      - name: Install SSH Key
+        uses: shimataro/ssh-key-action@v2
+        with:
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          name: id_rsa
+          known_hosts: 'placeholder' # Will be overwritten by ssh-keyscan next
+
+      - name: Scan VM Host Key
+        run: |
+          ssh-keyscan -H 135.116.196.120 >> ~/.ssh/known_hosts
+        
+      - name: Run Playbook
+        run: |
+          ansible-playbook -i infra/inventory.ini ansible/site.yml \
+          -u azureuser \
+          -e "app_branch=${{ github.head_ref || github.ref_name }}" \
+          -e "help_service_key=${{ secrets.HELP_SERVICE_KEY }}" \
+          -e "recipe_service_key=${{ secrets.RECIPE_SERVICE_KEY }}" \
+          -e "internal_auth_secret=${{ secrets.INTERNAL_AUTH_SECRET }}"

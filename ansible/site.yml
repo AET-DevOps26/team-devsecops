@@ -1,0 +1,79 @@
+---
+- name: Deploy Real App
+  hosts: web
+  become: yes
+  vars_files:
+    - local_secrets.yml  # Ansible will load this if it exists
+
+  tasks:
+    - name: Ensure basic dependencies are installed
+      apt:
+        name: [git, python3-docker, python3-pip]
+        state: present
+        update_cache: yes
+    
+    - name: Install Docker via official script
+      shell: curl -fsSL https://get.docker.com -o get-docker.sh && sh get-docker.sh
+      args:
+        creates: /usr/bin/docker
+
+    - name: Check if docker-compose exists
+      stat:
+        path: /usr/local/bin/docker-compose
+      register: compose_bin
+
+    - name: Install legacy docker-compose
+      get_url:
+        url: https://github.com/docker/compose/releases/latest/download/docker-compose-Linux-x86_64
+        dest: /usr/local/bin/docker-compose
+        mode: '0755'
+      when: not compose_bin.stat.exists
+
+    - name: Force clean any untracked blocking files
+      command: git clean -fdx
+      args:
+        chdir: /var/www/app
+      ignore_errors: yes
+
+    - name: Clone application repository
+      git:
+        repo: 'https://github.com/AET-DevOps26/team-devsecops'
+        dest: /var/www/app
+        version: "{{ app_branch | default('main') }}"
+        force: yes
+
+    - name: Create .env file from template
+      template:
+        src: ../infra/.env.j2
+        dest: /var/www/app/infra/.env
+        mode: '0644'
+        owner: azureuser
+
+    - name: Create nginx.conf from template
+      template:
+        src: ../infra/nginx.conf.j2
+        dest: /var/www/app/infra/nginx.conf
+        mode: '0644'
+
+    - name: Ensure previous containers are stopped
+      command: /usr/local/bin/docker-compose down
+      args:
+        chdir: /var/www/app/infra
+      ignore_errors: yes
+
+    - name: Attempt Docker Deployment
+      block:
+        - name: Bring up application with Docker Compose
+          command: /usr/local/bin/docker-compose up -d --build
+          args:
+            chdir: /var/www/app/infra
+          register: compose_output
+
+      rescue:
+        - name: Show Docker logs if deployment fails
+          debug:
+            var: compose_output.stdout_lines
+
+        - name: Fail the playbook so GitHub knows it failed
+          fail:
+            msg: "docker-compose up failed!"
