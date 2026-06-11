@@ -13,11 +13,13 @@ class CorsConfig {
 	// OPTIONS requests get answered before the auth check runs.
 	@Bean
 	fun corsConfigurationSource(): CorsConfigurationSource {
-		val config = CorsConfiguration().apply {
-			allowedOriginPatterns = listOf("*")
-			allowedMethods = listOf("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH")
-			allowedHeaders = listOf("*")
-		}
+		val config =
+			CorsConfiguration().apply {
+				// Wildcard origin is safe here because we use a bearer JWT in the Authorization header
+				allowedOriginPatterns = listOf("*")
+				allowedMethods = listOf("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH")
+				allowedHeaders = listOf("*")
+			}
 		return UrlBasedCorsConfigurationSource().apply {
 			registerCorsConfiguration("/api/**", config)
 		}

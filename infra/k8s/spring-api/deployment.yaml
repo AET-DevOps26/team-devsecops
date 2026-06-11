@@ -1,6 +1,4 @@
 ---
-# Image pushed to GHCR by .github/workflows/deploy-k8s.yml.
-# CI replaces :latest with the actual git SHA before applying.
 apiVersion: apps/v1
 kind: Deployment
 metadata:

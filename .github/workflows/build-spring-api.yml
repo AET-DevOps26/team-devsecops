@@ -25,7 +25,7 @@ jobs:
           curl -sSLo ktlint "https://github.com/ktlint/ktlint/releases/latest/download/ktlint"
           chmod +x ktlint
       - name: Run ktlint
-        run: ./ktlint -F 'src/**/*.kt'
+        run: ./ktlint 'src/**/*.kt'
 
   test:
     runs-on: ubuntu-latest

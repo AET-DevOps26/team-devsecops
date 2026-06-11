@@ -28,7 +28,7 @@ jobs:
       - name: Install Linting Tool
         run: pip install ruff
       - name: Run Ruff Linting
-        run: ruff format .
+        run: ruff check .
 
   test:
     runs-on: ubuntu-latest
