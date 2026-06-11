@@ -1,6 +1,8 @@
 package org.openapitools.model
 
 import com.fasterxml.jackson.annotation.JsonProperty
+import com.fasterxml.jackson.annotation.JsonSetter
+import com.fasterxml.jackson.annotation.Nulls
 import io.swagger.v3.oas.annotations.media.Schema
 import jakarta.validation.Valid
 import jakarta.validation.constraints.DecimalMax
@@ -39,5 +41,6 @@ data class RecipeInput(
 	@get:JsonProperty("portions", required = true) val portions: java.math.BigDecimal,
 	@field:Valid
 	@Schema(example = "null", description = "")
+	@field:JsonSetter(nulls = Nulls.FAIL)
 	@get:JsonProperty("nutrients") val nutrients: RecipeNutrients? = null,
 )
