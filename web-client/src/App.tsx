@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from './auth'
 import { AppLayout } from './components/AppLayout'
-import { GeneratePage } from './pages/GeneratePage'
+import { GenerateFlow, GeneratePage, GenerateResultsPage } from './pages/GeneratePage'
 import { LibraryPage } from './pages/LibraryPage'
 import { LoginPage } from './pages/LoginPage'
 import { NotFoundPage } from './pages/NotFoundPage'
@@ -28,8 +28,11 @@ export default function App() {
               </RequireAuth>
             }
           >
-            <Route path="/generate" element={<GeneratePage />} />
-            <Route path="/generate/recipe" element={<RecipePage />} />
+            <Route path="/generate" element={<GenerateFlow />}>
+              <Route index element={<GeneratePage />} />
+              <Route path="results" element={<GenerateResultsPage />} />
+              <Route path="recipe" element={<RecipePage />} />
+            </Route>
             <Route path="/library" element={<LibraryPage />} />
             <Route path="/library/recipe/:recipeId" element={<RecipePage />} />
             <Route path="/profile" element={<ProfilePage />} />

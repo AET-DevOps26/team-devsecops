@@ -3,7 +3,7 @@ import { screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, vi } from 'vitest'
 import type { components } from '../../src/api'
-import { GeneratePage } from '../../src/pages/GeneratePage'
+import { GenerateFlow, GeneratePage, GenerateResultsPage } from '../../src/pages/GeneratePage'
 import { jsonResponse, renderWithProviders } from '../utils'
 
 type Recipe = components['schemas']['Recipe']
@@ -28,12 +28,15 @@ afterEach(() => {
   vi.unstubAllGlobals()
 })
 
-function render() {
+function render(route = '/generate') {
   renderWithProviders(
     <Routes>
-      <Route path="/generate" element={<GeneratePage />} />
+      <Route path="/generate" element={<GenerateFlow />}>
+        <Route index element={<GeneratePage />} />
+        <Route path="results" element={<GenerateResultsPage />} />
+      </Route>
     </Routes>,
-    { route: '/generate', token: { value: 'tkn', username: 'alice' } },
+    { route, token: { value: 'tkn', username: 'alice' } },
   )
 }
 
@@ -41,7 +44,7 @@ describe('GeneratePage', () => {
   it('restores previously generated recipes from sessionStorage', () => {
     sessionStorage.setItem('generated_recipes', JSON.stringify([recipe]))
 
-    render()
+    render('/generate/results')
 
     expect(screen.getByText('Tomato Pasta')).toBeInTheDocument()
     expect(screen.getByText('2 portions')).toBeInTheDocument()
@@ -52,21 +55,21 @@ describe('GeneratePage', () => {
     const user = userEvent.setup()
     render()
 
-    await user.type(screen.getByPlaceholderText(/What do you want to cook/i), 'anything')
+    await user.type(screen.getByPlaceholderText(/Type what you think/i), 'anything')
     await user.click(screen.getByRole('button', { name: 'Generate' }))
 
     expect(await screen.findByText('No recipes returned.')).toBeInTheDocument()
   })
 
-  it('shows a server error and clears the loading state', async () => {
+  it('shows a server error on the results page', async () => {
     fetchMock.mockResolvedValueOnce(jsonResponse({ message: 'GenAI down' }, { status: 503 }))
     const user = userEvent.setup()
     render()
 
-    await user.type(screen.getByPlaceholderText(/What do you want to cook/i), 'pasta')
+    await user.type(screen.getByPlaceholderText(/Type what you think/i), 'pasta')
     await user.click(screen.getByRole('button', { name: 'Generate' }))
 
     expect(await screen.findByText('Error: GenAI down')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Generate' })).toBeEnabled()
+    expect(screen.getByRole('button', { name: 'Edit' })).toBeInTheDocument()
   })
 })

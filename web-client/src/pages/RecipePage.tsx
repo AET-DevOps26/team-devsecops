@@ -8,9 +8,10 @@ import {
   PlusIcon,
 } from '@heroicons/react/24/outline'
 import Markdown from 'react-markdown'
-import { Link, Navigate, useLocation, useNavigate, useParams } from 'react-router-dom'
+import { Link, Navigate, useLocation, useNavigate, useOutletContext, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import type { components } from '../api'
+import type { RecipeGenerationContext } from './GeneratePage'
 import { RecipeSaveButton } from '../components/RecipeSaveButton.tsx'
 import { formatQuantity } from '../recipeFormat'
 import { usePressPulse } from '../usePressPulse'
@@ -24,13 +25,6 @@ type HelpEntry = { question: string; answer: string }
 
 type Pagination = { index: number; count: number; onNavigate: (index: number) => void }
 
-const GENERATED_STORAGE_KEY = 'generated_recipes'
-
-function readGenerated(): Recipe[] {
-  const stored = sessionStorage.getItem(GENERATED_STORAGE_KEY)
-  return stored ? (JSON.parse(stored) as Recipe[]) : []
-}
-
 function toggleSetItem(set: Set<number>, item: number): Set<number> {
   const next = new Set(set)
   if (next.has(item)) next.delete(item)
@@ -43,21 +37,20 @@ export function RecipePage() {
   return pathname.startsWith('/library/') ? <LibraryRecipePage key={pathname} /> : <GeneratedRecipePage />
 }
 
-// Generated recipes live in sessionStorage and are paged through by list index in router state.
+// Generated recipes are shared with the GenerateFlow layout (which persists them to sessionStorage)
+// and are paged through by list index in router state.
 function GeneratedRecipePage() {
   const location = useLocation()
   const navigate = useNavigate()
   const index = (location.state as { index?: number } | null)?.index ?? 0
-  const [recipes, setRecipes] = useState<Recipe[]>(() => readGenerated())
+  const { recipes, setRecipes } = useOutletContext<RecipeGenerationContext>()
   const [helpAnswers, setHelpAnswers] = useState<Record<number, HelpEntry[]>>({})
   const recipe = recipes[index]
 
   function handleSavedIdChange(newId: number | undefined) {
-    setRecipes((prev) => {
-      const next = prev.map((prevRecipe, prevIndex) => (prevIndex === index ? { ...prevRecipe, id: newId } : prevRecipe))
-      sessionStorage.setItem(GENERATED_STORAGE_KEY, JSON.stringify(next))
-      return next
-    })
+    setRecipes((prev) =>
+      prev.map((prevRecipe, prevIndex) => (prevIndex === index ? { ...prevRecipe, id: newId } : prevRecipe)),
+    )
   }
 
   if (!recipe) return <Navigate to="/generate" replace />
@@ -66,7 +59,7 @@ function GeneratedRecipePage() {
     <RecipeView
       key={index}
       recipe={recipe}
-      parentPath="/generate"
+      parentPath="/generate/results"
       onSavedIdChange={handleSavedIdChange}
       answers={helpAnswers[index] ?? []}
       onAnswer={(entry) => setHelpAnswers((m) => ({ ...m, [index]: [entry, ...(m[index] ?? [])] }))}
