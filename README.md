@@ -2,8 +2,9 @@
 
 ## Try it out!
 
-Deployed on GitHub pages & GCP: https://aet-devops26.github.io/team-devsecops
+Kubernetes deployment: https://devsecops.stud.k8s.aet.cit.tum.de
 
+API scheme (Swagger UI): https://devsecops.stud.k8s.aet.cit.tum.de/swagger-ui/index.html
 ## Local development
 
 The full stack runs under Docker Compose with live-reload:
