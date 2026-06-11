@@ -1,6 +1,17 @@
 name: Deploy to Production
 
 on:
+
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'web-client/**'
+      - 'services/**'
+      - 'infra/**'
+      - 'ansible/**'
+      - '.github/workflows/ansible-deploy.yml'
+
   push:
     branches:
       - main
@@ -47,4 +58,6 @@ jobs:
           -e "app_branch=${{ github.head_ref || github.ref_name }}" \
           -e "help_service_key=${{ secrets.HELP_SERVICE_KEY }}" \
           -e "recipe_service_key=${{ secrets.RECIPE_SERVICE_KEY }}" \
-          -e "internal_auth_secret=${{ secrets.INTERNAL_AUTH_SECRET }}"
+          -e "internal_auth_secret=${{ secrets.INTERNAL_AUTH_SECRET }}" \
+          -e "db_user=${{ secrets.AZURE_DB_USER }}" \
+          -e "db_password=${{ secrets.AZURE_DB_PASSWORD }}"
