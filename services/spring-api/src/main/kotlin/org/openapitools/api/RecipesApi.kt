@@ -127,7 +127,7 @@ interface RecipesApi {
 				content = [Content(schema = Schema(implementation = ErrorResponse::class))],
 			),
 		],
-		security = [ SecurityRequirement(name = "bearerAuth") ],
+		security = [SecurityRequirement(name = "bearerAuth")],
 	)
 	@RequestMapping(
 		method = [RequestMethod.DELETE],
@@ -215,7 +215,7 @@ interface RecipesApi {
 				content = [Content(schema = Schema(implementation = ErrorResponse::class))],
 			),
 		],
-		security = [ SecurityRequirement(name = "bearerAuth") ],
+		security = [SecurityRequirement(name = "bearerAuth")],
 	)
 	@RequestMapping(
 		method = [RequestMethod.PUT],

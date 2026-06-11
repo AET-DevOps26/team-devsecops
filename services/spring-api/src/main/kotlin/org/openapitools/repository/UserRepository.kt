@@ -7,5 +7,6 @@ import java.util.Optional
 interface UserRepository : JpaRepository<UserEntity, Long> {
 	// Spring generates: SELECT * FROM users WHERE username = ?
 	fun findByUsername(username: String): Optional<UserEntity>
+
 	fun existsByUsername(username: String): Boolean
 }

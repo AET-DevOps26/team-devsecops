@@ -17,9 +17,9 @@ import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.reactive.function.client.WebClient
+import tools.jackson.databind.ObjectMapper
 import java.time.Duration
 import java.util.concurrent.TimeoutException
-import tools.jackson.databind.ObjectMapper
 
 @RestController
 @Validated
@@ -33,7 +33,9 @@ class AIApiController(
 	// Cap how long we wait on the GenAI service before returning an error
 	private val aiTimeout = Duration.ofSeconds(60)
 
-	override fun aiHelpPost(@Valid helpRequest: HelpRequest): ResponseEntity<HelpResponse> {
+	override fun aiHelpPost(
+		@Valid helpRequest: HelpRequest,
+	): ResponseEntity<HelpResponse> {
 		val user = userRepository.findByUsername(currentUsername()).orElseThrow()
 		val response =
 			aiHelpWebClient
@@ -49,7 +51,9 @@ class AIApiController(
 		return ResponseEntity.ok(response)
 	}
 
-	override fun aiRecipesPost(@Valid recipeRequest: RecipeRequest): ResponseEntity<List<RecipeInput>> {
+	override fun aiRecipesPost(
+		@Valid recipeRequest: RecipeRequest,
+	): ResponseEntity<List<RecipeInput>> {
 		val user = userRepository.findByUsername(currentUsername()).orElseThrow()
 		val recipes =
 			aiRecipeWebClient
