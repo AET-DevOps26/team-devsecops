@@ -9,6 +9,7 @@ import {
 } from '@heroicons/react/24/outline'
 import Markdown from 'react-markdown'
 import { Link, Navigate, useLocation, useNavigate, useParams } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import type { components } from '../api'
 import { RecipeSaveButton } from '../components/RecipeSaveButton.tsx'
 import { formatQuantity } from '../recipeFormat'
@@ -80,6 +81,7 @@ function GeneratedRecipePage() {
 
 // Saved recipes are fetched by id on every view, so the API is always the source of truth.
 function LibraryRecipePage() {
+  const { t } = useTranslation()
   const params = useParams()
   const location = useLocation()
   const navigate = useNavigate()
@@ -108,7 +110,7 @@ function LibraryRecipePage() {
         setPhase('ready')
       } catch (e) {
         if (cancelled || e instanceof SessionExpiredError) return
-        setError(`Error: ${e instanceof Error ? e.message : String(e)}`)
+        setError(t('common.error', { message: e instanceof Error ? e.message : String(e) }))
         setPhase('error')
       }
     }
@@ -116,17 +118,17 @@ function LibraryRecipePage() {
     return () => {
       cancelled = true
     }
-  }, [apiFetch, recipeId])
+  }, [apiFetch, recipeId, t])
 
-  if (phase === 'loading') return <p className="text-gray-500">Loading…</p>
+  if (phase === 'loading') return <p className="text-gray-500">{t('common.loading')}</p>
   if (phase === 'error') return <p className="text-red-600">{error}</p>
   if (phase === 'notfound' || !recipe) {
     return (
       <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4 text-center">
-        <h2 className="text-lg font-bold">Recipe not found</h2>
-        <p className="max-w-xs text-gray-500">This recipe doesn't exist or has been removed.</p>
+        <h2 className="text-lg font-bold">{t('recipe.notFoundTitle')}</h2>
+        <p className="max-w-xs text-gray-500">{t('recipe.notFoundBody')}</p>
         <Link to="/library" className="text-orange-600 hover:underline">
-          Back to library
+          {t('recipe.backToLibrary')}
         </Link>
       </div>
     )
@@ -164,6 +166,7 @@ function RecipeView({
   onAnswer: (entry: HelpEntry) => void
   pagination?: Pagination
 }) {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const apiFetch = useApi()
 
@@ -214,11 +217,11 @@ function RecipeView({
       })
       if (!response.ok) throw new Error(await errorMessage(response))
       const data = (await response.json()) as HelpResponse
-      onAnswer({ question, answer: data.response ?? 'No response.' })
+      onAnswer({ question, answer: data.response ?? t('recipe.noResponse') })
       setHelpPrompt('')
     } catch (e) {
       if (e instanceof SessionExpiredError) return
-      setHelpError(`Error: ${e instanceof Error ? e.message : String(e)}`)
+      setHelpError(t('common.error', { message: e instanceof Error ? e.message : String(e) }))
     } finally {
       setHelpLoading(false)
     }
@@ -233,7 +236,7 @@ function RecipeView({
         onClick={() => navigate(parentPath)}
       >
         <ChevronLeftIcon className="h-5 w-5" />
-        Back
+        {t('common.back')}
       </button>
 
       <article className="relative w-full rounded-lg border border-gray-200 bg-white p-6 shadow-sm flex flex-col gap-4">
@@ -250,7 +253,7 @@ function RecipeView({
               <span className="flex h-9 w-9 items-center justify-center rounded-full border border-gray-300 bg-white text-gray-600 shadow-sm">
                 <ChevronLeftIcon className="h-5 w-5" />
               </span>
-              <span className="text-xs">Previous</span>
+              <span className="text-xs">{t('recipe.previous')}</span>
             </button>
             <button
               type="button"
@@ -261,7 +264,7 @@ function RecipeView({
               <span className="flex h-9 w-9 items-center justify-center rounded-full border border-gray-300 bg-white text-gray-600 shadow-sm">
                 <ChevronRightIcon className="h-5 w-5" />
               </span>
-              <span className="text-xs">Next</span>
+              <span className="text-xs">{t('recipe.next')}</span>
             </button>
           </>
         )}
@@ -283,18 +286,18 @@ function RecipeView({
               className="flex h-7 w-7 items-center justify-center rounded-full border border-gray-300 cursor-pointer text-gray-600 transition-transform duration-100 hover:scale-95 disabled:opacity-40"
               onClick={() => setPortions((p) => Math.max(0.5, p - (p <= 5 ? 0.5 : 1)))}
               disabled={portions <= 0.5}
-              aria-label="Decrease portions"
+              aria-label={t('recipe.decreasePortions')}
             >
               <MinusIcon className="h-4 w-4 stroke-2" />
             </button>
             <span className="w-20 text-center text-sm text-gray-600">
-              {formatQuantity(portions)} {portions <= 1 ? 'portion' : 'portions'}
+              {formatQuantity(portions)} {portions <= 1 ? t('common.portion') : t('common.portions')}
             </span>
             <button
               type="button"
               className="flex h-7 w-7 items-center justify-center rounded-full border border-gray-300 cursor-pointer text-gray-600 transition-transform duration-100 hover:scale-95"
               onClick={() => setPortions((p) => p + (p < 5 ? 0.5 : 1))}
-              aria-label="Increase portions"
+              aria-label={t('recipe.increasePortions')}
             >
               <PlusIcon className="h-4 w-4 stroke-2" />
             </button>
@@ -303,7 +306,7 @@ function RecipeView({
 
 				{/* Ingredients */}
         <div>
-          <h3 className="font-medium">Ingredients</h3>
+          <h3 className="font-medium">{t('recipe.ingredients')}</h3>
           <ul className="flex flex-col gap-1">
             {recipe.ingredients.map((ing, j) => {
               const checked = checkedIngredients.has(j)
@@ -333,7 +336,7 @@ function RecipeView({
 
 				{/* Instructions */}
         <div>
-          <h3 className="font-medium">Instructions</h3>
+          <h3 className="font-medium">{t('recipe.instructions')}</h3>
           <ol className="flex flex-col gap-2">
             {recipe.instructions.map((step, j) => {
               const checked = checkedSteps.has(j)
@@ -356,23 +359,23 @@ function RecipeView({
 				{/* Nutrients */}
         {recipe.nutrients && (
           <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-gray-600">
-            {recipe.nutrients.calories != null && <span>{Math.round(recipe.nutrients.calories * scale)} kcal</span>}
-            {recipe.nutrients.protein != null && <span>{Math.round(recipe.nutrients.protein * scale)}g protein</span>}
-            {recipe.nutrients.fat != null && <span>{Math.round(recipe.nutrients.fat * scale)}g fat</span>}
-            {recipe.nutrients.carbs != null && <span>{Math.round(recipe.nutrients.carbs * scale)}g carbs</span>}
+            {recipe.nutrients.calories != null && <span>{t('common.kcal', { value: Math.round(recipe.nutrients.calories * scale) })}</span>}
+            {recipe.nutrients.protein != null && <span>{t('common.protein', { value: Math.round(recipe.nutrients.protein * scale) })}</span>}
+            {recipe.nutrients.fat != null && <span>{t('common.fat', { value: Math.round(recipe.nutrients.fat * scale) })}</span>}
+            {recipe.nutrients.carbs != null && <span>{t('common.carbs', { value: Math.round(recipe.nutrients.carbs * scale) })}</span>}
           </div>
         )}
       </article>
 
 			{/* Get help */}
       <div className="w-full flex flex-col gap-3 py-4">
-        <h3 className="font-medium">Get help</h3>
+        <h3 className="font-medium">{t('recipe.getHelp')}</h3>
         <div className="relative">
           <textarea
             ref={helpInputRef}
             rows={1}
             className="w-full min-h-20 resize-none overflow-hidden border border-gray-300 rounded-lg p-3 pr-14"
-            placeholder="Ask about this recipe (e.g. a substitution, a technique, what to serve it with)"
+            placeholder={t('recipe.helpPlaceholder')}
             value={helpPrompt}
             onChange={(e) => setHelpPrompt(e.target.value)}
             onKeyDown={(e) => {
@@ -391,7 +394,7 @@ function RecipeView({
             className="absolute bottom-3 right-3 flex h-9 w-9 items-center justify-center rounded-full bg-orange-500 text-white cursor-pointer transition-transform duration-100 hover:scale-95 disabled:opacity-50 disabled:hover:scale-100"
             onClick={handleGetHelp}
             disabled={helpLoading || helpPrompt.trim() === ''}
-            aria-label="Get help"
+            aria-label={t('recipe.getHelp')}
           >
             {helpLoading ? (
               <ArrowPathIcon className="h-5 w-5 animate-spin [animation-duration:1.5s]" />
@@ -409,7 +412,7 @@ function RecipeView({
           <p className="self-start rounded-lg bg-orange-50 px-3 py-2 font-medium text-orange-900 first-letter:uppercase">
             {pendingQuestion}
           </p>
-          <p className="animate-pulse text-gray-400">Thinking…</p>
+          <p className="animate-pulse text-gray-400">{t('recipe.thinking')}</p>
         </div>
       )}
 
@@ -437,19 +440,19 @@ function RecipeView({
               className="flex h-8 w-8 items-center justify-center cursor-pointer text-gray-600 transition-transform duration-100 hover:scale-95 disabled:opacity-40 disabled:hover:scale-100"
               onClick={() => pages.onNavigate(pages.index - 1)}
               disabled={pages.index <= 0}
-              aria-label="Previous recipe"
+              aria-label={t('recipe.previousRecipe')}
             >
               <ChevronLeftIcon className="h-5 w-5" />
             </button>
             <span className="text-sm text-gray-500 tabular-nums">
-              {pages.index + 1} of {pages.count}
+              {t('recipe.pageOf', { current: pages.index + 1, total: pages.count })}
             </span>
             <button
               type="button"
               className="flex h-8 w-8 items-center justify-center cursor-pointer text-gray-600 transition-transform duration-100 hover:scale-95 disabled:opacity-40 disabled:hover:scale-100"
               onClick={() => pages.onNavigate(pages.index + 1)}
               disabled={pages.index >= pages.count - 1}
-              aria-label="Next recipe"
+              aria-label={t('recipe.nextRecipe')}
             >
               <ChevronRightIcon className="h-5 w-5" />
             </button>

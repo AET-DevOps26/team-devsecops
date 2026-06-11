@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import type { SubmitEventHandler } from 'react'
 import { Navigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { useAuth } from '../auth'
 import { Button } from '../components/Button'
 import { PasswordInput } from '../components/PasswordInput'
@@ -9,6 +10,7 @@ import { usePressPulse } from '../usePressPulse'
 type Tab = 'login' | 'register'
 
 export function LoginPage() {
+  const { t } = useTranslation()
   const [tab, setTab] = useState<Tab>('login')
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
@@ -22,7 +24,7 @@ export function LoginPage() {
     e.preventDefault()
     pulseSubmit()
     if (tab === 'register' && password !== repeatPassword) {
-      setError('Passwords do not match')
+      setError(t('login.passwordsNoMatch'))
       return
     }
     setError('')
@@ -37,7 +39,7 @@ export function LoginPage() {
     }
   }
 
-  const passwordMismatch = error === 'Passwords do not match'
+  const passwordMismatch = error === t('login.passwordsNoMatch')
   const inputClass = (invalid: boolean) =>
     `w-full border rounded p-2 ${invalid ? 'border-red-500' : 'border-gray-300'}`
 
@@ -46,33 +48,33 @@ export function LoginPage() {
 
   return (
     <main className="mx-auto flex max-w-2xl flex-col gap-4 p-6 animate-fade-in">
-      <h1 className="text-2xl font-bold">Cooking Assistant</h1>
+      <h1 className="text-2xl font-bold">{t('layout.generate')}</h1>
       <div className="relative inline-flex self-start rounded-lg bg-gray-100 p-1">
         <span
           className={`pointer-events-none absolute inset-y-1 left-1 w-24 rounded-md bg-white shadow-sm transition-transform duration-200 ease-out ${
             tab === 'register' ? 'translate-x-full' : 'translate-x-0'
           }`}
         />
-        {(['login', 'register'] as const).map((t) => (
+        {(['login', 'register'] as const).map((value) => (
           <button
-            key={t}
+            key={value}
             type="button"
             className={`relative z-10 w-24 rounded-md py-1 text-sm font-medium transition-colors ${
-              tab === t ? 'text-orange-600' : 'text-gray-500'
+              tab === value ? 'text-orange-600' : 'text-gray-500'
             }`}
             onClick={() => {
-              setTab(t)
+              setTab(value)
               setError('')
             }}
           >
-            {t === 'login' ? 'Login' : 'Register'}
+            {value === 'login' ? t('login.login') : t('login.register')}
           </button>
         ))}
       </div>
 
       <form className="flex flex-col gap-4 max-w-sm" onSubmit={handleSubmit}>
         <label className="flex flex-col gap-1">
-          <span className="font-medium">Username</span>
+          <span className="font-medium">{t('login.username')}</span>
           <input
             type="text"
             className={inputClass(!!error && !passwordMismatch)}
@@ -83,7 +85,7 @@ export function LoginPage() {
         </label>
 
         <label className="flex flex-col gap-1">
-          <span className="font-medium">Password</span>
+          <span className="font-medium">{t('login.password')}</span>
           <PasswordInput
             className={inputClass(!!error)}
             value={password}
@@ -94,7 +96,7 @@ export function LoginPage() {
 
         {tab === 'register' && (
           <label className="flex flex-col gap-1">
-            <span className="font-medium">Repeat password</span>
+            <span className="font-medium">{t('login.repeatPassword')}</span>
             <PasswordInput
               className={inputClass(passwordMismatch)}
               value={repeatPassword}
@@ -105,7 +107,7 @@ export function LoginPage() {
         )}
 
         <Button ref={submitRef} type="submit" className="self-start" disabled={loading}>
-          {loading ? 'Please wait…' : tab === 'login' ? 'Login' : 'Sign up'}
+          {loading ? t('login.pleaseWait') : tab === 'login' ? t('login.login') : t('login.signup')}
         </Button>
 
         {error && <p className="text-red-600">{error}</p>}

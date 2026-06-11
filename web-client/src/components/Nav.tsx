@@ -1,15 +1,17 @@
 import { useLayoutEffect, useRef, useState } from 'react'
 import type { CSSProperties } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { BoltIcon, BookOpenIcon, UserIcon } from '@heroicons/react/24/solid'
 
 const items = [
-  { to: '/generate', label: 'Generate', Icon: BoltIcon },
-  { to: '/library', label: 'Library', Icon: BookOpenIcon },
-  { to: '/profile', label: 'Profile', Icon: UserIcon },
-]
+  { to: '/generate', label: 'nav.generate', Icon: BoltIcon },
+  { to: '/library', label: 'nav.library', Icon: BookOpenIcon },
+  { to: '/profile', label: 'nav.profile', Icon: UserIcon },
+] as const
 
 export function Nav() {
+  const { t } = useTranslation()
   const linkRefs = useRef<(HTMLAnchorElement | null)[]>([])
   const [pill, setPill] = useState<CSSProperties>()
   const { pathname } = useLocation()
@@ -43,7 +45,7 @@ export function Nav() {
 
   return (
     <nav className="fixed inset-x-0 bottom-0 z-10 flex border-t border-gray-200 bg-white md:relative md:w-56 md:flex-col md:gap-1 md:border-t-0 md:border-r md:p-4">
-      <span className="hidden px-3 pb-4 text-xl font-bold md:block">Cooking Assistant</span>
+      <span className="hidden px-3 pb-4 text-xl font-bold md:block">{t('layout.generate')}</span>
       {pill && (
         <span
           className="pointer-events-none absolute rounded-lg bg-orange-50 transition-all duration-200 ease-out"
@@ -66,7 +68,7 @@ export function Nav() {
           }
         >
           <Icon className="h-6 w-6" />
-          {label}
+          {t(label)}
         </NavLink>
       ))}
     </nav>

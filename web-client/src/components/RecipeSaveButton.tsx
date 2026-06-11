@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import type { MouseEvent, RefObject } from 'react'
 import { createPortal } from 'react-dom'
+import { useTranslation } from 'react-i18next'
 import {
   BookmarkIcon as BookmarkOutline,
   TrashIcon as TrashOutline,
@@ -33,6 +34,7 @@ export function RecipeSaveButton({
   confirmContainer?: RefObject<HTMLElement | null>
   className?: string
 }) {
+  const { t } = useTranslation()
   const apiFetch = useApi()
   const [savedId, setSavedId] = useState<number | undefined>(recipeId)
   const [saving, setSaving] = useState(false)
@@ -104,7 +106,7 @@ export function RecipeSaveButton({
     } catch (e) {
       if (e instanceof SessionExpiredError) return
       setFailed(true)
-      setError(e instanceof Error ? e.message : 'Something went wrong.')
+      setError(e instanceof Error ? e.message : t('save.genericError'))
     } finally {
       setSaving(false)
     }
@@ -114,10 +116,10 @@ export function RecipeSaveButton({
   const Solid = showTrash ? TrashSolid : BookmarkSolid
   const fillColor = showTrash ? 'text-red-500' : 'text-orange-500'
   const title = failed
-    ? 'Something went wrong, tap to retry'
+    ? t('save.retryTitle')
     : saved
-      ? 'Saved — tap to remove'
-      : 'Save recipe'
+      ? t('save.savedTitle')
+      : t('save.saveTitle')
 
   function confirmDelete(e: MouseEvent) {
     e.stopPropagation()
@@ -143,7 +145,7 @@ export function RecipeSaveButton({
           setSuppressTrash(false)
         }}
         disabled={saving}
-        aria-label={saved ? 'Remove from collection' : 'Save recipe'}
+        aria-label={saved ? t('save.removeAria') : t('save.saveTitle')}
         title={title}
         className={`group relative flex h-9 w-9 items-center justify-center rounded-full cursor-pointer disabled:cursor-default ${className}`}
       >
@@ -173,7 +175,7 @@ export function RecipeSaveButton({
               className="w-full max-w-sm rounded-lg bg-white p-6 shadow-xl"
             >
               <h2 id="recipe-delete-title" className="text-lg font-medium text-gray-900">
-                Delete recipe from library?
+                {t('save.confirmTitle')}
               </h2>
               <div className="mt-6 flex justify-end gap-2">
                 <button
@@ -181,14 +183,14 @@ export function RecipeSaveButton({
                   onClick={cancelDelete}
                   className="px-4 py-2 rounded text-gray-700 cursor-pointer hover:bg-gray-100"
                 >
-                  Cancel
+                  {t('common.cancel')}
                 </button>
                 <button
                   type="button"
                   onClick={confirmDelete}
                   className="px-4 py-2 rounded bg-red-500 text-white cursor-pointer hover:bg-red-600"
                 >
-                  Delete
+                  {t('common.delete')}
                 </button>
               </div>
             </div>
@@ -207,7 +209,7 @@ export function RecipeSaveButton({
               <button
                 type="button"
                 onClick={() => setError(null)}
-                aria-label="Dismiss"
+                aria-label={t('common.dismiss')}
                 className="-mr-1 shrink-0 cursor-pointer text-white/80 hover:text-white"
               >
                 <XMarkIcon className="h-5 w-5" />

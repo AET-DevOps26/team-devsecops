@@ -301,7 +301,7 @@ describe('ProfilePage', () => {
 
 		// the trash button for a row
 		const trashIn = (input: HTMLElement) =>
-			within(input.closest('.relative')!.parentElement as HTMLElement).getByRole('button')
+			within(input.parentElement as HTMLElement).getByRole('button')
 
 		it('disables a row while its deletion is in flight and only drops it once the server confirms', async () => {
 			const pending: Array<() => void> = []

@@ -1,5 +1,6 @@
 import {useEffect, useState} from 'react'
 import {useNavigate} from 'react-router-dom'
+import {useTranslation} from 'react-i18next'
 import type {components} from '../api'
 import {Button} from '../components/Button'
 import {RecipeCard} from '../components/RecipeCard'
@@ -12,6 +13,7 @@ type Recipe = components['schemas']['RecipeInput'] & { id?: number }
 type RecipeRequest = components['schemas']['RecipeRequest']
 
 export function GeneratePage() {
+  const { t } = useTranslation()
   const apiFetch = useApi()
   const navigate = useNavigate()
   const [generateBtnRef, pulseGenerate] = usePressPulse<HTMLButtonElement>()
@@ -36,7 +38,7 @@ export function GeneratePage() {
 
   async function handleGenerate() {
     setLoading(true)
-    setStatus('Generating recipes… (this might take a while)')
+    setStatus(t('generate.generatingStatus'))
     setRecipes([])
     sessionStorage.setItem('recipe_prompt', prompt)
     try {
@@ -49,10 +51,10 @@ export function GeneratePage() {
       if (!response.ok) throw new Error(await errorMessage(response))
       const data = (await response.json()) as Recipe[]
       setRecipes(data)
-      setStatus(data.length === 0 ? 'No recipes returned.' : null)
+      setStatus(data.length === 0 ? t('generate.noRecipes') : null)
     } catch (e) {
       if (e instanceof SessionExpiredError) return
-      setStatus(`Error: ${e instanceof Error ? e.message : String(e)}`)
+      setStatus(t('common.error', { message: e instanceof Error ? e.message : String(e) }))
     } finally {
       setLoading(false)
     }
@@ -64,10 +66,10 @@ export function GeneratePage() {
 
   return (
     <>
-      <h2 className="text-lg font-bold">What do you want to cook today?</h2>
+      <h2 className="text-lg font-bold">{t('generate.heading')}</h2>
       <textarea
         className="w-full min-h-32 border border-gray-300 rounded p-3"
-        placeholder="What do you want to cook? (e.g. ingredients, cuisine, constraints)"
+        placeholder={t('generate.placeholder')}
         value={prompt}
         onChange={(e) => setPrompt(e.target.value)}
         onFocus={(e) => e.target.select()}
@@ -89,7 +91,7 @@ export function GeneratePage() {
         onClick={handleGenerate}
         disabled={loading || prompt.trim() === ''}
       >
-        {loading ? 'Generating…' : 'Generate'}
+        {loading ? t('generate.generating') : t('generate.generate')}
       </Button>
 
       {status && <p className="text-gray-600">{status}</p>}
