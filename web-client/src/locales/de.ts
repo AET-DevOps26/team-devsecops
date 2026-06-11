@@ -84,7 +84,10 @@ export const de = {
     },
     generate: {
       heading: 'Was möchtest du heute kochen?',
-      placeholder: 'Was möchtest du kochen? (z. B. Zutaten, Stil, Einschränkungen)',
+      placeholder: 'Schreib, woran du denkst (optional)',
+      viewRecipes: 'Rezepte ansehen',
+      edit: 'Bearbeiten',
+      noOptions: 'Keine Optionen ausgewählt',
       generatingStatus: 'Rezepte werden erstellt… (das kann einen Moment dauern)',
       noRecipes: 'Keine Rezepte erhalten.',
       generating: 'Wird erstellt…',

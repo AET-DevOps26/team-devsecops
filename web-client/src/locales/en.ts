@@ -84,7 +84,10 @@ export const en = {
     },
     generate: {
       heading: 'What do you want to cook today?',
-      placeholder: 'What do you want to cook? (e.g. ingredients, cuisine, constraints)',
+      placeholder: 'Type what you think (optional)',
+      viewRecipes: 'View recipes',
+      edit: 'Edit',
+      noOptions: 'No options selected',
       generatingStatus: 'Generating recipes… (this might take a while)',
       noRecipes: 'No recipes returned.',
       generating: 'Generating…',

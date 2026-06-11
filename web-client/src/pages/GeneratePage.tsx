@@ -8,6 +8,7 @@ import {Button} from '../components/Button'
 import {RecipeCard} from '../components/RecipeCard'
 import {TagSelector} from '../components/TagSelector'
 import {tagsById} from '../recipeFormat'
+import {localizeTagLabel} from '../locales/recipeTagsDe'
 import {usePressPulse} from '../usePressPulse'
 import {errorMessage} from '../apiError'
 import {SessionExpiredError, useApi} from '../useApi'
@@ -139,14 +140,14 @@ export function GeneratePage() {
 						className="flex shrink-0 items-center gap-1 text-sm text-gray-500 cursor-pointer transition-transform duration-100 hover:scale-98"
 						onClick={() => navigate('/generate/results')}
 					>
-						View recipes
+						{t('generate.viewRecipes')}
 						<ChevronRightIcon className="h-4 w-4"/>
 					</button>
 				)}
 			</div>
 			<textarea
 				className="w-full min-h-32 border border-gray-300 rounded p-3"
-				placeholder="Type what you think (optional)"
+				placeholder={t('generate.placeholder')}
 				value={prompt}
 				onChange={(e) => setPrompt(e.target.value)}
 				onFocus={(e) => e.target.select()}
@@ -178,6 +179,7 @@ export function GeneratePage() {
 }
 
 export function GenerateResultsPage() {
+	const {t, i18n} = useTranslation()
 	const navigate = useNavigate()
 	const {prompt, selectedTags, recipes, status, setRecipes} = useOutletContext<RecipeGenerationContext>()
 
@@ -198,13 +200,13 @@ export function GenerateResultsPage() {
 							{selectedTags.map((id) => (
 								<span key={id}
 								      className="rounded-full border border-gray-200 bg-white px-2 py-0.5 text-xs text-gray-600">
-                  {tagsById.get(id)?.label ?? id}
+                  {localizeTagLabel(id, tagsById.get(id)?.label ?? id, i18n.language)}
                 </span>
 							))}
 						</div>
 					)}
 					{prompt.trim() === '' && selectedTags.length === 0 && (
-						<p className="text-sm text-gray-400">No options selected</p>
+						<p className="text-sm text-gray-400">{t('generate.noOptions')}</p>
 					)}
 				</div>
 				<button
@@ -213,7 +215,7 @@ export function GenerateResultsPage() {
 					onClick={() => navigate('/generate')}
 				>
 					<PencilSquareIcon className="h-4 w-4"/>
-					Edit
+					{t('generate.edit')}
 				</button>
 			</div>
 
