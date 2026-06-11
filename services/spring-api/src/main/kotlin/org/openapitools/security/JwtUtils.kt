@@ -9,7 +9,6 @@ import java.util.Date
 
 @Component
 class JwtUtils {
-
 	@Value("\${app.jwt.secret}")
 	private lateinit var jwtSecret: String
 
@@ -19,7 +18,8 @@ class JwtUtils {
 	private fun key() = Keys.hmacShaKeyFor(jwtSecret.toByteArray())
 
 	fun generateToken(userId: Long): String =
-		Jwts.builder()
+		Jwts
+			.builder()
 			.subject(userId.toString())
 			.issuedAt(Date())
 			.expiration(Date(System.currentTimeMillis() + jwtExpirationMs))
@@ -27,12 +27,21 @@ class JwtUtils {
 			.compact()
 
 	fun getUserIdFromToken(token: String): Long =
-		Jwts.parser().verifyWith(key()).build()
-			.parseSignedClaims(token).payload.subject.toLong()
+		Jwts
+			.parser()
+			.verifyWith(key())
+			.build()
+			.parseSignedClaims(token)
+			.payload.subject
+			.toLong()
 
 	fun validateToken(token: String): Boolean =
 		try {
-			Jwts.parser().verifyWith(key()).build().parseSignedClaims(token)
+			Jwts
+				.parser()
+				.verifyWith(key())
+				.build()
+				.parseSignedClaims(token)
 			true
 		} catch (e: JwtException) {
 			false

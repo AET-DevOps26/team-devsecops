@@ -1,0 +1,46 @@
+---
+# Container port 8080 — matches docker-compose (8090:8080 host:container mapping).
+# spring-api calls this service at http://py-recipe-service:8080 (AI_RECIPE_SERVICE_URL).
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: py-recipe-service
+  namespace: app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: py-recipe-service
+  template:
+    metadata:
+      labels:
+        app: py-recipe-service
+        monitoring: "true"
+    spec:
+      containers:
+        - name: py-recipe-service
+          image: ghcr.io/aet-devops26/team-devsecops/py-recipe-service:latest
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - secretRef:
+                name: py-recipe-secret
+          resources:
+            requests:
+              cpu: 200m
+              memory: 256Mi
+            limits:
+              cpu: 400m
+              memory: 512Mi
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 5

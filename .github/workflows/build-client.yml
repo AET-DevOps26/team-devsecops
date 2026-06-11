@@ -1,11 +1,16 @@
-name: Web Client - Lint & Test
+name: Web Client
 
 on:
-  pull_request:
-    paths: ['web-client/**', '.github/workflows/build-client.yml']
   push:
-    branches: [main]
-    paths: ['web-client/**', '.github/workflows/build-client.yml']
+    paths:
+      - 'web-client/**'
+      - '.github/workflows/build-client.yml'
+  workflow_dispatch:
+  workflow_call:
+    inputs:
+      push_image:
+        type: boolean
+        default: false
 
 jobs:
   lint:
@@ -85,3 +90,29 @@ jobs:
           name: playwright-report
           path: web-client/playwright-report/
           retention-days: 7
+
+  build:
+    needs: [lint, build-test]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Log in to GHCR
+        if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch' || inputs.push_image == true
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Lowercase image prefix
+        run: echo "IMAGE_PREFIX=ghcr.io/$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: web-client
+          push: ${{ github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch' || inputs.push_image == true }}
+          tags: |
+            ${{ env.IMAGE_PREFIX }}/web-client:${{ github.sha }}
+            ${{ env.IMAGE_PREFIX }}/web-client:latest

@@ -1,0 +1,38 @@
+name: Release
+
+# Single button to build all four images from any branch and deploy to the cluster.
+# For normal main merges, the per-service CI workflows build images automatically
+# and deploy-k8s.yml fires via workflow_run — this workflow is only needed when
+# you want to force a full rebuild+deploy from a specific branch.
+on:
+  workflow_dispatch:
+
+jobs:
+  build-spring-api:
+    uses: ./.github/workflows/build-spring-api.yml
+    with:
+      push_image: true
+    secrets: inherit
+
+  build-web-client:
+    uses: ./.github/workflows/build-client.yml
+    with:
+      push_image: true
+    secrets: inherit
+
+  build-py-recipe:
+    uses: ./.github/workflows/run-recipe-service-tests.yml
+    with:
+      push_image: true
+    secrets: inherit
+
+  build-py-help:
+    uses: ./.github/workflows/run-help-service-tests.yml
+    with:
+      push_image: true
+    secrets: inherit
+
+  deploy:
+    needs: [build-spring-api, build-web-client, build-py-recipe, build-py-help]
+    uses: ./.github/workflows/deploy-k8s.yml
+    secrets: inherit
