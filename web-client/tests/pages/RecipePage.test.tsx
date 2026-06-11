@@ -1,4 +1,5 @@
-import {Route, Routes} from 'react-router-dom'
+import {useState} from 'react'
+import {Outlet, Route, Routes} from 'react-router-dom'
 import {screen} from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import {afterEach, beforeEach, vi} from 'vitest'
@@ -28,12 +29,18 @@ afterEach(() => {
 	vi.unstubAllGlobals()
 })
 
+// mirrors the GenerateFlow layout that holds the shared recipe list
+function GenerateContext({recipes}: {recipes: Recipe[]}) {
+	const [list, setList] = useState(recipes)
+	return <Outlet context={{recipes: list, setRecipes: setList}}/>
+}
+
 function renderGeneratedRecipe(index = 0, recipes: Recipe[] = [a, b]) {
-	sessionStorage.setItem('generated_recipes', JSON.stringify(recipes))
 	renderWithProviders(
 		<Routes>
-			<Route path="/generate" element={<div>generate page</div>}/>
-			<Route path="/generate/recipe" element={<RecipePage/>}/>
+			<Route path="/generate" element={<GenerateContext recipes={recipes}/>}>
+				<Route path="recipe" element={<RecipePage/>}/>
+			</Route>
 		</Routes>,
 		{
 			route: {pathname: '/generate/recipe', state: {index}},

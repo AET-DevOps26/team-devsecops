@@ -35,7 +35,7 @@ test('login -> generate -> open recipe -> log out', async ({page}) => {
 	await page.keyboard.press('Enter')
 
 	await expect(page).toHaveURL(/\/generate$/)
-	await page.getByPlaceholder(/What do you want to cook/i).fill('pasta')
+	await page.getByPlaceholder(/Type what you think/i).fill('pasta')
 	await page.getByRole('button', {name: 'Generate'}).click()
 
 	await page.getByRole('button', {name: /Tomato Pasta/}).click()
