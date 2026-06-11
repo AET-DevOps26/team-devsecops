@@ -1,16 +1,6 @@
 name: Deploy to Production
 
 on:
-  pull_request:
-    branches:
-      - main
-    paths:
-      - 'web-client/**'
-      - 'services/**'
-      - 'infra/**'
-      - 'ansible/**'
-      - '.github/workflows/ansible-deploy.yml'
-
   push:
     branches:
       - main
