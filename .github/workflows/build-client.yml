@@ -59,7 +59,7 @@ jobs:
         run: npm run build
 
       - name: Unit tests
-        run: npm test
+        run: npm test -- --coverage
 
       - name: Publish unit test results
         uses: dorny/test-reporter@v1
@@ -68,6 +68,14 @@ jobs:
           name: Web Client Unit Tests
           path: web-client/test-results/vitest-junit.xml
           reporter: jest-junit
+
+      - name: Publish coverage report
+        uses: davelosert/vitest-coverage-report-action@v2
+        if: always()
+        with:
+          working-directory: web-client
+          name: Web Client Coverage
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium

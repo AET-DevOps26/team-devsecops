@@ -4,7 +4,7 @@ on:
   push:
     paths:
       - 'services/py-recipe-service/**'
-      - '.github/workflows/run-recipe-service-tests.yml'
+      - '.github/workflows/build-recipe-service.yml'
   workflow_dispatch:
   workflow_call:
     inputs:
@@ -57,7 +57,7 @@ jobs:
           INTERNAL_AUTH_SECRET: ${{ secrets.INTERNAL_AUTH_SECRET }}
           SERVICE_API_KEY: ${{ secrets.SERVICE_API_KEY }}
         run: |
-          pytest --junitxml=report.xml
+          pytest --junitxml=report.xml --cov=. --cov-report=xml:coverage.xml --cov-report=term-missing
 
       - name: Publish test results
         uses: dorny/test-reporter@v1
@@ -66,6 +66,14 @@ jobs:
           name: Recipe Service Tests
           path: services/py-recipe-service/report.xml
           reporter: java-junit
+
+      - name: Publish coverage report
+        uses: MishaKav/pytest-coverage-comment@main
+        if: always()
+        with:
+          pytest-coverage-path: services/py-recipe-service/coverage.xml
+          title: Recipe Service Coverage
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 
   build:
     needs: [lint, test]

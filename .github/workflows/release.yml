@@ -21,13 +21,13 @@ jobs:
     secrets: inherit
 
   build-py-recipe:
-    uses: ./.github/workflows/run-recipe-service-tests.yml
+    uses: ./.github/workflows/build-recipe-service.yml
     with:
       push_image: true
     secrets: inherit
 
   build-py-help:
-    uses: ./.github/workflows/run-help-service-tests.yml
+    uses: ./.github/workflows/build-help-service.yml
     with:
       push_image: true
     secrets: inherit
