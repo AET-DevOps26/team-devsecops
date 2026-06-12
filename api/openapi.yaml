@@ -523,7 +523,7 @@ components:
       properties:
         language:
           type: string
-          enum: [en, de]
+          enum: [EN, DE]
           description: Preferred UI and AI-content language as an ISO 639-1 code
         diet:
           type: array

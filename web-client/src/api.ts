@@ -735,7 +735,7 @@ export interface components {
              * @description Preferred UI and AI-content language as an ISO 639-1 code
              * @enum {string}
              */
-            language?: "en" | "de";
+            language?: "EN" | "DE";
             /** @description Dietary restriction or style (e.g. vegan, keto) */
             diet?: string[];
             /** @description List of ingredients the user is allergic to */
