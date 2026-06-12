@@ -166,28 +166,14 @@ jobs:
           git pull --rebase "$REMOTE" coverage-data 2>/dev/null || true
           git push "$REMOTE" HEAD:coverage-data
 
-      # ── Build web client ──────────────────────────────────────────────────────
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '24'
-          cache: 'npm'
-          cache-dependency-path: web-client/package-lock.json
-      - run: npm ci
-        working-directory: web-client
-      - run: npm run build
-        working-directory: web-client
-        env:
-          VITE_API_BASE: ${{ vars.VITE_API_BASE }}
-      - run: cp web-client/dist/index.html web-client/dist/404.html
-
-      # ── Assemble full Pages site ──────────────────────────────────────────────
+      # ── Assemble Pages site ───────────────────────────────────────────────────
       - name: Assemble site
         run: |
-          mkdir -p web-client/dist/coverage
-          [ -d store/coverage ] && cp -r store/coverage/. web-client/dist/coverage/
+          mkdir -p site
+          [ -d store/coverage ] && cp -r store/coverage/. site/
 
           # Per-branch index (links to each service subfolder)
-          for branch_dir in web-client/dist/coverage/*/; do
+          for branch_dir in site/*/; do
             [ -d "$branch_dir" ] || continue
             branch=$(basename "$branch_dir")
             {
@@ -205,26 +191,26 @@ jobs:
             } > "$branch_dir/index.html"
           done
 
-          # Top-level coverage index (lists all branches)
+          # Top-level index (lists all branches)
           {
             echo '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">'
             echo '<title>Coverage Reports</title>'
             echo '<style>body{font-family:sans-serif;max-width:600px;margin:4rem auto}a{color:#0969da}ul{line-height:2}</style>'
             echo '</head><body><h1>Coverage Reports</h1><ul>'
-            for branch_dir in web-client/dist/coverage/*/; do
+            for branch_dir in site/*/; do
               [ -d "$branch_dir" ] || continue
               branch=$(basename "$branch_dir")
               printf '<li><a href="%s/">%s</a></li>\n' "$branch" "$branch"
             done
             echo '</ul></body></html>'
-          } > web-client/dist/coverage/index.html
+          } > site/index.html
 
       # ── Deploy ────────────────────────────────────────────────────────────────
       - uses: actions/configure-pages@v5
 
       - uses: actions/upload-pages-artifact@v4
         with:
-          path: web-client/dist
+          path: site
 
       - id: deployment
         uses: actions/deploy-pages@v4
