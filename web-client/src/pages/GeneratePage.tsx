@@ -1,12 +1,14 @@
 import {useEffect, useState} from 'react'
 import type {Dispatch, SetStateAction} from 'react'
 import {Outlet, useLocation, useNavigate, useOutletContext} from 'react-router-dom'
+import {useTranslation} from 'react-i18next'
 import {ChevronRightIcon, PencilSquareIcon} from '@heroicons/react/24/outline'
 import type {components} from '../api'
 import {Button} from '../components/Button'
 import {RecipeCard} from '../components/RecipeCard'
 import {TagSelector} from '../components/TagSelector'
 import {tagsById} from '../recipeFormat'
+import {localizeTagLabel} from '../locales/recipeTagsDe'
 import {usePressPulse} from '../usePressPulse'
 import {errorMessage} from '../apiError'
 import {SessionExpiredError, useApi} from '../useApi'
@@ -36,6 +38,7 @@ function viewName(pathname: string): keyof typeof VIEW_ORDER {
 }
 
 export function GenerateFlow() {
+	const {t} = useTranslation()
 	const apiFetch = useApi()
 	const navigate = useNavigate()
 	const {pathname} = useLocation()
@@ -65,7 +68,7 @@ export function GenerateFlow() {
 
 	async function generate() {
 		setLoading(true)
-		setStatus('Generating recipes… (this might take a while)')
+		setStatus(t('generate.generatingStatus'))
 		setRecipes([])
 		sessionStorage.setItem('recipe_prompt', prompt)
 		sessionStorage.setItem('recipe_tags', JSON.stringify(selectedTags))
@@ -82,10 +85,10 @@ export function GenerateFlow() {
 			if (!response.ok) throw new Error(await errorMessage(response))
 			const data = (await response.json()) as Recipe[]
 			setRecipes(data)
-			setStatus(data.length === 0 ? 'No recipes returned.' : null)
+			setStatus(data.length === 0 ? t('generate.noRecipes') : null)
 		} catch (e) {
 			if (e instanceof SessionExpiredError) return
-			setStatus(`Error: ${e instanceof Error ? e.message : String(e)}`)
+			setStatus(t('common.error', {message: e instanceof Error ? e.message : String(e)}))
 		} finally {
 			setLoading(false)
 		}
@@ -114,6 +117,7 @@ export function GenerateFlow() {
 }
 
 export function GeneratePage() {
+	const {t} = useTranslation()
 	const navigate = useNavigate()
 	const {
 		prompt,
@@ -129,21 +133,21 @@ export function GeneratePage() {
 	return (
 		<>
 			<div className="flex items-center justify-between gap-3">
-				<h2 className="text-lg font-bold">What do you want to cook today?</h2>
+				<h2 className="text-lg font-bold">{t('generate.heading')}</h2>
 				{recipes.length > 0 && (
 					<button
 						type="button"
 						className="flex shrink-0 items-center gap-1 text-sm text-gray-500 cursor-pointer transition-transform duration-100 hover:scale-98"
 						onClick={() => navigate('/generate/results')}
 					>
-						View recipes
+						{t('generate.viewRecipes')}
 						<ChevronRightIcon className="h-4 w-4"/>
 					</button>
 				)}
 			</div>
 			<textarea
 				className="w-full min-h-32 border border-gray-300 rounded p-3"
-				placeholder="Type what you think (optional)"
+				placeholder={t('generate.placeholder')}
 				value={prompt}
 				onChange={(e) => setPrompt(e.target.value)}
 				onFocus={(e) => e.target.select()}
@@ -168,13 +172,14 @@ export function GeneratePage() {
 				onClick={generate}
 				disabled={loading || (prompt.trim() === '' && selectedTags.length === 0)}
 			>
-				{loading ? 'Generating…' : 'Generate'}
+				{loading ? t('generate.generating') : t('generate.generate')}
 			</Button>
 		</>
 	)
 }
 
 export function GenerateResultsPage() {
+	const {t, i18n} = useTranslation()
 	const navigate = useNavigate()
 	const {prompt, selectedTags, recipes, status, setRecipes} = useOutletContext<RecipeGenerationContext>()
 
@@ -195,13 +200,13 @@ export function GenerateResultsPage() {
 							{selectedTags.map((id) => (
 								<span key={id}
 								      className="rounded-full border border-gray-200 bg-white px-2 py-0.5 text-xs text-gray-600">
-                  {tagsById.get(id)?.label ?? id}
-                </span>
+									{localizeTagLabel(id, tagsById.get(id)?.label ?? id, i18n.language)}
+								</span>
 							))}
 						</div>
 					)}
 					{prompt.trim() === '' && selectedTags.length === 0 && (
-						<p className="text-sm text-gray-400">No options selected</p>
+						<p className="text-sm text-gray-400">{t('generate.noOptions')}</p>
 					)}
 				</div>
 				<button
@@ -210,7 +215,7 @@ export function GenerateResultsPage() {
 					onClick={() => navigate('/generate')}
 				>
 					<PencilSquareIcon className="h-4 w-4"/>
-					Edit
+					{t('generate.edit')}
 				</button>
 			</div>
 

@@ -15,7 +15,6 @@ class JwtAuthFilter(
 	private val jwtUtils: JwtUtils,
 	private val userRepository: UserRepository,
 ) : OncePerRequestFilter() {
-
 	override fun doFilterInternal(
 		request: HttpServletRequest,
 		response: HttpServletResponse,
@@ -28,7 +27,12 @@ class JwtAuthFilter(
 			if (jwtUtils.validateToken(token)) {
 				val userId = jwtUtils.getUserIdFromToken(token)
 				userRepository.findById(userId).ifPresent { entity ->
-					val userDetails = User.withUsername(entity.username).password(entity.password).roles("USER").build()
+					val userDetails =
+						User
+							.withUsername(entity.username)
+							.password(entity.password)
+							.roles("USER")
+							.build()
 					val auth = UsernamePasswordAuthenticationToken(userDetails, null, userDetails.authorities)
 					SecurityContextHolder.getContext().authentication = auth
 				}
@@ -36,4 +40,7 @@ class JwtAuthFilter(
 		}
 		filterChain.doFilter(request, response)
 	}
+
+	// set to false to avoid controller 500s being masked as 401
+	override fun shouldNotFilterErrorDispatch(): Boolean = false
 }

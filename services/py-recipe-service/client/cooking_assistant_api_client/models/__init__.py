@@ -15,6 +15,7 @@ from .recipe_request_forwarded import RecipeRequestForwarded
 from .recipe_update import RecipeUpdate
 from .user_credentials import UserCredentials
 from .user_preferences import UserPreferences
+from .user_preferences_language import UserPreferencesLanguage
 from .user_profile import UserProfile
 from .user_profile_update import UserProfileUpdate
 
@@ -34,6 +35,7 @@ __all__ = (
     "RecipeUpdate",
     "UserCredentials",
     "UserPreferences",
+    "UserPreferencesLanguage",
     "UserProfile",
     "UserProfileUpdate",
 )

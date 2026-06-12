@@ -1,0 +1,14 @@
+---
+# ClusterIP (the default) — internal only. The ingress exposes /api/ directly to this service.
+# Python services are NOT reachable via this service — they have their own ClusterIP services.
+apiVersion: v1
+kind: Service
+metadata:
+  name: spring-api
+  namespace: app
+spec:
+  selector:
+    app: spring-api
+  ports:
+    - port: 8080
+      targetPort: 8080

@@ -1,0 +1,57 @@
+---
+# Single ingress with path-based routing + TLS via cert-manager.
+#
+# Routing:
+#   /api/        → spring-api (direct, avoids extra nginx hop)
+#   /swagger-ui  → spring-api (API docs in browser)
+#   /v3/api-docs → spring-api (OpenAPI spec)
+#   /            → web-client nginx
+#
+# Python AI services are intentionally NOT exposed — internal ClusterIP only.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: app-ingress
+  namespace: app
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "60"
+    nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+spec:
+  ingressClassName: nginx # could also be traefik
+  tls:
+    - hosts:
+        - devsecops.stud.k8s.aet.cit.tum.de
+      secretName: app-tls-cert
+  rules:
+    - host: devsecops.stud.k8s.aet.cit.tum.de
+      http:
+        paths:
+          - path: /api/
+            pathType: Prefix
+            backend:
+              service:
+                name: spring-api
+                port:
+                  number: 8080
+          - path: /swagger-ui
+            pathType: Prefix
+            backend:
+              service:
+                name: spring-api
+                port:
+                  number: 8080
+          - path: /v3/api-docs
+            pathType: Prefix
+            backend:
+              service:
+                name: spring-api
+                port:
+                  number: 8080
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: web-client
+                port:
+                  number: 8080

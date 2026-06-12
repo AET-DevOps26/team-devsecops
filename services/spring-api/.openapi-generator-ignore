@@ -24,3 +24,4 @@
 
 build.gradle.kts
 application.yaml
+pom.xml

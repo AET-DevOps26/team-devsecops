@@ -1,0 +1,12 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: web-client
+  namespace: app
+spec:
+  selector:
+    app: web-client
+  ports:
+    - port: 8080
+      targetPort: 8080

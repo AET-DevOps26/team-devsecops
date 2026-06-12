@@ -23,6 +23,15 @@ tasks.test {
         showExceptions = true
         showCauses = true
     }
+    finalizedBy(tasks.jacocoTestReport)
+}
+
+tasks.jacocoTestReport {
+    dependsOn(tasks.test)
+    reports {
+        xml.required.set(true)
+        html.required.set(true)
+    }
 }
 
 plugins {
@@ -32,6 +41,7 @@ plugins {
     id("org.jetbrains.kotlin.plugin.spring") version kotlinVersion
     id("org.springframework.boot") version "4.0.1"
     id("io.spring.dependency-management") version "1.1.7"
+    id("jacoco")
 }
 
 tasks.bootJar {
@@ -59,6 +69,9 @@ dependencies {
     runtimeOnly("com.h2database:h2")
     runtimeOnly("org.postgresql:postgresql")
     runtimeOnly("com.google.cloud.sql:postgres-socket-factory:1.21.0")
+
+    // Observability
+    implementation("org.springframework.boot:spring-boot-starter-actuator")
 
     // Auth
     implementation("org.springframework.boot:spring-boot-starter-security")

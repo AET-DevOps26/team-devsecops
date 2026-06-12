@@ -731,6 +731,11 @@ export interface components {
             password?: string;
         };
         UserPreferences: {
+            /**
+             * @description Preferred UI and AI-content language as an ISO 639-1 code
+             * @enum {string}
+             */
+            language?: "EN" | "DE";
             /** @description Dietary restriction or style (e.g. vegan, keto) */
             diet?: string[];
             /** @description List of ingredients the user is allergic to */

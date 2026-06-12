@@ -18,6 +18,8 @@ load_dotenv()
 
 app = FastAPI(title="Cooking Assistant GenAI Service")
 
+LANGUAGE_NAMES = {"en": "English", "de": "German"}
+
 SECRET_KEY_STR = os.getenv("INTERNAL_AUTH_SECRET")
 if not SECRET_KEY_STR:
     raise RuntimeError("CRITICAL: INTERNAL_AUTH_SECRET environment variable is missing!")
@@ -80,7 +82,7 @@ def health_check():
 
 @app.post("/ai/recipes", dependencies=[Depends(verify_internal_hmac)])
 async def generate_recipes(request_data: dict[str, Any], llm: ChatGoogleGenerativeAI = Depends(get_llm)):
-    
+
     try:
         request = RecipeRequestForwarded.from_dict(request_data)
     except Exception as e:
@@ -88,7 +90,7 @@ async def generate_recipes(request_data: dict[str, Any], llm: ChatGoogleGenerati
 
     if not request.profile or not request.profile.preferences:
         raise HTTPException(status_code=400, detail="Missing required profile preferences.")
-    
+
     try:
 
         # 1. Extract Profile Context
@@ -96,6 +98,7 @@ async def generate_recipes(request_data: dict[str, Any], llm: ChatGoogleGenerati
         diet = ", ".join(prefs.diet) if prefs.diet else "None"
         allergies = ", ".join(prefs.allergies) if prefs.allergies else "None"
         about = ", ".join(prefs.about_me) if prefs.about_me else "None"
+        language = LANGUAGE_NAMES.get(getattr(prefs.language, "value", None) or "en", "English")
 
         # 2. Build the System Prompt with strict JSON requirements
         system_prompt = (
@@ -115,6 +118,8 @@ async def generate_recipes(request_data: dict[str, Any], llm: ChatGoogleGenerati
             "    }\n"
             "  ]\n"
             "}"
+			f"Write all recipe content (title, ingredients, units and instructions) in {language}. "
+			f"Keep the JSON keys in English as specified."
         )
 
         # 3. Invoke LLM

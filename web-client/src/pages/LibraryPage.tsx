@@ -1,6 +1,7 @@
 import {useEffect, useState} from 'react'
 import {flushSync} from 'react-dom'
 import {Link, useNavigate} from 'react-router-dom'
+import {Trans, useTranslation} from 'react-i18next'
 import {BookOpenIcon} from '@heroicons/react/24/outline'
 import {BoltIcon, BookmarkIcon} from '@heroicons/react/24/solid'
 import type {components} from '../api'
@@ -11,6 +12,7 @@ import {SessionExpiredError, useApi} from '../useApi'
 type Recipe = components['schemas']['Recipe']
 
 export function LibraryPage() {
+	const {t} = useTranslation()
 	const apiFetch = useApi()
 	const navigate = useNavigate()
 	const [recipes, setRecipes] = useState<Recipe[]>([])
@@ -30,7 +32,7 @@ export function LibraryPage() {
 				setPhase('ready')
 			} catch (e) {
 				if (cancelled || e instanceof SessionExpiredError) return
-				setError(`Error: ${e instanceof Error ? e.message : String(e)}`)
+				setError(t('common.error', {message: e instanceof Error ? e.message : String(e)}))
 				setPhase('error')
 			}
 		}
@@ -39,9 +41,9 @@ export function LibraryPage() {
 		return () => {
 			cancelled = true
 		}
-	}, [apiFetch])
+	}, [apiFetch, t])
 
-	if (phase === 'loading') return <p className="text-gray-500">Loading…</p>
+	if (phase === 'loading') return <p className="text-gray-500">{t('common.loading')}</p>
 	if (phase === 'error') return <p className="text-red-600">{error}</p>
 
 	if (recipes.length === 0) {
@@ -49,11 +51,14 @@ export function LibraryPage() {
 			<div className="flex min-h-[60vh] flex-col items-center justify-center gap-4 text-center">
 				<BookOpenIcon className="h-12 w-12 text-orange-200"/>
 				<div className="flex flex-col gap-1">
-					<h2 className="text-lg font-bold">Your cookbook is empty</h2>
+					<h2 className="text-lg font-bold">{t('library.emptyTitle')}</h2>
 					<p className="max-w-xs text-gray-500">
-						Nothing saved yet. Cook up some ideas and tap the{' '}
-						<BookmarkIcon className="inline h-4 w-4 -translate-y-0.5 text-orange-400"/> to stash
-						your favourites here.
+						<Trans
+							i18nKey="library.emptyBody"
+							components={{
+								bookmark: <BookmarkIcon className="inline h-4 w-4 -translate-y-0.5 text-orange-400"/>,
+							}}
+						/>
 					</p>
 				</div>
 				<Link
@@ -61,7 +66,7 @@ export function LibraryPage() {
 					className="flex items-center gap-2 rounded bg-orange-500 px-4 py-2 text-white transition-transform duration-100 hover:scale-98"
 				>
 					<BoltIcon className="h-5 w-5"/>
-					Generate a recipe
+					{t('library.generateRecipe')}
 				</Link>
 			</div>
 		)

@@ -1,0 +1,118 @@
+name: Deploy to Kubernetes
+
+on:
+  # Auto-deploy after any per-service CI workflow succeeds on main.
+  workflow_run:
+    workflows:
+      - "Spring API"
+      - "Python Help Service"
+      - "Python Recipe Service"
+      - "Web Client"
+    types: [completed]
+    branches: [main]
+  # Also trigger on K8s manifest changes and for manual/release runs.
+  push:
+    branches: [main]
+    paths:
+      - 'infra/k8s/**'
+      - '.github/workflows/deploy-k8s.yml'
+  workflow_call:
+  workflow_dispatch:
+
+# Queue concurrent deploys rather than running them in parallel.
+concurrency:
+  group: deploy-k8s
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    # For workflow_run: skip if the upstream CI failed or was cancelled.
+    # For all other triggers (push, workflow_call, workflow_dispatch): always run.
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    environment: kubernetes
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v4
+
+      - name: Configure kubeconfig
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBE_CONFIG }}" | base64 -d > ~/.kube/config
+          chmod 600 ~/.kube/config
+
+      - name: Apply namespaces
+        run: kubectl apply -f infra/k8s/namespace.yaml
+
+      # --dry-run=client -o yaml | kubectl apply -f - is idempotent: creates on first
+      # run, updates on subsequent runs, never errors if the secret already exists.
+      #
+      # Required GitHub Secrets (Settings → Secrets and variables → Actions):
+      #   DB_PASSWORD          — PostgreSQL password
+      #   JWT_SECRET           — JWT signing key
+      #   INTERNAL_AUTH_SECRET — shared HMAC key between spring-api and python services
+      #   HELP_SERVICE_KEY     — Gemini API key for py-help-service
+      #   RECIPE_SERVICE_KEY   — Gemini API key for py-recipe-service
+      #   KUBE_CONFIG          — base64-encoded kubeconfig (base64 -w0 on Linux)
+      - name: Upsert K8s secrets
+        run: |
+          kubectl create secret generic postgres-secret -n app \
+            --from-literal=password="${{ secrets.DB_PASSWORD }}" \
+            --dry-run=client -o yaml | kubectl apply -f -
+
+          kubectl create secret generic spring-api-secret -n app \
+            --from-literal=DB_PASSWORD="${{ secrets.DB_PASSWORD }}" \
+            --from-literal=JWT_SECRET="${{ secrets.JWT_SECRET }}" \
+            --from-literal=INTERNAL_AUTH_SECRET="${{ secrets.INTERNAL_AUTH_SECRET }}" \
+            --dry-run=client -o yaml | kubectl apply -f -
+
+          kubectl create secret generic py-recipe-secret -n app \
+            --from-literal=SERVICE_API_KEY="${{ secrets.RECIPE_SERVICE_KEY }}" \
+            --from-literal=INTERNAL_AUTH_SECRET="${{ secrets.INTERNAL_AUTH_SECRET }}" \
+            --dry-run=client -o yaml | kubectl apply -f -
+
+          kubectl create secret generic py-help-secret -n app \
+            --from-literal=SERVICE_API_KEY="${{ secrets.HELP_SERVICE_KEY }}" \
+            --from-literal=INTERNAL_AUTH_SECRET="${{ secrets.INTERNAL_AUTH_SECRET }}" \
+            --dry-run=client -o yaml | kubectl apply -f -
+
+      - name: Deploy PostgreSQL (StatefulSet)
+        run: kubectl apply -f infra/k8s/postgres/
+
+      - name: Wait for PostgreSQL to be ready
+        run: kubectl rollout status statefulset/postgres -n app --timeout=180s
+
+      - name: Deploy application services
+        run: |
+          kubectl apply -f infra/k8s/spring-api/
+          kubectl apply -f infra/k8s/py-recipe-service/
+          kubectl apply -f infra/k8s/py-help-service/
+          kubectl apply -f infra/k8s/web-client/
+          kubectl apply -f infra/k8s/ingress.yaml
+
+      - name: Restart deployments to pull latest images
+        run: |
+          kubectl rollout restart deployment/spring-api -n app
+          kubectl rollout restart deployment/py-recipe-service -n app
+          kubectl rollout restart deployment/py-help-service -n app
+          kubectl rollout restart deployment/web-client -n app
+
+      - name: Wait for rollouts
+        run: |
+          kubectl rollout status deployment/spring-api -n app --timeout=300s
+          kubectl rollout status deployment/py-recipe-service -n app --timeout=180s
+          kubectl rollout status deployment/py-help-service -n app --timeout=180s
+          kubectl rollout status deployment/web-client -n app --timeout=120s
+
+      - name: Show deployment summary
+        run: |
+          echo "=== Pods ==="
+          kubectl get pods -n app -o wide
+          echo ""
+          echo "=== Ingress ==="
+          kubectl get ingress -n app
+          echo ""
+          echo "URL: https://devsecops.stud.k8s.aet.cit.tum.de/"
