@@ -52,6 +52,11 @@ services:
       - backend
     volumes:
       - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres} -d ${DB_NAME:-cookingdb}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   spring-api:
     build: ../services/spring-api
@@ -69,8 +74,12 @@ services:
       DB_PASSWORD: ${DB_PASSWORD:-secretpass}
       JPA_DDL_AUTO: update # preserve tables and data
     depends_on:
-      - py-help-service
-      - py-recipe-service
+      postgres-db:
+        condition: service_healthy
+      py-help-service:
+        condition: service_started
+      py-recipe-service:
+        condition: service_started
 
   web-client:
     build: ../web-client
