@@ -1,0 +1,127 @@
+name: Deploy Coverage to GitHub Pages
+
+on:
+  # Re-deploy whenever any service build finishes on main (coverage artifact updated).
+  workflow_run:
+    workflows: ["Spring API", "Python Help Service", "Python Recipe Service", "Web Client"]
+    types: [completed]
+    # branches: [main]
+  # Also trigger on web-client changes (rebuilds the client portion).
+  push:
+    # branches: [main]
+    paths:
+      - 'web-client/**'
+      - '.github/workflows/deploy-coverage.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+  actions: read
+
+jobs:
+  deploy:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # ── Build web client ──────────────────────────────────────────────────
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+          cache-dependency-path: web-client/package-lock.json
+
+      - name: Install
+        run: npm ci
+        working-directory: web-client
+
+      - name: Build
+        run: npm run build
+        working-directory: web-client
+        env:
+          VITE_API_BASE: ${{ vars.VITE_API_BASE }}
+
+      - name: Copy index.html to 404.html
+        run: cp web-client/dist/index.html web-client/dist/404.html
+
+      # ── Download latest coverage HTML from each service's build ───────────
+      - name: Download Spring API coverage
+        uses: dawidd6/action-download-artifact@v6
+        with:
+          workflow: build-spring-api.yml
+          name: spring-api-coverage
+          path: web-client/dist/coverage/spring-api
+          if_no_artifact_found: ignore
+
+      - name: Download Help Service coverage
+        uses: dawidd6/action-download-artifact@v6
+        with:
+          workflow: build-help-service.yml
+          name: help-service-coverage
+          path: web-client/dist/coverage/py-help
+          if_no_artifact_found: ignore
+
+      - name: Download Recipe Service coverage
+        uses: dawidd6/action-download-artifact@v6
+        with:
+          workflow: build-recipe-service.yml
+          name: recipe-service-coverage
+          path: web-client/dist/coverage/py-recipe
+          if_no_artifact_found: ignore
+
+      - name: Download Web Client coverage
+        uses: dawidd6/action-download-artifact@v6
+        with:
+          workflow: build-client.yml
+          name: web-client-coverage
+          path: web-client/dist/coverage/web-client
+          if_no_artifact_found: ignore
+
+      # ── Coverage index page ───────────────────────────────────────────────
+      - name: Create coverage index
+        run: |
+          mkdir -p web-client/dist/coverage
+          cat > web-client/dist/coverage/index.html <<'EOF'
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+            <meta charset="UTF-8">
+            <title>Coverage Reports</title>
+            <style>
+              body { font-family: sans-serif; max-width: 600px; margin: 4rem auto; }
+              h1 { margin-bottom: 1rem; }
+              ul { line-height: 2; }
+              a { color: #0969da; }
+            </style>
+          </head>
+          <body>
+            <h1>Coverage Reports</h1>
+            <ul>
+              <li><a href="spring-api/">Spring API</a> — JaCoCo</li>
+              <li><a href="py-help/">Help Service</a> — pytest-cov</li>
+              <li><a href="py-recipe/">Recipe Service</a> — pytest-cov</li>
+              <li><a href="web-client/">Web Client</a> — Vitest</li>
+            </ul>
+          </body>
+          </html>
+          EOF
+
+      # ── Deploy ────────────────────────────────────────────────────────────
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: web-client/dist
+
+      - id: deployment
+        uses: actions/deploy-pages@v4

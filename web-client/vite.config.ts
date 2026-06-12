@@ -18,7 +18,7 @@ export default defineConfig({
 			['junit', { outputFile: 'test-results/vitest-junit.xml' }],
 		],
 		coverage: {
-			reporter: ['text', 'json-summary', 'json'],
+			reporter: ['text', 'html'],
 			reportOnFailure: true,
 		},
 	},

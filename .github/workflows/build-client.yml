@@ -69,13 +69,13 @@ jobs:
           path: web-client/test-results/vitest-junit.xml
           reporter: jest-junit
 
-      - name: Publish coverage report
-        uses: davelosert/vitest-coverage-report-action@v2
+      - name: Upload coverage HTML
+        uses: actions/upload-artifact@v4
         if: always()
         with:
-          working-directory: web-client
-          name: Web Client Coverage
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          name: web-client-coverage
+          path: web-client/coverage/
+          retention-days: 7
 
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium

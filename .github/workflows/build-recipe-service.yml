@@ -57,7 +57,7 @@ jobs:
           INTERNAL_AUTH_SECRET: ${{ secrets.INTERNAL_AUTH_SECRET }}
           SERVICE_API_KEY: ${{ secrets.SERVICE_API_KEY }}
         run: |
-          pytest --junitxml=report.xml --cov=. --cov-report=xml:coverage.xml --cov-report=term-missing
+          pytest --junitxml=report.xml --cov=. --cov-report=html:htmlcov
 
       - name: Publish test results
         uses: dorny/test-reporter@v1
@@ -67,13 +67,13 @@ jobs:
           path: services/py-recipe-service/report.xml
           reporter: java-junit
 
-      - name: Publish coverage report
-        uses: MishaKav/pytest-coverage-comment@main
+      - name: Upload coverage HTML
+        uses: actions/upload-artifact@v4
         if: always()
         with:
-          pytest-coverage-path: services/py-recipe-service/coverage.xml
-          title: Recipe Service Coverage
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          name: recipe-service-coverage
+          path: services/py-recipe-service/htmlcov/
+          retention-days: 7
 
   build:
     needs: [lint, test]
