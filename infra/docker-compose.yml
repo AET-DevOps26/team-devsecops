@@ -38,6 +38,26 @@ services:
       SERVICE_API_KEY: ${HELP_SERVICE_KEY}
       INTERNAL_AUTH_SECRET: ${INTERNAL_AUTH_SECRET}
 
+  postgres-db:
+    image: postgres:15-alpine
+    restart: always
+    env_file: .env
+    environment:
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-secretpass}
+      POSTGRES_DB: ${DB_NAME:-cookingdb}
+    expose:
+      - "5432"
+    networks:
+      - backend
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres} -d ${DB_NAME:-cookingdb}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
   spring-api:
     build: ../services/spring-api
     env_file: .env
@@ -49,9 +69,17 @@ services:
       AI_RECIPE_SERVICE_URL: http://py-recipe-service:8080
       AI_HELP_SERVICE_URL: http://py-help-service:8080
       INTERNAL_AUTH_SECRET: ${INTERNAL_AUTH_SECRET}
+      DB_URL: jdbc:postgresql://postgres-db:5432/${DB_NAME:-cookingdb}
+      DB_USER: ${DB_USER:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:-secretpass}
+      JPA_DDL_AUTO: update # preserve tables and data
     depends_on:
-      - py-help-service
-      - py-recipe-service
+      postgres-db:
+        condition: service_healthy
+      py-help-service:
+        condition: service_started
+      py-recipe-service:
+        condition: service_started
 
   web-client:
     build: ../web-client
@@ -62,3 +90,6 @@ services:
       - backend
     depends_on:
       - spring-api
+
+volumes:
+  db-data:
