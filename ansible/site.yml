@@ -17,17 +17,11 @@
       args:
         creates: /usr/bin/docker
 
-    - name: Check if docker-compose exists
-      stat:
-        path: /usr/local/bin/docker-compose
-      register: compose_bin
-
-    - name: Install legacy docker-compose
-      get_url:
-        url: https://github.com/docker/compose/releases/latest/download/docker-compose-Linux-x86_64
-        dest: /usr/local/bin/docker-compose
-        mode: '0755'
-      when: not compose_bin.stat.exists
+    - name: Ensure Docker Compose v2 plugin is installed
+      apt:
+        name: docker-compose-plugin
+        state: present
+        update_cache: yes
 
     - name: Force clean any untracked blocking files
       command: git clean -fdx
@@ -56,7 +50,7 @@
         mode: '0644'
 
     - name: Ensure previous containers are stopped
-      command: /usr/local/bin/docker-compose down
+      command: docker compose down
       args:
         chdir: /var/www/app/infra
       ignore_errors: yes
@@ -64,7 +58,7 @@
     - name: Attempt Docker Deployment
       block:
         - name: Bring up application with Docker Compose
-          command: /usr/local/bin/docker-compose up -d --build
+          command: docker compose up -d --build
           args:
             chdir: /var/www/app/infra
           register: compose_output
