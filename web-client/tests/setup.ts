@@ -5,7 +5,7 @@ import { cleanup } from '@testing-library/react'
 import '../src/i18n'
 
 afterEach(() => {
-  cleanup()
-  localStorage.clear()
-  sessionStorage.clear()
+	cleanup()
+	localStorage.clear()
+	sessionStorage.clear()
 })
