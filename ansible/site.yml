@@ -17,11 +17,17 @@
       args:
         creates: /usr/bin/docker
 
-    - name: Ensure Docker Compose v2 plugin is installed
-      apt:
-        name: docker-compose-plugin
-        state: present
-        update_cache: yes
+    - name: Ensure docker cli-plugins directory exists
+      file:
+        path: /usr/local/lib/docker/cli-plugins
+        state: directory
+        mode: '0755'
+
+    - name: Install Docker Compose v2 as a CLI plugin
+      get_url:
+        url: https://github.com/docker/compose/releases/latest/download/docker-compose-linux-x86_64
+        dest: /usr/local/lib/docker/cli-plugins/docker-compose
+        mode: '0755'
 
     - name: Force clean any untracked blocking files
       command: git clean -fdx
