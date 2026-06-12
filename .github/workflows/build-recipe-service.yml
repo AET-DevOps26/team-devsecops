@@ -1,10 +1,10 @@
-name: Python Help Service
+name: Python Recipe Service
 
 on:
   push:
     paths:
-      - 'services/py-help-service/**'
-      - '.github/workflows/run-help-service-tests.yml'
+      - 'services/py-recipe-service/**'
+      - '.github/workflows/build-recipe-service.yml'
   workflow_dispatch:
   workflow_call:
     inputs:
@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: services/py-help-service
+        working-directory: services/py-recipe-service
     steps:
       - uses: actions/checkout@v4
       - name: Set up Python
@@ -37,7 +37,7 @@ jobs:
       pull-requests: write
     defaults:
       run:
-        working-directory: services/py-help-service
+        working-directory: services/py-recipe-service
     steps:
       - uses: actions/checkout@v4
 
@@ -57,15 +57,23 @@ jobs:
           INTERNAL_AUTH_SECRET: ${{ secrets.INTERNAL_AUTH_SECRET }}
           SERVICE_API_KEY: ${{ secrets.SERVICE_API_KEY }}
         run: |
-          pytest --junitxml=report.xml
+          pytest --junitxml=report.xml --cov=main --cov-report=html:htmlcov
 
       - name: Publish test results
         uses: dorny/test-reporter@v1
         if: always()
         with:
-          name: Help Service Tests
-          path: services/py-help-service/report.xml
+          name: Recipe Service Tests
+          path: services/py-recipe-service/report.xml
           reporter: java-junit
+
+      - name: Upload coverage HTML
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: recipe-service-coverage
+          path: services/py-recipe-service/htmlcov/
+          retention-days: 7
 
   build:
     needs: [lint, test]
@@ -87,8 +95,8 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
-          context: services/py-help-service
+          context: services/py-recipe-service
           push: ${{ github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch' || inputs.push_image == true }}
           tags: |
-            ${{ env.IMAGE_PREFIX }}/py-help-service:${{ github.sha }}
-            ${{ env.IMAGE_PREFIX }}/py-help-service:latest
+            ${{ env.IMAGE_PREFIX }}/py-recipe-service:${{ github.sha }}
+            ${{ env.IMAGE_PREFIX }}/py-recipe-service:latest

@@ -9,67 +9,67 @@ import { jsonResponse, renderWithProviders } from '../utils'
 type Recipe = components['schemas']['Recipe']
 
 const recipe: Recipe = {
-  id: 1,
-  title: 'Tomato Pasta',
-  portions: 2,
-  ingredients: [{ name: 'tomato', quantity: 4, unit: 'pcs' }],
-  instructions: ['boil pasta', 'add sauce'],
-  nutrients: { calories: 0, protein: 0, fat: 0, carbs: 0 },
+	id: 1,
+	title: 'Tomato Pasta',
+	portions: 2,
+	ingredients: [{ name: 'tomato', quantity: 4, unit: 'pcs' }],
+	instructions: ['boil pasta', 'add sauce'],
+	nutrients: { calories: 0, protein: 0, fat: 0, carbs: 0 },
 }
 
 const fetchMock = vi.fn<typeof fetch>()
 
 beforeEach(() => {
-  vi.stubGlobal('fetch', fetchMock)
-  fetchMock.mockResolvedValueOnce(jsonResponse({ username: 'alice' }))
+	vi.stubGlobal('fetch', fetchMock)
+	fetchMock.mockResolvedValueOnce(jsonResponse({ username: 'alice' }))
 })
 afterEach(() => {
-  fetchMock.mockReset()
-  vi.unstubAllGlobals()
+	fetchMock.mockReset()
+	vi.unstubAllGlobals()
 })
 
 function render(route = '/generate') {
-  renderWithProviders(
-    <Routes>
-      <Route path="/generate" element={<GenerateFlow />}>
-        <Route index element={<GeneratePage />} />
-        <Route path="results" element={<GenerateResultsPage />} />
-      </Route>
-    </Routes>,
-    { route, token: { value: 'tkn', username: 'alice' } },
-  )
+	renderWithProviders(
+		<Routes>
+			<Route path="/generate" element={<GenerateFlow />}>
+				<Route index element={<GeneratePage />} />
+				<Route path="results" element={<GenerateResultsPage />} />
+			</Route>
+		</Routes>,
+		{ route, token: { value: 'tkn', username: 'alice' } },
+	)
 }
 
 describe('GeneratePage', () => {
-  it('restores previously generated recipes from sessionStorage', () => {
-    sessionStorage.setItem('generated_recipes', JSON.stringify([recipe]))
+	it('restores previously generated recipes from sessionStorage', () => {
+		sessionStorage.setItem('generated_recipes', JSON.stringify([recipe]))
 
-    render('/generate/results')
+		render('/generate/results')
 
-    expect(screen.getByText('Tomato Pasta')).toBeInTheDocument()
-    expect(screen.getByText('2 portions')).toBeInTheDocument()
-  })
+		expect(screen.getByText('Tomato Pasta')).toBeInTheDocument()
+		expect(screen.getByText('2 portions')).toBeInTheDocument()
+	})
 
-  it('shows the "No recipes returned" message when the server returns an empty list', async () => {
-    fetchMock.mockResolvedValueOnce(jsonResponse([]))
-    const user = userEvent.setup()
-    render()
+	it('shows the "No recipes returned" message when the server returns an empty list', async () => {
+		fetchMock.mockResolvedValueOnce(jsonResponse([]))
+		const user = userEvent.setup()
+		render()
 
-    await user.type(screen.getByPlaceholderText(/Type what you think/i), 'anything')
-    await user.click(screen.getByRole('button', { name: 'Generate' }))
+		await user.type(screen.getByPlaceholderText(/Type what you think/i), 'anything')
+		await user.click(screen.getByRole('button', { name: 'Generate' }))
 
-    expect(await screen.findByText('No recipes returned.')).toBeInTheDocument()
-  })
+		expect(await screen.findByText('No recipes returned.')).toBeInTheDocument()
+	})
 
-  it('shows a server error on the results page', async () => {
-    fetchMock.mockResolvedValueOnce(jsonResponse({ message: 'GenAI down' }, { status: 503 }))
-    const user = userEvent.setup()
-    render()
+	it('shows a server error on the results page', async () => {
+		fetchMock.mockResolvedValueOnce(jsonResponse({ message: 'GenAI down' }, { status: 503 }))
+		const user = userEvent.setup()
+		render()
 
-    await user.type(screen.getByPlaceholderText(/Type what you think/i), 'pasta')
-    await user.click(screen.getByRole('button', { name: 'Generate' }))
+		await user.type(screen.getByPlaceholderText(/Type what you think/i), 'pasta')
+		await user.click(screen.getByRole('button', { name: 'Generate' }))
 
-    expect(await screen.findByText('Error: GenAI down')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Edit' })).toBeInTheDocument()
-  })
+		expect(await screen.findByText('Error: GenAI down')).toBeInTheDocument()
+		expect(screen.getByRole('button', { name: 'Edit' })).toBeInTheDocument()
+	})
 })

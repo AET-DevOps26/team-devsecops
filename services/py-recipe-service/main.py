@@ -18,7 +18,7 @@ load_dotenv()
 
 app = FastAPI(title="Cooking Assistant GenAI Service")
 
-LANGUAGE_NAMES = {"en": "English", "de": "German", "hu": "Hungarian"}
+LANGUAGE_NAMES = {"EN": "English", "DE": "German", "HU": "Hungarian"}
 
 SECRET_KEY_STR = os.getenv("INTERNAL_AUTH_SECRET")
 if not SECRET_KEY_STR:
@@ -98,7 +98,7 @@ async def generate_recipes(request_data: dict[str, Any], llm: ChatGoogleGenerati
         diet = ", ".join(prefs.diet) if prefs.diet else "None"
         allergies = ", ".join(prefs.allergies) if prefs.allergies else "None"
         about = ", ".join(prefs.about_me) if prefs.about_me else "None"
-        language = LANGUAGE_NAMES.get(getattr(prefs.language, "value", None) or "en", "English")
+        language = LANGUAGE_NAMES.get(getattr(prefs.language, "value", None) or "EN", "English")
 
         # 2. Build the System Prompt with strict JSON requirements
         system_prompt = (

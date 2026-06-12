@@ -8,5 +8,3 @@ indent_style = tab
 
 ktlint_standard_no-wildcard-imports = disabled
 ktlint_standard_kdoc = disabled
-# generated enums use the raw OpenAPI values (e.g. language codes) as entry names
-ktlint_standard_enum-entry-name-case = disabled

@@ -59,7 +59,7 @@ jobs:
         run: npm run build
 
       - name: Unit tests
-        run: npm test
+        run: npm test -- --coverage
 
       - name: Publish unit test results
         uses: dorny/test-reporter@v1
@@ -68,6 +68,14 @@ jobs:
           name: Web Client Unit Tests
           path: web-client/test-results/vitest-junit.xml
           reporter: jest-junit
+
+      - name: Upload coverage HTML
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: web-client-coverage
+          path: web-client/coverage/
+          retention-days: 7
 
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium

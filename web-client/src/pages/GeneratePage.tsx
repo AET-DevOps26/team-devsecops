@@ -200,8 +200,8 @@ export function GenerateResultsPage() {
 							{selectedTags.map((id) => (
 								<span key={id}
 								      className="rounded-full border border-gray-200 bg-white px-2 py-0.5 text-xs text-gray-600">
-                  {localizeTagLabel(id, tagsById.get(id)?.label ?? id, i18n.language)}
-                </span>
+									{localizeTagLabel(id, tagsById.get(id)?.label ?? id, i18n.language)}
+								</span>
 							))}
 						</div>
 					)}

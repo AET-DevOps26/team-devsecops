@@ -17,7 +17,7 @@ load_dotenv()
 
 app = FastAPI(title="Cooking Assistant GenAI Service")
 
-LANGUAGE_NAMES = {"en": "English", "de": "German", "hu": "Hungarian"}
+LANGUAGE_NAMES = {"EN": "English", "DE": "German", "HU": "Hungarian"}
 
 SECRET_KEY_STR = os.getenv("INTERNAL_AUTH_SECRET")
 if not SECRET_KEY_STR:
@@ -96,7 +96,7 @@ async def generate_help(request_data: dict[str, Any], llm: ChatGoogleGenerativeA
 		if request.profile and request.profile.preferences:
 			prefs = request.profile.preferences
 
-			language = LANGUAGE_NAMES.get(getattr(prefs.language, "value", None) or "en", "English")
+			language = LANGUAGE_NAMES.get(getattr(prefs.language, "value", None) or "EN", "English")
 			context.append(f"You serve a user speaking {language}.")
 
 			diet = prefs.diet or []
