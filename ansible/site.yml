@@ -29,6 +29,21 @@
         dest: /usr/local/lib/docker/cli-plugins/docker-compose
         mode: '0755'
 
+    # Compose v2 only builds with BuildKit when the buildx plugin is present;
+    # without it, it silently falls back to the classic builder, which rejects
+    # the `RUN --mount=type=cache` lines in the Spring Dockerfile.
+    - name: Get latest Docker Buildx release tag
+      uri:
+        url: https://api.github.com/repos/docker/buildx/releases/latest
+        return_content: yes
+      register: buildx_release
+
+    - name: Install Docker Buildx as a CLI plugin
+      get_url:
+        url: "https://github.com/docker/buildx/releases/download/{{ buildx_release.json.tag_name }}/buildx-{{ buildx_release.json.tag_name }}.linux-amd64"
+        dest: /usr/local/lib/docker/cli-plugins/docker-buildx
+        mode: '0755'
+
     - name: Force clean any untracked blocking files
       command: git clean -fdx
       args:
