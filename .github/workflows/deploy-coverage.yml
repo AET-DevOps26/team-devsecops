@@ -1,122 +1,225 @@
 name: Deploy Coverage to GitHub Pages
 
 on:
-  # Re-deploy whenever any service build finishes on main (coverage artifact updated).
+  # Deploy immediately when main is updated.
+  push:
+    branches:
+      - main
+  # Re-deploy whenever any service build finishes (on any branch).
   workflow_run:
     workflows: ["Spring API", "Python Help Service", "Python Recipe Service", "Web Client"]
     types: [completed]
-    # branches: [main]
-  # Also trigger on web-client changes (rebuilds the client portion).
-  push:
-    # branches: [main]
-    paths:
-      - 'web-client/**'
-      - '.github/workflows/deploy-coverage.yml'
+  # Clean up coverage store when a PR is closed.
+  pull_request:
+    types: [closed]
+  # Manual trigger to force-refresh all coverage for main.
   workflow_dispatch:
 
 concurrency:
   group: pages
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 permissions:
-  contents: read
+  contents: write  # push to coverage-data store branch
   pages: write
   id-token: write
-  actions: read
+  actions: read    # download artifacts from other workflow runs
 
 jobs:
-  deploy:
-    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+  # ── Remove a closed PR's coverage from the store ───────────────────────────
+  cleanup:
+    if: github.event_name == 'pull_request' && github.event.action == 'closed'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: coverage-data
+          path: store
+        continue-on-error: true
 
-      # ── Build web client ──────────────────────────────────────────────────
+      - name: Remove branch from store
+        run: |
+          [ -d store ] || exit 0
+          KEY="${{ github.event.pull_request.head.ref }}"
+          KEY="${KEY//\//-}"
+          rm -rf "store/coverage/$KEY"
+          cd store
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add .
+          git diff --staged --quiet || \
+            git commit -m "Remove coverage: $KEY (PR #${{ github.event.pull_request.number }} closed)"
+          git push origin coverage-data
+
+  # ── Update coverage store and redeploy Pages ───────────────────────────────
+  deploy:
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      github.event_name == 'push' ||
+      (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success')
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      # ── Identify what triggered this run ─────────────────────────────────────
+      - name: Set context
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_run" ]; then
+            BRANCH="${{ github.event.workflow_run.head_branch }}"
+            echo "COVERAGE_KEY=${BRANCH//\//-}" >> $GITHUB_ENV
+            case "${{ github.event.workflow_run.name }}" in
+              "Spring API")             echo "ARTIFACT=spring-api-coverage"  && echo "SERVICE=spring-api" ;;
+              "Python Help Service")    echo "ARTIFACT=help-service-coverage" && echo "SERVICE=py-help" ;;
+              "Python Recipe Service")  echo "ARTIFACT=recipe-service-coverage" && echo "SERVICE=py-recipe" ;;
+              "Web Client")             echo "ARTIFACT=web-client-coverage"   && echo "SERVICE=web-client" ;;
+            esac >> $GITHUB_ENV
+          else
+            echo "COVERAGE_KEY=main" >> $GITHUB_ENV
+          fi
+
+      # ── Check out (or initialise) the coverage-data store branch ─────────────
+      - uses: actions/checkout@v4
+        id: checkout-store
+        with:
+          ref: coverage-data
+          path: store
+          fetch-depth: 1
+        continue-on-error: true
+
+      - name: Init store branch
+        if: steps.checkout-store.outcome == 'failure'
+        run: |
+          mkdir store && cd store
+          git init
+          git remote add origin https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git
+          git checkout -b coverage-data
+          mkdir -p coverage
+          git -c user.name="github-actions[bot]" -c user.email="github-actions[bot]@users.noreply.github.com" \
+            commit --allow-empty -m "Initialize coverage store"
+
+      # ── Download coverage ─────────────────────────────────────────────────────
+      # workflow_run: download the one service that just built, from that exact run.
+      - name: Download service coverage
+        if: github.event_name == 'workflow_run'
+        uses: dawidd6/action-download-artifact@v6
+        with:
+          run_id: ${{ github.event.workflow_run.id }}
+          name: ${{ env.ARTIFACT }}
+          path: store/coverage/${{ env.COVERAGE_KEY }}/${{ env.SERVICE }}
+          if_no_artifact_found: ignore
+
+      # push/workflow_dispatch: pull latest coverage for all services on main.
+      - name: Download Spring API coverage
+        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+        uses: dawidd6/action-download-artifact@v6
+        with:
+          workflow: build-spring-api.yml
+          branch: main
+          name: spring-api-coverage
+          path: store/coverage/main/spring-api
+          if_no_artifact_found: ignore
+
+      - name: Download Help Service coverage
+        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+        uses: dawidd6/action-download-artifact@v6
+        with:
+          workflow: build-help-service.yml
+          branch: main
+          name: help-service-coverage
+          path: store/coverage/main/py-help
+          if_no_artifact_found: ignore
+
+      - name: Download Recipe Service coverage
+        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+        uses: dawidd6/action-download-artifact@v6
+        with:
+          workflow: build-recipe-service.yml
+          branch: main
+          name: recipe-service-coverage
+          path: store/coverage/main/py-recipe
+          if_no_artifact_found: ignore
+
+      - name: Download Web Client coverage
+        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+        uses: dawidd6/action-download-artifact@v6
+        with:
+          workflow: build-client.yml
+          branch: main
+          name: web-client-coverage
+          path: store/coverage/main/web-client
+          if_no_artifact_found: ignore
+
+      # ── Persist updated coverage to the store ────────────────────────────────
+      - name: Commit to store
+        run: |
+          cd store
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add .
+          git diff --staged --quiet && echo "No coverage changes" && exit 0
+          git commit -m "Update coverage: ${{ env.COVERAGE_KEY || 'main (rebuild)' }}"
+          # Rebase in case another branch committed while we were running.
+          REMOTE="https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git"
+          git pull --rebase "$REMOTE" coverage-data 2>/dev/null || true
+          git push "$REMOTE" HEAD:coverage-data
+
+      # ── Build web client ──────────────────────────────────────────────────────
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
           cache: 'npm'
           cache-dependency-path: web-client/package-lock.json
-
-      - name: Install
-        run: npm ci
+      - run: npm ci
         working-directory: web-client
-
-      - name: Build
-        run: npm run build
+      - run: npm run build
         working-directory: web-client
         env:
           VITE_API_BASE: ${{ vars.VITE_API_BASE }}
+      - run: cp web-client/dist/index.html web-client/dist/404.html
 
-      - name: Copy index.html to 404.html
-        run: cp web-client/dist/index.html web-client/dist/404.html
-
-      # ── Download latest coverage HTML from each service's build ───────────
-      - name: Download Spring API coverage
-        uses: dawidd6/action-download-artifact@v6
-        with:
-          workflow: build-spring-api.yml
-          name: spring-api-coverage
-          path: web-client/dist/coverage/spring-api
-          if_no_artifact_found: ignore
-
-      - name: Download Help Service coverage
-        uses: dawidd6/action-download-artifact@v6
-        with:
-          workflow: build-help-service.yml
-          name: help-service-coverage
-          path: web-client/dist/coverage/py-help
-          if_no_artifact_found: ignore
-
-      - name: Download Recipe Service coverage
-        uses: dawidd6/action-download-artifact@v6
-        with:
-          workflow: build-recipe-service.yml
-          name: recipe-service-coverage
-          path: web-client/dist/coverage/py-recipe
-          if_no_artifact_found: ignore
-
-      - name: Download Web Client coverage
-        uses: dawidd6/action-download-artifact@v6
-        with:
-          workflow: build-client.yml
-          name: web-client-coverage
-          path: web-client/dist/coverage/web-client
-          if_no_artifact_found: ignore
-
-      # ── Coverage index page ───────────────────────────────────────────────
-      - name: Create coverage index
+      # ── Assemble full Pages site ──────────────────────────────────────────────
+      - name: Assemble site
         run: |
           mkdir -p web-client/dist/coverage
-          cat > web-client/dist/coverage/index.html <<'EOF'
-          <!DOCTYPE html>
-          <html lang="en">
-          <head>
-            <meta charset="UTF-8">
-            <title>Coverage Reports</title>
-            <style>
-              body { font-family: sans-serif; max-width: 600px; margin: 4rem auto; }
-              h1 { margin-bottom: 1rem; }
-              ul { line-height: 2; }
-              a { color: #0969da; }
-            </style>
-          </head>
-          <body>
-            <h1>Coverage Reports</h1>
-            <ul>
-              <li><a href="spring-api/">Spring API</a> — JaCoCo</li>
-              <li><a href="py-help/">Help Service</a> — pytest-cov</li>
-              <li><a href="py-recipe/">Recipe Service</a> — pytest-cov</li>
-              <li><a href="web-client/">Web Client</a> — Vitest</li>
-            </ul>
-          </body>
-          </html>
-          EOF
+          [ -d store/coverage ] && cp -r store/coverage/. web-client/dist/coverage/
 
-      # ── Deploy ────────────────────────────────────────────────────────────
+          # Per-branch index (links to each service subfolder)
+          for branch_dir in web-client/dist/coverage/*/; do
+            [ -d "$branch_dir" ] || continue
+            branch=$(basename "$branch_dir")
+            {
+              printf '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">'
+              printf '<title>Coverage: %s</title>' "$branch"
+              echo '<style>body{font-family:sans-serif;max-width:600px;margin:4rem auto}a{color:#0969da}ul{line-height:2}</style>'
+              echo '</head><body>'
+              printf '<h1>Coverage: %s</h1><p><a href="../">← All branches</a></p><ul>' "$branch"
+              for svc_dir in "$branch_dir"*/; do
+                [ -d "$svc_dir" ] || continue
+                svc=$(basename "$svc_dir")
+                printf '<li><a href="%s/">%s</a></li>' "$svc" "$svc"
+              done
+              echo '</ul></body></html>'
+            } > "$branch_dir/index.html"
+          done
+
+          # Top-level coverage index (lists all branches)
+          {
+            echo '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">'
+            echo '<title>Coverage Reports</title>'
+            echo '<style>body{font-family:sans-serif;max-width:600px;margin:4rem auto}a{color:#0969da}ul{line-height:2}</style>'
+            echo '</head><body><h1>Coverage Reports</h1><ul>'
+            for branch_dir in web-client/dist/coverage/*/; do
+              [ -d "$branch_dir" ] || continue
+              branch=$(basename "$branch_dir")
+              printf '<li><a href="%s/">%s</a></li>\n' "$branch" "$branch"
+            done
+            echo '</ul></body></html>'
+          } > web-client/dist/coverage/index.html
+
+      # ── Deploy ────────────────────────────────────────────────────────────────
       - uses: actions/configure-pages@v5
 
       - uses: actions/upload-pages-artifact@v4
