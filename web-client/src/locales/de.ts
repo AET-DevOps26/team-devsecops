@@ -17,6 +17,7 @@ export const de = {
       language: 'Sprache',
       english: 'English',
       german: 'Deutsch',
+      hungarian: 'Magyar',
       aboutMe: 'Über mich',
       aboutMePlaceholder: 'z. B. Ich koche für eine vierköpfige Familie und mag scharfes Essen',
       diet: 'Ernährungsform',

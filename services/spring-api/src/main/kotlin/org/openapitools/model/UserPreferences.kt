@@ -40,13 +40,14 @@ data class UserPreferences(
 ) {
 	/**
 	 * Preferred UI and AI-content language as an ISO 639-1 code
-	 * Values: en,de
+	 * Values: en,de,hu
 	 */
 	enum class Language(
 		@get:JsonValue val value: kotlin.String,
 	) {
 		en("en"),
 		de("de"),
+		hu("hu"),
 		;
 
 		companion object {

@@ -1,13 +1,5 @@
 // German labels for the recipe tag taxonomy (src/recipeTags.json), keyed by id.
 
-export function localizeTagLabel(id: string, fallback: string, lang: string): string {
-  return lang.startsWith('de') ? recipeTagLabelsDe[id] ?? fallback : fallback
-}
-
-export function localizeFacetLabel(id: string, fallback: string, lang: string): string {
-  return lang.startsWith('de') ? recipeFacetLabelsDe[id] ?? fallback : fallback
-}
-
 export const recipeFacetLabelsDe: Record<string, string> = {
   'meal-type': 'Art der Mahlzeit',
   cuisine: 'Küche',

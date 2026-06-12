@@ -21,6 +21,12 @@ type UserProfileUpdate = components['schemas']['UserProfileUpdate']
 
 type Language = NonNullable<components['schemas']['UserPreferences']['language']>
 
+const LANGUAGE_OPTIONS = [
+  { code: 'en', labelKey: 'profile.english' },
+  { code: 'de', labelKey: 'profile.german' },
+  { code: 'hu', labelKey: 'profile.hungarian' },
+] as const satisfies readonly { code: Language; labelKey: string }[]
+
 // un-trimmed preferences as held by the inputs
 type PrefsDraft = { language: Language; aboutMe: string[]; diet: string[]; allergies: string[] }
 
@@ -257,24 +263,25 @@ export function ProfilePage() {
             </div>
             <div className="relative inline-flex self-start rounded-lg bg-gray-100 p-1">
               <span
-                className={`pointer-events-none absolute inset-y-1 left-1 w-24 rounded-md bg-white shadow-sm transition-transform duration-200 ease-out ${
-                  language === 'de' ? 'translate-x-full' : 'translate-x-0'
-                }`}
+                className="pointer-events-none absolute inset-y-1 left-1 w-24 rounded-md bg-white shadow-sm transition-transform duration-200 ease-out"
+                style={{
+                  transform: `translateX(${LANGUAGE_OPTIONS.findIndex((o) => o.code === language) * 100}%)`,
+                }}
               />
-              {(['en', 'de'] as const).map((l) => (
+              {LANGUAGE_OPTIONS.map(({ code, labelKey }) => (
                 <button
-                  key={l}
+                  key={code}
                   type="button"
                   className={`relative z-10 w-24 rounded-md py-1 text-sm font-medium transition-colors ${
-                    language === l ? 'text-orange-600' : 'text-gray-500'
+                    language === code ? 'text-orange-600' : 'text-gray-500'
                   }`}
                   onClick={() => {
-                    setLanguage(l)
-                    void i18n.changeLanguage(l)
-                    editPrefs('language', livePrefs({ language: l }))
+                    setLanguage(code)
+                    void i18n.changeLanguage(code)
+                    editPrefs('language', livePrefs({ language: code }))
                   }}
                 >
-                  {l === 'en' ? t('profile.english') : t('profile.german')}
+                  {t(labelKey)}
                 </button>
               ))}
             </div>

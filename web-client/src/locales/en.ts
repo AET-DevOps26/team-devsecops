@@ -17,6 +17,7 @@ export const en = {
       language: 'Language',
       english: 'English',
       german: 'Deutsch',
+      hungarian: 'Magyar',
       aboutMe: 'About me',
       aboutMePlaceholder: 'e.g. I cook for a family of four and love spicy food',
       diet: 'Diet',

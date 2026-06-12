@@ -2,8 +2,9 @@ import i18n from 'i18next'
 import { initReactI18next } from 'react-i18next'
 import { en } from './locales/en'
 import { de } from './locales/de'
+import { hu } from './locales/hu'
 
-export const SUPPORTED_LANGUAGES = ['en', 'de'] as const
+export const SUPPORTED_LANGUAGES = ['en', 'de', 'hu'] as const
 export type Language = (typeof SUPPORTED_LANGUAGES)[number]
 
 const FALLBACK_LANGUAGE: Language = 'en'
@@ -20,7 +21,7 @@ function detectInitialLanguage(): Language {
 }
 
 i18n.use(initReactI18next).init({
-  resources: { en, de },
+  resources: { en, de, hu },
   lng: detectInitialLanguage(),
   fallbackLng: FALLBACK_LANGUAGE,
   supportedLngs: SUPPORTED_LANGUAGES,

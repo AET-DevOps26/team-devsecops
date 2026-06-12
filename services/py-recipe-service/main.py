@@ -18,7 +18,7 @@ load_dotenv()
 
 app = FastAPI(title="Cooking Assistant GenAI Service")
 
-LANGUAGE_NAMES = {"en": "English", "de": "German"}
+LANGUAGE_NAMES = {"en": "English", "de": "German", "hu": "Hungarian"}
 
 SECRET_KEY_STR = os.getenv("INTERNAL_AUTH_SECRET")
 if not SECRET_KEY_STR:
