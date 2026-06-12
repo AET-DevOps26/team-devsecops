@@ -15,13 +15,10 @@ import { usePressPulse } from "../usePressPulse";
 import { usePrefsAutosave } from "../usePrefsAutosave";
 import { errorMessage } from "../apiError";
 import { SessionExpiredError, useApi } from "../useApi";
+import { SUPPORTED_LANGUAGES, type Language } from "../i18n";
 
 type UserProfile = components["schemas"]["UserProfile"];
 type UserProfileUpdate = components["schemas"]["UserProfileUpdate"];
-
-type Language = NonNullable<
-	components["schemas"]["UserPreferences"]["language"]
->;
 
 // un-trimmed preferences as held by the inputs
 type PrefsDraft = {
@@ -328,7 +325,7 @@ export function ProfilePage() {
 									language === "DE" ? "translate-x-full" : "translate-x-0"
 								}`}
 							/>
-							{(["EN", "DE"] as const).map((l) => (
+							{SUPPORTED_LANGUAGES.map((l) => (
 								<button
 									key={l}
 									type="button"

@@ -1,4 +1,4 @@
-export const en = {
+export const EN = {
 	translation: {
 		nav: {
 			generate: 'Generate',
