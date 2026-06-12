@@ -1,5 +1,6 @@
 import { useRef } from 'react'
 import type { KeyboardEvent } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { components } from '../api'
 import { formatQuantity } from '../recipeFormat'
 import { RecipeSaveButton } from './RecipeSaveButton.tsx'
@@ -19,6 +20,7 @@ export function RecipeCard({
   recipeId?: number
   onSavedIdChange?: (id: number | undefined) => void
 }) {
+  const { t } = useTranslation()
   const cardRef = useRef<HTMLDivElement>(null)
 
   function handleKeyDown(e: KeyboardEvent) {
@@ -41,7 +43,7 @@ export function RecipeCard({
         <h2 className="text-lg font-bold">{recipe.title}</h2>
         <div className="flex items-center gap-2">
           <span className="text-sm text-gray-500 whitespace-nowrap">
-            {recipe.portions} {recipe.portions === 1 ? 'portion' : 'portions'}
+            {recipe.portions} {recipe.portions === 1 ? t('common.portion') : t('common.portions')}
           </span>
           <RecipeSaveButton
             recipe={recipe}
@@ -67,10 +69,10 @@ export function RecipeCard({
 
       {recipe.nutrients && (
         <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-gray-600">
-          {recipe.nutrients.calories != null && <span>{recipe.nutrients.calories} kcal</span>}
-          {recipe.nutrients.protein != null && <span>{recipe.nutrients.protein}g protein</span>}
-          {recipe.nutrients.fat != null && <span>{recipe.nutrients.fat}g fat</span>}
-          {recipe.nutrients.carbs != null && <span>{recipe.nutrients.carbs}g carbs</span>}
+          {recipe.nutrients.calories != null && <span>{t('common.kcal', { value: recipe.nutrients.calories })}</span>}
+          {recipe.nutrients.protein != null && <span>{t('common.protein', { value: recipe.nutrients.protein })}</span>}
+          {recipe.nutrients.fat != null && <span>{t('common.fat', { value: recipe.nutrients.fat })}</span>}
+          {recipe.nutrients.carbs != null && <span>{t('common.carbs', { value: recipe.nutrients.carbs })}</span>}
         </div>
       )}
     </div>

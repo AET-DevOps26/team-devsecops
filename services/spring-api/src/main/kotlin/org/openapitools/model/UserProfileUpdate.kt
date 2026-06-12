@@ -1,6 +1,8 @@
 package org.openapitools.model
 
 import com.fasterxml.jackson.annotation.JsonProperty
+import com.fasterxml.jackson.annotation.JsonSetter
+import com.fasterxml.jackson.annotation.Nulls
 import io.swagger.v3.oas.annotations.media.Schema
 import jakarta.validation.Valid
 import jakarta.validation.constraints.DecimalMax
@@ -24,11 +26,14 @@ data class UserProfileUpdate(
 	@get:Pattern(regexp = "^[a-zA-Z0-9_.-]+$")
 	@get:Size(min = 1, max = 64)
 	@Schema(example = "null", description = "Alphanumeric, underscores, hyphens, and dots only")
+	@field:JsonSetter(nulls = Nulls.FAIL)
 	@get:JsonProperty("username") val username: kotlin.String? = null,
 	@get:Size(min = 4, max = 128)
 	@Schema(example = "null", description = "")
+	@field:JsonSetter(nulls = Nulls.FAIL)
 	@get:JsonProperty("password") val password: kotlin.String? = null,
 	@field:Valid
 	@Schema(example = "null", description = "")
+	@field:JsonSetter(nulls = Nulls.FAIL)
 	@get:JsonProperty("preferences") val preferences: UserPreferences? = null,
 )

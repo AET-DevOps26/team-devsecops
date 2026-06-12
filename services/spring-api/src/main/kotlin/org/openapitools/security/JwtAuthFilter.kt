@@ -40,4 +40,7 @@ class JwtAuthFilter(
 		}
 		filterChain.doFilter(request, response)
 	}
+
+	// set to false to avoid controller 500s being masked as 401
+	override fun shouldNotFilterErrorDispatch(): Boolean = false
 }

@@ -1,4 +1,6 @@
+import {useTranslation} from 'react-i18next'
 import {facets, tags, tagsById} from '../recipeFormat'
+import {localizeFacetLabel, localizeTagLabel} from '../locales/recipeTagsDe'
 
 // background by reveal order: defaults (0) are neutral, each further hop is a touch more orange.
 const TINT_BY_ORDER = [
@@ -15,6 +17,7 @@ interface TagSelectorProps {
 }
 
 export function TagSelector({selectedTags, onChange}: TagSelectorProps) {
+  const {i18n} = useTranslation()
   const selectedTagsSet = new Set(selectedTags)
 
   // order = number of "reveal-hops" from a default tag, walking only through selected tags.
@@ -50,7 +53,7 @@ export function TagSelector({selectedTags, onChange}: TagSelectorProps) {
         if (facetTags.length === 0) return null
         return (
           <div key={facet.id}>
-            <h3 className="text-sm font-semibold text-gray-700 mb-1">{facet.label}</h3>
+            <h3 className="text-sm font-semibold text-gray-700 mb-1">{localizeFacetLabel(facet.id, facet.label, i18n.language)}</h3>
             <div className="flex flex-wrap gap-2">
               {facetTags.map((tag) => {
                 const active = selectedTagsSet.has(tag.id)
@@ -65,7 +68,7 @@ export function TagSelector({selectedTags, onChange}: TagSelectorProps) {
                       active ? 'bg-orange-500 text-white border-orange-500' : tint
                     }`}
                   >
-                    {tag.label}
+                    {localizeTagLabel(tag.id, tag.label, i18n.language)}
                   </button>
                 )
               })}

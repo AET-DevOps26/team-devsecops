@@ -1,6 +1,8 @@
 spring:
   application:
     name: cookingAssistant
+  jackson:
+    default-property-inclusion: non_null
   datasource:
     # Locally defaults to H2 in-memory. On GCP Cloud Run, set DB_URL (e.g. jdbc:postgresql:///<db>?socketFactory=...&cloudSqlInstance=...), DB_USER, DB_PASSWORD env vars
     url: ${DB_URL:jdbc:h2:mem:cookingdb;DB_CLOSE_DELAY=-1}

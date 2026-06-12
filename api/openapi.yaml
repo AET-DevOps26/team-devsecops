@@ -521,6 +521,10 @@ components:
       type: object
       additionalProperties: false
       properties:
+        language:
+          type: string
+          enum: [en, de]
+          description: Preferred UI and AI-content language as an ISO 639-1 code
         diet:
           type: array
           items:

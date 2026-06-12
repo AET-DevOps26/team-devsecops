@@ -5,11 +5,12 @@ import {
   TrashIcon,
 } from '@heroicons/react/24/outline'
 import { useNavigate } from 'react-router-dom'
+import { Trans, useTranslation } from 'react-i18next'
 import type { components } from '../api'
 import { useAuth } from '../auth'
 import { Button } from '../components/Button'
 import { PasswordInput } from '../components/PasswordInput'
-import { SaveIndicator } from '../components/SaveIndicator'
+import { SaveIndicator, type SaveStatus } from '../components/SaveIndicator'
 import { usePressPulse } from '../usePressPulse'
 import { usePrefsAutosave } from '../usePrefsAutosave'
 import { errorMessage } from '../apiError'
@@ -18,8 +19,10 @@ import { SessionExpiredError, useApi } from '../useApi'
 type UserProfile = components['schemas']['UserProfile']
 type UserProfileUpdate = components['schemas']['UserProfileUpdate']
 
+type Language = NonNullable<components['schemas']['UserPreferences']['language']>
+
 // un-trimmed preferences as held by the inputs
-type PrefsDraft = { aboutMe: string[]; diet: string[]; allergies: string[] }
+type PrefsDraft = { language: Language; aboutMe: string[]; diet: string[]; allergies: string[] }
 
 const trimList = (xs: string[]) => xs.map((x) => x.trim()).filter((x) => x !== '')
 
@@ -28,25 +31,11 @@ const arrayWithout = (array: string[], index: number | null) =>
 
 const SAVE_TIMEOUT_MS = 8000
 
-const allergyPlaceholders = [
-  'e.g. peanuts',
-  'e.g. shellfish',
-  'e.g. gluten',
-  'e.g. eggs',
-  'e.g. tree nuts',
-  'e.g. dairy',
-  'e.g. soy',
-  'e.g. sesame',
-]
-
-const dietPlaceholders = [
-  'e.g. vegetarian',
-  'e.g. keto',
-  'e.g. pescatarian',
-  'e.g. low-carb',
-]
+// when a field spans several inputs (e.g. each diet row), the worst-case status wins
+const STATUS_PRIORITY: SaveStatus[] = ['error', 'saving', 'resaving', 'saved', 'idle']
 
 export function ProfilePage() {
+  const { t, i18n } = useTranslation()
   const { username, signOut, updateUsername } = useAuth()
   const apiFetch = useApi()
   const navigate = useNavigate()
@@ -58,6 +47,7 @@ export function ProfilePage() {
   const newUsername = usernameDraft ?? username ?? ''
   const [newPassword, setNewPassword] = useState('')
   const [repeatNewPassword, setRepeatNewPassword] = useState('')
+  const [language, setLanguage] = useState<Language>('en')
   const [aboutMe, setAboutMe] = useState<string[]>([])
   const [diet, setDiet] = useState<string[]>([''])
   const [allergies, setAllergies] = useState<string[]>(['', ''])
@@ -79,6 +69,7 @@ export function ProfilePage() {
         const data = (await res.json()) as UserProfile
         if (cancelled) return
         const prefs = data.preferences ?? {}
+        setLanguage(prefs.language ?? 'en')
         setAboutMe(prefs.aboutMe ?? [])
         setDiet(prefs.diet?.length ? prefs.diet : [''])
         setAllergies(prefs.allergies?.length ? prefs.allergies : ['', ''])
@@ -104,12 +95,12 @@ export function ProfilePage() {
       })
     } catch (e) {
       if ((e instanceof DOMException && e.name === 'TimeoutError') || e instanceof TypeError) {
-        throw new Error("Couldn't reach the server", { cause: e })
+        throw new Error(t('profile.couldntReachServer'), { cause: e })
       }
       throw e
     }
-    if (res.status === 409) throw new Error(await errorMessage(res, 'Username already taken'))
-    if (res.status === 400) throw new Error(await errorMessage(res, 'Invalid request'))
+    if (res.status === 409) throw new Error(await errorMessage(res, t('profile.usernameTaken')))
+    if (res.status === 400) throw new Error(await errorMessage(res, t('profile.invalidRequest')))
     if (!res.ok) throw new Error(await errorMessage(res, `HTTP ${res.status}`))
   }
 
@@ -117,6 +108,7 @@ export function ProfilePage() {
     updateProfile(
       {
         preferences: {
+          language: draft.language,
           diet: trimList(draft.diet),
           allergies: trimList(draft.allergies),
           aboutMe: trimList(draft.aboutMe),
@@ -125,7 +117,7 @@ export function ProfilePage() {
       keepalive,
     )
 
-  const { statuses: prefsStatuses, notifyEdit } = usePrefsAutosave<PrefsDraft>({
+  const { statuses: prefsStatuses, notifyEdit, trackSave } = usePrefsAutosave<PrefsDraft>({
     save: savePrefs,
     onError: (err) => {
       if (err instanceof SessionExpiredError) return
@@ -133,8 +125,17 @@ export function ProfilePage() {
     },
   })
 
+  // aggregate the status of every input belonging to a field (e.g. all diet rows)
+  const groupStatus = (field: string): SaveStatus => {
+    const statuses = Object.entries(prefsStatuses)
+      .filter(([key]) => key === field || key.startsWith(`${field}:`))
+      .map(([, status]) => status)
+    return STATUS_PRIORITY.find((s) => statuses.includes(s)) ?? 'idle'
+  }
+
   // preferences without those that are currently being delted
   const livePrefs = (overrides: Partial<PrefsDraft> = {}): PrefsDraft => ({
+    language: overrides.language ?? language,
     aboutMe: overrides.aboutMe ?? aboutMe,
     diet: arrayWithout(overrides.diet ?? diet, pendingDietDeletion),
     allergies: arrayWithout(overrides.allergies ?? allergies, pendingAllergyDeletion),
@@ -152,11 +153,13 @@ export function ProfilePage() {
     setPending(index)
     setPrefsStatus(null)
     try {
-      await savePrefs(
-        livePrefs(
-          list === 'diet'
-            ? { diet: arrayWithout(diet, index) }
-            : { allergies: arrayWithout(allergies, index) },
+      await trackSave(list, () =>
+        savePrefs(
+          livePrefs(
+            list === 'diet'
+              ? { diet: arrayWithout(diet, index) }
+              : { allergies: arrayWithout(allergies, index) },
+          ),
         ),
       )
       setValues((cur) => cur.filter((_, i) => i !== index))
@@ -172,7 +175,7 @@ export function ProfilePage() {
     pulseUsername()
     const trimmedUsername = newUsername.trim()
     if (trimmedUsername === '' || trimmedUsername === username) {
-      setUsernameStatus({ kind: 'error', msg: 'Enter a new username' })
+      setUsernameStatus({ kind: 'error', msg: t('profile.enterNewUsername') })
       return
     }
 
@@ -182,7 +185,7 @@ export function ProfilePage() {
       await updateProfile({ username: trimmedUsername })
       updateUsername(trimmedUsername)
       setUsernameDraft(null)
-      setUsernameStatus({ kind: 'ok', msg: 'Username updated' })
+      setUsernameStatus({ kind: 'ok', msg: t('profile.usernameUpdated') })
     } catch (e) {
       if (e instanceof SessionExpiredError) return
       setUsernameStatus({ kind: 'error', msg: e instanceof Error ? e.message : String(e) })
@@ -194,11 +197,11 @@ export function ProfilePage() {
   async function handleUpdatePassword() {
     pulsePassword()
     if (!newPassword) {
-      setPasswordStatus({ kind: 'error', msg: 'Enter a new password' })
+      setPasswordStatus({ kind: 'error', msg: t('profile.enterNewPassword') })
       return
     }
     if (newPassword !== repeatNewPassword) {
-      setPasswordStatus({ kind: 'error', msg: 'Passwords do not match' })
+      setPasswordStatus({ kind: 'error', msg: t('profile.passwordsNoMatch') })
       return
     }
 
@@ -208,7 +211,7 @@ export function ProfilePage() {
       await updateProfile({ password: newPassword })
       setNewPassword('')
       setRepeatNewPassword('')
-      setPasswordStatus({ kind: 'ok', msg: 'Password updated' })
+      setPasswordStatus({ kind: 'ok', msg: t('profile.passwordUpdated') })
     } catch (e) {
       if (e instanceof SessionExpiredError) return
       setPasswordStatus({ kind: 'error', msg: e instanceof Error ? e.message : String(e) })
@@ -217,11 +220,16 @@ export function ProfilePage() {
     }
   }
 
+  const dietPlaceholders = t('profile.dietPlaceholders', { returnObjects: true })
+  const allergyPlaceholders = t('profile.allergyPlaceholders', { returnObjects: true })
+
   return (
     <>
       <div className="flex flex-col items-center gap-1 w-full max-w-md self-center md:self-start my-12">
         <p>
-          Signed in as <span className="font-medium">{username}</span>.
+          <Trans i18nKey="profile.signedInAs" values={{ username: username ?? '' }}>
+            Signed in as <span className="font-medium">{username}</span>.
+          </Trans>
         </p>
         <button
           type="button"
@@ -232,61 +240,88 @@ export function ProfilePage() {
           }}
         >
           <ArrowRightStartOnRectangleIcon className="h-5 w-5" />
-          Log out
+          {t('profile.logout')}
         </button>
       </div>
 
+			{/* Preferences */}
       <div className="w-full max-w-md rounded-lg border border-gray-200 bg-white p-6 shadow-sm self-center md:self-start">
-        {/* taste preferences autosave as you type — no submit button */}
         <div className="flex flex-col gap-4">
-          <h2 className="text-lg font-bold">Taste preferences</h2>
+          <h2 className="text-lg font-bold">{t('profile.preferences')}</h2>
 
-          <label className="flex flex-col gap-1">
-            <span className="font-medium">About me</span>
-            <div className="relative">
-              <textarea
-                className="w-full border border-gray-300 rounded p-2 pr-9"
-                rows={3}
-                value={aboutMe[0] ?? ''}
-                onChange={(e) => {
-                  const next = [e.target.value]
-                  setAboutMe(next)
-                  editPrefs('aboutMe', livePrefs({ aboutMe: next }))
-                }}
-                placeholder="e.g. I cook for a family of four and love spicy food"
-              />
-              <SaveIndicator
-                status={prefsStatuses['aboutMe'] ?? 'idle'}
-                className="absolute right-2 top-2"
-              />
+					{/* Language */}
+          <div className="flex flex-col gap-1">
+            <div className="flex items-center gap-2">
+              <span className="font-medium">{t('profile.language')}</span>
+              <SaveIndicator status={prefsStatuses['language'] ?? 'idle'} />
             </div>
+            <div className="relative inline-flex self-start rounded-lg bg-gray-100 p-1">
+              <span
+                className={`pointer-events-none absolute inset-y-1 left-1 w-24 rounded-md bg-white shadow-sm transition-transform duration-200 ease-out ${
+                  language === 'de' ? 'translate-x-full' : 'translate-x-0'
+                }`}
+              />
+              {(['en', 'de'] as const).map((l) => (
+                <button
+                  key={l}
+                  type="button"
+                  className={`relative z-10 w-24 rounded-md py-1 text-sm font-medium transition-colors ${
+                    language === l ? 'text-orange-600' : 'text-gray-500'
+                  }`}
+                  onClick={() => {
+                    setLanguage(l)
+                    void i18n.changeLanguage(l)
+                    editPrefs('language', livePrefs({ language: l }))
+                  }}
+                >
+                  {l === 'en' ? t('profile.english') : t('profile.german')}
+                </button>
+              ))}
+            </div>
+          </div>
+
+					{/* About me */}
+          <label className="flex flex-col gap-1">
+            <div className="flex items-center gap-2">
+              <span className="font-medium">{t('profile.aboutMe')}</span>
+              <SaveIndicator status={prefsStatuses['aboutMe'] ?? 'idle'} />
+            </div>
+            <textarea
+              className="w-full border border-gray-300 rounded p-2"
+              rows={3}
+              value={aboutMe[0] ?? ''}
+              onChange={(e) => {
+                const next = [e.target.value]
+                setAboutMe(next)
+                editPrefs('aboutMe', livePrefs({ aboutMe: next }))
+              }}
+              placeholder={t('profile.aboutMePlaceholder')}
+            />
           </label>
 
+					{/* Diets */}
           <div className="flex flex-col gap-1">
-            <span className="font-medium">Diet</span>
+            <div className="flex items-center gap-2">
+              <span className="font-medium">{t('profile.diet')}</span>
+              <SaveIndicator status={groupStatus('diet')} />
+            </div>
             {diet.map((d, i) => (
               <div
                 key={i}
                 className={`flex items-center gap-2 ${pendingDietDeletion === i ? 'opacity-50' : ''}`}
               >
-                <div className="relative flex-1">
-                  <input
-                    type="text"
-                    className="w-full border border-gray-300 rounded p-2 pr-9 disabled:bg-gray-100"
-                    value={d}
-                    disabled={pendingDietDeletion === i}
-                    onChange={(e) => {
-                      const next = diet.map((x, j) => (j === i ? e.target.value : x))
-                      setDiet(next)
-                      editPrefs(`diet:${i}`, livePrefs({ diet: next }))
-                    }}
-                    placeholder={dietPlaceholders[i % dietPlaceholders.length]}
-                  />
-                  <SaveIndicator
-                    status={prefsStatuses[`diet:${i}`] ?? 'idle'}
-                    className="absolute right-2 top-1/2 -translate-y-1/2"
-                  />
-                </div>
+                <input
+                  type="text"
+                  className="flex-1 border border-gray-300 rounded p-2 disabled:bg-gray-100"
+                  value={d}
+                  disabled={pendingDietDeletion === i}
+                  onChange={(e) => {
+                    const next = diet.map((x, j) => (j === i ? e.target.value : x))
+                    setDiet(next)
+                    editPrefs(`diet:${i}`, livePrefs({ diet: next }))
+                  }}
+                  placeholder={dietPlaceholders[i % dietPlaceholders.length]}
+                />
                 <button
                   type="button"
                   className="cursor-pointer text-gray-400 hover:text-red-600 transition-transform duration-100 hover:scale-98 disabled:cursor-not-allowed disabled:text-gray-300 disabled:hover:text-gray-300 disabled:hover:scale-100"
@@ -305,35 +340,33 @@ export function ProfilePage() {
               <span className="flex h-5 w-5 items-center justify-center rounded-full border border-gray-400">
                 <PlusIcon className="h-4 w-4 text-gray-400 stroke-2" />
               </span>
-              add diet
+              {t('profile.addDiet')}
             </button>
           </div>
 
+					{/* Allergies */}
           <div className="flex flex-col gap-1">
-            <span className="font-medium">Allergies</span>
+            <div className="flex items-center gap-2">
+              <span className="font-medium">{t('profile.allergies')}</span>
+              <SaveIndicator status={groupStatus('allergies')} />
+            </div>
             {allergies.map((allergy, i) => (
               <div
                 key={i}
                 className={`flex items-center gap-2 ${pendingAllergyDeletion === i ? 'opacity-50' : ''}`}
               >
-                <div className="relative flex-1">
-                  <input
-                    type="text"
-                    className="w-full border border-gray-300 rounded p-2 pr-9 disabled:bg-gray-100"
-                    value={allergy}
-                    disabled={pendingAllergyDeletion === i}
-                    onChange={(e) => {
-                      const next = allergies.map((a, j) => (j === i ? e.target.value : a))
-                      setAllergies(next)
-                      editPrefs(`allergies:${i}`, livePrefs({ allergies: next }))
-                    }}
-                    placeholder={allergyPlaceholders[i % allergyPlaceholders.length]}
-                  />
-                  <SaveIndicator
-                    status={prefsStatuses[`allergies:${i}`] ?? 'idle'}
-                    className="absolute right-2 top-1/2 -translate-y-1/2"
-                  />
-                </div>
+                <input
+                  type="text"
+                  className="flex-1 border border-gray-300 rounded p-2 disabled:bg-gray-100"
+                  value={allergy}
+                  disabled={pendingAllergyDeletion === i}
+                  onChange={(e) => {
+                    const next = allergies.map((a, j) => (j === i ? e.target.value : a))
+                    setAllergies(next)
+                    editPrefs(`allergies:${i}`, livePrefs({ allergies: next }))
+                  }}
+                  placeholder={allergyPlaceholders[i % allergyPlaceholders.length]}
+                />
                 <button
                   type="button"
                   className="cursor-pointer text-gray-400 hover:text-red-600 transition-transform duration-100 hover:scale-98 disabled:cursor-not-allowed disabled:text-gray-300 disabled:hover:text-gray-300 disabled:hover:scale-100"
@@ -352,7 +385,7 @@ export function ProfilePage() {
               <span className="flex h-5 w-5 items-center justify-center rounded-full border border-gray-400">
                 <PlusIcon className="h-4 w-4 text-gray-400 stroke-2" />
               </span>
-              add allergy
+              {t('profile.addAllergy')}
             </button>
           </div>
 
@@ -364,6 +397,7 @@ export function ProfilePage() {
         </div>
       </div>
 
+			{/* Update username */}
       <div className="w-full max-w-md rounded-lg border border-gray-200 bg-white p-6 shadow-sm self-center md:self-start">
         <form
           className="flex flex-col gap-4"
@@ -372,10 +406,10 @@ export function ProfilePage() {
             handleUpdateUsername()
           }}
         >
-          <h2 className="text-lg font-bold">Update username</h2>
+          <h2 className="text-lg font-bold">{t('profile.updateUsername')}</h2>
 
           <label className="flex flex-col gap-1">
-            <span className="font-medium">New username</span>
+            <span className="font-medium">{t('profile.newUsername')}</span>
             <input
               type="text"
               className="w-full border border-gray-300 rounded p-2"
@@ -386,7 +420,7 @@ export function ProfilePage() {
           </label>
 
           <Button ref={usernameBtnRef} type="submit" className="self-center" disabled={usernameSaving}>
-            {usernameSaving ? 'Saving…' : 'Update username'}
+            {usernameSaving ? t('profile.saving') : t('profile.updateUsername')}
           </Button>
 
           {usernameStatus && (
@@ -397,6 +431,7 @@ export function ProfilePage() {
         </form>
       </div>
 
+			{/* Update password */}
       <div className="w-full max-w-md rounded-lg border border-gray-200 bg-white p-6 shadow-sm self-center md:self-start">
         <form
           className="flex flex-col gap-4"
@@ -405,10 +440,10 @@ export function ProfilePage() {
             handleUpdatePassword()
           }}
         >
-          <h2 className="text-lg font-bold">Update password</h2>
+          <h2 className="text-lg font-bold">{t('profile.updatePassword')}</h2>
 
           <label className="flex flex-col gap-1">
-            <span className="font-medium">New password</span>
+            <span className="font-medium">{t('profile.newPassword')}</span>
             <PasswordInput
               className="w-full border border-gray-300 rounded p-2"
               value={newPassword}
@@ -418,7 +453,7 @@ export function ProfilePage() {
           </label>
 
           <label className="flex flex-col gap-1">
-            <span className="font-medium">Repeat new password</span>
+            <span className="font-medium">{t('profile.repeatNewPassword')}</span>
             <PasswordInput
               className="w-full border border-gray-300 rounded p-2"
               value={repeatNewPassword}
@@ -428,7 +463,7 @@ export function ProfilePage() {
           </label>
 
           <Button ref={passwordBtnRef} type="submit" className="self-center" disabled={passwordSaving}>
-            {passwordSaving ? 'Saving…' : 'Update password'}
+            {passwordSaving ? t('profile.saving') : t('profile.updatePassword')}
           </Button>
 
           {passwordStatus && (

@@ -111,6 +111,24 @@ export function usePrefsAutosave<P>(options: {
       })
   }
 
+  // Update the indicator through a save made outside the debounced edit flow (e.g. deleting a row)
+  const trackSave = useCallback(
+    async (field: string, run: () => Promise<void>) => {
+      const timer = setTimeout(() => apply(field, 'saving'), spinnerDelay)
+      try {
+        await run()
+      } catch (err) {
+        clearTimeout(timer)
+        apply(field, 'idle')
+        throw err
+      }
+      clearTimeout(timer)
+      apply(field, 'saved')
+      scheduleFade(field)
+    },
+    [apply, scheduleFade, spinnerDelay],
+  )
+
   const savePendingEditsNow = useCallback(() => {
     if (debounceRef.current) {
       clearTimeout(debounceRef.current)
@@ -165,5 +183,5 @@ export function usePrefsAutosave<P>(options: {
     [],
   )
 
-  return { statuses, notifyEdit }
+  return { statuses, notifyEdit, trackSave }
 }
