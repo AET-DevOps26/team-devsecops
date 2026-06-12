@@ -20,6 +20,7 @@ spec:
       containers:
         - name: py-help-service
           image: ghcr.io/aet-devops26/team-devsecops/py-help-service:latest
+          imagePullPolicy: Always
           ports:
             - containerPort: 8080
           envFrom:
