@@ -57,7 +57,7 @@ jobs:
           INTERNAL_AUTH_SECRET: ${{ secrets.INTERNAL_AUTH_SECRET }}
           SERVICE_API_KEY: ${{ secrets.SERVICE_API_KEY }}
         run: |
-          pytest --junitxml=report.xml --cov=. --cov-report=html:htmlcov
+          pytest --junitxml=report.xml --cov=main --cov-report=html:htmlcov
 
       - name: Publish test results
         uses: dorny/test-reporter@v1
