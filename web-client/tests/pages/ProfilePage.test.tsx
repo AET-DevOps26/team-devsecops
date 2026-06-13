@@ -70,6 +70,20 @@ describe('ProfilePage', () => {
 		expect(await screen.findByText('Username already taken')).toBeInTheDocument()
 	})
 
+	it('deletes the account after confirmation and redirects to login', async () => {
+		defaultProfileFetch({username: 'alice'})
+		const user = userEvent.setup()
+		render()
+
+		await user.click(screen.getByRole('button', {name: 'Delete account'}))
+		await user.click(screen.getByRole('button', {name: 'Yes, delete my account'}))
+
+		const deleteCalls = fetchMock.mock.calls.filter(([, init]) => init?.method === 'DELETE')
+		expect(deleteCalls).toHaveLength(1)
+		expect(String(deleteCalls[0][0])).toContain('/users/profile')
+		expect(await screen.findByText('login page')).toBeInTheDocument()
+	})
+
 	describe('taste-preferences autosave', () => {
 		const status = () => document.querySelector('[data-status]:not([data-status="idle"])')
 			?.getAttribute('data-status') ?? 'idle'

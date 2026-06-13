@@ -54,6 +54,12 @@ export const HU = {
 			saving: 'Mentés…',
 			couldntReachServer: 'A szerver nem érhető el',
 			invalidRequest: 'Hibás kérés',
+			deleteAccount: 'Fiók törlése',
+			deleteAccountWarning:
+				'Ez véglegesen törli a fiókodat és az összes mentett receptedet. A művelet nem vonható vissza.',
+			deleteAccountConfirm: 'Igen, töröld a fiókomat',
+			deleteAccountCancel: 'Mégse',
+			deleting: 'Törlés…',
 		},
 		common: {
 			error: 'Hiba: {{message}}',
