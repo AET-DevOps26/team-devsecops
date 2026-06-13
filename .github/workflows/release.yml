@@ -7,6 +7,12 @@ name: Release
 on:
   workflow_dispatch:
 
+permissions:
+  contents: read
+  packages: write
+  checks: write
+  pull-requests: write
+
 jobs:
   build-spring-api:
     uses: ./.github/workflows/build-spring-api.yml

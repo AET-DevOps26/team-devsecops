@@ -28,7 +28,10 @@ jobs:
   deploy:
     # For workflow_run: skip if the upstream CI failed or was cancelled.
     # For all other triggers (push, workflow_call, workflow_dispatch): always run.
-    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    if: >
+      github.event_name != 'workflow_run' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.event != 'workflow_call')
     runs-on: ubuntu-latest
     environment: kubernetes
 
@@ -94,6 +97,7 @@ jobs:
           kubectl apply -f infra/k8s/ingress.yaml
 
       - name: Restart deployments to pull latest images
+        if: github.event_name != 'push'
         run: |
           kubectl rollout restart deployment/spring-api -n app
           kubectl rollout restart deployment/py-recipe-service -n app
@@ -109,6 +113,12 @@ jobs:
 
       - name: Show deployment summary
         run: |
+          echo "=== Running image digests ==="
+          kubectl get pods -n app -o json | jq -r '
+            .items[] |
+            "\(.metadata.name):\n  image:  \(.status.containerStatuses[0].image // "unknown")\n  digest: \(.status.containerStatuses[0].imageID // "pending")"
+          '
+          echo ""
           echo "=== Pods ==="
           kubectl get pods -n app -o wide
           echo ""

@@ -20,6 +20,7 @@ spec:
       containers:
         - name: py-recipe-service
           image: ghcr.io/aet-devops26/team-devsecops/py-recipe-service:latest
+          imagePullPolicy: Always
           ports:
             - containerPort: 8080
           envFrom:

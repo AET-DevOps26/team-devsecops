@@ -18,6 +18,7 @@ spec:
       containers:
         - name: spring-api
           image: ghcr.io/aet-devops26/team-devsecops/spring-api:latest
+          imagePullPolicy: Always
           ports:
             - containerPort: 8080
           envFrom:

@@ -21,6 +21,7 @@ spec:
       containers:
         - name: web-client
           image: ghcr.io/aet-devops26/team-devsecops/web-client:latest
+          imagePullPolicy: Always
           ports:
             - containerPort: 8080
           resources:
