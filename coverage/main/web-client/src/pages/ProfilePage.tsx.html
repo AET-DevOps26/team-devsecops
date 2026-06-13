@@ -23,30 +23,30 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">75.15% </span>
+                <span class="strong">75.47% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>118/157</span>
+                <span class='fraction'>120/159</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">67.76% </span>
+                <span class="strong">67.52% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>82/121</span>
+                <span class='fraction'>79/117</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">81.81% </span>
+                <span class="strong">82.22% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>36/44</span>
+                <span class='fraction'>37/45</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">77.37% </span>
+                <span class="strong">77.69% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>106/137</span>
+                <span class='fraction'>108/139</span>
             </div>
         
             
@@ -569,7 +569,14 @@
 <a name='L504'></a><a href='#L504'>504</a>
 <a name='L505'></a><a href='#L505'>505</a>
 <a name='L506'></a><a href='#L506'>506</a>
-<a name='L507'></a><a href='#L507'>507</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L507'></a><a href='#L507'>507</a>
+<a name='L508'></a><a href='#L508'>508</a>
+<a name='L509'></a><a href='#L509'>509</a>
+<a name='L510'></a><a href='#L510'>510</a>
+<a name='L511'></a><a href='#L511'>511</a>
+<a name='L512'></a><a href='#L512'>512</a>
+<a name='L513'></a><a href='#L513'>513</a>
+<a name='L514'></a><a href='#L514'>514</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -587,6 +594,12 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -830,10 +843,11 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">113x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">226x</span>
+<span class="cline-any cline-yes">339x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -1098,6 +1112,12 @@ type UserProfileUpdate = components['schemas']['UserProfileUpdate']
 &nbsp;
 type Language = NonNullable&lt;components['schemas']['UserPreferences']['language']&gt;
 &nbsp;
+const LANGUAGE_OPTIONS = [
+	{ code: 'EN', labelKey: 'profile.english' },
+	{ code: 'DE', labelKey: 'profile.german' },
+	{ code: 'HU', labelKey: 'profile.hungarian' },
+] as const satisfies readonly { code: Language; labelKey: string }[]
+&nbsp;
 // un-trimmed preferences as held by the inputs
 type PrefsDraft = { language: Language; aboutMe: string[]; diet: string[]; allergies: string[] }
 &nbsp;
@@ -1334,24 +1354,25 @@ export function ProfilePage() {
 						&lt;/div&gt;
 						&lt;div className="relative inline-flex self-start rounded-lg bg-gray-100 p-1"&gt;
 							&lt;span
-								className={`pointer-events-none absolute inset-y-1 left-1 w-24 rounded-md bg-white shadow-sm transition-transform duration-200 ease-out ${
-									language === 'DE' ? <span class="branch-0 cbranch-no" title="branch not covered" >'translate-x-full' : '</span>translate-x-0'
-								}`}
+								className="pointer-events-none absolute inset-y-1 left-1 w-24 rounded-md bg-white shadow-sm transition-transform duration-200 ease-out"
+								style={{
+									transform: `translateX(${LANGUAGE_OPTIONS.findIndex((o) =&gt; o.code === language) * 100}%)`,
+								}}
 							/&gt;
-							{(['EN', 'DE'] as const).map((l) =&gt; (
+							{LANGUAGE_OPTIONS.map(({ code, labelKey }) =&gt; (
 								&lt;button
-									key={l}
+									key={code}
 									type="button"
 									className={`relative z-10 w-24 rounded-md py-1 text-sm font-medium transition-colors ${
-										language === l ? 'text-orange-600' : 'text-gray-500'
+										language === code ? 'text-orange-600' : 'text-gray-500'
 									}`}
 									onClick={<span class="fstat-no" title="function not covered" >() =&gt; {</span>
-<span class="cstat-no" title="statement not covered" >										setLanguage(l)</span>
-<span class="cstat-no" title="statement not covered" >										void i18n.changeLanguage(l)</span>
-<span class="cstat-no" title="statement not covered" >										editPrefs('language', livePrefs({ language: l }))</span>
+<span class="cstat-no" title="statement not covered" >										setLanguage(code)</span>
+<span class="cstat-no" title="statement not covered" >										void i18n.changeLanguage(code)</span>
+<span class="cstat-no" title="statement not covered" >										editPrefs('language', livePrefs({ language: code }))</span>
 									}}
 								&gt;
-									{l === 'EN' ? t('profile.english') : t('profile.german')}
+									{t(labelKey)}
 								&lt;/button&gt;
 							))}
 						&lt;/div&gt;
@@ -1588,7 +1609,7 @@ export function ProfilePage() {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-06-12T14:53:26.774Z
+                at 2026-06-13T08:17:40.533Z
             </div>
         <script src="../../prettify.js"></script>
         <script>
