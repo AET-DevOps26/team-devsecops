@@ -3,10 +3,11 @@ import { initReactI18next } from 'react-i18next'
 import type { components } from './api'
 import { EN } from './locales/en'
 import { DE } from './locales/de'
+import { HU } from './locales/hu'
 
 export type Language = NonNullable<components['schemas']['UserPreferences']['language']>
 
-export const SUPPORTED_LANGUAGES = ['EN', 'DE'] as const satisfies readonly Language[]
+export const SUPPORTED_LANGUAGES = ['EN', 'DE', 'HU'] as const satisfies readonly Language[]
 
 const FALLBACK_LANGUAGE: Language = 'EN'
 
@@ -22,7 +23,7 @@ function detectInitialLanguage(): Language {
 }
 
 i18n.use(initReactI18next).init({
-	resources: { EN, DE },
+	resources: { EN, DE, HU },
 	lng: detectInitialLanguage(),
 	fallbackLng: FALLBACK_LANGUAGE,
 	supportedLngs: SUPPORTED_LANGUAGES,

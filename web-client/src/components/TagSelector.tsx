@@ -1,6 +1,6 @@
 import {useTranslation} from 'react-i18next'
 import {facets, tags, tagsById} from '../recipeFormat'
-import {localizeFacetLabel, localizeTagLabel} from '../locales/recipeTagsDe'
+import {localizeFacetLabel, localizeTagLabel} from '../locales/recipeTagLabels'
 
 // background by reveal order: defaults (0) are neutral, each further hop is a touch more orange.
 const TINT_BY_ORDER = [
