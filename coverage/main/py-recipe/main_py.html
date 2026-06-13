@@ -65,7 +65,7 @@
             <a id="nextFileLink" class="nav" href="index.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.14.1">coverage.py v7.14.1</a>,
-            created at 2026-06-12 14:53 +0000
+            created at 2026-06-13 08:17 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -100,7 +100,7 @@
     <p class="pln"><span class="n"><a id="t18" href="#t18">18</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t19" href="#t19">19</a></span><span class="t"><span class="nam">app</span> <span class="op">=</span> <span class="nam">FastAPI</span><span class="op">(</span><span class="nam">title</span><span class="op">=</span><span class="str">"Cooking Assistant GenAI Service"</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t20" href="#t20">20</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t21" href="#t21">21</a></span><span class="t"><span class="nam">LANGUAGE_NAMES</span> <span class="op">=</span> <span class="op">{</span><span class="str">"en"</span><span class="op">:</span> <span class="str">"English"</span><span class="op">,</span> <span class="str">"de"</span><span class="op">:</span> <span class="str">"German"</span><span class="op">}</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t21" href="#t21">21</a></span><span class="t"><span class="nam">LANGUAGE_NAMES</span> <span class="op">=</span> <span class="op">{</span><span class="str">"EN"</span><span class="op">:</span> <span class="str">"English"</span><span class="op">,</span> <span class="str">"DE"</span><span class="op">:</span> <span class="str">"German"</span><span class="op">,</span> <span class="str">"HU"</span><span class="op">:</span> <span class="str">"Hungarian"</span><span class="op">}</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t22" href="#t22">22</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t23" href="#t23">23</a></span><span class="t"><span class="nam">SECRET_KEY_STR</span> <span class="op">=</span> <span class="nam">os</span><span class="op">.</span><span class="nam">getenv</span><span class="op">(</span><span class="str">"INTERNAL_AUTH_SECRET"</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t24" href="#t24">24</a></span><span class="t"><span class="key">if</span> <span class="key">not</span> <span class="nam">SECRET_KEY_STR</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
@@ -180,7 +180,7 @@
     <p class="run"><span class="n"><a id="t98" href="#t98">98</a></span><span class="t">        <span class="nam">diet</span> <span class="op">=</span> <span class="str">", "</span><span class="op">.</span><span class="nam">join</span><span class="op">(</span><span class="nam">prefs</span><span class="op">.</span><span class="nam">diet</span><span class="op">)</span> <span class="key">if</span> <span class="nam">prefs</span><span class="op">.</span><span class="nam">diet</span> <span class="key">else</span> <span class="str">"None"</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t99" href="#t99">99</a></span><span class="t">        <span class="nam">allergies</span> <span class="op">=</span> <span class="str">", "</span><span class="op">.</span><span class="nam">join</span><span class="op">(</span><span class="nam">prefs</span><span class="op">.</span><span class="nam">allergies</span><span class="op">)</span> <span class="key">if</span> <span class="nam">prefs</span><span class="op">.</span><span class="nam">allergies</span> <span class="key">else</span> <span class="str">"None"</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t100" href="#t100">100</a></span><span class="t">        <span class="nam">about</span> <span class="op">=</span> <span class="str">", "</span><span class="op">.</span><span class="nam">join</span><span class="op">(</span><span class="nam">prefs</span><span class="op">.</span><span class="nam">about_me</span><span class="op">)</span> <span class="key">if</span> <span class="nam">prefs</span><span class="op">.</span><span class="nam">about_me</span> <span class="key">else</span> <span class="str">"None"</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t101" href="#t101">101</a></span><span class="t">        <span class="nam">language</span> <span class="op">=</span> <span class="nam">LANGUAGE_NAMES</span><span class="op">.</span><span class="nam">get</span><span class="op">(</span><span class="nam">getattr</span><span class="op">(</span><span class="nam">prefs</span><span class="op">.</span><span class="nam">language</span><span class="op">,</span> <span class="str">"value"</span><span class="op">,</span> <span class="key">None</span><span class="op">)</span> <span class="key">or</span> <span class="str">"en"</span><span class="op">,</span> <span class="str">"English"</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t101" href="#t101">101</a></span><span class="t">        <span class="nam">language</span> <span class="op">=</span> <span class="nam">LANGUAGE_NAMES</span><span class="op">.</span><span class="nam">get</span><span class="op">(</span><span class="nam">getattr</span><span class="op">(</span><span class="nam">prefs</span><span class="op">.</span><span class="nam">language</span><span class="op">,</span> <span class="str">"value"</span><span class="op">,</span> <span class="key">None</span><span class="op">)</span> <span class="key">or</span> <span class="str">"EN"</span><span class="op">,</span> <span class="str">"English"</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t102" href="#t102">102</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t103" href="#t103">103</a></span><span class="t">        <span class="com"># 2. Build the System Prompt with strict JSON requirements</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t104" href="#t104">104</a></span><span class="t">        <span class="nam">system_prompt</span> <span class="op">=</span> <span class="op">(</span>&nbsp;</span><span class="r"></span></p>
@@ -242,7 +242,7 @@
             <a class="nav" href="index.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.14.1">coverage.py v7.14.1</a>,
-            created at 2026-06-12 14:53 +0000
+            created at 2026-06-13 08:17 +0000
         </p>
     </div>
 </footer>
