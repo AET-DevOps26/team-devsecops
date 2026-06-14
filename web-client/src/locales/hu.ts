@@ -59,7 +59,7 @@ export const HU = {
 				'Ez véglegesen törli a fiókodat és az összes mentett receptedet. A művelet nem vonható vissza.',
 			deleteAccountConfirm: 'Igen, töröld a fiókomat',
 			deleteAccountCancel: 'Mégse',
-			deleting: 'Törlés…',
+			deleting: 'Törlés folyamatban…',
 		},
 		common: {
 			error: 'Hiba: {{message}}',

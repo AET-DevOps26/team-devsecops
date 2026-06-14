@@ -6,6 +6,8 @@ Rancher deployment (Kubernetes): https://devsecops.stud.k8s.aet.cit.tum.de
 
 Azure deployment (Docker Compose): http://135.116.196.120/
 
+Coverage reports: https://aet-devops26.github.io/team-devsecops/
+
 API scheme (Swagger UI): https://devsecops.stud.k8s.aet.cit.tum.de/swagger-ui/index.html
 ## Local development
 
