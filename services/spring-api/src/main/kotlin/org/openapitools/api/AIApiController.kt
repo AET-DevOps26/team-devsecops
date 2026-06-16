@@ -43,15 +43,16 @@ class AIApiController(
 				recipe = helpRequest.recipe?.toInternalRecipe(),
 			)
 
-		val retrofitResponse = try {
-        helpServiceApi.aiHelpPost("", "", internalRequest).execute()
-		} catch (e: InterruptedIOException) {
-			// Map the timeout to 504 Gateway Timeout
-			throw ResponseStatusException(HttpStatus.GATEWAY_TIMEOUT, "Upstream AI service timed out", e)
-		} catch (e: Exception) {
-			// Handle other potential network failures
-			throw ResponseStatusException(HttpStatus.BAD_GATEWAY, "Upstream service error", e)
-		}
+		val retrofitResponse =
+			try {
+				helpServiceApi.aiHelpPost("", "", internalRequest).execute()
+			} catch (e: InterruptedIOException) {
+				// Map the timeout to 504 Gateway Timeout
+				throw ResponseStatusException(HttpStatus.GATEWAY_TIMEOUT, "Upstream AI service timed out", e)
+			} catch (e: Exception) {
+				// Handle other potential network failures
+				throw ResponseStatusException(HttpStatus.BAD_GATEWAY, "Upstream service error", e)
+			}
 
 		val body = handleRetrofitResponse(retrofitResponse)
 		return ResponseEntity.ok(HelpResponse(response = body.response))
@@ -68,13 +69,14 @@ class AIApiController(
 				prompt = recipeRequest.prompt,
 			)
 
-		val retrofitResponse = try {
-			recipeServiceApi.aiRecipesPost("", "", internalRequest).execute()
-		} catch (e: InterruptedIOException) {
-			throw ResponseStatusException(HttpStatus.GATEWAY_TIMEOUT, "Upstream AI service timed out", e)
-		} catch (e: Exception) {
-			throw ResponseStatusException(HttpStatus.BAD_GATEWAY, "Upstream service error", e)
-		}
+		val retrofitResponse =
+			try {
+				recipeServiceApi.aiRecipesPost("", "", internalRequest).execute()
+			} catch (e: InterruptedIOException) {
+				throw ResponseStatusException(HttpStatus.GATEWAY_TIMEOUT, "Upstream AI service timed out", e)
+			} catch (e: Exception) {
+				throw ResponseStatusException(HttpStatus.BAD_GATEWAY, "Upstream service error", e)
+			}
 
 		val internalRecipes = handleRetrofitResponse(retrofitResponse)
 		val publicRecipes = internalRecipes.map { it.toPublicRecipe() }
@@ -89,13 +91,14 @@ class AIApiController(
 	private fun <T> handleRetrofitResponse(response: retrofit2.Response<T>): T {
 		if (!response.isSuccessful) {
 			throw ResponseStatusException(
-				HttpStatus.BAD_GATEWAY, 
-				"Upstream service returned error: ${response.code()}"
+				HttpStatus.BAD_GATEWAY,
+				"Upstream service returned error: ${response.code()}",
 			)
 		}
 		
 		return response.body() ?: throw ResponseStatusException(
-			HttpStatus.INTERNAL_SERVER_ERROR, "Empty body"
+			HttpStatus.INTERNAL_SERVER_ERROR,
+			"Empty body",
 		)
 	}
 

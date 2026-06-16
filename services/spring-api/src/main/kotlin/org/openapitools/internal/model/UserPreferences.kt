@@ -7,28 +7,27 @@
  */
 
 @file:Suppress(
-    "ArrayInDataClass",
-    "DuplicatedCode",
-    "EnumEntryName",
-    "RemoveRedundantQualifierName",
-    "RemoveRedundantCallsOfConversionMethods",
-    "REDUNDANT_CALL_OF_CONVERSION_METHOD",
-    "RedundantUnitReturnType",
-    "RemoveEmptyClassBody",
-    "UnnecessaryVariable",
-    "UnusedImport",
-    "UnnecessaryVariable",
-    "unused"
+	"ArrayInDataClass",
+	"DuplicatedCode",
+	"EnumEntryName",
+	"RemoveRedundantQualifierName",
+	"RemoveRedundantCallsOfConversionMethods",
+	"REDUNDANT_CALL_OF_CONVERSION_METHOD",
+	"RedundantUnitReturnType",
+	"RemoveEmptyClassBody",
+	"UnnecessaryVariable",
+	"UnusedImport",
+	"UnnecessaryVariable",
+	"unused",
 )
 
 package org.openapitools.internal.model
-
 
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 
 /**
- * 
+ *
  *
  * @param language Preferred UI and AI-content language as an ISO 639-1 code
  * @param diet Dietary restriction or style (e.g. vegan, keto)
@@ -36,38 +35,36 @@ import com.squareup.moshi.JsonClass
  * @param aboutMe Free-form user context provided to the AI
  */
 
-
-data class UserPreferences (
-
-    /* Preferred UI and AI-content language as an ISO 639-1 code */
-    @Json(name = "language")
-    val language: UserPreferences.Language? = null,
-
-    /* Dietary restriction or style (e.g. vegan, keto) */
-    @Json(name = "diet")
-    val diet: kotlin.collections.List<kotlin.String>? = null,
-
-    /* List of ingredients the user is allergic to */
-    @Json(name = "allergies")
-    val allergies: kotlin.collections.List<kotlin.String>? = null,
-
-    /* Free-form user context provided to the AI */
-    @Json(name = "aboutMe")
-    val aboutMe: kotlin.collections.List<kotlin.String>? = null
-
+data class UserPreferences(
+	// Preferred UI and AI-content language as an ISO 639-1 code
+	@Json(name = "language")
+	val language: UserPreferences.Language? = null,
+	// Dietary restriction or style (e.g. vegan, keto)
+	@Json(name = "diet")
+	val diet: kotlin.collections.List<kotlin.String>? = null,
+	// List of ingredients the user is allergic to
+	@Json(name = "allergies")
+	val allergies: kotlin.collections.List<kotlin.String>? = null,
+	// Free-form user context provided to the AI
+	@Json(name = "aboutMe")
+	val aboutMe: kotlin.collections.List<kotlin.String>? = null,
 ) {
+	/**
+	 * Preferred UI and AI-content language as an ISO 639-1 code
+	 *
+	 * Values: EN,DE,HU
+	 */
+	@JsonClass(generateAdapter = false)
+	enum class Language(
+		val value: kotlin.String,
+	) {
+		@Json(name = "EN")
+		EN("EN"),
 
-    /**
-     * Preferred UI and AI-content language as an ISO 639-1 code
-     *
-     * Values: EN,DE,HU
-     */
-    @JsonClass(generateAdapter = false)
-    enum class Language(val value: kotlin.String) {
-        @Json(name = "EN") EN("EN"),
-        @Json(name = "DE") DE("DE"),
-        @Json(name = "HU") HU("HU");
-    }
+		@Json(name = "DE")
+		DE("DE"),
 
+		@Json(name = "HU")
+		HU("HU"),
+	}
 }
-

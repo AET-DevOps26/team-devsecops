@@ -7,49 +7,39 @@
  */
 
 @file:Suppress(
-    "ArrayInDataClass",
-    "DuplicatedCode",
-    "EnumEntryName",
-    "RemoveRedundantQualifierName",
-    "RemoveRedundantCallsOfConversionMethods",
-    "REDUNDANT_CALL_OF_CONVERSION_METHOD",
-    "RedundantUnitReturnType",
-    "RemoveEmptyClassBody",
-    "UnnecessaryVariable",
-    "UnusedImport",
-    "UnnecessaryVariable",
-    "unused"
+	"ArrayInDataClass",
+	"DuplicatedCode",
+	"EnumEntryName",
+	"RemoveRedundantQualifierName",
+	"RemoveRedundantCallsOfConversionMethods",
+	"REDUNDANT_CALL_OF_CONVERSION_METHOD",
+	"RedundantUnitReturnType",
+	"RemoveEmptyClassBody",
+	"UnnecessaryVariable",
+	"UnusedImport",
+	"UnnecessaryVariable",
+	"unused",
 )
 
 package org.openapitools.internal.model
-
 
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 
 /**
- * 
  *
- * @param quantity 
+ *
+ * @param quantity
  * @param unit Unit of measurement (e.g. g, ml, cup, tbsp)
- * @param name 
+ * @param name
  */
 
-
-data class RecipeIngredient (
-
-    @Json(name = "quantity")
-    val quantity: kotlin.Double,
-
-    /* Unit of measurement (e.g. g, ml, cup, tbsp) */
-    @Json(name = "unit")
-    val unit: kotlin.String,
-
-    @Json(name = "name")
-    val name: kotlin.String
-
-) {
-
-
-}
-
+data class RecipeIngredient(
+	@Json(name = "quantity")
+	val quantity: kotlin.Double,
+	// Unit of measurement (e.g. g, ml, cup, tbsp)
+	@Json(name = "unit")
+	val unit: kotlin.String,
+	@Json(name = "name")
+	val name: kotlin.String,
+)

@@ -1,5 +1,6 @@
 package org.openapitools.api
 
+import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.ResponseBody.Companion.toResponseBody
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -28,8 +29,6 @@ import retrofit2.Call
 import retrofit2.Response
 import java.io.InterruptedIOException
 import java.math.BigDecimal
-
-import okhttp3.MediaType.Companion.toMediaType
 
 @Import(AIApiTest.MockApiServices::class)
 class AIApiTest : ApiTestBase() {
