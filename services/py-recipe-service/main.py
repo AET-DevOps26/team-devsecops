@@ -11,7 +11,7 @@ from dotenv import load_dotenv
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.messages import HumanMessage, SystemMessage
 
-from client.cooking_assistant_api_client.models.recipe_request_forwarded import RecipeRequestForwarded
+from client.cooking_assistant_gen_ai_services_api_internal_client.models.recipe_request_forwarded import RecipeRequestForwarded
 
 # Load variables from .env for local testing
 load_dotenv()
@@ -38,19 +38,19 @@ async def verify_internal_hmac(
     if not x_internal_timestamp or not x_internal_signature:
         raise HTTPException(
             status_code=401,
-            detail="Unauthorized: Missing security authentication headers."
+            detail={"message": "Unauthorized: Missing security authentication headers."}
         )
 
     # 1. Parse incoming timestamp string context securely
     try:
         request_time = int(x_internal_timestamp)
     except ValueError:
-        raise HTTPException(status_code=400, detail="Invalid timestamp metadata formatting.")
+        raise HTTPException(status_code=400, detail={"message": "Invalid timestamp metadata formatting."})
 
     # 2. Reject requests with more than 5 minutes of clock drift
     current_time = int(time.time())
     if abs(current_time - request_time) > 300:
-        raise HTTPException(status_code=401, detail="Request token signature expired.")
+        raise HTTPException(status_code=401, detail={"message": "Request token signature expired."})
 
     # 3. Read the raw body bytes directly from the stream
     body_bytes = await request.body()
@@ -66,7 +66,7 @@ async def verify_internal_hmac(
 
     # 5. Use constant-time comparison to completely prevent timing attacks
     if not hmac.compare_digest(expected_signature, x_internal_signature):
-        raise HTTPException(status_code=403, detail="Forbidden: HMAC signature validation mismatch.")
+        raise HTTPException(status_code=403, detail={"message": "Forbidden: HMAC signature validation mismatch."})
 
 
 def get_llm():
@@ -86,10 +86,10 @@ async def generate_recipes(request_data: dict[str, Any], llm: ChatGoogleGenerati
     try:
         request = RecipeRequestForwarded.from_dict(request_data)
     except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Invalid request format: {str(e)}")
+        raise HTTPException(status_code=400, detail={"message": f"Invalid request format: {str(e)}"})
 
     if not request.profile or not request.profile.preferences:
-        raise HTTPException(status_code=400, detail="Missing required profile preferences.")
+        raise HTTPException(status_code=400, detail={"message": "Missing required profile preferences."})
 
     try:
 
@@ -147,7 +147,7 @@ async def generate_recipes(request_data: dict[str, Any], llm: ChatGoogleGenerati
         return data
 
     except asyncio.TimeoutError:
-        raise HTTPException(status_code=504, detail="LLM connection timed out.")
+        raise HTTPException(status_code=504, detail={"message": "LLM connection timed out."})
     except Exception as e:
         traceback.print_exc()
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail={"message": str(e)})

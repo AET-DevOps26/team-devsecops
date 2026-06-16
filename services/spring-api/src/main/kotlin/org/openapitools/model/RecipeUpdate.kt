@@ -36,7 +36,7 @@ data class RecipeUpdate(
 	@get:JsonProperty("instructions") val instructions: kotlin.collections.List<kotlin.String>? = null,
 	@get:DecimalMin(value = "0.5")
 	@Schema(example = "null", description = "")
-	@get:JsonProperty("portions") val portions: java.math.BigDecimal? = null,
+	@get:JsonProperty("portions") val portions: kotlin.Double? = null,
 	@field:Valid
 	@Schema(example = "null", description = "")
 	@get:JsonProperty("nutrients") val nutrients: RecipeNutrients? = null,

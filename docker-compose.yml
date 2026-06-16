@@ -84,3 +84,17 @@ services:
           target: /app/vite.config.ts
         - action: rebuild
           path: ./web-client/package.json
+
+  swagger-ui:
+    image: swaggerapi/swagger-ui:v5.18.2
+    container_name: team-devsecops-swagger-ui
+    ports:
+      - "8083:8080"
+    environment:
+      URLS: "[
+        { url: '/openapi/openapi.yaml', name: 'Public Gateway API' },
+        { url: '/openapi/openapi-internal.yaml', name: 'Internal GenAI Microservices' }
+      ]"
+    volumes:
+      - ./api/openapi.yaml:/usr/share/nginx/html/openapi/openapi.yaml:ro
+      - ./api/openapi-internal.yaml:/usr/share/nginx/html/openapi/openapi-internal.yaml:ro

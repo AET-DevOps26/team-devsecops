@@ -2,6 +2,8 @@ package org.openapitools.api
 
 import jakarta.validation.Valid
 import org.openapitools.entity.UserEntity
+import org.openapitools.internal.client.HelpServiceApi
+import org.openapitools.internal.client.RecipeServiceApi
 import org.openapitools.model.HelpRequest
 import org.openapitools.model.HelpResponse
 import org.openapitools.model.RecipeInput
@@ -9,79 +11,130 @@ import org.openapitools.model.RecipeRequest
 import org.openapitools.model.UserPreferences
 import org.openapitools.model.UserProfile
 import org.openapitools.repository.UserRepository
-import org.springframework.core.ParameterizedTypeReference
-import org.springframework.http.MediaType
+import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
-import org.springframework.web.reactive.function.client.WebClient
+import org.springframework.web.server.ResponseStatusException
 import tools.jackson.databind.ObjectMapper
-import java.time.Duration
-import java.util.concurrent.TimeoutException
+import retrofit2.Response
 
 @RestController
 @Validated
 @RequestMapping("\${api.base-path:/api/v1}")
 class AIApiController(
-	private val aiHelpWebClient: WebClient,
-	private val aiRecipeWebClient: WebClient,
+	private val helpServiceApi: HelpServiceApi,
+    private val recipeServiceApi: RecipeServiceApi,
 	private val userRepository: UserRepository,
 	private val objectMapper: ObjectMapper,
 ) : AIApi {
-	// Cap how long we wait on the GenAI service before returning an error
-	private val aiTimeout = Duration.ofSeconds(60)
-
+	
 	override fun aiHelpPost(
-		@Valid helpRequest: HelpRequest,
-	): ResponseEntity<HelpResponse> {
-		val user = userRepository.findByUsername(currentUsername()).orElseThrow()
-		val response =
-			aiHelpWebClient
-				.post()
-				.uri("/ai/help")
-				.contentType(MediaType.APPLICATION_JSON)
-				.bodyValue(mapOf("profile" to user.toProfile(), "recipe" to helpRequest.recipe, "prompt" to helpRequest.prompt))
-				.retrieve()
-				.bodyToMono(HelpResponse::class.java)
-				.timeout(aiTimeout)
-				.onErrorMap(TimeoutException::class.java) { GatewayTimeoutException("GenAI service timed out") }
-				.block() ?: throw BadGatewayException("GenAI service unavailable or returned an unparseable response")
-		return ResponseEntity.ok(response)
-	}
+        @Valid helpRequest: HelpRequest,
+    ): ResponseEntity<HelpResponse> {
+        val user = userRepository.findByUsername(currentUsername()).orElseThrow()
 
-	override fun aiRecipesPost(
-		@Valid recipeRequest: RecipeRequest,
-	): ResponseEntity<List<RecipeInput>> {
-		val user = userRepository.findByUsername(currentUsername()).orElseThrow()
-		val recipes =
-			aiRecipeWebClient
-				.post()
-				.uri("/ai/recipes")
-				.contentType(MediaType.APPLICATION_JSON)
-				.bodyValue(mapOf("profile" to user.toProfile(), "prompt" to recipeRequest.prompt))
-				.retrieve()
-				.bodyToMono(object : ParameterizedTypeReference<List<RecipeInput>>() {})
-				.timeout(aiTimeout)
-				.onErrorMap(TimeoutException::class.java) { GatewayTimeoutException("GenAI service timed out") }
-				.block() ?: throw BadGatewayException("GenAI service unavailable or returned an unparseable response")
-		return ResponseEntity.ok(recipes)
-	}
+        val internalRequest = org.openapitools.internal.model.HelpRequestForwarded(
+            profile = user.toInternalProfile(),
+            prompt = helpRequest.prompt,
+            recipe = helpRequest.recipe?.toInternalRecipe()
+        )
 
-	private fun currentUsername(): String = SecurityContextHolder.getContext().authentication!!.name
+        val retrofitResponse = helpServiceApi.aiHelpPost("", "", internalRequest).execute()
+        val body = handleRetrofitResponse(retrofitResponse)
 
-	// Converts the DB user entity into the API UserProfile model, injecting real profile data.
-	// Password is intentionally excluded — never forwarded to the AI service.
-	private fun UserEntity.toProfile(): UserProfile {
-		val prefs =
-			preferences?.let {
-				try {
-					objectMapper.readValue(it, UserPreferences::class.java)
-				} catch (_: Exception) {
-					null
-				}
-			} ?: UserPreferences()
-		return UserProfile(username = username, preferences = prefs)
-	}
+        return ResponseEntity.ok(HelpResponse(response = body.response))
+    }
+
+    override fun aiRecipesPost(
+        @Valid recipeRequest: RecipeRequest,
+    ): ResponseEntity<List<RecipeInput>> {
+        val user = userRepository.findByUsername(currentUsername()).orElseThrow()
+
+        val internalRequest = org.openapitools.internal.model.RecipeRequestForwarded(
+            profile = user.toInternalProfile(),
+            prompt = recipeRequest.prompt
+        )
+
+        val retrofitResponse = recipeServiceApi.aiRecipesPost("", "", internalRequest).execute()
+        val internalRecipes = handleRetrofitResponse(retrofitResponse)
+
+        val publicRecipes = internalRecipes.map { it.toPublicRecipe() }
+        return ResponseEntity.ok(publicRecipes)
+    }
+
+    private fun currentUsername(): String = SecurityContextHolder.getContext().authentication!!.name
+
+    /**
+     * Helper to unwrap Retrofit responses and throw standard Spring Exceptions on failures
+     */
+    private fun <T> handleRetrofitResponse(response: Response<T>): T {
+        if (!response.isSuccessful) {
+            val errorBody = response.errorBody()?.string() ?: "Unknown error"
+            if (response.code() == 504) {
+                throw ResponseStatusException(HttpStatus.GATEWAY_TIMEOUT, "GenAI service timed out")
+            }
+            throw ResponseStatusException(HttpStatus.BAD_GATEWAY, "GenAI service error: $errorBody")
+        }
+        return response.body() ?: throw ResponseStatusException(HttpStatus.BAD_GATEWAY, "Empty response from GenAI service")
+    }
+
+    // -------------------------------------------------------------------------
+    // MODEL MAPPING EXTENSIONS (Translates between Public and Internal DTOs)
+    // -------------------------------------------------------------------------
+
+    private fun UserEntity.toInternalProfile(): org.openapitools.internal.model.UserProfile {
+        val publicPrefs = preferences?.let {
+            try { objectMapper.readValue(it, UserPreferences::class.java) } catch (_: Exception) { null }
+        } ?: UserPreferences()
+
+        return org.openapitools.internal.model.UserProfile(
+            username = username,
+            preferences = org.openapitools.internal.model.UserPreferences(
+                diet = publicPrefs.diet,
+                allergies = publicPrefs.allergies,
+                aboutMe = publicPrefs.aboutMe,
+                
+                // safely convert between the two different generated enum types using string matching
+                language = publicPrefs.language?.name?.let { enumName ->
+                    try {
+                        org.openapitools.internal.model.UserPreferences.Language.valueOf(enumName)
+                    } catch (_: IllegalArgumentException) {
+                        null // Fallback gracefully if there's an unexpected mismatch
+                }
+            }
+            )
+        )
+    }
+
+    private fun org.openapitools.model.RecipeInput.toInternalRecipe(): org.openapitools.internal.model.RecipeInput {
+        return org.openapitools.internal.model.RecipeInput(
+            title = this.title,
+            portions = this.portions,
+            instructions = this.instructions,
+            ingredients = this.ingredients.map {
+                org.openapitools.internal.model.RecipeIngredient(name = it.name, quantity = it.quantity, unit = it.unit)
+            },
+            nutrients = this.nutrients?.let {
+                org.openapitools.internal.model.RecipeNutrients(calories = it.calories, protein = it.protein, fat = it.fat, carbs = it.carbs)
+            }
+        )
+    }
+
+    private fun org.openapitools.internal.model.RecipeInput.toPublicRecipe(): org.openapitools.model.RecipeInput {
+        return org.openapitools.model.RecipeInput(
+            title = this.title,
+            portions = this.portions,
+            instructions = this.instructions,
+            ingredients = this.ingredients.map {
+                org.openapitools.model.RecipeIngredient(name = it.name, quantity = it.quantity, unit = it.unit)
+            },
+            nutrients = this.nutrients?.let {
+                org.openapitools.model.RecipeNutrients(calories = it.calories, protein = it.protein, fat = it.fat, carbs = it.carbs)
+            }
+        )
+    }
+
 }

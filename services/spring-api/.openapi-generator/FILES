@@ -3,7 +3,6 @@ gradle/wrapper/gradle-wrapper.jar
 gradle/wrapper/gradle-wrapper.properties
 gradlew
 gradlew.bat
-pom.xml
 settings.gradle
 src/main/kotlin/org/openapitools/SpringDocConfiguration.kt
 src/main/kotlin/org/openapitools/api/AIApi.kt
@@ -15,7 +14,6 @@ src/main/kotlin/org/openapitools/model/AuthRequest.kt
 src/main/kotlin/org/openapitools/model/AuthResponse.kt
 src/main/kotlin/org/openapitools/model/ErrorResponse.kt
 src/main/kotlin/org/openapitools/model/HelpRequest.kt
-src/main/kotlin/org/openapitools/model/HelpRequestForwarded.kt
 src/main/kotlin/org/openapitools/model/HelpResponse.kt
 src/main/kotlin/org/openapitools/model/Recipe.kt
 src/main/kotlin/org/openapitools/model/RecipeCreated.kt
@@ -23,7 +21,6 @@ src/main/kotlin/org/openapitools/model/RecipeIngredient.kt
 src/main/kotlin/org/openapitools/model/RecipeInput.kt
 src/main/kotlin/org/openapitools/model/RecipeNutrients.kt
 src/main/kotlin/org/openapitools/model/RecipeRequest.kt
-src/main/kotlin/org/openapitools/model/RecipeRequestForwarded.kt
 src/main/kotlin/org/openapitools/model/RecipeUpdate.kt
 src/main/kotlin/org/openapitools/model/UserCredentials.kt
 src/main/kotlin/org/openapitools/model/UserPreferences.kt
