@@ -23,6 +23,11 @@ kotlin {
         jvmTarget.set(JvmTarget.JVM_17)
         freeCompilerArgs.add("-Xannotation-default-target=param-property")
     }
+    sourceSets {
+        getByName("test") {
+            kotlin.exclude("org/openapitools/**")
+        }
+    }
 }
 
 tasks.test {
