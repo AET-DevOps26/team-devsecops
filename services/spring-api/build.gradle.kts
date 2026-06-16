@@ -32,6 +32,12 @@ kotlin {
 
 tasks.test {
     useJUnitPlatform()
+
+    reports {
+        junitXml.required.set(true)
+        html.required.set(true)
+    }
+
     testLogging {
         events("passed", "skipped", "failed")
         exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
