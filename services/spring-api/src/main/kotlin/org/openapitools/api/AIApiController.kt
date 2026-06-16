@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.server.ResponseStatusException
 import retrofit2.Response
 import tools.jackson.databind.ObjectMapper
+import java.io.InterruptedIOException
 
 @RestController
 @Validated
@@ -42,9 +43,17 @@ class AIApiController(
 				recipe = helpRequest.recipe?.toInternalRecipe(),
 			)
 
-		val retrofitResponse = helpServiceApi.aiHelpPost("", "", internalRequest).execute()
-		val body = handleRetrofitResponse(retrofitResponse)
+		val retrofitResponse = try {
+        helpServiceApi.aiHelpPost("", "", internalRequest).execute()
+		} catch (e: InterruptedIOException) {
+			// Map the timeout to 504 Gateway Timeout
+			throw ResponseStatusException(HttpStatus.GATEWAY_TIMEOUT, "Upstream AI service timed out", e)
+		} catch (e: Exception) {
+			// Handle other potential network failures
+			throw ResponseStatusException(HttpStatus.BAD_GATEWAY, "Upstream service error", e)
+		}
 
+		val body = handleRetrofitResponse(retrofitResponse)
 		return ResponseEntity.ok(HelpResponse(response = body.response))
 	}
 
@@ -59,9 +68,15 @@ class AIApiController(
 				prompt = recipeRequest.prompt,
 			)
 
-		val retrofitResponse = recipeServiceApi.aiRecipesPost("", "", internalRequest).execute()
-		val internalRecipes = handleRetrofitResponse(retrofitResponse)
+		val retrofitResponse = try {
+			recipeServiceApi.aiRecipesPost("", "", internalRequest).execute()
+		} catch (e: InterruptedIOException) {
+			throw ResponseStatusException(HttpStatus.GATEWAY_TIMEOUT, "Upstream AI service timed out", e)
+		} catch (e: Exception) {
+			throw ResponseStatusException(HttpStatus.BAD_GATEWAY, "Upstream service error", e)
+		}
 
+		val internalRecipes = handleRetrofitResponse(retrofitResponse)
 		val publicRecipes = internalRecipes.map { it.toPublicRecipe() }
 		return ResponseEntity.ok(publicRecipes)
 	}
@@ -71,15 +86,17 @@ class AIApiController(
 	/**
 	 * Helper to unwrap Retrofit responses and throw standard Spring Exceptions on failures
 	 */
-	private fun <T> handleRetrofitResponse(response: Response<T>): T {
+	private fun <T> handleRetrofitResponse(response: retrofit2.Response<T>): T {
 		if (!response.isSuccessful) {
-			val errorBody = response.errorBody()?.string() ?: "Unknown error"
-			if (response.code() == 504) {
-				throw ResponseStatusException(HttpStatus.GATEWAY_TIMEOUT, "GenAI service timed out")
-			}
-			throw ResponseStatusException(HttpStatus.BAD_GATEWAY, "GenAI service error: $errorBody")
+			throw ResponseStatusException(
+				HttpStatus.BAD_GATEWAY, 
+				"Upstream service returned error: ${response.code()}"
+			)
 		}
-		return response.body() ?: throw ResponseStatusException(HttpStatus.BAD_GATEWAY, "Empty response from GenAI service")
+		
+		return response.body() ?: throw ResponseStatusException(
+			HttpStatus.INTERNAL_SERVER_ERROR, "Empty body"
+		)
 	}
 
 	// -------------------------------------------------------------------------

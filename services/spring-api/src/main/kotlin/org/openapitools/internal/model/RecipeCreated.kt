@@ -7,32 +7,40 @@
  */
 
 @file:Suppress(
-	"ArrayInDataClass",
-	"DuplicatedCode",
-	"EnumEntryName",
-	"RemoveRedundantQualifierName",
-	"RemoveRedundantCallsOfConversionMethods",
-	"REDUNDANT_CALL_OF_CONVERSION_METHOD",
-	"RedundantUnitReturnType",
-	"RemoveEmptyClassBody",
-	"UnnecessaryVariable",
-	"UnusedImport",
-	"UnnecessaryVariable",
-	"unused",
+    "ArrayInDataClass",
+    "DuplicatedCode",
+    "EnumEntryName",
+    "RemoveRedundantQualifierName",
+    "RemoveRedundantCallsOfConversionMethods",
+    "REDUNDANT_CALL_OF_CONVERSION_METHOD",
+    "RedundantUnitReturnType",
+    "RemoveEmptyClassBody",
+    "UnnecessaryVariable",
+    "UnusedImport",
+    "UnnecessaryVariable",
+    "unused"
 )
 
 package org.openapitools.internal.model
+
 
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 
 /**
+ * 
  *
- *
- * @param id
+ * @param id 
  */
 
-data class RecipeCreated(
-	@Json(name = "id")
-	val id: kotlin.Long,
-)
+
+data class RecipeCreated (
+
+    @Json(name = "id")
+    val id: kotlin.Long
+
+) {
+
+
+}
+

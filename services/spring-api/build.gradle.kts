@@ -23,15 +23,18 @@ kotlin {
         jvmTarget.set(JvmTarget.JVM_17)
         freeCompilerArgs.add("-Xannotation-default-target=param-property")
     }
+
     sourceSets {
         getByName("test") {
-            kotlin.exclude("org/openapitools/**")
+            kotlin.srcDir("src/test/kotlin")
         }
     }
 }
 
 tasks.test {
     useJUnitPlatform()
+
+    jvmArgs("-XX:+EnableDynamicAgentLoading")
 
     reports {
         junitXml.required.set(true)

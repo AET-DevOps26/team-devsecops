@@ -7,36 +7,45 @@
  */
 
 @file:Suppress(
-	"ArrayInDataClass",
-	"DuplicatedCode",
-	"EnumEntryName",
-	"RemoveRedundantQualifierName",
-	"RemoveRedundantCallsOfConversionMethods",
-	"REDUNDANT_CALL_OF_CONVERSION_METHOD",
-	"RedundantUnitReturnType",
-	"RemoveEmptyClassBody",
-	"UnnecessaryVariable",
-	"UnusedImport",
-	"UnnecessaryVariable",
-	"unused",
+    "ArrayInDataClass",
+    "DuplicatedCode",
+    "EnumEntryName",
+    "RemoveRedundantQualifierName",
+    "RemoveRedundantCallsOfConversionMethods",
+    "REDUNDANT_CALL_OF_CONVERSION_METHOD",
+    "RedundantUnitReturnType",
+    "RemoveEmptyClassBody",
+    "UnnecessaryVariable",
+    "UnusedImport",
+    "UnnecessaryVariable",
+    "unused"
 )
 
 package org.openapitools.internal.model
+
 
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 
 /**
- *
+ * 
  *
  * @param username Alphanumeric, underscores, hyphens, and dots only
- * @param password
+ * @param password 
  */
 
-data class AuthRequest(
-	// Alphanumeric, underscores, hyphens, and dots only
-	@Json(name = "username")
-	val username: kotlin.String,
-	@Json(name = "password")
-	val password: kotlin.String,
-)
+
+data class AuthRequest (
+
+    /* Alphanumeric, underscores, hyphens, and dots only */
+    @Json(name = "username")
+    val username: kotlin.String,
+
+    @Json(name = "password")
+    val password: kotlin.String
+
+) {
+
+
+}
+

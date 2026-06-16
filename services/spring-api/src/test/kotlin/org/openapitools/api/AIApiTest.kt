@@ -29,6 +29,8 @@ import retrofit2.Response
 import java.io.InterruptedIOException
 import java.math.BigDecimal
 
+import okhttp3.MediaType.Companion.toMediaType
+
 @Import(AIApiTest.MockApiServices::class)
 class AIApiTest : ApiTestBase() {
 	@TestConfiguration

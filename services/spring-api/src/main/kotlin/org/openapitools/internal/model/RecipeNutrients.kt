@@ -7,27 +7,28 @@
  */
 
 @file:Suppress(
-	"ArrayInDataClass",
-	"DuplicatedCode",
-	"EnumEntryName",
-	"RemoveRedundantQualifierName",
-	"RemoveRedundantCallsOfConversionMethods",
-	"REDUNDANT_CALL_OF_CONVERSION_METHOD",
-	"RedundantUnitReturnType",
-	"RemoveEmptyClassBody",
-	"UnnecessaryVariable",
-	"UnusedImport",
-	"UnnecessaryVariable",
-	"unused",
+    "ArrayInDataClass",
+    "DuplicatedCode",
+    "EnumEntryName",
+    "RemoveRedundantQualifierName",
+    "RemoveRedundantCallsOfConversionMethods",
+    "REDUNDANT_CALL_OF_CONVERSION_METHOD",
+    "RedundantUnitReturnType",
+    "RemoveEmptyClassBody",
+    "UnnecessaryVariable",
+    "UnusedImport",
+    "UnnecessaryVariable",
+    "unused"
 )
 
 package org.openapitools.internal.model
+
 
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 
 /**
- *
+ * 
  *
  * @param calories Number of Calories (kcal)
  * @param protein Protein in grams
@@ -35,17 +36,27 @@ import com.squareup.moshi.JsonClass
  * @param carbs Carbohydrates in grams
  */
 
-data class RecipeNutrients(
-	// Number of Calories (kcal)
-	@Json(name = "calories")
-	val calories: kotlin.Int,
-	// Protein in grams
-	@Json(name = "protein")
-	val protein: kotlin.Int,
-	// Fat in grams
-	@Json(name = "fat")
-	val fat: kotlin.Int,
-	// Carbohydrates in grams
-	@Json(name = "carbs")
-	val carbs: kotlin.Int,
-)
+
+data class RecipeNutrients (
+
+    /* Number of Calories (kcal) */
+    @Json(name = "calories")
+    val calories: kotlin.Int,
+
+    /* Protein in grams */
+    @Json(name = "protein")
+    val protein: kotlin.Int,
+
+    /* Fat in grams */
+    @Json(name = "fat")
+    val fat: kotlin.Int,
+
+    /* Carbohydrates in grams */
+    @Json(name = "carbs")
+    val carbs: kotlin.Int
+
+) {
+
+
+}
+

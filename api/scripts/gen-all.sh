@@ -23,6 +23,9 @@ openapi-generator-cli generate \
 # delete lines causing compilation failures because of missing references
 sed -i '' '/org.openapitools.client.infrastructure/d' services/spring-api/src/main/kotlin/org/openapitools/internal/client/*ServiceApi.kt
 
+# delete generated tests for generated code because of compatibility issues
+rm -rf services/spring-api/src/test/kotlin/org/openapitools/internal/
+
 # Generates the internal servers/client sdks for the Python Help Service.
 openapi-python-client generate \
   --path api/openapi-internal.yaml \
