@@ -7,69 +7,67 @@
  */
 
 @file:Suppress(
-    "ArrayInDataClass",
-    "DuplicatedCode",
-    "EnumEntryName",
-    "RemoveRedundantQualifierName",
-    "RemoveRedundantCallsOfConversionMethods",
-    "REDUNDANT_CALL_OF_CONVERSION_METHOD",
-    "RedundantUnitReturnType",
-    "RemoveEmptyClassBody",
-    "UnnecessaryVariable",
-    "UnusedImport",
-    "UnnecessaryVariable",
-    "unused"
+	"ArrayInDataClass",
+	"DuplicatedCode",
+	"EnumEntryName",
+	"RemoveRedundantQualifierName",
+	"RemoveRedundantCallsOfConversionMethods",
+	"REDUNDANT_CALL_OF_CONVERSION_METHOD",
+	"RedundantUnitReturnType",
+	"RemoveEmptyClassBody",
+	"UnnecessaryVariable",
+	"UnusedImport",
+	"UnnecessaryVariable",
+	"unused",
 )
 
 package org.openapitools.internal.model
 
 import io.kotlintest.shouldBe
 import io.kotlintest.specs.ShouldSpec
-
 import org.openapitools.internal.model.Recipe
 import org.openapitools.internal.model.RecipeIngredient
 import org.openapitools.internal.model.RecipeNutrients
 
 class RecipeTest : ShouldSpec() {
-    init {
-        // uncomment below to create an instance of Recipe
-        //val modelInstance = Recipe()
+	init {
+		// uncomment below to create an instance of Recipe
+		// val modelInstance = Recipe()
 
-        // to test the property `title`
-        should("test title") {
-            // uncomment below to test the property
-            //modelInstance.title shouldBe ("TODO")
-        }
+		// to test the property `title`
+		should("test title") {
+			// uncomment below to test the property
+			// modelInstance.title shouldBe ("TODO")
+		}
 
-        // to test the property `ingredients`
-        should("test ingredients") {
-            // uncomment below to test the property
-            //modelInstance.ingredients shouldBe ("TODO")
-        }
+		// to test the property `ingredients`
+		should("test ingredients") {
+			// uncomment below to test the property
+			// modelInstance.ingredients shouldBe ("TODO")
+		}
 
-        // to test the property `instructions`
-        should("test instructions") {
-            // uncomment below to test the property
-            //modelInstance.instructions shouldBe ("TODO")
-        }
+		// to test the property `instructions`
+		should("test instructions") {
+			// uncomment below to test the property
+			// modelInstance.instructions shouldBe ("TODO")
+		}
 
-        // to test the property `portions`
-        should("test portions") {
-            // uncomment below to test the property
-            //modelInstance.portions shouldBe ("TODO")
-        }
+		// to test the property `portions`
+		should("test portions") {
+			// uncomment below to test the property
+			// modelInstance.portions shouldBe ("TODO")
+		}
 
-        // to test the property `id`
-        should("test id") {
-            // uncomment below to test the property
-            //modelInstance.id shouldBe ("TODO")
-        }
+		// to test the property `id`
+		should("test id") {
+			// uncomment below to test the property
+			// modelInstance.id shouldBe ("TODO")
+		}
 
-        // to test the property `nutrients`
-        should("test nutrients") {
-            // uncomment below to test the property
-            //modelInstance.nutrients shouldBe ("TODO")
-        }
-
-    }
+		// to test the property `nutrients`
+		should("test nutrients") {
+			// uncomment below to test the property
+			// modelInstance.nutrients shouldBe ("TODO")
+		}
+	}
 }

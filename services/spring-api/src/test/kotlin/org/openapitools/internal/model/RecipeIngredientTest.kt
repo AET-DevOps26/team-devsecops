@@ -7,49 +7,47 @@
  */
 
 @file:Suppress(
-    "ArrayInDataClass",
-    "DuplicatedCode",
-    "EnumEntryName",
-    "RemoveRedundantQualifierName",
-    "RemoveRedundantCallsOfConversionMethods",
-    "REDUNDANT_CALL_OF_CONVERSION_METHOD",
-    "RedundantUnitReturnType",
-    "RemoveEmptyClassBody",
-    "UnnecessaryVariable",
-    "UnusedImport",
-    "UnnecessaryVariable",
-    "unused"
+	"ArrayInDataClass",
+	"DuplicatedCode",
+	"EnumEntryName",
+	"RemoveRedundantQualifierName",
+	"RemoveRedundantCallsOfConversionMethods",
+	"REDUNDANT_CALL_OF_CONVERSION_METHOD",
+	"RedundantUnitReturnType",
+	"RemoveEmptyClassBody",
+	"UnnecessaryVariable",
+	"UnusedImport",
+	"UnnecessaryVariable",
+	"unused",
 )
 
 package org.openapitools.internal.model
 
 import io.kotlintest.shouldBe
 import io.kotlintest.specs.ShouldSpec
-
 import org.openapitools.internal.model.RecipeIngredient
 
 class RecipeIngredientTest : ShouldSpec() {
-    init {
-        // uncomment below to create an instance of RecipeIngredient
-        //val modelInstance = RecipeIngredient()
+	init {
+		// uncomment below to create an instance of RecipeIngredient
+		// val modelInstance = RecipeIngredient()
 
-        // to test the property `quantity`
-        should("test quantity") {
-            // uncomment below to test the property
-            //modelInstance.quantity shouldBe ("TODO")
-        }
+		// to test the property `quantity`
+		should("test quantity") {
+			// uncomment below to test the property
+			// modelInstance.quantity shouldBe ("TODO")
+		}
 
-        // to test the property `unit`
-        should("test unit") {
-            // uncomment below to test the property
-            //modelInstance.unit shouldBe ("TODO")
-        }
+		// to test the property `unit`
+		should("test unit") {
+			// uncomment below to test the property
+			// modelInstance.unit shouldBe ("TODO")
+		}
 
-        // to test the property `name`
-        should("test name") {
-            // uncomment below to test the property
-            //modelInstance.name shouldBe ("TODO")
-        }
-
-    }
+		// to test the property `name`
+		should("test name") {
+			// uncomment below to test the property
+			// modelInstance.name shouldBe ("TODO")
+		}
+	}
 }

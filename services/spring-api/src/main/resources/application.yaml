@@ -5,7 +5,7 @@ spring:
     default-property-inclusion: non_null
   datasource:
     # Locally defaults to H2 in-memory. On GCP Cloud Run, set DB_URL (e.g. jdbc:postgresql:///<db>?socketFactory=...&cloudSqlInstance=...), DB_USER, DB_PASSWORD env vars
-    url: ${DB_URL:jdbc:h2:mem:cookingdb;DB_CLOSE_DELAY=-1}
+    url: ${DB_URL:jdbc:h2:mem:cookingdb;DB_CLOSE_DELAY=-1;INIT=ANALYZE}
     username: ${DB_USER:sa}
     password: ${DB_PASSWORD:}
   jpa:
@@ -13,6 +13,10 @@ spring:
       # create-drop: wipe and recreate tables every restart
       # update: keep data between restarts
       ddl-auto: ${JPA_DDL_AUTO:create-drop}
+    properties:
+      hibernate:
+        connection:
+          provider_disables_autocommit: false
     show-sql: false
     open-in-view: false
   mvc:

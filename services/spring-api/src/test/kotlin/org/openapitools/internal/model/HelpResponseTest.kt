@@ -7,37 +7,35 @@
  */
 
 @file:Suppress(
-    "ArrayInDataClass",
-    "DuplicatedCode",
-    "EnumEntryName",
-    "RemoveRedundantQualifierName",
-    "RemoveRedundantCallsOfConversionMethods",
-    "REDUNDANT_CALL_OF_CONVERSION_METHOD",
-    "RedundantUnitReturnType",
-    "RemoveEmptyClassBody",
-    "UnnecessaryVariable",
-    "UnusedImport",
-    "UnnecessaryVariable",
-    "unused"
+	"ArrayInDataClass",
+	"DuplicatedCode",
+	"EnumEntryName",
+	"RemoveRedundantQualifierName",
+	"RemoveRedundantCallsOfConversionMethods",
+	"REDUNDANT_CALL_OF_CONVERSION_METHOD",
+	"RedundantUnitReturnType",
+	"RemoveEmptyClassBody",
+	"UnnecessaryVariable",
+	"UnusedImport",
+	"UnnecessaryVariable",
+	"unused",
 )
 
 package org.openapitools.internal.model
 
 import io.kotlintest.shouldBe
 import io.kotlintest.specs.ShouldSpec
-
 import org.openapitools.internal.model.HelpResponse
 
 class HelpResponseTest : ShouldSpec() {
-    init {
-        // uncomment below to create an instance of HelpResponse
-        //val modelInstance = HelpResponse()
+	init {
+		// uncomment below to create an instance of HelpResponse
+		// val modelInstance = HelpResponse()
 
-        // to test the property `response`
-        should("test response") {
-            // uncomment below to test the property
-            //modelInstance.response shouldBe ("TODO")
-        }
-
-    }
+		// to test the property `response`
+		should("test response") {
+			// uncomment below to test the property
+			// modelInstance.response shouldBe ("TODO")
+		}
+	}
 }

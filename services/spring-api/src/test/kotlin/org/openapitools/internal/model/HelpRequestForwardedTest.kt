@@ -7,51 +7,49 @@
  */
 
 @file:Suppress(
-    "ArrayInDataClass",
-    "DuplicatedCode",
-    "EnumEntryName",
-    "RemoveRedundantQualifierName",
-    "RemoveRedundantCallsOfConversionMethods",
-    "REDUNDANT_CALL_OF_CONVERSION_METHOD",
-    "RedundantUnitReturnType",
-    "RemoveEmptyClassBody",
-    "UnnecessaryVariable",
-    "UnusedImport",
-    "UnnecessaryVariable",
-    "unused"
+	"ArrayInDataClass",
+	"DuplicatedCode",
+	"EnumEntryName",
+	"RemoveRedundantQualifierName",
+	"RemoveRedundantCallsOfConversionMethods",
+	"REDUNDANT_CALL_OF_CONVERSION_METHOD",
+	"RedundantUnitReturnType",
+	"RemoveEmptyClassBody",
+	"UnnecessaryVariable",
+	"UnusedImport",
+	"UnnecessaryVariable",
+	"unused",
 )
 
 package org.openapitools.internal.model
 
 import io.kotlintest.shouldBe
 import io.kotlintest.specs.ShouldSpec
-
 import org.openapitools.internal.model.HelpRequestForwarded
 import org.openapitools.internal.model.RecipeInput
 import org.openapitools.internal.model.UserProfile
 
 class HelpRequestForwardedTest : ShouldSpec() {
-    init {
-        // uncomment below to create an instance of HelpRequestForwarded
-        //val modelInstance = HelpRequestForwarded()
+	init {
+		// uncomment below to create an instance of HelpRequestForwarded
+		// val modelInstance = HelpRequestForwarded()
 
-        // to test the property `profile`
-        should("test profile") {
-            // uncomment below to test the property
-            //modelInstance.profile shouldBe ("TODO")
-        }
+		// to test the property `profile`
+		should("test profile") {
+			// uncomment below to test the property
+			// modelInstance.profile shouldBe ("TODO")
+		}
 
-        // to test the property `prompt`
-        should("test prompt") {
-            // uncomment below to test the property
-            //modelInstance.prompt shouldBe ("TODO")
-        }
+		// to test the property `prompt`
+		should("test prompt") {
+			// uncomment below to test the property
+			// modelInstance.prompt shouldBe ("TODO")
+		}
 
-        // to test the property `recipe`
-        should("test recipe") {
-            // uncomment below to test the property
-            //modelInstance.recipe shouldBe ("TODO")
-        }
-
-    }
+		// to test the property `recipe`
+		should("test recipe") {
+			// uncomment below to test the property
+			// modelInstance.recipe shouldBe ("TODO")
+		}
+	}
 }

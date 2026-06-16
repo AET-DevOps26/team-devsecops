@@ -7,50 +7,40 @@
  */
 
 @file:Suppress(
-    "ArrayInDataClass",
-    "DuplicatedCode",
-    "EnumEntryName",
-    "RemoveRedundantQualifierName",
-    "RemoveRedundantCallsOfConversionMethods",
-    "REDUNDANT_CALL_OF_CONVERSION_METHOD",
-    "RedundantUnitReturnType",
-    "RemoveEmptyClassBody",
-    "UnnecessaryVariable",
-    "UnusedImport",
-    "UnnecessaryVariable",
-    "unused"
+	"ArrayInDataClass",
+	"DuplicatedCode",
+	"EnumEntryName",
+	"RemoveRedundantQualifierName",
+	"RemoveRedundantCallsOfConversionMethods",
+	"REDUNDANT_CALL_OF_CONVERSION_METHOD",
+	"RedundantUnitReturnType",
+	"RemoveEmptyClassBody",
+	"UnnecessaryVariable",
+	"UnusedImport",
+	"UnnecessaryVariable",
+	"unused",
 )
 
 package org.openapitools.internal.model
 
-import org.openapitools.internal.model.UserPreferences
-
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
+import org.openapitools.internal.model.UserPreferences
 
 /**
  * At least one field must be provided
  *
  * @param username Alphanumeric, underscores, hyphens, and dots only
- * @param password 
- * @param preferences 
+ * @param password
+ * @param preferences
  */
 
-
-data class UserProfileUpdate (
-
-    /* Alphanumeric, underscores, hyphens, and dots only */
-    @Json(name = "username")
-    val username: kotlin.String? = null,
-
-    @Json(name = "password")
-    val password: kotlin.String? = null,
-
-    @Json(name = "preferences")
-    val preferences: UserPreferences? = null
-
-) {
-
-
-}
-
+data class UserProfileUpdate(
+	// Alphanumeric, underscores, hyphens, and dots only
+	@Json(name = "username")
+	val username: kotlin.String? = null,
+	@Json(name = "password")
+	val password: kotlin.String? = null,
+	@Json(name = "preferences")
+	val preferences: UserPreferences? = null,
+)

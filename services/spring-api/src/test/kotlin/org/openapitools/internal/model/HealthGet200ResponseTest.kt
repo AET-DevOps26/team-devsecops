@@ -7,37 +7,35 @@
  */
 
 @file:Suppress(
-    "ArrayInDataClass",
-    "DuplicatedCode",
-    "EnumEntryName",
-    "RemoveRedundantQualifierName",
-    "RemoveRedundantCallsOfConversionMethods",
-    "REDUNDANT_CALL_OF_CONVERSION_METHOD",
-    "RedundantUnitReturnType",
-    "RemoveEmptyClassBody",
-    "UnnecessaryVariable",
-    "UnusedImport",
-    "UnnecessaryVariable",
-    "unused"
+	"ArrayInDataClass",
+	"DuplicatedCode",
+	"EnumEntryName",
+	"RemoveRedundantQualifierName",
+	"RemoveRedundantCallsOfConversionMethods",
+	"REDUNDANT_CALL_OF_CONVERSION_METHOD",
+	"RedundantUnitReturnType",
+	"RemoveEmptyClassBody",
+	"UnnecessaryVariable",
+	"UnusedImport",
+	"UnnecessaryVariable",
+	"unused",
 )
 
 package org.openapitools.internal.model
 
 import io.kotlintest.shouldBe
 import io.kotlintest.specs.ShouldSpec
-
 import org.openapitools.internal.model.HealthGet200Response
 
 class HealthGet200ResponseTest : ShouldSpec() {
-    init {
-        // uncomment below to create an instance of HealthGet200Response
-        //val modelInstance = HealthGet200Response()
+	init {
+		// uncomment below to create an instance of HealthGet200Response
+		// val modelInstance = HealthGet200Response()
 
-        // to test the property `status`
-        should("test status") {
-            // uncomment below to test the property
-            //modelInstance.status shouldBe ("TODO")
-        }
-
-    }
+		// to test the property `status`
+		should("test status") {
+			// uncomment below to test the property
+			// modelInstance.status shouldBe ("TODO")
+		}
+	}
 }

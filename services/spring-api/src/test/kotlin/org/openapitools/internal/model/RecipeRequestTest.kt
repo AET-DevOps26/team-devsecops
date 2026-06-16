@@ -7,37 +7,35 @@
  */
 
 @file:Suppress(
-    "ArrayInDataClass",
-    "DuplicatedCode",
-    "EnumEntryName",
-    "RemoveRedundantQualifierName",
-    "RemoveRedundantCallsOfConversionMethods",
-    "REDUNDANT_CALL_OF_CONVERSION_METHOD",
-    "RedundantUnitReturnType",
-    "RemoveEmptyClassBody",
-    "UnnecessaryVariable",
-    "UnusedImport",
-    "UnnecessaryVariable",
-    "unused"
+	"ArrayInDataClass",
+	"DuplicatedCode",
+	"EnumEntryName",
+	"RemoveRedundantQualifierName",
+	"RemoveRedundantCallsOfConversionMethods",
+	"REDUNDANT_CALL_OF_CONVERSION_METHOD",
+	"RedundantUnitReturnType",
+	"RemoveEmptyClassBody",
+	"UnnecessaryVariable",
+	"UnusedImport",
+	"UnnecessaryVariable",
+	"unused",
 )
 
 package org.openapitools.internal.model
 
 import io.kotlintest.shouldBe
 import io.kotlintest.specs.ShouldSpec
-
 import org.openapitools.internal.model.RecipeRequest
 
 class RecipeRequestTest : ShouldSpec() {
-    init {
-        // uncomment below to create an instance of RecipeRequest
-        //val modelInstance = RecipeRequest()
+	init {
+		// uncomment below to create an instance of RecipeRequest
+		// val modelInstance = RecipeRequest()
 
-        // to test the property `prompt`
-        should("test prompt") {
-            // uncomment below to test the property
-            //modelInstance.prompt shouldBe ("TODO")
-        }
-
-    }
+		// to test the property `prompt`
+		should("test prompt") {
+			// uncomment below to test the property
+			// modelInstance.prompt shouldBe ("TODO")
+		}
+	}
 }

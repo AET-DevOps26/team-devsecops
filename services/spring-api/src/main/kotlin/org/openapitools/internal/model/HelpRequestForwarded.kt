@@ -7,50 +7,40 @@
  */
 
 @file:Suppress(
-    "ArrayInDataClass",
-    "DuplicatedCode",
-    "EnumEntryName",
-    "RemoveRedundantQualifierName",
-    "RemoveRedundantCallsOfConversionMethods",
-    "REDUNDANT_CALL_OF_CONVERSION_METHOD",
-    "RedundantUnitReturnType",
-    "RemoveEmptyClassBody",
-    "UnnecessaryVariable",
-    "UnusedImport",
-    "UnnecessaryVariable",
-    "unused"
+	"ArrayInDataClass",
+	"DuplicatedCode",
+	"EnumEntryName",
+	"RemoveRedundantQualifierName",
+	"RemoveRedundantCallsOfConversionMethods",
+	"REDUNDANT_CALL_OF_CONVERSION_METHOD",
+	"RedundantUnitReturnType",
+	"RemoveEmptyClassBody",
+	"UnnecessaryVariable",
+	"UnusedImport",
+	"UnnecessaryVariable",
+	"unused",
 )
 
 package org.openapitools.internal.model
 
+import com.squareup.moshi.Json
+import com.squareup.moshi.JsonClass
 import org.openapitools.internal.model.RecipeInput
 import org.openapitools.internal.model.UserProfile
 
-import com.squareup.moshi.Json
-import com.squareup.moshi.JsonClass
-
 /**
- * 
  *
- * @param profile 
- * @param prompt 
- * @param recipe 
+ *
+ * @param profile
+ * @param prompt
+ * @param recipe
  */
 
-
-data class HelpRequestForwarded (
-
-    @Json(name = "profile")
-    val profile: UserProfile,
-
-    @Json(name = "prompt")
-    val prompt: kotlin.String,
-
-    @Json(name = "recipe")
-    val recipe: RecipeInput? = null
-
-) {
-
-
-}
-
+data class HelpRequestForwarded(
+	@Json(name = "profile")
+	val profile: UserProfile,
+	@Json(name = "prompt")
+	val prompt: kotlin.String,
+	@Json(name = "recipe")
+	val recipe: RecipeInput? = null,
+)

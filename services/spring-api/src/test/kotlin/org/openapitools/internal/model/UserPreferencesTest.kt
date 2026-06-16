@@ -7,49 +7,47 @@
  */
 
 @file:Suppress(
-    "ArrayInDataClass",
-    "DuplicatedCode",
-    "EnumEntryName",
-    "RemoveRedundantQualifierName",
-    "RemoveRedundantCallsOfConversionMethods",
-    "REDUNDANT_CALL_OF_CONVERSION_METHOD",
-    "RedundantUnitReturnType",
-    "RemoveEmptyClassBody",
-    "UnnecessaryVariable",
-    "UnusedImport",
-    "UnnecessaryVariable",
-    "unused"
+	"ArrayInDataClass",
+	"DuplicatedCode",
+	"EnumEntryName",
+	"RemoveRedundantQualifierName",
+	"RemoveRedundantCallsOfConversionMethods",
+	"REDUNDANT_CALL_OF_CONVERSION_METHOD",
+	"RedundantUnitReturnType",
+	"RemoveEmptyClassBody",
+	"UnnecessaryVariable",
+	"UnusedImport",
+	"UnnecessaryVariable",
+	"unused",
 )
 
 package org.openapitools.internal.model
 
 import io.kotlintest.shouldBe
 import io.kotlintest.specs.ShouldSpec
-
 import org.openapitools.internal.model.UserPreferences
 
 class UserPreferencesTest : ShouldSpec() {
-    init {
-        // uncomment below to create an instance of UserPreferences
-        //val modelInstance = UserPreferences()
+	init {
+		// uncomment below to create an instance of UserPreferences
+		// val modelInstance = UserPreferences()
 
-        // to test the property `diet`
-        should("test diet") {
-            // uncomment below to test the property
-            //modelInstance.diet shouldBe ("TODO")
-        }
+		// to test the property `diet`
+		should("test diet") {
+			// uncomment below to test the property
+			// modelInstance.diet shouldBe ("TODO")
+		}
 
-        // to test the property `allergies`
-        should("test allergies") {
-            // uncomment below to test the property
-            //modelInstance.allergies shouldBe ("TODO")
-        }
+		// to test the property `allergies`
+		should("test allergies") {
+			// uncomment below to test the property
+			// modelInstance.allergies shouldBe ("TODO")
+		}
 
-        // to test the property `aboutMe`
-        should("test aboutMe") {
-            // uncomment below to test the property
-            //modelInstance.aboutMe shouldBe ("TODO")
-        }
-
-    }
+		// to test the property `aboutMe`
+		should("test aboutMe") {
+			// uncomment below to test the property
+			// modelInstance.aboutMe shouldBe ("TODO")
+		}
+	}
 }

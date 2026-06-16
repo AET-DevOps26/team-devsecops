@@ -7,37 +7,35 @@
  */
 
 @file:Suppress(
-    "ArrayInDataClass",
-    "DuplicatedCode",
-    "EnumEntryName",
-    "RemoveRedundantQualifierName",
-    "RemoveRedundantCallsOfConversionMethods",
-    "REDUNDANT_CALL_OF_CONVERSION_METHOD",
-    "RedundantUnitReturnType",
-    "RemoveEmptyClassBody",
-    "UnnecessaryVariable",
-    "UnusedImport",
-    "UnnecessaryVariable",
-    "unused"
+	"ArrayInDataClass",
+	"DuplicatedCode",
+	"EnumEntryName",
+	"RemoveRedundantQualifierName",
+	"RemoveRedundantCallsOfConversionMethods",
+	"REDUNDANT_CALL_OF_CONVERSION_METHOD",
+	"RedundantUnitReturnType",
+	"RemoveEmptyClassBody",
+	"UnnecessaryVariable",
+	"UnusedImport",
+	"UnnecessaryVariable",
+	"unused",
 )
 
 package org.openapitools.internal.model
 
 import io.kotlintest.shouldBe
 import io.kotlintest.specs.ShouldSpec
-
 import org.openapitools.internal.model.AuthResponse
 
 class AuthResponseTest : ShouldSpec() {
-    init {
-        // uncomment below to create an instance of AuthResponse
-        //val modelInstance = AuthResponse()
+	init {
+		// uncomment below to create an instance of AuthResponse
+		// val modelInstance = AuthResponse()
 
-        // to test the property `token` - JWT bearer token to include in subsequent requests
-        should("test token") {
-            // uncomment below to test the property
-            //modelInstance.token shouldBe ("TODO")
-        }
-
-    }
+		// to test the property `token` - JWT bearer token to include in subsequent requests
+		should("test token") {
+			// uncomment below to test the property
+			// modelInstance.token shouldBe ("TODO")
+		}
+	}
 }

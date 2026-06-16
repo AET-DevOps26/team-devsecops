@@ -7,40 +7,32 @@
  */
 
 @file:Suppress(
-    "ArrayInDataClass",
-    "DuplicatedCode",
-    "EnumEntryName",
-    "RemoveRedundantQualifierName",
-    "RemoveRedundantCallsOfConversionMethods",
-    "REDUNDANT_CALL_OF_CONVERSION_METHOD",
-    "RedundantUnitReturnType",
-    "RemoveEmptyClassBody",
-    "UnnecessaryVariable",
-    "UnusedImport",
-    "UnnecessaryVariable",
-    "unused"
+	"ArrayInDataClass",
+	"DuplicatedCode",
+	"EnumEntryName",
+	"RemoveRedundantQualifierName",
+	"RemoveRedundantCallsOfConversionMethods",
+	"REDUNDANT_CALL_OF_CONVERSION_METHOD",
+	"RedundantUnitReturnType",
+	"RemoveEmptyClassBody",
+	"UnnecessaryVariable",
+	"UnusedImport",
+	"UnnecessaryVariable",
+	"unused",
 )
 
 package org.openapitools.internal.model
-
 
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 
 /**
- * 
  *
- * @param status 
+ *
+ * @param status
  */
 
-
-data class HealthGet200Response (
-
-    @Json(name = "status")
-    val status: kotlin.String
-
-) {
-
-
-}
-
+data class HealthGet200Response(
+	@Json(name = "status")
+	val status: kotlin.String,
+)

@@ -7,37 +7,35 @@
  */
 
 @file:Suppress(
-    "ArrayInDataClass",
-    "DuplicatedCode",
-    "EnumEntryName",
-    "RemoveRedundantQualifierName",
-    "RemoveRedundantCallsOfConversionMethods",
-    "REDUNDANT_CALL_OF_CONVERSION_METHOD",
-    "RedundantUnitReturnType",
-    "RemoveEmptyClassBody",
-    "UnnecessaryVariable",
-    "UnusedImport",
-    "UnnecessaryVariable",
-    "unused"
+	"ArrayInDataClass",
+	"DuplicatedCode",
+	"EnumEntryName",
+	"RemoveRedundantQualifierName",
+	"RemoveRedundantCallsOfConversionMethods",
+	"REDUNDANT_CALL_OF_CONVERSION_METHOD",
+	"RedundantUnitReturnType",
+	"RemoveEmptyClassBody",
+	"UnnecessaryVariable",
+	"UnusedImport",
+	"UnnecessaryVariable",
+	"unused",
 )
 
 package org.openapitools.internal.model
 
 import io.kotlintest.shouldBe
 import io.kotlintest.specs.ShouldSpec
-
 import org.openapitools.internal.model.ErrorResponse
 
 class ErrorResponseTest : ShouldSpec() {
-    init {
-        // uncomment below to create an instance of ErrorResponse
-        //val modelInstance = ErrorResponse()
+	init {
+		// uncomment below to create an instance of ErrorResponse
+		// val modelInstance = ErrorResponse()
 
-        // to test the property `detail` - Informational details explaining internal transaction faults (Matches FastAPI HTTPException schema default).
-        should("test detail") {
-            // uncomment below to test the property
-            //modelInstance.detail shouldBe ("TODO")
-        }
-
-    }
+		// to test the property `detail` - Informational details explaining internal transaction faults (Matches FastAPI HTTPException schema default).
+		should("test detail") {
+			// uncomment below to test the property
+			// modelInstance.detail shouldBe ("TODO")
+		}
+	}
 }

@@ -7,25 +7,24 @@
  */
 
 @file:Suppress(
-    "ArrayInDataClass",
-    "DuplicatedCode",
-    "EnumEntryName",
-    "RemoveRedundantQualifierName",
-    "RemoveRedundantCallsOfConversionMethods",
-    "REDUNDANT_CALL_OF_CONVERSION_METHOD",
-    "RedundantUnitReturnType",
-    "RemoveEmptyClassBody",
-    "UnnecessaryVariable",
-    "UnusedImport",
-    "UnnecessaryVariable",
-    "unused"
+	"ArrayInDataClass",
+	"DuplicatedCode",
+	"EnumEntryName",
+	"RemoveRedundantQualifierName",
+	"RemoveRedundantCallsOfConversionMethods",
+	"REDUNDANT_CALL_OF_CONVERSION_METHOD",
+	"RedundantUnitReturnType",
+	"RemoveEmptyClassBody",
+	"UnnecessaryVariable",
+	"UnusedImport",
+	"UnnecessaryVariable",
+	"unused",
 )
 
 package org.openapitools.internal.client
 
 import io.kotlintest.shouldBe
 import io.kotlintest.specs.ShouldSpec
-
 import org.openapitools.internal.client.RecipeServiceApi
 import org.openapitools.internal.model.ErrorResponse
 import org.openapitools.internal.model.HealthGet200Response
@@ -33,26 +32,25 @@ import org.openapitools.internal.model.RecipeInput
 import org.openapitools.internal.model.RecipeRequestForwarded
 
 class RecipeServiceApiTest : ShouldSpec() {
-    init {
-        // uncomment below to create an instance of RecipeServiceApi
-        //val apiInstance = RecipeServiceApi()
+	init {
+		// uncomment below to create an instance of RecipeServiceApi
+		// val apiInstance = RecipeServiceApi()
 
-        // to test aiRecipesPost
-        should("test aiRecipesPost") {
-            // uncomment below to test aiRecipesPost
-            //val xInternalTimestamp : kotlin.String = xInternalTimestamp_example // kotlin.String | Linux Unix epoch timestamp string binding the generation window to block replay attacks.
-            //val xInternalSignature : kotlin.String = xInternalSignature_example // kotlin.String | Hex-encoded HMAC-SHA256 signature validating data package integrity over private networks.
-            //val recipeRequestForwarded : RecipeRequestForwarded =  // RecipeRequestForwarded | 
-            //val result : kotlin.collections.List<RecipeInput> = apiInstance.aiRecipesPost(xInternalTimestamp, xInternalSignature, recipeRequestForwarded)
-            //result shouldBe ("TODO")
-        }
+		// to test aiRecipesPost
+		should("test aiRecipesPost") {
+			// uncomment below to test aiRecipesPost
+			// val xInternalTimestamp : kotlin.String = xInternalTimestamp_example // kotlin.String | Linux Unix epoch timestamp string binding the generation window to block replay attacks.
+			// val xInternalSignature : kotlin.String = xInternalSignature_example // kotlin.String | Hex-encoded HMAC-SHA256 signature validating data package integrity over private networks.
+			// val recipeRequestForwarded : RecipeRequestForwarded =  // RecipeRequestForwarded |
+			// val result : kotlin.collections.List<RecipeInput> = apiInstance.aiRecipesPost(xInternalTimestamp, xInternalSignature, recipeRequestForwarded)
+			// result shouldBe ("TODO")
+		}
 
-        // to test healthGet
-        should("test healthGet") {
-            // uncomment below to test healthGet
-            //val result : HealthGet200Response = apiInstance.healthGet()
-            //result shouldBe ("TODO")
-        }
-
-    }
+		// to test healthGet
+		should("test healthGet") {
+			// uncomment below to test healthGet
+			// val result : HealthGet200Response = apiInstance.healthGet()
+			// result shouldBe ("TODO")
+		}
+	}
 }

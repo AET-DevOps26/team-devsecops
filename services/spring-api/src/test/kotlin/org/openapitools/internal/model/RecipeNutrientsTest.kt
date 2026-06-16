@@ -7,55 +7,53 @@
  */
 
 @file:Suppress(
-    "ArrayInDataClass",
-    "DuplicatedCode",
-    "EnumEntryName",
-    "RemoveRedundantQualifierName",
-    "RemoveRedundantCallsOfConversionMethods",
-    "REDUNDANT_CALL_OF_CONVERSION_METHOD",
-    "RedundantUnitReturnType",
-    "RemoveEmptyClassBody",
-    "UnnecessaryVariable",
-    "UnusedImport",
-    "UnnecessaryVariable",
-    "unused"
+	"ArrayInDataClass",
+	"DuplicatedCode",
+	"EnumEntryName",
+	"RemoveRedundantQualifierName",
+	"RemoveRedundantCallsOfConversionMethods",
+	"REDUNDANT_CALL_OF_CONVERSION_METHOD",
+	"RedundantUnitReturnType",
+	"RemoveEmptyClassBody",
+	"UnnecessaryVariable",
+	"UnusedImport",
+	"UnnecessaryVariable",
+	"unused",
 )
 
 package org.openapitools.internal.model
 
 import io.kotlintest.shouldBe
 import io.kotlintest.specs.ShouldSpec
-
 import org.openapitools.internal.model.RecipeNutrients
 
 class RecipeNutrientsTest : ShouldSpec() {
-    init {
-        // uncomment below to create an instance of RecipeNutrients
-        //val modelInstance = RecipeNutrients()
+	init {
+		// uncomment below to create an instance of RecipeNutrients
+		// val modelInstance = RecipeNutrients()
 
-        // to test the property `calories`
-        should("test calories") {
-            // uncomment below to test the property
-            //modelInstance.calories shouldBe ("TODO")
-        }
+		// to test the property `calories`
+		should("test calories") {
+			// uncomment below to test the property
+			// modelInstance.calories shouldBe ("TODO")
+		}
 
-        // to test the property `protein`
-        should("test protein") {
-            // uncomment below to test the property
-            //modelInstance.protein shouldBe ("TODO")
-        }
+		// to test the property `protein`
+		should("test protein") {
+			// uncomment below to test the property
+			// modelInstance.protein shouldBe ("TODO")
+		}
 
-        // to test the property `fat`
-        should("test fat") {
-            // uncomment below to test the property
-            //modelInstance.fat shouldBe ("TODO")
-        }
+		// to test the property `fat`
+		should("test fat") {
+			// uncomment below to test the property
+			// modelInstance.fat shouldBe ("TODO")
+		}
 
-        // to test the property `carbs`
-        should("test carbs") {
-            // uncomment below to test the property
-            //modelInstance.carbs shouldBe ("TODO")
-        }
-
-    }
+		// to test the property `carbs`
+		should("test carbs") {
+			// uncomment below to test the property
+			// modelInstance.carbs shouldBe ("TODO")
+		}
+	}
 }

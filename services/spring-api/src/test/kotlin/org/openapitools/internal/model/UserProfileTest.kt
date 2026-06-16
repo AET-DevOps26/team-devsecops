@@ -7,44 +7,42 @@
  */
 
 @file:Suppress(
-    "ArrayInDataClass",
-    "DuplicatedCode",
-    "EnumEntryName",
-    "RemoveRedundantQualifierName",
-    "RemoveRedundantCallsOfConversionMethods",
-    "REDUNDANT_CALL_OF_CONVERSION_METHOD",
-    "RedundantUnitReturnType",
-    "RemoveEmptyClassBody",
-    "UnnecessaryVariable",
-    "UnusedImport",
-    "UnnecessaryVariable",
-    "unused"
+	"ArrayInDataClass",
+	"DuplicatedCode",
+	"EnumEntryName",
+	"RemoveRedundantQualifierName",
+	"RemoveRedundantCallsOfConversionMethods",
+	"REDUNDANT_CALL_OF_CONVERSION_METHOD",
+	"RedundantUnitReturnType",
+	"RemoveEmptyClassBody",
+	"UnnecessaryVariable",
+	"UnusedImport",
+	"UnnecessaryVariable",
+	"unused",
 )
 
 package org.openapitools.internal.model
 
 import io.kotlintest.shouldBe
 import io.kotlintest.specs.ShouldSpec
-
-import org.openapitools.internal.model.UserProfile
 import org.openapitools.internal.model.UserPreferences
+import org.openapitools.internal.model.UserProfile
 
 class UserProfileTest : ShouldSpec() {
-    init {
-        // uncomment below to create an instance of UserProfile
-        //val modelInstance = UserProfile()
+	init {
+		// uncomment below to create an instance of UserProfile
+		// val modelInstance = UserProfile()
 
-        // to test the property `username`
-        should("test username") {
-            // uncomment below to test the property
-            //modelInstance.username shouldBe ("TODO")
-        }
+		// to test the property `username`
+		should("test username") {
+			// uncomment below to test the property
+			// modelInstance.username shouldBe ("TODO")
+		}
 
-        // to test the property `preferences`
-        should("test preferences") {
-            // uncomment below to test the property
-            //modelInstance.preferences shouldBe ("TODO")
-        }
-
-    }
+		// to test the property `preferences`
+		should("test preferences") {
+			// uncomment below to test the property
+			// modelInstance.preferences shouldBe ("TODO")
+		}
+	}
 }

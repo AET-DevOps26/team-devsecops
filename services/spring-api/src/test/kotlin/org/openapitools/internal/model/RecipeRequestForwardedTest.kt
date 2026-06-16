@@ -7,44 +7,42 @@
  */
 
 @file:Suppress(
-    "ArrayInDataClass",
-    "DuplicatedCode",
-    "EnumEntryName",
-    "RemoveRedundantQualifierName",
-    "RemoveRedundantCallsOfConversionMethods",
-    "REDUNDANT_CALL_OF_CONVERSION_METHOD",
-    "RedundantUnitReturnType",
-    "RemoveEmptyClassBody",
-    "UnnecessaryVariable",
-    "UnusedImport",
-    "UnnecessaryVariable",
-    "unused"
+	"ArrayInDataClass",
+	"DuplicatedCode",
+	"EnumEntryName",
+	"RemoveRedundantQualifierName",
+	"RemoveRedundantCallsOfConversionMethods",
+	"REDUNDANT_CALL_OF_CONVERSION_METHOD",
+	"RedundantUnitReturnType",
+	"RemoveEmptyClassBody",
+	"UnnecessaryVariable",
+	"UnusedImport",
+	"UnnecessaryVariable",
+	"unused",
 )
 
 package org.openapitools.internal.model
 
 import io.kotlintest.shouldBe
 import io.kotlintest.specs.ShouldSpec
-
 import org.openapitools.internal.model.RecipeRequestForwarded
 import org.openapitools.internal.model.UserProfile
 
 class RecipeRequestForwardedTest : ShouldSpec() {
-    init {
-        // uncomment below to create an instance of RecipeRequestForwarded
-        //val modelInstance = RecipeRequestForwarded()
+	init {
+		// uncomment below to create an instance of RecipeRequestForwarded
+		// val modelInstance = RecipeRequestForwarded()
 
-        // to test the property `profile`
-        should("test profile") {
-            // uncomment below to test the property
-            //modelInstance.profile shouldBe ("TODO")
-        }
+		// to test the property `profile`
+		should("test profile") {
+			// uncomment below to test the property
+			// modelInstance.profile shouldBe ("TODO")
+		}
 
-        // to test the property `prompt`
-        should("test prompt") {
-            // uncomment below to test the property
-            //modelInstance.prompt shouldBe ("TODO")
-        }
-
-    }
+		// to test the property `prompt`
+		should("test prompt") {
+			// uncomment below to test the property
+			// modelInstance.prompt shouldBe ("TODO")
+		}
+	}
 }
