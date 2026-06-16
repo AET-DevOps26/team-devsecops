@@ -54,6 +54,12 @@ export const DE = {
 			saving: 'Speichern…',
 			couldntReachServer: 'Server nicht erreichbar',
 			invalidRequest: 'Ungültige Anfrage',
+			deleteAccount: 'Konto löschen',
+			deleteAccountWarning:
+				'Dadurch werden dein Konto und alle gespeicherten Rezepte dauerhaft gelöscht. Dies kann nicht rückgängig gemacht werden.',
+			deleteAccountConfirm: 'Ja, mein Konto löschen',
+			deleteAccountCancel: 'Abbrechen',
+			deleting: 'Wird gelöscht…',
 		},
 		common: {
 			error: 'Fehler: {{message}}',
