@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Deploy (or update) a per-PR frontend preview into the team's existing namespace.
+# Deploy (or update) a per-PR frontend preview into the existing namespace.
 # Usage: deploy.sh <pr-number>
 # Env:   WEB_CLIENT_IMAGE  (required) — web-client image ref to deploy
 #        PREVIEW_DOMAIN    (default devsecops.stud.k8s.aet.cit.tum.de)
@@ -13,15 +13,14 @@ HOST="pr-${PR}.${PREVIEW_DOMAIN:-devsecops.stud.k8s.aet.cit.tum.de}"
 export WEB_CLIENT_IMAGE="${WEB_CLIENT_IMAGE:?}"
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-# Route command output to stderr (still shown in logs) so stdout carries only
-# the final URL line, which the caller captures. fd 3 is the real stdout.
+# Route command output to stderr so stdout carries only the final URL line
 exec 3>&1 1>&2
 
-# web-client Deployment + Service, named/labelled per PR.
+# web-client Deployment + Service, named/labelled per PR
 envsubst '${PR} ${WEB_CLIENT_IMAGE}' < "$DIR/manifests.yaml" | kubectl apply -n "$NS" -f -
 
-# Per-PR ingress (inline to substitute the host). Its own TLS secret avoids
-# collisions with production and other previews in this shared namespace.
+# setup TLS and expose the deployment using an Ingress
+# (this is done inline to easily substitute $HOST)
 kubectl apply -n "$NS" -f - <<EOF
 apiVersion: networking.k8s.io/v1
 kind: Ingress
@@ -51,7 +50,7 @@ spec:
                   number: 8080
 EOF
 
-# Stable per-PR tag → apply is a no-op on updates; restart to pull the new image.
+# restart to pull the image with the latest changes from the PR
 kubectl rollout restart "deployment/web-client-pr-${PR}" -n "$NS"
 kubectl rollout status "deployment/web-client-pr-${PR}" -n "$NS" --timeout=180s
 

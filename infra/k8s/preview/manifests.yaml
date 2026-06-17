@@ -1,11 +1,6 @@
 ---
-# Per-PR frontend preview, deployed INTO the team's existing namespace (the AET
-# token is namespace-scoped and cannot create namespaces). Resources are named
-# and labelled per PR so they never collide with production or other previews.
-# The web-client's baked nginx proxies /api to the production spring-api Service,
-# which already lives in this namespace — no alias needed.
-#
-# Substituted by deploy.sh: ${PR}, ${WEB_CLIENT_IMAGE}.
+# Per-PR frontend preview
+# ${PR} and ${WEB_CLIENT_IMAGE} need to be substituted by the caller
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -49,6 +44,7 @@ spec:
             initialDelaySeconds: 5
             periodSeconds: 5
 ---
+# expose the pod at web-client:8080
 apiVersion: v1
 kind: Service
 metadata:
