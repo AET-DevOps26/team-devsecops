@@ -1,0 +1,45 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+      - id: check-merge-conflict
+      - id: check-yaml
+        args: [--allow-multiple-documents]
+      - id: check-json
+        exclude: tsconfig.*\.json$
+
+  - repo: local
+    hooks:
+      - id: ruff
+        name: ruff check
+        entry: ruff check --fix
+        language: system
+        types: [python]
+
+      - id: ruff-format
+        name: ruff format
+        entry: ruff format
+        language: system
+        types: [python]
+
+      - id: redocly-lint
+        name: Redocly OpenAPI lint
+        entry: redocly lint api/openapi.yaml
+        language: node
+        additional_dependencies: ['@redocly/cli@2.34.0']
+        pass_filenames: false
+        files: ^api/openapi\.yaml$
+
+      - id: ktlint
+        name: ktlint
+        entry: ktlint -F
+        language: system
+        types: [kotlin]
+
+      - id: eslint
+        name: eslint
+        entry: web-client/node_modules/.bin/eslint
+        language: system
+        files: web-client/.*\.(ts|tsx|js|jsx)$

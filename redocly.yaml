@@ -1,0 +1,5 @@
+rules:
+  info-license: off
+  no-server-example.com: off
+  operation-operationId: off
+  no-unused-components: off
