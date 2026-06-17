@@ -1,0 +1,99 @@
+name: PR Preview
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
+    paths:
+      - 'web-client/**'
+      - 'infra/k8s/preview/**'
+      - '.github/workflows/deploy-k8s-client-preview.yml'
+
+concurrency:
+  group: preview-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  packages: write
+  pull-requests: write
+
+env:
+  # gets prefixed with the PR number
+  PREVIEW_DOMAIN: devsecops.stud.k8s.aet.cit.tum.de
+
+jobs:
+  deploy:
+    if: github.event.action != 'closed'
+    runs-on: ubuntu-latest
+    environment: kubernetes
+    steps:
+      - name: Checkout PR head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Image prefix
+        run: echo "IMAGE_PREFIX=ghcr.io/$(echo "$GITHUB_REPOSITORY" | tr '[:upper:]' '[:lower:]')" >> "$GITHUB_ENV"
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build web-client
+        uses: docker/build-push-action@v6
+        with:
+          context: web-client
+          push: true
+          tags: ${{ env.IMAGE_PREFIX }}/web-client:preview-pr-${{ github.event.pull_request.number }}
+
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v4
+
+      - name: Configure kubeconfig
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBE_CONFIG }}" | base64 -d > ~/.kube/config
+          chmod 600 ~/.kube/config
+
+      - name: Deploy preview
+        id: deploy
+        env:
+          WEB_CLIENT_IMAGE: ${{ env.IMAGE_PREFIX }}/web-client:preview-pr-${{ github.event.pull_request.number }}
+        run: |
+          url=$(infra/k8s/preview/deploy.sh "${{ github.event.pull_request.number }}")
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+
+      - name: Comment preview URL
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          number: ${{ github.event.pull_request.number }}
+          header: preview
+          message: 🚀 [Frontend preview ↗](${{ steps.deploy.outputs.url }}) &nbsp;·&nbsp; commit `${{ github.event.pull_request.head.sha }}`
+
+  teardown:
+    if: github.event.action == 'closed'
+    runs-on: ubuntu-latest
+    environment: kubernetes
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v4
+      - name: Configure kubeconfig
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBE_CONFIG }}" | base64 -d > ~/.kube/config
+          chmod 600 ~/.kube/config
+      - name: Tear down preview
+        run: |
+          PR="${{ github.event.pull_request.number }}"
+          kubectl delete deployment,service,ingress -n app -l "preview-pr=$PR"
+          kubectl delete secret "preview-pr-$PR-tls" -n app --ignore-not-found
+      - name: Update comment
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          number: ${{ github.event.pull_request.number }}
+          header: preview
+          message: 🧹 The preview environment was removed because this PR was closed.
