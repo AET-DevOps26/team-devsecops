@@ -87,7 +87,10 @@ jobs:
           echo "${{ secrets.KUBE_CONFIG }}" | base64 -d > ~/.kube/config
           chmod 600 ~/.kube/config
       - name: Tear down preview
-        run: kubectl delete namespace "preview-pr-${{ github.event.pull_request.number }}" --ignore-not-found --wait=false
+        run: |
+          PR="${{ github.event.pull_request.number }}"
+          kubectl delete deployment,service,ingress -n app -l "preview-pr=$PR"
+          kubectl delete secret "preview-pr-$PR-tls" -n app --ignore-not-found
       - name: Update comment
         uses: marocchino/sticky-pull-request-comment@v2
         with:

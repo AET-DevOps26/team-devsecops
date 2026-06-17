@@ -1,19 +1,27 @@
 ---
-# Per-PR frontend preview
-# ${WEB_CLIENT_IMAGE} needs to be substituted by the caller
+# Per-PR frontend preview, deployed INTO the team's existing namespace (the AET
+# token is namespace-scoped and cannot create namespaces). Resources are named
+# and labelled per PR so they never collide with production or other previews.
+# The web-client's baked nginx proxies /api to the production spring-api Service,
+# which already lives in this namespace — no alias needed.
+#
+# Substituted by deploy.sh: ${PR}, ${WEB_CLIENT_IMAGE}.
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: web-client
+  name: web-client-pr-${PR}
+  labels:
+    preview-pr: "${PR}"
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: web-client
+      app: web-client-pr-${PR}
   template:
     metadata:
       labels:
-        app: web-client
+        app: web-client-pr-${PR}
+        preview-pr: "${PR}"
     spec:
       containers:
         - name: web-client
@@ -41,25 +49,15 @@ spec:
             initialDelaySeconds: 5
             periodSeconds: 5
 ---
-# expose the pod at web-client:8080
 apiVersion: v1
 kind: Service
 metadata:
-  name: web-client
+  name: web-client-pr-${PR}
+  labels:
+    preview-pr: "${PR}"
 spec:
   selector:
-    app: web-client
+    app: web-client-pr-${PR}
   ports:
     - port: 8080
       targetPort: 8080
----
-# Make the prod backend available at spring-api:8080 for the frontend
-apiVersion: v1
-kind: Service
-metadata:
-  name: spring-api
-spec:
-  type: ExternalName
-  externalName: spring-api.app.svc.cluster.local
-  ports:
-    - port: 8080
