@@ -13,6 +13,10 @@ HOST="pr-${PR}.${PREVIEW_DOMAIN:-devsecops.stud.k8s.aet.cit.tum.de}"
 export WEB_CLIENT_IMAGE="${WEB_CLIENT_IMAGE:?}"
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+# Route command output to stderr (still shown in logs) so stdout carries only
+# the final URL line, which the caller captures. fd 3 is the real stdout.
+exec 3>&1 1>&2
+
 # web-client Deployment + Service, named/labelled per PR.
 envsubst '${PR} ${WEB_CLIENT_IMAGE}' < "$DIR/manifests.yaml" | kubectl apply -n "$NS" -f -
 
@@ -51,4 +55,4 @@ EOF
 kubectl rollout restart "deployment/web-client-pr-${PR}" -n "$NS"
 kubectl rollout status "deployment/web-client-pr-${PR}" -n "$NS" --timeout=180s
 
-echo "https://${HOST}/team-devsecops/"
+echo "https://${HOST}/team-devsecops/" >&3
