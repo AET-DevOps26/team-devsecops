@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
     val kotlinVersion = "2.2.0"
     id("org.jetbrains.kotlin.jvm") version kotlinVersion
@@ -7,8 +9,6 @@ plugins {
     id("io.spring.dependency-management") version "1.1.7"
     id("jacoco")
 }
-
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 group = "org.openapitools"
 version = "1.0.0"
