@@ -781,6 +781,21 @@ export interface components {
         Recipe: components["schemas"]["RecipeInput"] & {
             /** Format: int64 */
             id: number;
+            /**
+             * Format: date-time
+             * @description When the recipe was saved (UTC)
+             */
+            createdAt: string;
+            /**
+             * Format: date-time
+             * @description When the recipe was last edited (UTC)
+             */
+            editedAt: string;
+            /**
+             * Format: date-time
+             * @description When the recipe was last opened (UTC)
+             */
+            openedAt?: string | null;
         };
         RecipeRequest: {
             prompt: string;

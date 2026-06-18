@@ -17,6 +17,8 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import tools.jackson.core.type.TypeReference
 import tools.jackson.databind.ObjectMapper
+import java.time.Instant
+import java.time.ZoneOffset
 
 @RestController
 @Validated
@@ -54,6 +56,8 @@ class RecipesApiController(
 		val entity = recipeRepository.findById(recipeId).orElseThrow { NotFoundException("Recipe not found") }
 		val user = userRepository.findByUsername(currentUsername()).orElseThrow()
 		if (entity.user.id != user.id) throw ForbiddenException("Recipe belongs to a different user")
+		entity.openedAt = Instant.now()
+		recipeRepository.save(entity)
 		return ResponseEntity.ok(entity.toApiModel())
 	}
 
@@ -74,6 +78,7 @@ class RecipesApiController(
 			entity.nutrientProt = it.protein
 			entity.nutrientFat = it.fat
 		}
+		entity.editedAt = Instant.now()
 		return ResponseEntity.ok(recipeRepository.save(entity).toApiModel())
 	}
 
@@ -101,5 +106,8 @@ class RecipesApiController(
 					protein = nutrientProt,
 					fat = nutrientFat,
 				),
+			createdAt = createdAt.atOffset(ZoneOffset.UTC),
+			editedAt = editedAt.atOffset(ZoneOffset.UTC),
+			openedAt = openedAt?.atOffset(ZoneOffset.UTC),
 		)
 }

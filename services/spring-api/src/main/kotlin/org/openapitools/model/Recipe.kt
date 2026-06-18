@@ -22,7 +22,10 @@ import java.util.Objects
  * @param instructions
  * @param portions
  * @param id
+ * @param createdAt When the recipe was saved (UTC)
+ * @param editedAt When the recipe was last edited (UTC)
  * @param nutrients
+ * @param openedAt When the recipe was last opened (UTC)
  */
 data class Recipe(
 	@get:Size(min = 1, max = 255)
@@ -41,7 +44,13 @@ data class Recipe(
 	@get:Min(value = 1L)
 	@Schema(example = "null", required = true, description = "")
 	@get:JsonProperty("id", required = true) val id: kotlin.Long,
+	@Schema(example = "null", required = true, description = "When the recipe was saved (UTC)")
+	@get:JsonProperty("createdAt", required = true) val createdAt: java.time.OffsetDateTime,
+	@Schema(example = "null", required = true, description = "When the recipe was last edited (UTC)")
+	@get:JsonProperty("editedAt", required = true) val editedAt: java.time.OffsetDateTime,
 	@field:Valid
 	@Schema(example = "null", description = "")
 	@get:JsonProperty("nutrients") val nutrients: RecipeNutrients? = null,
+	@Schema(example = "null", description = "When the recipe was last opened (UTC)")
+	@get:JsonProperty("openedAt") val openedAt: java.time.OffsetDateTime? = null,
 )
