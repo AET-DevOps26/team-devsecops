@@ -1,5 +1,6 @@
 package org.openapitools.security
 
+import org.openapitools.repository.TokenBlocklistRepository
 import org.openapitools.repository.UserRepository
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -20,6 +21,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 class SecurityConfig(
 	private val userRepository: UserRepository,
 	private val jwtUtils: JwtUtils,
+	private val tokenBlocklist: TokenBlocklistRepository,
 ) {
 	// BCrypt is the standard algorithm for hashing passwords
 	@Bean
@@ -78,7 +80,7 @@ class SecurityConfig(
 				}
 			}.headers { it.frameOptions { fo -> fo.disable() } } // needed for H2 console iframe
 			.addFilterBefore(
-				JwtAuthFilter(jwtUtils, userRepository),
+				JwtAuthFilter(jwtUtils, userRepository, tokenBlocklist),
 				UsernamePasswordAuthenticationFilter::class.java,
 			)
 		return http.build()

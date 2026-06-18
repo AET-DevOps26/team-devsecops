@@ -9,6 +9,7 @@ import org.openapitools.model.RecipeRequest
 import org.openapitools.model.UserPreferences
 import org.openapitools.model.UserProfile
 import org.openapitools.repository.UserRepository
+import org.slf4j.LoggerFactory
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
@@ -30,42 +31,57 @@ class AIApiController(
 	private val userRepository: UserRepository,
 	private val objectMapper: ObjectMapper,
 ) : AIApi {
+	private val log = LoggerFactory.getLogger(javaClass)
+
 	// Cap how long we wait on the GenAI service before returning an error
 	private val aiTimeout = Duration.ofSeconds(60)
 
 	override fun aiHelpPost(
 		@Valid helpRequest: HelpRequest,
 	): ResponseEntity<HelpResponse> {
-		val user = userRepository.findByUsername(currentUsername()).orElseThrow()
+		val username = currentUsername()
+		log.info("Help request [user={}, promptLength={}]", username, helpRequest.prompt.length)
+		val user = userRepository.findByUsername(username).orElseThrow()
 		val response =
 			aiHelpWebClient
 				.post()
 				.uri("/ai/help")
 				.contentType(MediaType.APPLICATION_JSON)
-				.bodyValue(mapOf("profile" to user.toProfile(), "recipe" to helpRequest.recipe, "prompt" to helpRequest.prompt))
-				.retrieve()
+				.bodyValue(
+					objectMapper.writeValueAsString(
+						mapOf(
+							"profile" to user.toProfile(),
+							"recipe" to helpRequest.recipe,
+							"prompt" to helpRequest.prompt,
+						),
+					),
+				).retrieve()
 				.bodyToMono(HelpResponse::class.java)
 				.timeout(aiTimeout)
 				.onErrorMap(TimeoutException::class.java) { GatewayTimeoutException("GenAI service timed out") }
 				.block() ?: throw BadGatewayException("GenAI service unavailable or returned an unparseable response")
+		log.info("Help response delivered [user={}]", username)
 		return ResponseEntity.ok(response)
 	}
 
 	override fun aiRecipesPost(
 		@Valid recipeRequest: RecipeRequest,
 	): ResponseEntity<List<RecipeInput>> {
-		val user = userRepository.findByUsername(currentUsername()).orElseThrow()
+		val username = currentUsername()
+		log.info("Recipe generation request [user={}, promptLength={}]", username, recipeRequest.prompt.length)
+		val user = userRepository.findByUsername(username).orElseThrow()
 		val recipes =
 			aiRecipeWebClient
 				.post()
 				.uri("/ai/recipes")
 				.contentType(MediaType.APPLICATION_JSON)
-				.bodyValue(mapOf("profile" to user.toProfile(), "prompt" to recipeRequest.prompt))
+				.bodyValue(objectMapper.writeValueAsString(mapOf("profile" to user.toProfile(), "prompt" to recipeRequest.prompt)))
 				.retrieve()
 				.bodyToMono(object : ParameterizedTypeReference<List<RecipeInput>>() {})
 				.timeout(aiTimeout)
 				.onErrorMap(TimeoutException::class.java) { GatewayTimeoutException("GenAI service timed out") }
 				.block() ?: throw BadGatewayException("GenAI service unavailable or returned an unparseable response")
+		log.info("Recipe generation complete [user={}, count={}]", username, recipes.size)
 		return ResponseEntity.ok(recipes)
 	}
 

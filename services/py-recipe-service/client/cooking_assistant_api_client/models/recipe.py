@@ -1,9 +1,11 @@
 from __future__ import annotations
 
+import datetime
 from collections.abc import Mapping
 from typing import TYPE_CHECKING, Any, TypeVar, cast
 
 from attrs import define as _attrs_define
+from dateutil.parser import isoparse
 
 from ..types import UNSET, Unset
 
@@ -24,7 +26,10 @@ class Recipe:
         instructions (list[str]):
         portions (float):
         id (int):
+        created_at (datetime.datetime): When the recipe was saved (UTC)
+        edited_at (datetime.datetime): When the recipe was last edited (UTC)
         nutrients (RecipeNutrients | Unset):
+        opened_at (datetime.datetime | None | Unset): When the recipe was last opened (UTC)
     """
 
     title: str
@@ -32,7 +37,10 @@ class Recipe:
     instructions: list[str]
     portions: float
     id: int
+    created_at: datetime.datetime
+    edited_at: datetime.datetime
     nutrients: RecipeNutrients | Unset = UNSET
+    opened_at: datetime.datetime | None | Unset = UNSET
 
     def to_dict(self) -> dict[str, Any]:
         title = self.title
@@ -48,9 +56,21 @@ class Recipe:
 
         id = self.id
 
+        created_at = self.created_at.isoformat()
+
+        edited_at = self.edited_at.isoformat()
+
         nutrients: dict[str, Any] | Unset = UNSET
         if not isinstance(self.nutrients, Unset):
             nutrients = self.nutrients.to_dict()
+
+        opened_at: None | str | Unset
+        if isinstance(self.opened_at, Unset):
+            opened_at = UNSET
+        elif isinstance(self.opened_at, datetime.datetime):
+            opened_at = self.opened_at.isoformat()
+        else:
+            opened_at = self.opened_at
 
         field_dict: dict[str, Any] = {}
 
@@ -61,10 +81,14 @@ class Recipe:
                 "instructions": instructions,
                 "portions": portions,
                 "id": id,
+                "createdAt": created_at,
+                "editedAt": edited_at,
             }
         )
         if nutrients is not UNSET:
             field_dict["nutrients"] = nutrients
+        if opened_at is not UNSET:
+            field_dict["openedAt"] = opened_at
 
         return field_dict
 
@@ -89,6 +113,10 @@ class Recipe:
 
         id = d.pop("id")
 
+        created_at = isoparse(d.pop("createdAt"))
+
+        edited_at = isoparse(d.pop("editedAt"))
+
         _nutrients = d.pop("nutrients", UNSET)
         nutrients: RecipeNutrients | Unset
         if isinstance(_nutrients, Unset):
@@ -96,13 +124,33 @@ class Recipe:
         else:
             nutrients = RecipeNutrients.from_dict(_nutrients)
 
+        def _parse_opened_at(data: object) -> datetime.datetime | None | Unset:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            try:
+                if not isinstance(data, str):
+                    raise TypeError()
+                opened_at_type_0 = isoparse(data)
+
+                return opened_at_type_0
+            except (TypeError, ValueError, AttributeError, KeyError):
+                pass
+            return cast(datetime.datetime | None | Unset, data)
+
+        opened_at = _parse_opened_at(d.pop("openedAt", UNSET))
+
         recipe = cls(
             title=title,
             ingredients=ingredients,
             instructions=instructions,
             portions=portions,
             id=id,
+            created_at=created_at,
+            edited_at=edited_at,
             nutrients=nutrients,
+            opened_at=opened_at,
         )
 
         return recipe

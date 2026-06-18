@@ -646,12 +646,25 @@ components:
       allOf:
         - $ref: "#/components/schemas/RecipeInput"
         - type: object
-          required: [id]
+          required: [id, createdAt, editedAt]
           properties:
             id:
               type: integer
               format: int64
               minimum: 1
+            createdAt:
+              type: string
+              format: date-time
+              description: When the recipe was saved (UTC)
+            editedAt:
+              type: string
+              format: date-time
+              description: When the recipe was last edited (UTC)
+            openedAt:
+              type: string
+              format: date-time
+              nullable: true
+              description: When the recipe was last opened (UTC)
 
     RecipeRequest:
       type: object
