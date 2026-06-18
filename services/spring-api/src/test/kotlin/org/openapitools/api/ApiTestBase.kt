@@ -1,6 +1,7 @@
 package org.openapitools.api
 
 import org.junit.jupiter.api.BeforeEach
+import org.openapitools.repository.TokenBlocklistRepository
 import org.openapitools.repository.UserRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -24,8 +25,11 @@ abstract class ApiTestBase {
 
 	@Autowired lateinit var userRepository: UserRepository
 
+	@Autowired lateinit var tokenBlocklist: TokenBlocklistRepository
+
 	@BeforeEach
 	fun cleanupDatabase() {
+		tokenBlocklist.deleteAll()
 		userRepository.deleteAll()
 	}
 

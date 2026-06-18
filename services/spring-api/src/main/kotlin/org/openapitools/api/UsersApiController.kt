@@ -1,12 +1,14 @@
 package org.openapitools.api
 
 import jakarta.validation.Valid
+import org.openapitools.entity.TokenBlocklistEntry
 import org.openapitools.entity.UserEntity
 import org.openapitools.model.AuthRequest
 import org.openapitools.model.AuthResponse
 import org.openapitools.model.UserPreferences
 import org.openapitools.model.UserProfile
 import org.openapitools.model.UserProfileUpdate
+import org.openapitools.repository.TokenBlocklistRepository
 import org.openapitools.repository.UserRepository
 import org.openapitools.security.JwtUtils
 import org.springframework.http.HttpStatus
@@ -30,6 +32,7 @@ class UsersApiController(
 	private val authManager: AuthenticationManager,
 	private val jwtUtils: JwtUtils,
 	private val objectMapper: ObjectMapper,
+	private val tokenBlocklist: TokenBlocklistRepository,
 ) : UsersApi {
 	override fun usersRegisterPost(
 		@Valid authRequest: AuthRequest,
@@ -61,10 +64,18 @@ class UsersApiController(
 		return ResponseEntity.ok(AuthResponse(token = jwtUtils.generateToken(user.id)))
 	}
 
-	override fun usersLogoutPost(): ResponseEntity<Unit> =
-		// JWTs are stateless — the client simply discards the token.
-		// For true server-side invalidation you'd need a token blocklist (e.g. Redis).
-		ResponseEntity(HttpStatus.OK)
+	override fun usersLogoutPost(): ResponseEntity<Unit> {
+		val token = SecurityContextHolder.getContext().authentication?.credentials as? String
+		if (token != null) {
+			tokenBlocklist.save(
+				TokenBlocklistEntry(
+					tokenHash = jwtUtils.tokenHash(token),
+					expiresAt = jwtUtils.getExpirationFromToken(token),
+				),
+			)
+		}
+		return ResponseEntity(HttpStatus.OK)
+	}
 
 	override fun usersProfileGet(): ResponseEntity<UserProfile> {
 		val user = userRepository.findByUsername(currentUsername()).orElseThrow()

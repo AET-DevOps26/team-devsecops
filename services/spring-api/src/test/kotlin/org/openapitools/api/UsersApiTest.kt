@@ -126,6 +126,17 @@ class UsersApiTest : ApiTestBase() {
 	}
 
 	@Test
+	fun `logout - token is blocked and subsequent requests return 401`() {
+		val token = register()
+		mockMvc
+			.perform(post("/api/v1/users/logout").header("Authorization", "Bearer $token"))
+			.andExpect(status().isOk)
+		mockMvc
+			.perform(get("/api/v1/users/profile").header("Authorization", "Bearer $token"))
+			.andExpect(status().isUnauthorized)
+	}
+
+	@Test
 	fun `logout - unauthenticated returns 401`() {
 		mockMvc
 			.perform(post("/api/v1/users/logout"))
