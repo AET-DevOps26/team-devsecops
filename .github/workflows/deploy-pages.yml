@@ -1,4 +1,4 @@
-name: Deploy Coverage to GitHub Pages
+name: Deploy Pages
 
 on:
   # Deploy immediately when main is updated.
@@ -172,16 +172,20 @@ jobs:
           mkdir -p site
           [ -d store/coverage ] && cp -r store/coverage/. site/
 
+          # API docs
+          npx --yes @redocly/cli@2.34.0 build-docs api/openapi.yaml --output site/api/index.html
+
           # Per-branch index (links to each service subfolder)
           for branch_dir in site/*/; do
             [ -d "$branch_dir" ] || continue
             branch=$(basename "$branch_dir")
+            [ "$branch" = "api" ] && continue
             {
               printf '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">'
               printf '<title>Coverage: %s</title>' "$branch"
               echo '<style>body{font-family:sans-serif;max-width:600px;margin:4rem auto}a{color:#0969da}ul{line-height:2}</style>'
               echo '</head><body>'
-              printf '<h1>Coverage: %s</h1><p><a href="../">← All branches</a></p><ul>' "$branch"
+              printf '<h1>Coverage: %s</h1><p><a href="../">← All</a></p><ul>' "$branch"
               for svc_dir in "$branch_dir"*/; do
                 [ -d "$svc_dir" ] || continue
                 svc=$(basename "$svc_dir")
@@ -191,15 +195,18 @@ jobs:
             } > "$branch_dir/index.html"
           done
 
-          # Top-level index (lists all branches)
+          # Top-level index
           {
             echo '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">'
-            echo '<title>Coverage Reports</title>'
-            echo '<style>body{font-family:sans-serif;max-width:600px;margin:4rem auto}a{color:#0969da}ul{line-height:2}</style>'
-            echo '</head><body><h1>Coverage Reports</h1><ul>'
+            echo '<title>Team DevSecOps</title>'
+            echo '<style>body{font-family:sans-serif;max-width:600px;margin:4rem auto}a{color:#0969da}ul{line-height:2}h2{margin-top:2rem}</style>'
+            echo '</head><body><h1>Team DevSecOps</h1>'
+            echo '<h2>API</h2><ul><li><a href="api/">API Documentation</a></li></ul>'
+            echo '<h2>Coverage</h2><ul>'
             for branch_dir in site/*/; do
               [ -d "$branch_dir" ] || continue
               branch=$(basename "$branch_dir")
+              [ "$branch" = "api" ] && continue
               printf '<li><a href="%s/">%s</a></li>\n' "$branch" "$branch"
             done
             echo '</ul></body></html>'
