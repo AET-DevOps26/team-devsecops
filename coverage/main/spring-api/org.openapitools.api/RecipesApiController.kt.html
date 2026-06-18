@@ -44,7 +44,7 @@ import java.time.ZoneOffset
 <span class="fc" id="L44">					title = recipeInput.title,</span>
 <span class="fc" id="L45">					ingredients = objectMapper.writeValueAsString(recipeInput.ingredients),</span>
 <span class="fc" id="L46">					instructions = objectMapper.writeValueAsString(recipeInput.instructions),</span>
-<span class="fc" id="L47">					portions = recipeInput.portions,</span>
+<span class="fc" id="L47">					portions = java.math.BigDecimal.valueOf(recipeInput.portions),</span>
 <span class="pc bpc" id="L48" title="1 of 2 branches missed.">					nutrientKcal = recipeInput.nutrients?.calories ?: 0,</span>
 <span class="pc bpc" id="L49" title="1 of 2 branches missed.">					nutrientCarb = recipeInput.nutrients?.carbs ?: 0,</span>
 <span class="pc bpc" id="L50" title="1 of 2 branches missed.">					nutrientProt = recipeInput.nutrients?.protein ?: 0,</span>
@@ -75,7 +75,7 @@ import java.time.ZoneOffset
 <span class="pc bpc" id="L75" title="1 of 2 branches missed.">		recipeUpdate.title?.let { entity.title = it }</span>
 <span class="pc bpc" id="L76" title="1 of 2 branches missed.">		recipeUpdate.ingredients?.let { entity.ingredients = objectMapper.writeValueAsString(it) }</span>
 <span class="pc bpc" id="L77" title="1 of 2 branches missed.">		recipeUpdate.instructions?.let { entity.instructions = objectMapper.writeValueAsString(it) }</span>
-<span class="pc bpc" id="L78" title="1 of 2 branches missed.">		recipeUpdate.portions?.let { entity.portions = it }</span>
+<span class="pc bpc" id="L78" title="1 of 2 branches missed.">		recipeUpdate.portions?.let { entity.portions = java.math.BigDecimal.valueOf(it) }</span>
 <span class="pc bpc" id="L79" title="1 of 2 branches missed.">		recipeUpdate.nutrients?.let {</span>
 <span class="nc" id="L80">			entity.nutrientKcal = it.calories</span>
 <span class="nc" id="L81">			entity.nutrientCarb = it.carbs</span>
@@ -104,7 +104,7 @@ import java.time.ZoneOffset
 <span class="fc" id="L104">			title = title,</span>
 <span class="fc" id="L105">			ingredients = objectMapper.readValue(ingredients, object : TypeReference&lt;List&lt;RecipeIngredient&gt;&gt;() {}),</span>
 <span class="fc" id="L106">			instructions = objectMapper.readValue(instructions, object : TypeReference&lt;List&lt;String&gt;&gt;() {}),</span>
-<span class="fc" id="L107">			portions = portions,</span>
+<span class="fc" id="L107">			portions = portions.toDouble(),</span>
 			nutrients =
 <span class="fc" id="L109">				RecipeNutrients(</span>
 <span class="fc" id="L110">					calories = nutrientKcal,</span>

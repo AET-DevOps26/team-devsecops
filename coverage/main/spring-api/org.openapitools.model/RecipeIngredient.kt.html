@@ -22,7 +22,7 @@ import java.util.Objects
 <span class="fc" id="L22">data class RecipeIngredient(</span>
 <span class="fc" id="L23">	@get:DecimalMin(value = &quot;0&quot;)</span>
 	@Schema(example = &quot;null&quot;, required = true, description = &quot;&quot;)
-	@get:JsonProperty(&quot;quantity&quot;, required = true) val quantity: java.math.BigDecimal,
+	@get:JsonProperty(&quot;quantity&quot;, required = true) val quantity: kotlin.Double,
 <span class="fc" id="L26">	@get:Size(min = 1)</span>
 	@Schema(example = &quot;null&quot;, required = true, description = &quot;Unit of measurement (e.g. g, ml, cup, tbsp)&quot;)
 	@get:JsonProperty(&quot;unit&quot;, required = true) val unit: kotlin.String,
