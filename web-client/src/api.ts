@@ -800,16 +800,7 @@ export interface components {
         RecipeRequest: {
             prompt: string;
         };
-        RecipeRequestForwarded: {
-            profile: components["schemas"]["UserProfile"];
-            prompt: string;
-        };
         HelpRequest: {
-            recipe: components["schemas"]["RecipeInput"];
-            prompt: string;
-        };
-        HelpRequestForwarded: {
-            profile: components["schemas"]["UserProfile"];
             recipe: components["schemas"]["RecipeInput"];
             prompt: string;
         };

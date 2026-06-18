@@ -22,7 +22,7 @@ import java.util.Objects
 data class RecipeIngredient(
 	@get:DecimalMin(value = "0")
 	@Schema(example = "null", required = true, description = "")
-	@get:JsonProperty("quantity", required = true) val quantity: java.math.BigDecimal,
+	@get:JsonProperty("quantity", required = true) val quantity: kotlin.Double,
 	@get:Size(min = 1)
 	@Schema(example = "null", required = true, description = "Unit of measurement (e.g. g, ml, cup, tbsp)")
 	@get:JsonProperty("unit", required = true) val unit: kotlin.String,

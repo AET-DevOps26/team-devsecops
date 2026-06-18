@@ -1,39 +1,5 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
-group = "org.openapitools"
-version = "1.0.0"
-java.sourceCompatibility = JavaVersion.VERSION_17
-
-repositories {
-	mavenCentral()
-}
-
-kotlin {
-	compilerOptions {
-		jvmTarget.set(JvmTarget.JVM_17)
-		freeCompilerArgs.add("-Xannotation-default-target=param-property")
-	}
-}
-
-tasks.test {
-	useJUnitPlatform()
-	testLogging {
-		events("passed", "skipped", "failed")
-		exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
-		showExceptions = true
-		showCauses = true
-	}
-	finalizedBy(tasks.jacocoTestReport)
-}
-
-tasks.jacocoTestReport {
-	dependsOn(tasks.test)
-	reports {
-		xml.required.set(true)
-		html.required.set(true)
-	}
-}
-
 plugins {
 	val kotlinVersion = "2.2.0"
 	id("org.jetbrains.kotlin.jvm") version kotlinVersion
@@ -43,6 +9,54 @@ plugins {
 	id("io.spring.dependency-management") version "1.1.7"
 	id("jacoco")
 	id("org.jlleitschuh.gradle.ktlint") version "14.0.1"
+}
+
+group = "org.openapitools"
+version = "1.0.0"
+java.sourceCompatibility = JavaVersion.VERSION_17
+
+repositories {
+	mavenCentral()
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget.set(JvmTarget.JVM_17)
+        freeCompilerArgs.add("-Xannotation-default-target=param-property")
+    }
+
+    sourceSets {
+        getByName("test") {
+            kotlin.srcDir("src/test/kotlin")
+        }
+    }
+}
+
+tasks.test {
+    useJUnitPlatform()
+
+    jvmArgs("-XX:+EnableDynamicAgentLoading")
+
+    reports {
+        junitXml.required.set(true)
+        html.required.set(true)
+    }
+
+    testLogging {
+        events("passed", "skipped", "failed")
+        exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+        showExceptions = true
+        showCauses = true
+    }
+    finalizedBy(tasks.jacocoTestReport)
+}
+
+tasks.jacocoTestReport {
+	dependsOn(tasks.test)
+	reports {
+		xml.required.set(true)
+		html.required.set(true)
+	}
 }
 
 tasks.bootJar {
@@ -80,12 +94,24 @@ dependencies {
 	runtimeOnly("io.jsonwebtoken:jjwt-impl:0.12.6")
 	runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.12.6")
 
-	// Tests
-	testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
-	testImplementation("org.springframework.boot:spring-boot-starter-test") {
-		exclude(module = "junit")
-	}
-	testImplementation("org.mockito.kotlin:mockito-kotlin:5.4.0")
-	testImplementation("org.springframework.boot:spring-boot-webmvc-test")
-	testImplementation("org.springframework.security:spring-security-test")
+    // Tests
+    testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
+    testImplementation("org.springframework.boot:spring-boot-starter-test") {
+        exclude(module = "junit")
+    }
+    testImplementation("org.mockito.kotlin:mockito-kotlin:5.4.0")
+    testImplementation("org.springframework.boot:spring-boot-webmvc-test")
+    testImplementation("org.springframework.security:spring-security-test")
+
+    // Retrofit
+    implementation("com.squareup.retrofit2:retrofit:2.11.0")
+    implementation("com.squareup.retrofit2:converter-jackson:2.11.0")
+
+    // OkHttp
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+
+    // JSON multiplatform runtime
+    implementation("com.squareup.moshi:moshi:1.15.1")
+    implementation("com.squareup.moshi:moshi-kotlin:1.15.1")
+    implementation("com.squareup.retrofit2:converter-moshi:2.11.0")
 }

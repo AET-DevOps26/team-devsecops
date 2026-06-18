@@ -678,17 +678,6 @@ components:
           minLength: 1
           maxLength: 4096
 
-    RecipeRequestForwarded:
-      type: object
-      required: [profile, prompt]
-      additionalProperties: false
-      properties:
-        profile:
-          $ref: "#/components/schemas/UserProfile"
-        prompt:
-          type: string
-          minLength: 1
-
     HelpRequest:
       type: object
       required: [recipe, prompt]
@@ -700,19 +689,6 @@ components:
           type: string
           minLength: 1
           maxLength: 4096
-
-    HelpRequestForwarded:
-      type: object
-      required: [profile, recipe, prompt]
-      additionalProperties: false
-      properties:
-        profile:
-          $ref: "#/components/schemas/UserProfile"
-        recipe:
-          $ref: "#/components/schemas/RecipeInput"
-        prompt:
-          type: string
-          minLength: 1
 
     HelpResponse:
       type: object

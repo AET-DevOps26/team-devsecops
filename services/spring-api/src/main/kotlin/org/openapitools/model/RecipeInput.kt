@@ -36,7 +36,7 @@ data class RecipeInput(
 	@get:JsonProperty("instructions", required = true) val instructions: kotlin.collections.List<kotlin.String>,
 	@get:DecimalMin(value = "0.5")
 	@Schema(example = "null", required = true, description = "")
-	@get:JsonProperty("portions", required = true) val portions: java.math.BigDecimal,
+	@get:JsonProperty("portions", required = true) val portions: kotlin.Double,
 	@field:Valid
 	@Schema(example = "null", description = "")
 	@get:JsonProperty("nutrients") val nutrients: RecipeNutrients? = null,
