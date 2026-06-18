@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AIApiController.kt</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openapi-spring</a> &gt; <a href="index.source.html" class="el_package">org.openapitools.api</a> &gt; <span class="el_source">AIApiController.kt</span></div><h1>AIApiController.kt</h1><pre class="source lang-java linenums">package org.openapitools.api
+
+import jakarta.validation.Valid
+import org.openapitools.entity.UserEntity
+import org.openapitools.model.HelpRequest
+import org.openapitools.model.HelpResponse
+import org.openapitools.model.RecipeInput
+import org.openapitools.model.RecipeRequest
+import org.openapitools.model.UserPreferences
+import org.openapitools.model.UserProfile
+import org.openapitools.repository.UserRepository
+import org.springframework.core.ParameterizedTypeReference
+import org.springframework.http.MediaType
+import org.springframework.http.ResponseEntity
+import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.validation.annotation.Validated
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.reactive.function.client.WebClient
+import tools.jackson.databind.ObjectMapper
+import java.time.Duration
+import java.util.concurrent.TimeoutException
+
+@RestController
+@Validated
+@RequestMapping(&quot;\${api.base-path:/api/v1}&quot;)
+<span class="fc" id="L27">class AIApiController(</span>
+<span class="fc" id="L28">	private val aiHelpWebClient: WebClient,</span>
+<span class="fc" id="L29">	private val aiRecipeWebClient: WebClient,</span>
+<span class="fc" id="L30">	private val userRepository: UserRepository,</span>
+<span class="fc" id="L31">	private val objectMapper: ObjectMapper,</span>
+) : AIApi {
+	// Cap how long we wait on the GenAI service before returning an error
+<span class="fc" id="L34">	private val aiTimeout = Duration.ofSeconds(60)</span>
+
+	override fun aiHelpPost(
+		@Valid helpRequest: HelpRequest,
+	): ResponseEntity&lt;HelpResponse&gt; {
+<span class="fc" id="L39">		val user = userRepository.findByUsername(currentUsername()).orElseThrow()</span>
+<span class="fc" id="L40">		val response =</span>
+<span class="fc bfc" id="L41" title="All 2 branches covered.">			aiHelpWebClient</span>
+<span class="fc" id="L42">				.post()</span>
+<span class="fc" id="L43">				.uri(&quot;/ai/help&quot;)</span>
+<span class="fc" id="L44">				.contentType(MediaType.APPLICATION_JSON)</span>
+<span class="fc" id="L45">				.bodyValue(mapOf(&quot;profile&quot; to user.toProfile(), &quot;recipe&quot; to helpRequest.recipe, &quot;prompt&quot; to helpRequest.prompt))</span>
+<span class="fc" id="L46">				.retrieve()</span>
+<span class="fc" id="L47">				.bodyToMono(HelpResponse::class.java)</span>
+<span class="fc" id="L48">				.timeout(aiTimeout)</span>
+<span class="pc" id="L49">				.onErrorMap(TimeoutException::class.java) { GatewayTimeoutException(&quot;GenAI service timed out&quot;) }</span>
+<span class="fc" id="L50">				.block() ?: throw BadGatewayException(&quot;GenAI service unavailable or returned an unparseable response&quot;)</span>
+<span class="fc" id="L51">		return ResponseEntity.ok(response)</span>
+	}
+
+	override fun aiRecipesPost(
+		@Valid recipeRequest: RecipeRequest,
+	): ResponseEntity&lt;List&lt;RecipeInput&gt;&gt; {
+<span class="fc" id="L57">		val user = userRepository.findByUsername(currentUsername()).orElseThrow()</span>
+		// the client sends the active UI language so generated recipes match what the user sees,
+		// even when no language is stored in their preferences
+<span class="fc" id="L60">		val profile = user.toProfile()</span>
+<span class="fc" id="L61">		val profileWithLanguage =</span>
+<span class="pc bpc" id="L62" title="1 of 4 branches missed.">			recipeRequest.language?.let {</span>
+<span class="fc" id="L63">				profile.copy(preferences = profile.preferences.copy(language = it))</span>
+<span class="fc" id="L64">			} ?: profile</span>
+<span class="fc" id="L65">		val recipes =</span>
+<span class="fc bfc" id="L66" title="All 2 branches covered.">			aiRecipeWebClient</span>
+<span class="fc" id="L67">				.post()</span>
+<span class="fc" id="L68">				.uri(&quot;/ai/recipes&quot;)</span>
+<span class="fc" id="L69">				.contentType(MediaType.APPLICATION_JSON)</span>
+<span class="fc" id="L70">				.bodyValue(mapOf(&quot;profile&quot; to profileWithLanguage, &quot;prompt&quot; to recipeRequest.prompt))</span>
+<span class="fc" id="L71">				.retrieve()</span>
+<span class="fc" id="L72">				.bodyToMono(object : ParameterizedTypeReference&lt;List&lt;RecipeInput&gt;&gt;() {})</span>
+<span class="fc" id="L73">				.timeout(aiTimeout)</span>
+<span class="pc" id="L74">				.onErrorMap(TimeoutException::class.java) { GatewayTimeoutException(&quot;GenAI service timed out&quot;) }</span>
+<span class="fc" id="L75">				.block() ?: throw BadGatewayException(&quot;GenAI service unavailable or returned an unparseable response&quot;)</span>
+<span class="fc" id="L76">		return ResponseEntity.ok(recipes)</span>
+	}
+
+<span class="fc" id="L79">	private fun currentUsername(): String = SecurityContextHolder.getContext().authentication!!.name</span>
+
+	// Converts the DB user entity into the API UserProfile model, injecting real profile data.
+	// Password is intentionally excluded — never forwarded to the AI service.
+	private fun UserEntity.toProfile(): UserProfile {
+<span class="fc" id="L84">		val prefs =</span>
+<span class="pc bpc" id="L85" title="2 of 4 branches missed.">			preferences?.let {</span>
+<span class="fc" id="L86">				try {</span>
+<span class="fc" id="L87">					objectMapper.readValue(it, UserPreferences::class.java)</span>
+<span class="nc" id="L88">				} catch (_: Exception) {</span>
+<span class="pc" id="L89">					null</span>
+<span class="fc" id="L90">				}</span>
+<span class="nc" id="L91">			} ?: UserPreferences()</span>
+<span class="fc" id="L92">		return UserProfile(username = username, preferences = prefs)</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>
