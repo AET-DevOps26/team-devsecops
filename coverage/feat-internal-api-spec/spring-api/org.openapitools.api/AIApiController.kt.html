@@ -51,7 +51,7 @@ import java.io.InterruptedIOException
 <span class="fc" id="L51">				throw ResponseStatusException(HttpStatus.GATEWAY_TIMEOUT, &quot;Upstream AI service timed out&quot;, e)</span>
 <span class="nc" id="L52">			} catch (e: Exception) {</span>
 				// Handle other potential network failures
-<span class="nc" id="L54">				throw ResponseStatusException(HttpStatus.BAD_GATEWAY, &quot;Upstream service error&quot;, e)</span>
+<span class="nc bnc" id="L54" title="All 2 branches missed.">				throw ResponseStatusException(HttpStatus.BAD_GATEWAY, e.message ?: &quot;Upstream service unreachable&quot;, e)</span>
 			}
 
 <span class="fc" id="L57">		val body = handleRetrofitResponse(retrofitResponse)</span>
@@ -75,7 +75,7 @@ import java.io.InterruptedIOException
 <span class="fc" id="L75">			} catch (e: InterruptedIOException) {</span>
 <span class="fc" id="L76">				throw ResponseStatusException(HttpStatus.GATEWAY_TIMEOUT, &quot;Upstream AI service timed out&quot;, e)</span>
 <span class="nc" id="L77">			} catch (e: Exception) {</span>
-<span class="nc" id="L78">				throw ResponseStatusException(HttpStatus.BAD_GATEWAY, &quot;Upstream service error&quot;, e)</span>
+<span class="nc bnc" id="L78" title="All 2 branches missed.">				throw ResponseStatusException(HttpStatus.BAD_GATEWAY, e.message ?: &quot;Upstream service unreachable&quot;, e)</span>
 			}
 
 <span class="fc" id="L81">		val internalRecipes = handleRetrofitResponse(retrofitResponse)</span>
@@ -90,15 +90,41 @@ import java.io.InterruptedIOException
 	 */
 	private fun &lt;T&gt; handleRetrofitResponse(response: retrofit2.Response&lt;T&gt;): T {
 <span class="fc bfc" id="L92" title="All 2 branches covered.">		if (!response.isSuccessful) {</span>
-<span class="fc" id="L93">			throw ResponseStatusException(</span>
-<span class="fc" id="L94">				HttpStatus.BAD_GATEWAY,</span>
-<span class="fc" id="L95">				&quot;Upstream service returned error: ${response.code()}&quot;,</span>
-			)
+<span class="pc bpc" id="L93" title="1 of 2 branches missed.">			val errorBodyString = response.errorBody()?.string()</span>
+
+			// Attempt to parse a flat {&quot;message&quot;: &quot;...&quot;} OR the fallback nested {&quot;detail&quot;: {&quot;message&quot;: &quot;...&quot;}}
+<span class="fc" id="L96">			val extractedMessage =</span>
+<span class="pc bpc" id="L97" title="1 of 2 branches missed.">				try {</span>
+<span class="nc" id="L98">					val jsonNode = objectMapper.readTree(errorBodyString)</span>
+
+					// 1. Check if Python sent the new flattened message format
+<span class="nc bnc" id="L101" title="All 2 branches missed.">					val flatMessage = jsonNode.get(&quot;message&quot;)?.asText()</span>
+
+<span class="nc bnc" id="L103" title="All 2 branches missed.">					if (flatMessage != null) {</span>
+<span class="nc" id="L104">						flatMessage</span>
+					} else {
+						// 2. Fall back to parsing the old/automatic FastAPI detail format
+<span class="nc" id="L107">						val detailNode = jsonNode.get(&quot;detail&quot;)</span>
+<span class="nc bnc" id="L108" title="All 4 branches missed.">						if (detailNode != null &amp;&amp; detailNode.isObject) {</span>
+<span class="nc bnc" id="L109" title="All 2 branches missed.">							detailNode.get(&quot;message&quot;)?.asText()</span>
+						} else {
+<span class="nc bnc" id="L111" title="All 2 branches missed.">							detailNode?.asText()</span>
+						}
+					}
+<span class="fc" id="L114">				} catch (_: Exception) {</span>
+<span class="fc" id="L115">					null</span>
+<span class="fc" id="L116">				} ?: &quot;Upstream service returned error: ${response.code()}&quot;</span>
+
+			// 2. Resolve the actual HTTP status code dynamically from the upstream response
+<span class="pc bpc" id="L119" title="1 of 2 branches missed.">			val upstreamStatus = HttpStatus.resolve(response.code()) ?: HttpStatus.BAD_GATEWAY</span>
+
+			// 3. Forward the exact code and message down the pipeline
+<span class="fc" id="L122">			throw ResponseStatusException(upstreamStatus, extractedMessage)</span>
 		}
-		
-<span class="pc bpc" id="L99" title="1 of 2 branches missed.">		return response.body() ?: throw ResponseStatusException(</span>
-<span class="nc" id="L100">			HttpStatus.INTERNAL_SERVER_ERROR,</span>
-<span class="nc" id="L101">			&quot;Empty body&quot;,</span>
+
+<span class="pc bpc" id="L125" title="1 of 2 branches missed.">		return response.body() ?: throw ResponseStatusException(</span>
+<span class="nc" id="L126">			HttpStatus.INTERNAL_SERVER_ERROR,</span>
+<span class="nc" id="L127">			&quot;Empty body&quot;,</span>
 		)
 	}
 
@@ -107,70 +133,70 @@ import java.io.InterruptedIOException
 	// -------------------------------------------------------------------------
 
 	private fun UserEntity.toInternalProfile(): org.openapitools.internal.model.UserProfile {
-<span class="fc" id="L110">		val publicPrefs =</span>
-<span class="pc bpc" id="L111" title="2 of 4 branches missed.">			preferences?.let {</span>
-<span class="fc" id="L112">				try {</span>
-<span class="fc" id="L113">					objectMapper.readValue(it, UserPreferences::class.java)</span>
-<span class="nc" id="L114">				} catch (_: Exception) {</span>
-<span class="pc" id="L115">					null</span>
-<span class="fc" id="L116">				}</span>
-<span class="nc" id="L117">			} ?: UserPreferences()</span>
+<span class="fc" id="L136">		val publicPrefs =</span>
+<span class="pc bpc" id="L137" title="2 of 4 branches missed.">			preferences?.let {</span>
+<span class="fc" id="L138">				try {</span>
+<span class="fc" id="L139">					objectMapper.readValue(it, UserPreferences::class.java)</span>
+<span class="nc" id="L140">				} catch (_: Exception) {</span>
+<span class="pc" id="L141">					null</span>
+<span class="fc" id="L142">				}</span>
+<span class="nc" id="L143">			} ?: UserPreferences()</span>
 
-<span class="fc" id="L119">		return org.openapitools.internal.model.UserProfile(</span>
-<span class="fc" id="L120">			username = username,</span>
+<span class="fc" id="L145">		return org.openapitools.internal.model.UserProfile(</span>
+<span class="fc" id="L146">			username = username,</span>
 			preferences =
-<span class="fc" id="L122">				org.openapitools.internal.model.UserPreferences(</span>
-<span class="fc" id="L123">					diet = publicPrefs.diet,</span>
-<span class="fc" id="L124">					allergies = publicPrefs.allergies,</span>
-<span class="fc" id="L125">					aboutMe = publicPrefs.aboutMe,</span>
+<span class="fc" id="L148">				org.openapitools.internal.model.UserPreferences(</span>
+<span class="fc" id="L149">					diet = publicPrefs.diet,</span>
+<span class="fc" id="L150">					allergies = publicPrefs.allergies,</span>
+<span class="fc" id="L151">					aboutMe = publicPrefs.aboutMe,</span>
 					// safely convert between the two different generated enum types using string matching
 					language =
-<span class="pc bpc" id="L128" title="2 of 4 branches missed.">						publicPrefs.language?.name?.let { enumName -&gt;</span>
-<span class="nc" id="L129">							try {</span>
+<span class="pc bpc" id="L154" title="2 of 4 branches missed.">						publicPrefs.language?.name?.let { enumName -&gt;</span>
+<span class="nc" id="L155">							try {</span>
 								org.openapitools.internal.model.UserPreferences.Language
-<span class="nc" id="L131">									.valueOf(enumName)</span>
-<span class="nc" id="L132">							} catch (_: IllegalArgumentException) {</span>
-<span class="nc" id="L133">								null // Fallback gracefully if there's an unexpected mismatch</span>
-<span class="nc" id="L134">							}</span>
+<span class="nc" id="L157">									.valueOf(enumName)</span>
+<span class="nc" id="L158">							} catch (_: IllegalArgumentException) {</span>
+<span class="nc" id="L159">								null // Fallback gracefully if there's an unexpected mismatch</span>
+<span class="nc" id="L160">							}</span>
 						},
 				),
 		)
 	}
 
 	private fun org.openapitools.model.RecipeInput.toInternalRecipe(): org.openapitools.internal.model.RecipeInput =
-<span class="fc" id="L141">		org.openapitools.internal.model.RecipeInput(</span>
-<span class="fc" id="L142">			title = this.title,</span>
-<span class="fc" id="L143">			portions = this.portions,</span>
-<span class="fc" id="L144">			instructions = this.instructions,</span>
+<span class="fc" id="L167">		org.openapitools.internal.model.RecipeInput(</span>
+<span class="fc" id="L168">			title = this.title,</span>
+<span class="fc" id="L169">			portions = this.portions,</span>
+<span class="fc" id="L170">			instructions = this.instructions,</span>
 			ingredients =
-<span class="fc" id="L146">				this.ingredients.map {</span>
+<span class="fc" id="L172">				this.ingredients.map {</span>
 					org.openapitools.internal.model
-<span class="fc" id="L148">						.RecipeIngredient(name = it.name, quantity = it.quantity, unit = it.unit)</span>
+<span class="fc" id="L174">						.RecipeIngredient(name = it.name, quantity = it.quantity, unit = it.unit)</span>
 				},
 			nutrients =
-<span class="pc bpc" id="L151" title="1 of 2 branches missed.">				this.nutrients?.let {</span>
-<span class="nc" id="L152">					org.openapitools.internal.model.RecipeNutrients(</span>
-<span class="nc" id="L153">						calories = it.calories,</span>
-<span class="nc" id="L154">						protein = it.protein,</span>
-<span class="nc" id="L155">						fat = it.fat,</span>
-<span class="nc" id="L156">						carbs = it.carbs,</span>
-<span class="nc" id="L157">					)</span>
+<span class="pc bpc" id="L177" title="1 of 2 branches missed.">				this.nutrients?.let {</span>
+<span class="nc" id="L178">					org.openapitools.internal.model.RecipeNutrients(</span>
+<span class="nc" id="L179">						calories = it.calories,</span>
+<span class="nc" id="L180">						protein = it.protein,</span>
+<span class="nc" id="L181">						fat = it.fat,</span>
+<span class="nc" id="L182">						carbs = it.carbs,</span>
+<span class="nc" id="L183">					)</span>
 				},
-<span class="fc" id="L159">		)</span>
+<span class="fc" id="L185">		)</span>
 
 	private fun org.openapitools.internal.model.RecipeInput.toPublicRecipe(): org.openapitools.model.RecipeInput =
-<span class="fc" id="L162">		org.openapitools.model.RecipeInput(</span>
-<span class="fc" id="L163">			title = this.title,</span>
-<span class="fc" id="L164">			portions = this.portions,</span>
-<span class="fc" id="L165">			instructions = this.instructions,</span>
+<span class="fc" id="L188">		org.openapitools.model.RecipeInput(</span>
+<span class="fc" id="L189">			title = this.title,</span>
+<span class="fc" id="L190">			portions = this.portions,</span>
+<span class="fc" id="L191">			instructions = this.instructions,</span>
 			ingredients =
-<span class="fc" id="L167">				this.ingredients.map {</span>
-<span class="fc" id="L168">					org.openapitools.model.RecipeIngredient(name = it.name, quantity = it.quantity, unit = it.unit)</span>
+<span class="fc" id="L193">				this.ingredients.map {</span>
+<span class="fc" id="L194">					org.openapitools.model.RecipeIngredient(name = it.name, quantity = it.quantity, unit = it.unit)</span>
 				},
 			nutrients =
-<span class="pc bpc" id="L171" title="1 of 2 branches missed.">				this.nutrients?.let {</span>
-<span class="fc" id="L172">					org.openapitools.model.RecipeNutrients(calories = it.calories, protein = it.protein, fat = it.fat, carbs = it.carbs)</span>
+<span class="pc bpc" id="L197" title="1 of 2 branches missed.">				this.nutrients?.let {</span>
+<span class="fc" id="L198">					org.openapitools.model.RecipeNutrients(calories = it.calories, protein = it.protein, fat = it.fat, carbs = it.carbs)</span>
 				},
-<span class="fc" id="L174">		)</span>
+<span class="fc" id="L200">		)</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>
