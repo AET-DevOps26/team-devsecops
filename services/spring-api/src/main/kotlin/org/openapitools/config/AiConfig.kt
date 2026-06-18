@@ -29,6 +29,7 @@ class AiConfig {
 		OkHttpClient
 			.Builder()
 			.connectionPool(ConnectionPool(5, 2, TimeUnit.SECONDS))
+			.callTimeout(60, TimeUnit.SECONDS)
 			.addInterceptor(InternalHmacInterceptor(internalAuthSecret))
 			.build()
 
