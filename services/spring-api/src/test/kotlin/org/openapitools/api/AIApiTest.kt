@@ -14,6 +14,7 @@ import org.openapitools.model.Language
 import org.openapitools.model.RecipeIngredient
 import org.openapitools.model.RecipeInput
 import org.openapitools.model.RecipeNutrients
+import org.openapitools.model.RecipeRequestForwarded
 import org.openapitools.model.UserProfile
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.TestConfiguration
@@ -26,6 +27,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPat
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import org.springframework.web.reactive.function.client.WebClient
 import reactor.core.publisher.Mono
+import tools.jackson.databind.ObjectMapper
 import java.math.BigDecimal
 import kotlin.test.assertEquals
 
@@ -43,6 +45,8 @@ class AIApiTest : ApiTestBase() {
 	}
 
 	@Autowired lateinit var mockWebClients: MockWebClients
+
+	@Autowired lateinit var objectMapper: ObjectMapper
 
 	@BeforeEach
 	fun resetMocks() {
@@ -203,11 +207,8 @@ class AIApiTest : ApiTestBase() {
 		return bodyCaptor
 	}
 
-	private fun forwardedProfile(bodyCaptor: org.mockito.kotlin.KArgumentCaptor<Any>): UserProfile {
-		@Suppress("UNCHECKED_CAST")
-		val forwarded = bodyCaptor.firstValue as Map<String, Any>
-		return forwarded["profile"] as UserProfile
-	}
+	private fun forwardedProfile(bodyCaptor: org.mockito.kotlin.KArgumentCaptor<Any>): UserProfile =
+		objectMapper.readValue(bodyCaptor.firstValue as String, RecipeRequestForwarded::class.java).profile
 
 	@Test
 	fun `ai recipes - forwards the request language so recipes match the UI`() {
