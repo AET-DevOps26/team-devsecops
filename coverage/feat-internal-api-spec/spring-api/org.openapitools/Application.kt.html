@@ -3,12 +3,14 @@
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 import org.springframework.context.annotation.ComponentScan
+import org.springframework.scheduling.annotation.EnableScheduling
 
-<span class="fc" id="L7">@SpringBootApplication</span>
+<span class="fc" id="L8">@SpringBootApplication</span>
+@EnableScheduling
 @ComponentScan(basePackages = [&quot;org.openapitools&quot;, &quot;org.openapitools.api&quot;, &quot;org.openapitools.model&quot;])
 class Application
 
 fun main(args: Array&lt;String&gt;) {
-<span class="nc" id="L12">	runApplication&lt;Application&gt;(*args)</span>
-<span class="nc" id="L13">}</span>
+<span class="nc" id="L14">	runApplication&lt;Application&gt;(*args)</span>
+<span class="nc" id="L15">}</span>
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>
