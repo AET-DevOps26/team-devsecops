@@ -3,45 +3,58 @@
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
+import org.openapitools.repository.TokenBlocklistRepository
 import org.openapitools.repository.UserRepository
+import org.slf4j.LoggerFactory
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.core.userdetails.User
 import org.springframework.web.filter.OncePerRequestFilter
 
-// Runs on every incoming request and checks the Authorization header for a valid JWT.
-// If valid, it marks the request as authenticated so Spring Security lets it through.
 <span class="fc" id="L14">class JwtAuthFilter(</span>
 <span class="fc" id="L15">	private val jwtUtils: JwtUtils,</span>
 <span class="fc" id="L16">	private val userRepository: UserRepository,</span>
-<span class="fc" id="L17">) : OncePerRequestFilter() {</span>
+<span class="fc" id="L17">	private val tokenBlocklist: TokenBlocklistRepository,</span>
+<span class="fc" id="L18">) : OncePerRequestFilter() {</span>
+<span class="fc" id="L19">	private val log = LoggerFactory.getLogger(javaClass)</span>
+
 	override fun doFilterInternal(
 		request: HttpServletRequest,
 		response: HttpServletResponse,
 		filterChain: FilterChain,
 	) {
-		// Expects: Authorization: Bearer &lt;token&gt;
-<span class="fc" id="L24">		val header = request.getHeader(&quot;Authorization&quot;)</span>
-<span class="pc bpc" id="L25" title="1 of 4 branches missed.">		if (header != null &amp;&amp; header.startsWith(&quot;Bearer &quot;)) {</span>
-<span class="fc" id="L26">			val token = header.removePrefix(&quot;Bearer &quot;)</span>
-<span class="pc bpc" id="L27" title="1 of 2 branches missed.">			if (jwtUtils.validateToken(token)) {</span>
-<span class="fc" id="L28">				val userId = jwtUtils.getUserIdFromToken(token)</span>
-<span class="fc" id="L29">				userRepository.findById(userId).ifPresent { entity -&gt;</span>
-<span class="fc" id="L30">					val userDetails =</span>
-						User
-<span class="fc" id="L32">							.withUsername(entity.username)</span>
-<span class="fc" id="L33">							.password(entity.password)</span>
-<span class="fc" id="L34">							.roles(&quot;USER&quot;)</span>
-<span class="fc" id="L35">							.build()</span>
-<span class="fc" id="L36">					val auth = UsernamePasswordAuthenticationToken(userDetails, null, userDetails.authorities)</span>
-<span class="fc" id="L37">					SecurityContextHolder.getContext().authentication = auth</span>
-<span class="fc" id="L38">				}</span>
+<span class="fc" id="L26">		val header = request.getHeader(&quot;Authorization&quot;)</span>
+<span class="pc bpc" id="L27" title="1 of 4 branches missed.">		if (header != null &amp;&amp; header.startsWith(&quot;Bearer &quot;)) {</span>
+<span class="fc" id="L28">			val token = header.removePrefix(&quot;Bearer &quot;)</span>
+<span class="fc" id="L29">			when {</span>
+<span class="pc bpc" id="L30" title="1 of 2 branches missed.">				!jwtUtils.validateToken(token) -&gt; {</span>
+<span class="nc" id="L31">					log.warn(&quot;Rejected invalid JWT [path={}]&quot;, request.requestURI)</span>
+				}
+
+<span class="fc bfc" id="L34" title="All 2 branches covered.">				tokenBlocklist.existsById(jwtUtils.tokenHash(token)) -&gt; {</span>
+<span class="fc" id="L35">					log.warn(&quot;Rejected invalidated JWT [path={}]&quot;, request.requestURI)</span>
+				}
+
+				else -&gt; {
+<span class="fc" id="L39">					val userId = jwtUtils.getUserIdFromToken(token)</span>
+<span class="fc" id="L40">					userRepository.findById(userId).ifPresent { entity -&gt;</span>
+<span class="fc" id="L41">						val userDetails =</span>
+							User
+<span class="fc" id="L43">								.withUsername(entity.username)</span>
+<span class="fc" id="L44">								.password(entity.password)</span>
+<span class="fc" id="L45">								.roles(&quot;USER&quot;)</span>
+<span class="fc" id="L46">								.build()</span>
+						// Store the raw token as credentials so logout can retrieve and blocklist it.
+<span class="fc" id="L48">						val auth = UsernamePasswordAuthenticationToken(userDetails, token, userDetails.authorities)</span>
+<span class="fc" id="L49">						SecurityContextHolder.getContext().authentication = auth</span>
+<span class="fc" id="L50">					}</span>
+				}
 			}
 		}
-<span class="fc" id="L41">		filterChain.doFilter(request, response)</span>
-<span class="fc" id="L42">	}</span>
+<span class="fc" id="L54">		filterChain.doFilter(request, response)</span>
+<span class="fc" id="L55">	}</span>
 
 	// set to false to avoid controller 500s being masked as 401
-<span class="nc" id="L45">	override fun shouldNotFilterErrorDispatch(): Boolean = false</span>
+<span class="nc" id="L58">	override fun shouldNotFilterErrorDispatch(): Boolean = false</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

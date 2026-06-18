@@ -22,27 +22,36 @@ import java.util.Objects
  * @param instructions
  * @param portions
  * @param id
+ * @param createdAt When the recipe was saved (UTC)
+ * @param editedAt When the recipe was last edited (UTC)
  * @param nutrients
+ * @param openedAt When the recipe was last opened (UTC)
  */
-<span class="pc" id="L27">data class Recipe(</span>
-<span class="fc" id="L28">	@get:Size(min = 1, max = 255)</span>
+<span class="pc" id="L30">data class Recipe(</span>
+<span class="fc" id="L31">	@get:Size(min = 1, max = 255)</span>
 	@Schema(example = &quot;null&quot;, required = true, description = &quot;&quot;)
 	@get:JsonProperty(&quot;title&quot;, required = true) val title: kotlin.String,
-<span class="fc" id="L31">	@field:Valid</span>
+<span class="fc" id="L34">	@field:Valid</span>
 	@get:Size(min = 1)
 	@Schema(example = &quot;null&quot;, required = true, description = &quot;&quot;)
 	@get:JsonProperty(&quot;ingredients&quot;, required = true) val ingredients: kotlin.collections.List&lt;RecipeIngredient&gt;,
-<span class="fc" id="L35">	@get:Size(min = 1)</span>
+<span class="fc" id="L38">	@get:Size(min = 1)</span>
 	@Schema(example = &quot;null&quot;, required = true, description = &quot;&quot;)
 	@get:JsonProperty(&quot;instructions&quot;, required = true) val instructions: kotlin.collections.List&lt;kotlin.String&gt;,
-<span class="fc" id="L38">	@get:DecimalMin(value = &quot;0.5&quot;)</span>
+<span class="fc" id="L41">	@get:DecimalMin(value = &quot;0.5&quot;)</span>
 	@Schema(example = &quot;null&quot;, required = true, description = &quot;&quot;)
 	@get:JsonProperty(&quot;portions&quot;, required = true) val portions: java.math.BigDecimal,
-<span class="fc" id="L41">	@get:Min(value = 1L)</span>
+<span class="fc" id="L44">	@get:Min(value = 1L)</span>
 	@Schema(example = &quot;null&quot;, required = true, description = &quot;&quot;)
 	@get:JsonProperty(&quot;id&quot;, required = true) val id: kotlin.Long,
-<span class="fc" id="L44">	@field:Valid</span>
+<span class="fc" id="L47">	@Schema(example = &quot;null&quot;, required = true, description = &quot;When the recipe was saved (UTC)&quot;)</span>
+	@get:JsonProperty(&quot;createdAt&quot;, required = true) val createdAt: java.time.OffsetDateTime,
+<span class="fc" id="L49">	@Schema(example = &quot;null&quot;, required = true, description = &quot;When the recipe was last edited (UTC)&quot;)</span>
+	@get:JsonProperty(&quot;editedAt&quot;, required = true) val editedAt: java.time.OffsetDateTime,
+<span class="fc" id="L51">	@field:Valid</span>
 	@Schema(example = &quot;null&quot;, description = &quot;&quot;)
-<span class="nc" id="L46">	@get:JsonProperty(&quot;nutrients&quot;) val nutrients: RecipeNutrients? = null,</span>
-<span class="nc" id="L47">)</span>
+<span class="nc" id="L53">	@get:JsonProperty(&quot;nutrients&quot;) val nutrients: RecipeNutrients? = null,</span>
+<span class="fc" id="L54">	@Schema(example = &quot;null&quot;, description = &quot;When the recipe was last opened (UTC)&quot;)</span>
+<span class="nc" id="L55">	@get:JsonProperty(&quot;openedAt&quot;) val openedAt: java.time.OffsetDateTime? = null,</span>
+<span class="nc" id="L56">)</span>
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>
