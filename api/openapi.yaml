@@ -24,6 +24,7 @@ paths:
     post:
       tags: [Users]
       summary: Register a new user
+      security: []
       requestBody:
         required: true
         content:
@@ -50,6 +51,7 @@ paths:
     post:
       tags: [Users]
       summary: Login and receive a JWT token
+      security: []
       requestBody:
         required: true
         content:

@@ -8,3 +8,10 @@ indent_style = tab
 
 ktlint_standard_no-wildcard-imports = disabled
 ktlint_standard_kdoc = disabled
+
+# OpenAPI-generated sources
+[services/spring-api/src/main/kotlin/org/openapitools/model/**]
+ktlint = disabled
+
+[services/spring-api/src/main/kotlin/org/openapitools/{SpringDocConfiguration,api/AIApi,api/ApiUtil,api/Exceptions,api/RecipesApi,api/UsersApi}.kt]
+ktlint = disabled
