@@ -159,6 +159,12 @@ export function ProfilePage() {
 		notifyEdit(field, draft)
 	}
 
+	function changeLanguage(code: LanguageSetting) {
+		setLanguage(code)
+		void i18n.changeLanguage(code === 'detect' ? detectInitialLanguage() : code)
+		editPrefs('language', livePrefs({ language: code }))
+	}
+
 	async function deleteRow(list: 'diet' | 'allergies', index: number) {
 		const setPending = list === 'diet' ? setPendingDietDeletion : setPendingAllergyDeletion
 		const setValues = list === 'diet' ? setDiet : setAllergies
@@ -282,7 +288,19 @@ export function ProfilePage() {
 							<span className="font-medium">{t('profile.language')}</span>
 							<SaveIndicator status={prefsStatuses['language'] ?? 'idle'} />
 						</div>
-						<div className="relative inline-flex self-start rounded-lg bg-gray-100 p-1">
+						{/* Native dropdown on mobile, where the segmented control would overflow */}
+						<select
+							className="self-start rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium sm:hidden"
+							value={language}
+							onChange={(e) => changeLanguage(e.target.value as LanguageSetting)}
+						>
+							{LANGUAGE_OPTIONS.map(({ code, labelKey }) => (
+								<option key={code} value={code}>
+									{t(labelKey)}
+								</option>
+							))}
+						</select>
+						<div className="relative hidden self-start rounded-lg bg-gray-100 p-1 sm:inline-flex">
 							<span
 								className="pointer-events-none absolute inset-y-1 left-1 w-24 rounded-md bg-white shadow-sm transition-transform duration-200 ease-out"
 								style={{
@@ -297,11 +315,7 @@ export function ProfilePage() {
 									className={`relative z-10 w-24 rounded-md py-1 text-sm font-medium transition-colors ${
 										language === code ? 'text-orange-600' : 'text-gray-500'
 									}`}
-									onClick={() => {
-										setLanguage(code)
-										void i18n.changeLanguage(code === 'detect' ? detectInitialLanguage() : code)
-										editPrefs('language', livePrefs({ language: code }))
-									}}
+									onClick={() => changeLanguage(code)}
 								>
 									{t(labelKey)}
 								</button>
