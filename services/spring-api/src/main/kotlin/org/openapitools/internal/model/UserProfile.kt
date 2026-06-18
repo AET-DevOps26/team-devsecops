@@ -7,45 +7,36 @@
  */
 
 @file:Suppress(
-    "ArrayInDataClass",
-    "DuplicatedCode",
-    "EnumEntryName",
-    "RemoveRedundantQualifierName",
-    "RemoveRedundantCallsOfConversionMethods",
-    "REDUNDANT_CALL_OF_CONVERSION_METHOD",
-    "RedundantUnitReturnType",
-    "RemoveEmptyClassBody",
-    "UnnecessaryVariable",
-    "UnusedImport",
-    "UnnecessaryVariable",
-    "unused"
+	"ArrayInDataClass",
+	"DuplicatedCode",
+	"EnumEntryName",
+	"RemoveRedundantQualifierName",
+	"RemoveRedundantCallsOfConversionMethods",
+	"REDUNDANT_CALL_OF_CONVERSION_METHOD",
+	"RedundantUnitReturnType",
+	"RemoveEmptyClassBody",
+	"UnnecessaryVariable",
+	"UnusedImport",
+	"UnnecessaryVariable",
+	"unused",
 )
 
 package org.openapitools.internal.model
 
-import org.openapitools.internal.model.UserPreferences
-
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
+import org.openapitools.internal.model.UserPreferences
 
 /**
- * 
  *
- * @param username 
- * @param preferences 
+ *
+ * @param username
+ * @param preferences
  */
 
-
-data class UserProfile (
-
-    @Json(name = "username")
-    val username: kotlin.String,
-
-    @Json(name = "preferences")
-    val preferences: UserPreferences
-
-) {
-
-
-}
-
+data class UserProfile(
+	@Json(name = "username")
+	val username: kotlin.String,
+	@Json(name = "preferences")
+	val preferences: UserPreferences,
+)

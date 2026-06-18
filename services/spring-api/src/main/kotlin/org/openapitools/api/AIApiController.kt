@@ -89,44 +89,44 @@ class AIApiController(
 	 * Helper to unwrap Retrofit responses and throw standard Spring Exceptions on failures
 	 */
 	private fun <T> handleRetrofitResponse(response: retrofit2.Response<T>): T {
-        if (!response.isSuccessful) {
-            val errorBodyString = response.errorBody()?.string()
-            
-            // Attempt to parse a flat {"message": "..."} OR the fallback nested {"detail": {"message": "..."}}
-            val extractedMessage = try {
-                val jsonNode = objectMapper.readTree(errorBodyString)
-                
-                // 1. Check if Python sent the new flattened message format
-                val flatMessage = jsonNode.get("message")?.asText()
-                
-                if (flatMessage != null) {
-                    flatMessage
-                } else {
-                    // 2. Fall back to parsing the old/automatic FastAPI detail format
-                    val detailNode = jsonNode.get("detail")
-                    if (detailNode != null && detailNode.isObject) {
-                        detailNode.get("message")?.asText()
-                    } else {
-                        detailNode?.asText()
-                    }
-                }
-            } catch (_: Exception) {
-                null
-            } ?: "Upstream service returned error: ${response.code()}"
+		if (!response.isSuccessful) {
+			val errorBodyString = response.errorBody()?.string()
+
+			// Attempt to parse a flat {"message": "..."} OR the fallback nested {"detail": {"message": "..."}}
+			val extractedMessage =
+				try {
+					val jsonNode = objectMapper.readTree(errorBodyString)
+
+					// 1. Check if Python sent the new flattened message format
+					val flatMessage = jsonNode.get("message")?.asText()
+
+					if (flatMessage != null) {
+						flatMessage
+					} else {
+						// 2. Fall back to parsing the old/automatic FastAPI detail format
+						val detailNode = jsonNode.get("detail")
+						if (detailNode != null && detailNode.isObject) {
+							detailNode.get("message")?.asText()
+						} else {
+							detailNode?.asText()
+						}
+					}
+				} catch (_: Exception) {
+					null
+				} ?: "Upstream service returned error: ${response.code()}"
 
 			// 2. Resolve the actual HTTP status code dynamically from the upstream response
-            val upstreamStatus = HttpStatus.resolve(response.code()) ?: HttpStatus.BAD_GATEWAY
+			val upstreamStatus = HttpStatus.resolve(response.code()) ?: HttpStatus.BAD_GATEWAY
 
-            // 3. Forward the exact code and message down the pipeline
-            throw ResponseStatusException(upstreamStatus, extractedMessage)
+			// 3. Forward the exact code and message down the pipeline
+			throw ResponseStatusException(upstreamStatus, extractedMessage)
+		}
 
-        }
-        
-        return response.body() ?: throw ResponseStatusException(
-            HttpStatus.INTERNAL_SERVER_ERROR,
-            "Empty body",
-        )
-    }
+		return response.body() ?: throw ResponseStatusException(
+			HttpStatus.INTERNAL_SERVER_ERROR,
+			"Empty body",
+		)
+	}
 
 	// -------------------------------------------------------------------------
 	// MODEL MAPPING EXTENSIONS (Translates between Public and Internal DTOs)
