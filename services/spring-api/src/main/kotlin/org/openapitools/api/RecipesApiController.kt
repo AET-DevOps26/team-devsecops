@@ -9,6 +9,7 @@ import org.openapitools.model.RecipeNutrients
 import org.openapitools.model.RecipeUpdate
 import org.openapitools.repository.RecipeRepository
 import org.openapitools.repository.UserRepository
+import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.context.SecurityContextHolder
@@ -28,6 +29,8 @@ class RecipesApiController(
 	private val userRepository: UserRepository,
 	private val objectMapper: ObjectMapper,
 ) : RecipesApi {
+	private val log = LoggerFactory.getLogger(javaClass)
+
 	override fun recipesGet(): ResponseEntity<List<Recipe>> {
 		val user = userRepository.findByUsername(currentUsername()).orElseThrow()
 		return ResponseEntity.ok(recipeRepository.findByUserId(user.id).map { it.toApiModel() })
@@ -49,6 +52,7 @@ class RecipesApiController(
 					user = user,
 				),
 			)
+		log.info("Recipe saved [user={}, recipeId={}, title='{}']", user.username, saved.id, saved.title)
 		return ResponseEntity.status(HttpStatus.CREATED).body(RecipeCreated(id = saved.id))
 	}
 
@@ -79,6 +83,7 @@ class RecipesApiController(
 			entity.nutrientFat = it.fat
 		}
 		entity.editedAt = Instant.now()
+		log.info("Recipe updated [user={}, recipeId={}]", user.username, recipeId)
 		return ResponseEntity.ok(recipeRepository.save(entity).toApiModel())
 	}
 
@@ -87,6 +92,7 @@ class RecipesApiController(
 		val user = userRepository.findByUsername(currentUsername()).orElseThrow()
 		if (entity.user.id != user.id) throw ForbiddenException("Recipe belongs to a different user")
 		recipeRepository.delete(entity)
+		log.info("Recipe deleted [user={}, recipeId={}]", user.username, recipeId)
 		return ResponseEntity(HttpStatus.NO_CONTENT)
 	}
 

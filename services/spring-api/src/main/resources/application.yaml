@@ -53,3 +53,12 @@ app:
   jwt:
     secret: ${JWT_SECRET:local-dev-secret-change-this-in-production-use-env-var}
     expiration-ms: 86400000   # 24 hours
+
+logging:
+  structured:
+    format:
+      console: ecs   # JSON structured logs — comment out for plain-text
+  level:
+    root: INFO
+    org.springframework.security: WARN
+    org.hibernate: WARN
