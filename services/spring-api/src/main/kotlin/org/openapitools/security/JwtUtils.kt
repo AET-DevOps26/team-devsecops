@@ -5,6 +5,8 @@ import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.security.Keys
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
+import java.security.MessageDigest
+import java.time.Instant
 import java.util.Date
 
 @Component
@@ -46,4 +48,18 @@ class JwtUtils {
 		} catch (e: JwtException) {
 			false
 		}
+
+	fun getExpirationFromToken(token: String): Instant =
+		Jwts
+			.parser()
+			.verifyWith(key())
+			.build()
+			.parseSignedClaims(token)
+			.payload.expiration
+			.toInstant()
+
+	fun tokenHash(token: String): String {
+		val bytes = MessageDigest.getInstance("SHA-256").digest(token.toByteArray())
+		return bytes.joinToString("") { "%02x".format(it) }
+	}
 }

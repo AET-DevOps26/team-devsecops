@@ -5,3 +5,4 @@ langchain-core==1.4.0
 pydantic==2.7.4
 python-dotenv==1.0.1
 attrs
+python-dateutil
