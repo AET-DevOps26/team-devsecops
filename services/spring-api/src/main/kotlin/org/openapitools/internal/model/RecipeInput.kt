@@ -7,46 +7,58 @@
  */
 
 @file:Suppress(
-	"ArrayInDataClass",
-	"DuplicatedCode",
-	"EnumEntryName",
-	"RemoveRedundantQualifierName",
-	"RemoveRedundantCallsOfConversionMethods",
-	"REDUNDANT_CALL_OF_CONVERSION_METHOD",
-	"RedundantUnitReturnType",
-	"RemoveEmptyClassBody",
-	"UnnecessaryVariable",
-	"UnusedImport",
-	"UnnecessaryVariable",
-	"unused",
+    "ArrayInDataClass",
+    "DuplicatedCode",
+    "EnumEntryName",
+    "RemoveRedundantQualifierName",
+    "RemoveRedundantCallsOfConversionMethods",
+    "REDUNDANT_CALL_OF_CONVERSION_METHOD",
+    "RedundantUnitReturnType",
+    "RemoveEmptyClassBody",
+    "UnnecessaryVariable",
+    "UnusedImport",
+    "UnnecessaryVariable",
+    "unused"
 )
 
 package org.openapitools.internal.model
 
-import com.squareup.moshi.Json
-import com.squareup.moshi.JsonClass
 import org.openapitools.internal.model.RecipeIngredient
 import org.openapitools.internal.model.RecipeNutrients
 
+import com.squareup.moshi.Json
+import com.squareup.moshi.JsonClass
+
 /**
+ * 
  *
- *
- * @param title
- * @param ingredients
- * @param instructions
- * @param portions
- * @param nutrients
+ * @param title 
+ * @param ingredients 
+ * @param instructions 
+ * @param portions 
+ * @param nutrients 
  */
 
-data class RecipeInput(
-	@Json(name = "title")
-	val title: kotlin.String,
-	@Json(name = "ingredients")
-	val ingredients: kotlin.collections.List<RecipeIngredient>,
-	@Json(name = "instructions")
-	val instructions: kotlin.collections.List<kotlin.String>,
-	@Json(name = "portions")
-	val portions: kotlin.Double,
-	@Json(name = "nutrients")
-	val nutrients: RecipeNutrients? = null,
-)
+
+data class RecipeInput (
+
+    @Json(name = "title")
+    val title: kotlin.String,
+
+    @Json(name = "ingredients")
+    val ingredients: kotlin.collections.List<RecipeIngredient>,
+
+    @Json(name = "instructions")
+    val instructions: kotlin.collections.List<kotlin.String>,
+
+    @Json(name = "portions")
+    val portions: kotlin.Double,
+
+    @Json(name = "nutrients")
+    val nutrients: RecipeNutrients? = null
+
+) {
+
+
+}
+

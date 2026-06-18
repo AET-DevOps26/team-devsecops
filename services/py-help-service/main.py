@@ -6,6 +6,7 @@ import time
 from typing import Any
 from fastapi import Depends, FastAPI, HTTPException, Header, Request
 from dotenv import load_dotenv
+from fastapi.responses import JSONResponse
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.messages import HumanMessage, SystemMessage
 
@@ -16,6 +17,11 @@ from client.cooking_assistant_gen_ai_services_api_internal_client.models.help_re
 load_dotenv()
 
 app = FastAPI(title="Cooking Assistant GenAI Service")
+
+@app.exception_handler(HTTPException)
+async def http_exception_handler(request: Request, exc: HTTPException):
+	body = exc.detail if isinstance(exc.detail, dict) else {"message": exc.detail}
+	return JSONResponse(status_code=exc.status_code, content=body, headers=exc.headers)
 
 LANGUAGE_NAMES = {"EN": "English", "DE": "German", "HU": "Hungarian"}
 

@@ -172,22 +172,6 @@ components:
           type: string
           minLength: 1
 
-    AuthResponse:
-      type: object
-      required: [token]
-      additionalProperties: false
-      properties:
-        token:
-          type: string
-          minLength: 1
-          description: JWT bearer token to include in subsequent requests
-
-    AuthRequest:
-      additionalProperties: false
-      required: [username, password]
-      allOf:
-        - $ref: "#/components/schemas/UserCredentials"
-
     UserProfile:
       type: object
       required: [username, preferences]
@@ -198,31 +182,6 @@ components:
           minLength: 1
         preferences:
           $ref: "#/components/schemas/UserPreferences"
-
-    UserProfileUpdate:
-      additionalProperties: false
-      description: At least one field must be provided
-      allOf:
-        - $ref: "#/components/schemas/UserCredentials"
-        - type: object
-          properties:
-            preferences:
-              $ref: "#/components/schemas/UserPreferences"
-
-    UserCredentials:
-      type: object
-      description: Reusable field definitions for username and password constraints
-      properties:
-        username:
-          type: string
-          minLength: 1
-          maxLength: 64
-          pattern: "^[a-zA-Z0-9_.-]+$"
-          description: Alphanumeric, underscores, hyphens, and dots only
-        password:
-          type: string
-          minLength: 4
-          maxLength: 128
 
     UserPreferences:
       type: object
@@ -311,76 +270,6 @@ components:
           minimum: 0.5
         nutrients:
           $ref: "#/components/schemas/RecipeNutrients"
-
-    RecipeUpdate:
-      type: object
-      additionalProperties: false
-      description: At least one field must be provided
-      properties:
-        title:
-          type: string
-          minLength: 1
-          maxLength: 255
-        ingredients:
-          type: array
-          items:
-            $ref: "#/components/schemas/RecipeIngredient"
-          minItems: 1
-        instructions:
-          type: array
-          items:
-            type: string
-            minLength: 1
-          minItems: 1
-        portions:
-          type: number
-          minimum: 0.5
-        nutrients:
-          $ref: "#/components/schemas/RecipeNutrients"
-
-    RecipeCreated:
-      type: object
-      required: [id]
-      properties:
-        id:
-          type: integer
-          format: int64
-          minimum: 1
-
-    Recipe:
-      type: object
-      additionalProperties: false
-      allOf:
-        - $ref: "#/components/schemas/RecipeInput"
-        - type: object
-          required: [id]
-          properties:
-            id:
-              type: integer
-              format: int64
-              minimum: 1
-
-    RecipeRequest:
-      type: object
-      required: [prompt]
-      additionalProperties: false
-      properties:
-        prompt:
-          type: string
-          minLength: 1
-          maxLength: 4096
-
-    HelpRequest:
-      type: object
-      required: [recipe, prompt]
-      additionalProperties: false
-      properties:
-        recipe:
-          $ref: "#/components/schemas/RecipeInput"
-        prompt:
-          type: string
-          minLength: 1
-          maxLength: 4096
 
     HelpResponse:
       type: object

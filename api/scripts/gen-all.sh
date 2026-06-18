@@ -14,14 +14,20 @@ npx openapi-typescript api/openapi.yaml -o web-client/src/api.ts
 openapi-generator-cli generate \
   -i api/openapi-internal.yaml \
   -g kotlin \
-  --global-property="apis,models" \
+  --global-property="apis,models,apiDocs=false,modelDocs=false" \
   --additional-properties="library=jvm-retrofit2,apiPackage=org.openapitools.internal.client,modelPackage=org.openapitools.internal.model,infrastructurePackage=org.openapitools.internal.client" \
   --type-mappings=number=kotlin.Double \
   --import-mappings=BigDecimal=java.lang.Double \
   -o services/spring-api
 
 # delete lines causing compilation failures because of missing references
-sed -i '' '/org.openapitools.client.infrastructure/d' services/spring-api/src/main/kotlin/org/openapitools/internal/client/*ServiceApi.kt
+if sed --version 2>&1 | grep -q "GNU"; then
+  # Linux (GNU sed)
+  sed -i '/import org.openapitools.client.infrastructure/d' services/spring-api/src/main/kotlin/org/openapitools/internal/client/*ServiceApi.kt
+else
+  # macOS (BSD sed)
+  sed -i '' '/import org.openapitools.client.infrastructure/d' services/spring-api/src/main/kotlin/org/openapitools/internal/client/*ServiceApi.kt
+fi
 
 # delete generated tests for generated code because of compatibility issues
 rm -rf services/spring-api/src/test/kotlin/org/openapitools/internal/

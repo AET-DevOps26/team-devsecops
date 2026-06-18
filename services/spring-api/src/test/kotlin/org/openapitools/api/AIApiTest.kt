@@ -140,7 +140,7 @@ class AIApiTest : ApiTestBase() {
 	}
 
 	@Test
-	fun `ai help - service returns error returns 502`() {
+	fun `ai help - service returns 500 forwards 500`() {
 		val token = register()
 		stubHelpClientError(500) // Simulates a 500 failure from Python
 
@@ -152,7 +152,7 @@ class AIApiTest : ApiTestBase() {
 					.content(
 						"""{"recipe":{"title":"Pasta","ingredients":[{"quantity":200,"unit":"g","name":"pasta"}],"instructions":["Cook"],"portions":2},"prompt":"Help?"}""",
 					),
-			).andExpect(status().isBadGateway)
+			).andExpect(status().isInternalServerError)
 	}
 
 	@Test
@@ -241,7 +241,7 @@ class AIApiTest : ApiTestBase() {
 	}
 
 	@Test
-	fun `ai recipes - service returns error returns 502`() {
+	fun `ai recipes - service returns 500 forwards 500`() {
 		val token = register()
 		stubRecipeClientError(500)
 
@@ -251,7 +251,7 @@ class AIApiTest : ApiTestBase() {
 					.header("Authorization", "Bearer $token")
 					.contentType(MediaType.APPLICATION_JSON)
 					.content("""{"prompt":"Give me a pasta recipe"}"""),
-			).andExpect(status().isBadGateway)
+			).andExpect(status().isInternalServerError)
 	}
 
 	@Test
