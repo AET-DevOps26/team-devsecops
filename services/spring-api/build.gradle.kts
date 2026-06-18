@@ -15,7 +15,7 @@ version = "1.0.0"
 java.sourceCompatibility = JavaVersion.VERSION_17
 
 repositories {
-    mavenCentral()
+	mavenCentral()
 }
 
 kotlin {
@@ -51,47 +51,47 @@ tasks.test {
 }
 
 tasks.jacocoTestReport {
-    dependsOn(tasks.test)
-    reports {
-        xml.required.set(true)
-        html.required.set(true)
-    }
+	dependsOn(tasks.test)
+	reports {
+		xml.required.set(true)
+		html.required.set(true)
+	}
 }
 
 tasks.bootJar {
-    archiveFileName.set("app.jar")
+	archiveFileName.set("app.jar")
 }
 
 dependencies {
-    implementation("org.jetbrains.kotlin:kotlin-stdlib")
-    implementation("org.jetbrains.kotlin:kotlin-reflect")
-        implementation("org.springframework.boot:spring-boot-starter-webmvc")
-        implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.6")
+	implementation("org.jetbrains.kotlin:kotlin-stdlib")
+	implementation("org.jetbrains.kotlin:kotlin-reflect")
+	implementation("org.springframework.boot:spring-boot-starter-webmvc")
+	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.6")
 
-    implementation("com.google.code.findbugs:jsr305:3.0.2")
-    implementation("tools.jackson.dataformat:jackson-dataformat-yaml")
-    implementation("tools.jackson.dataformat:jackson-dataformat-xml")
-    implementation("tools.jackson.module:jackson-module-kotlin")
-    implementation("org.springframework.data:spring-data-commons")
-    implementation("org.springframework.boot:spring-boot-starter-validation")
-    implementation("jakarta.annotation:jakarta.annotation-api:3.0.0")
+	implementation("com.google.code.findbugs:jsr305:3.0.2")
+	implementation("tools.jackson.dataformat:jackson-dataformat-yaml")
+	implementation("tools.jackson.dataformat:jackson-dataformat-xml")
+	implementation("tools.jackson.module:jackson-module-kotlin")
+	implementation("org.springframework.data:spring-data-commons")
+	implementation("org.springframework.boot:spring-boot-starter-validation")
+	implementation("jakarta.annotation:jakarta.annotation-api:3.0.0")
 
-    implementation("org.springframework.boot:spring-boot-starter-webflux")
+	implementation("org.springframework.boot:spring-boot-starter-webflux")
 
-    // Database
-    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-    runtimeOnly("com.h2database:h2")
-    runtimeOnly("org.postgresql:postgresql")
-    runtimeOnly("com.google.cloud.sql:postgres-socket-factory:1.21.0")
+	// Database
+	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+	runtimeOnly("com.h2database:h2")
+	runtimeOnly("org.postgresql:postgresql")
+	runtimeOnly("com.google.cloud.sql:postgres-socket-factory:1.21.0")
 
-    // Observability
-    implementation("org.springframework.boot:spring-boot-starter-actuator")
+	// Observability
+	implementation("org.springframework.boot:spring-boot-starter-actuator")
 
-    // Auth
-    implementation("org.springframework.boot:spring-boot-starter-security")
-    implementation("io.jsonwebtoken:jjwt-api:0.12.6")
-    runtimeOnly("io.jsonwebtoken:jjwt-impl:0.12.6")
-    runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.12.6")
+	// Auth
+	implementation("org.springframework.boot:spring-boot-starter-security")
+	implementation("io.jsonwebtoken:jjwt-api:0.12.6")
+	runtimeOnly("io.jsonwebtoken:jjwt-impl:0.12.6")
+	runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.12.6")
 
     // Tests
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
