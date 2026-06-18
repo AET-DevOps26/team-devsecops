@@ -65,6 +65,9 @@ export function ProfilePage() {
 	const [passwordStatus, setPasswordStatus] = useState<{ kind: 'error' | 'ok'; msg: string } | null>(null)
 	const [usernameSaving, setUsernameSaving] = useState(false)
 	const [passwordSaving, setPasswordSaving] = useState(false)
+	const [confirmingDelete, setConfirmingDelete] = useState(false)
+	const [deleting, setDeleting] = useState(false)
+	const [deleteStatus, setDeleteStatus] = useState<{ kind: 'error'; msg: string } | null>(null)
 
 	// fetch the currently stored user profile
 	useEffect(() => {
@@ -223,6 +226,20 @@ export function ProfilePage() {
 			setPasswordStatus({ kind: 'error', msg: e instanceof Error ? e.message : String(e) })
 		} finally {
 			setPasswordSaving(false)
+		}
+	}
+
+	async function handleDeleteAccount() {
+		setDeleting(true)
+		setDeleteStatus(null)
+		try {
+			const res = await apiFetch('/users/profile', { method: 'DELETE' })
+			if (!res.ok) throw new Error(await errorMessage(res))
+			signOut()
+			navigate('/login')
+		} catch (e) {
+			setDeleting(false)
+			setDeleteStatus({ kind: 'error', msg: e instanceof Error ? e.message : String(e) })
 		}
 	}
 
@@ -481,33 +498,51 @@ export function ProfilePage() {
 				</form>
 			</div>
 
-			{/* Delete Account (not yet supported by backend) */}
-			{/*<div className="w-full max-w-md rounded-lg border border-gray-200 bg-white p-6 shadow-sm self-center md:self-start">*/}
-			{/*  <form*/}
-			{/*    className="flex flex-col gap-4"*/}
-			{/*    onSubmit={(e) => e.preventDefault()}*/}
-			{/*  >*/}
-			{/*    <h2 className="text-lg font-bold">Delete account</h2>*/}
+			{/* Delete account */}
+			<div className="w-full max-w-md rounded-lg border border-gray-200 bg-white p-6 shadow-sm self-center md:self-start">
+				<div className="flex flex-col gap-4">
+					<h2 className="text-lg font-bold">{t('profile.deleteAccount')}</h2>
 
-			{/*    <label className="flex flex-col gap-1">*/}
-			{/*      <span className="font-medium">Password</span>*/}
-			{/*      <PasswordInput*/}
-			{/*        className="w-full border border-gray-300 rounded p-2"*/}
-			{/*        value={deletePassword}*/}
-			{/*        onChange={(e) => setDeletePassword(e.target.value)}*/}
-			{/*        autoComplete="current-password"*/}
-			{/*      />*/}
-			{/*    </label>*/}
+					{confirmingDelete ? (
+						<>
+							<p className="text-red-600">{t('profile.deleteAccountWarning')}</p>
+							<div className="flex items-center justify-center gap-4">
+								<button
+									type="button"
+									className="cursor-pointer text-gray-500 transition-transform duration-100 hover:scale-98 disabled:cursor-not-allowed disabled:opacity-50"
+									disabled={deleting}
+									onClick={() => setConfirmingDelete(false)}
+								>
+									{t('profile.deleteAccountCancel')}
+								</button>
+								<button
+									type="button"
+									className="flex items-center gap-1 cursor-pointer text-red-600 transition-transform duration-100 hover:scale-98 disabled:cursor-not-allowed disabled:opacity-50"
+									disabled={deleting}
+									onClick={handleDeleteAccount}
+								>
+									<TrashIcon className="h-5 w-5" />
+									{deleting ? t('profile.deleting') : t('profile.deleteAccountConfirm')}
+								</button>
+							</div>
+						</>
+					) : (
+						<button
+							type="button"
+							className="flex items-center gap-1 self-center text-red-600 cursor-pointer transition-transform duration-100 hover:scale-98"
+							onClick={() => {
+								setDeleteStatus(null)
+								setConfirmingDelete(true)
+							}}
+						>
+							<TrashIcon className="h-5 w-5" />
+							{t('profile.deleteAccount')}
+						</button>
+					)}
 
-			{/*    <button*/}
-			{/*      type="button"*/}
-			{/*      className="flex items-center gap-1 self-center text-red-600 cursor-pointer transition-transform duration-100 hover:scale-98"*/}
-			{/*    >*/}
-			{/*      <TrashIcon className="h-5 w-5" />*/}
-			{/*      Delete account*/}
-			{/*    </button>*/}
-			{/*  </form>*/}
-			{/*</div>*/}
+					{deleteStatus && <p className="text-red-600">{deleteStatus.msg}</p>}
+				</div>
+			</div>
 		</>
 	)
 }

@@ -1,0 +1,59 @@
+---
+# Per-PR frontend preview
+# ${PR} and ${WEB_CLIENT_IMAGE} need to be substituted by the caller
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-client-pr-${PR}
+  labels:
+    preview-pr: "${PR}"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: web-client-pr-${PR}
+  template:
+    metadata:
+      labels:
+        app: web-client-pr-${PR}
+        preview-pr: "${PR}"
+    spec:
+      containers:
+        - name: web-client
+          image: ${WEB_CLIENT_IMAGE}
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
+          livenessProbe:
+            httpGet:
+              path: /team-devsecops/
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /team-devsecops/
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 5
+---
+# expose the pod at web-client:8080
+apiVersion: v1
+kind: Service
+metadata:
+  name: web-client-pr-${PR}
+  labels:
+    preview-pr: "${PR}"
+spec:
+  selector:
+    app: web-client-pr-${PR}
+  ports:
+    - port: 8080
+      targetPort: 8080

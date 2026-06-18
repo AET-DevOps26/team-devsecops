@@ -54,6 +54,12 @@ export const EN = {
 			saving: 'Saving…',
 			couldntReachServer: "Couldn't reach the server",
 			invalidRequest: 'Invalid request',
+			deleteAccount: 'Delete account',
+			deleteAccountWarning:
+				'Permanently delete your account and all your saved recipes. This cannot be undone.',
+			deleteAccountConfirm: 'Yes, delete my account',
+			deleteAccountCancel: 'Cancel',
+			deleting: 'Deleting…',
 		},
 		common: {
 			error: 'Error: {{message}}',
