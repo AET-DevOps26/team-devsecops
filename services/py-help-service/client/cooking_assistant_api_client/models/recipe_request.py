@@ -5,7 +5,7 @@ from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
 
-from ..models.recipe_request_language import RecipeRequestLanguage
+from ..models.language import Language
 from ..types import UNSET, Unset
 
 T = TypeVar("T", bound="RecipeRequest")
@@ -16,11 +16,11 @@ class RecipeRequest:
     """
     Attributes:
         prompt (str):
-        language (RecipeRequestLanguage | Unset): Active UI language; generated recipe content is written in it
+        language (Language | Unset): Supported UI and AI-content language as an ISO 639-1 code
     """
 
     prompt: str
-    language: RecipeRequestLanguage | Unset = UNSET
+    language: Language | Unset = UNSET
 
     def to_dict(self) -> dict[str, Any]:
         prompt = self.prompt
@@ -47,11 +47,11 @@ class RecipeRequest:
         prompt = d.pop("prompt")
 
         _language = d.pop("language", UNSET)
-        language: RecipeRequestLanguage | Unset
+        language: Language | Unset
         if isinstance(_language, Unset):
             language = UNSET
         else:
-            language = RecipeRequestLanguage(_language)
+            language = Language(_language)
 
         recipe_request = cls(
             prompt=prompt,

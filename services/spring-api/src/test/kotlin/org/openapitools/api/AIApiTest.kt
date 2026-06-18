@@ -10,12 +10,11 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.whenever
 import org.openapitools.model.HelpResponse
+import org.openapitools.model.Language
 import org.openapitools.model.RecipeIngredient
 import org.openapitools.model.RecipeInput
 import org.openapitools.model.RecipeNutrients
-import org.openapitools.model.UserPreferences
 import org.openapitools.model.UserProfile
-import kotlin.test.assertEquals
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
@@ -28,6 +27,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import org.springframework.web.reactive.function.client.WebClient
 import reactor.core.publisher.Mono
 import java.math.BigDecimal
+import kotlin.test.assertEquals
 
 @Import(AIApiTest.MockWebClients::class)
 class AIApiTest : ApiTestBase() {
@@ -221,7 +221,7 @@ class AIApiTest : ApiTestBase() {
 					.content("""{"prompt":"Give me a pasta recipe","language":"DE"}"""),
 			).andExpect(status().isOk)
 
-		assertEquals(UserPreferences.Language.DE, forwardedProfile(bodyCaptor).preferences.language)
+		assertEquals(Language.DE, forwardedProfile(bodyCaptor).preferences.language)
 	}
 
 	@Test

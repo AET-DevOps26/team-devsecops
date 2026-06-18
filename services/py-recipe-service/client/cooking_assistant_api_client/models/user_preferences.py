@@ -5,7 +5,7 @@ from typing import Any, TypeVar, cast
 
 from attrs import define as _attrs_define
 
-from ..models.user_preferences_language import UserPreferencesLanguage
+from ..models.language import Language
 from ..types import UNSET, Unset
 
 T = TypeVar("T", bound="UserPreferences")
@@ -15,13 +15,13 @@ T = TypeVar("T", bound="UserPreferences")
 class UserPreferences:
     """
     Attributes:
-        language (UserPreferencesLanguage | Unset): Preferred UI and AI-content language as an ISO 639-1 code
+        language (Language | Unset): Supported UI and AI-content language as an ISO 639-1 code
         diet (list[str] | Unset): Dietary restriction or style (e.g. vegan, keto)
         allergies (list[str] | Unset): List of ingredients the user is allergic to
         about_me (list[str] | Unset): Free-form user context provided to the AI
     """
 
-    language: UserPreferencesLanguage | Unset = UNSET
+    language: Language | Unset = UNSET
     diet: list[str] | Unset = UNSET
     allergies: list[str] | Unset = UNSET
     about_me: list[str] | Unset = UNSET
@@ -61,11 +61,11 @@ class UserPreferences:
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
         _language = d.pop("language", UNSET)
-        language: UserPreferencesLanguage | Unset
+        language: Language | Unset
         if isinstance(_language, Unset):
             language = UNSET
         else:
-            language = UserPreferencesLanguage(_language)
+            language = Language(_language)
 
         diet = cast(list[str], d.pop("diet", UNSET))
 

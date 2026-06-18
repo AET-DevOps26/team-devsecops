@@ -1,7 +1,7 @@
 from enum import Enum
 
 
-class RecipeRequestLanguage(str, Enum):
+class Language(str, Enum):
     DE = "DE"
     EN = "EN"
     HU = "HU"

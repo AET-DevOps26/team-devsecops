@@ -118,7 +118,7 @@ describe('ProfilePage', () => {
 			await screen.findByRole('button', {name: 'Deutsch', pressed: true})
 			expect(screen.getByText('Sprache')).toBeInTheDocument()
 
-			await user.click(screen.getByRole('button', {name: 'Auto'}))
+			await user.click(screen.getByRole('button', {name: 'Automatisch'}))
 
 			// jsdom reports en-US, so detection falls back to English
 			expect(await screen.findByText('Language')).toBeInTheDocument()

@@ -456,6 +456,11 @@ components:
   # -------------------------
 
   schemas:
+    Language:
+      type: string
+      enum: [EN, DE, HU]
+      description: Supported UI and AI-content language as an ISO 639-1 code
+
     ErrorResponse:
       type: object
       required: [message]
@@ -522,8 +527,7 @@ components:
       additionalProperties: false
       properties:
         language:
-          type: string
-          enum: [EN, DE, HU]
+          $ref: '#/components/schemas/Language'
           description: Preferred UI and AI-content language as an ISO 639-1 code
         diet:
           type: array
@@ -663,8 +667,7 @@ components:
           minLength: 1
           maxLength: 4096
         language:
-          type: string
-          enum: [EN, DE, HU]
+          $ref: '#/components/schemas/Language'
           description: Active UI language; generated recipe content is written in it
 
     RecipeRequestForwarded:

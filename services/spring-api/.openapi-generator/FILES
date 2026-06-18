@@ -10,12 +10,14 @@ src/main/kotlin/org/openapitools/api/ApiUtil.kt
 src/main/kotlin/org/openapitools/api/Exceptions.kt
 src/main/kotlin/org/openapitools/api/RecipesApi.kt
 src/main/kotlin/org/openapitools/api/UsersApi.kt
+src/main/kotlin/org/openapitools/configuration/EnumConverterConfiguration.kt
 src/main/kotlin/org/openapitools/model/AuthRequest.kt
 src/main/kotlin/org/openapitools/model/AuthResponse.kt
 src/main/kotlin/org/openapitools/model/ErrorResponse.kt
 src/main/kotlin/org/openapitools/model/HelpRequest.kt
 src/main/kotlin/org/openapitools/model/HelpRequestForwarded.kt
 src/main/kotlin/org/openapitools/model/HelpResponse.kt
+src/main/kotlin/org/openapitools/model/Language.kt
 src/main/kotlin/org/openapitools/model/Recipe.kt
 src/main/kotlin/org/openapitools/model/RecipeCreated.kt
 src/main/kotlin/org/openapitools/model/RecipeIngredient.kt
