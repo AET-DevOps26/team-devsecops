@@ -10,6 +10,12 @@ export const EN = {
 			library: 'Library',
 			profile: 'Profile',
 		},
+		theme: {
+			light: 'Light',
+			auto: 'Auto',
+			dark: 'Dark',
+			switchTo: 'Switch to {{mode}} theme',
+		},
 		profile: {
 			signedInAs: 'Signed in as <1>{{username}}</1>.',
 			logout: 'Log out',

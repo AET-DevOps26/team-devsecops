@@ -2,6 +2,20 @@
 
 @plugin "@tailwindcss/typography";
 
+/* dark mode is driven by a `.dark` class on <html> (see theme.ts) rather than the OS media query */
+@custom-variant dark (&:where(.dark, .dark *));
+
+@layer base {
+	body {
+		@apply bg-white text-gray-900 dark:bg-neutral-900 dark:text-neutral-100;
+	}
+
+	/* let native controls (inputs, checkboxes, scrollbars) follow the theme */
+	html.dark {
+		color-scheme: dark;
+	}
+}
+
 @font-face {
 	font-family: 'Outfit';
 	font-style: normal;

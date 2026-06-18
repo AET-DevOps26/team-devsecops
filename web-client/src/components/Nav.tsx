@@ -3,6 +3,7 @@ import type { CSSProperties } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { BoltIcon, BookOpenIcon, UserIcon } from '@heroicons/react/24/solid'
+import { ThemeSlider } from './ThemeToggle'
 
 const items = [
 	{ to: '/generate', label: 'nav.generate', Icon: BoltIcon },
@@ -44,11 +45,11 @@ export function Nav() {
 	}, [activeIndex])
 
 	return (
-		<nav className="fixed inset-x-0 bottom-0 z-10 flex border-t border-gray-200 bg-white md:relative md:w-56 md:flex-col md:gap-1 md:border-t-0 md:border-r md:p-4">
+		<nav className="fixed inset-x-0 bottom-0 z-10 flex border-t border-gray-200 bg-white md:sticky md:top-0 md:h-screen md:w-56 md:flex-col md:gap-1 md:overflow-hidden md:border-t-0 md:border-r md:p-4 dark:border-neutral-700 dark:bg-neutral-900">
 			<span className="hidden px-3 pb-4 text-xl font-bold md:block">{t('layout.generate')}</span>
 			{pill && (
 				<span
-					className="pointer-events-none absolute rounded-lg bg-orange-50 transition-all duration-200 ease-out"
+					className="pointer-events-none absolute rounded-lg bg-orange-50 transition-all duration-200 ease-out dark:bg-orange-500/15"
 					style={pill}
 				/>
 			)}
@@ -62,8 +63,8 @@ export function Nav() {
 					className={({ isActive }) =>
 						`relative z-10 flex flex-1 flex-col items-center gap-1 py-2 text-xs md:flex-none md:flex-row md:gap-3 md:rounded-lg md:px-3 md:py-2 md:text-sm ${
 							isActive
-								? 'text-orange-600'
-								: 'text-gray-500 md:hover:bg-gray-100'
+								? 'text-orange-600 dark:text-orange-400'
+								: 'text-gray-500 md:hover:bg-gray-100 dark:text-neutral-400 md:dark:hover:bg-neutral-800'
 						}`
 					}
 				>
@@ -71,6 +72,9 @@ export function Nav() {
 					{t(label)}
 				</NavLink>
 			))}
+			<div className="mt-auto hidden md:block">
+				<ThemeSlider />
+			</div>
 		</nav>
 	)
 }

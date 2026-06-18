@@ -10,6 +10,12 @@ export const HU = {
 			library: 'Receptjeim',
 			profile: 'Profil',
 		},
+		theme: {
+			light: 'Világos',
+			auto: 'Auto',
+			dark: 'Sötét',
+			switchTo: 'Váltás erre: {{mode}}',
+		},
 		profile: {
 			signedInAs: 'Bejelentkezett felhasználó: <1>{{username}}</1>.',
 			logout: 'Kijelentkezés',

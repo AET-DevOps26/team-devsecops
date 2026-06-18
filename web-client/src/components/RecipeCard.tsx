@@ -37,12 +37,12 @@ export function RecipeCard({
 			tabIndex={0}
 			onClick={onOpen}
 			onKeyDown={handleKeyDown}
-			className="relative w-full text-left rounded-lg border border-gray-200 bg-white p-6 shadow-sm flex flex-col gap-3 cursor-pointer transition-transform duration-100 hover:scale-99"
+			className="relative w-full text-left rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 p-6 shadow-sm flex flex-col gap-3 cursor-pointer transition-transform duration-100 hover:scale-99"
 		>
 			<header className="flex items-baseline justify-between gap-3">
 				<h2 className="text-lg font-bold">{recipe.title}</h2>
 				<div className="flex items-center gap-2">
-					<span className="text-sm text-gray-500 whitespace-nowrap">
+					<span className="text-sm text-gray-500 dark:text-neutral-400 whitespace-nowrap">
 						{recipe.portions} {recipe.portions === 1 ? t('common.portion') : t('common.portions')}
 					</span>
 					<RecipeSaveButton
@@ -68,7 +68,7 @@ export function RecipeCard({
 			</div>
 
 			{recipe.nutrients && (
-				<div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-gray-600">
+				<div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-gray-600 dark:text-neutral-300">
 					{recipe.nutrients.calories != null && <span>{t('common.kcal', { value: recipe.nutrients.calories })}</span>}
 					{recipe.nutrients.protein != null && <span>{t('common.protein', { value: recipe.nutrients.protein })}</span>}
 					{recipe.nutrients.fat != null && <span>{t('common.fat', { value: recipe.nutrients.fat })}</span>}

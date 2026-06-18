@@ -41,7 +41,7 @@ export function LoginPage() {
 
 	const passwordMismatch = error === t('login.passwordsNoMatch')
 	const inputClass = (invalid: boolean) =>
-		`w-full border rounded p-2 ${invalid ? 'border-red-500' : 'border-gray-300'}`
+		`w-full border rounded p-2 ${invalid ? 'border-red-500' : 'border-gray-300 dark:border-neutral-600'}`
 
 	// already signed in -> skip the login page
 	if (token) return <Navigate to="/generate" replace />
@@ -49,9 +49,9 @@ export function LoginPage() {
 	return (
 		<main className="mx-auto flex max-w-2xl flex-col gap-4 p-6 animate-fade-in">
 			<h1 className="text-2xl font-bold">{t('layout.generate')}</h1>
-			<div className="relative inline-flex self-start rounded-lg bg-gray-100 p-1">
+			<div className="relative inline-flex self-start rounded-lg bg-gray-100 dark:bg-neutral-700 p-1">
 				<span
-					className={`pointer-events-none absolute inset-y-1 left-1 w-24 rounded-md bg-white shadow-sm transition-transform duration-200 ease-out ${
+					className={`pointer-events-none absolute inset-y-1 left-1 w-24 rounded-md bg-white dark:bg-neutral-800 shadow-sm transition-transform duration-200 ease-out ${
 						tab === 'register' ? 'translate-x-full' : 'translate-x-0'
 					}`}
 				/>
@@ -60,7 +60,7 @@ export function LoginPage() {
 						key={value}
 						type="button"
 						className={`relative z-10 w-24 rounded-md py-1 text-sm font-medium transition-colors ${
-							tab === value ? 'text-orange-600' : 'text-gray-500'
+							tab === value ? 'text-orange-600 dark:text-orange-400' : 'text-gray-500 dark:text-neutral-400'
 						}`}
 						onClick={() => {
 							setTab(value)
@@ -110,7 +110,7 @@ export function LoginPage() {
 					{loading ? t('login.pleaseWait') : tab === 'login' ? t('login.login') : t('login.signup')}
 				</Button>
 
-				{error && <p className="text-red-600">{error}</p>}
+				{error && <p className="text-red-600 dark:text-red-400">{error}</p>}
 			</form>
 		</main>
 	)
