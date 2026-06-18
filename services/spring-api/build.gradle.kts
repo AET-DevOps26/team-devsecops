@@ -1,13 +1,14 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
-    val kotlinVersion = "2.2.0"
-    id("org.jetbrains.kotlin.jvm") version kotlinVersion
-    id("org.jetbrains.kotlin.plugin.jpa") version kotlinVersion
-    id("org.jetbrains.kotlin.plugin.spring") version kotlinVersion
-    id("org.springframework.boot") version "4.0.1"
-    id("io.spring.dependency-management") version "1.1.7"
-    id("jacoco")
+	val kotlinVersion = "2.2.0"
+	id("org.jetbrains.kotlin.jvm") version kotlinVersion
+	id("org.jetbrains.kotlin.plugin.jpa") version kotlinVersion
+	id("org.jetbrains.kotlin.plugin.spring") version kotlinVersion
+	id("org.springframework.boot") version "4.0.1"
+	id("io.spring.dependency-management") version "1.1.7"
+	id("jacoco")
+	id("org.jlleitschuh.gradle.ktlint") version "14.0.1"
 }
 
 group = "org.openapitools"
