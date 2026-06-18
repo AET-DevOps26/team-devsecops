@@ -11,6 +11,7 @@ import org.openapitools.model.UserProfileUpdate
 import org.openapitools.repository.TokenBlocklistRepository
 import org.openapitools.repository.UserRepository
 import org.openapitools.security.JwtUtils
+import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.authentication.AuthenticationManager
@@ -34,6 +35,8 @@ class UsersApiController(
 	private val objectMapper: ObjectMapper,
 	private val tokenBlocklist: TokenBlocklistRepository,
 ) : UsersApi {
+	private val log = LoggerFactory.getLogger(javaClass)
+
 	override fun usersRegisterPost(
 		@Valid authRequest: AuthRequest,
 	): ResponseEntity<Unit> {
@@ -47,6 +50,7 @@ class UsersApiController(
 				preferences = objectMapper.writeValueAsString(UserPreferences()),
 			),
 		)
+		log.info("User registered [user={}]", authRequest.username)
 		return ResponseEntity(HttpStatus.CREATED)
 	}
 
@@ -61,10 +65,12 @@ class UsersApiController(
 			throw UnauthorizedException("Invalid username or password")
 		}
 		val user = userRepository.findByUsername(authRequest.username).orElseThrow()
+		log.info("User logged in [user={}]", authRequest.username)
 		return ResponseEntity.ok(AuthResponse(token = jwtUtils.generateToken(user.id)))
 	}
 
 	override fun usersLogoutPost(): ResponseEntity<Unit> {
+		val username = currentUsername()
 		val token = SecurityContextHolder.getContext().authentication?.credentials as? String
 		if (token != null) {
 			tokenBlocklist.save(
@@ -74,6 +80,7 @@ class UsersApiController(
 				),
 			)
 		}
+		log.info("User logged out [user={}]", username)
 		return ResponseEntity(HttpStatus.OK)
 	}
 
