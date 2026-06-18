@@ -16,6 +16,8 @@ const a: Recipe = {
 	ingredients: [{name: 'tomato', quantity: 4, unit: 'pcs'}],
 	instructions: ['boil pasta', 'add sauce'],
 	nutrients: {calories: 500, protein: 20, fat: 10, carbs: 60},
+	createdAt: '2024-01-01T00:00:00Z',
+	editedAt: '2024-01-01T00:00:00Z',
 }
 const b: Recipe = {...a, id: 2, title: 'Pesto Pasta'}
 

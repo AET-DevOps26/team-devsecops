@@ -47,8 +47,15 @@ class AIApiController(
 				.post()
 				.uri("/ai/help")
 				.contentType(MediaType.APPLICATION_JSON)
-				.bodyValue(mapOf("profile" to user.toProfile(), "recipe" to helpRequest.recipe, "prompt" to helpRequest.prompt))
-				.retrieve()
+				.bodyValue(
+					objectMapper.writeValueAsString(
+						mapOf(
+							"profile" to user.toProfile(),
+							"recipe" to helpRequest.recipe,
+							"prompt" to helpRequest.prompt,
+						),
+					),
+				).retrieve()
 				.bodyToMono(HelpResponse::class.java)
 				.timeout(aiTimeout)
 				.onErrorMap(TimeoutException::class.java) { GatewayTimeoutException("GenAI service timed out") }
@@ -68,7 +75,7 @@ class AIApiController(
 				.post()
 				.uri("/ai/recipes")
 				.contentType(MediaType.APPLICATION_JSON)
-				.bodyValue(mapOf("profile" to user.toProfile(), "prompt" to recipeRequest.prompt))
+				.bodyValue(objectMapper.writeValueAsString(mapOf("profile" to user.toProfile(), "prompt" to recipeRequest.prompt)))
 				.retrieve()
 				.bodyToMono(object : ParameterizedTypeReference<List<RecipeInput>>() {})
 				.timeout(aiTimeout)

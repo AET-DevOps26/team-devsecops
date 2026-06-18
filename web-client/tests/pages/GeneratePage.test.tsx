@@ -15,6 +15,8 @@ const recipe: Recipe = {
 	ingredients: [{ name: 'tomato', quantity: 4, unit: 'pcs' }],
 	instructions: ['boil pasta', 'add sauce'],
 	nutrients: { calories: 0, protein: 0, fat: 0, carbs: 0 },
+	createdAt: '2024-01-01T00:00:00Z',
+	editedAt: '2024-01-01T00:00:00Z',
 }
 
 const fetchMock = vi.fn<typeof fetch>()
