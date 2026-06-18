@@ -7,11 +7,15 @@ import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 import org.mockito.Mockito
 import org.mockito.kotlin.any
+import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.whenever
 import org.openapitools.model.HelpResponse
 import org.openapitools.model.RecipeIngredient
 import org.openapitools.model.RecipeInput
 import org.openapitools.model.RecipeNutrients
+import org.openapitools.model.UserPreferences
+import org.openapitools.model.UserProfile
+import kotlin.test.assertEquals
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
@@ -182,6 +186,42 @@ class AIApiTest : ApiTestBase() {
 			).andExpect(status().isOk)
 			.andExpect(jsonPath("$").isArray)
 			.andExpect(jsonPath("$[0].title").value("AI Pasta"))
+	}
+
+	// Stubs the recipe client and captures the body forwarded to the GenAI service.
+	private fun captureForwardedRecipeBody(): org.mockito.kotlin.KArgumentCaptor<Any> {
+		val bodyCaptor = argumentCaptor<Any>()
+		whenever(
+			mockWebClients.recipeClient
+				.post()
+				.uri("/ai/recipes")
+				.contentType(any())
+				.bodyValue(bodyCaptor.capture())
+				.retrieve()
+				.bodyToMono(any<ParameterizedTypeReference<List<RecipeInput>>>()),
+		).thenReturn(Mono.just(listOf(sampleRecipeInput)))
+		return bodyCaptor
+	}
+
+	private fun forwardedProfile(bodyCaptor: org.mockito.kotlin.KArgumentCaptor<Any>): UserProfile {
+		@Suppress("UNCHECKED_CAST")
+		val forwarded = bodyCaptor.firstValue as Map<String, Any>
+		return forwarded["profile"] as UserProfile
+	}
+
+	@Test
+	fun `ai recipes - forwards the request language so recipes match the UI`() {
+		val token = register()
+		val bodyCaptor = captureForwardedRecipeBody()
+		mockMvc
+			.perform(
+				post("/api/v1/ai/recipes")
+					.header("Authorization", "Bearer $token")
+					.contentType(MediaType.APPLICATION_JSON)
+					.content("""{"prompt":"Give me a pasta recipe","language":"DE"}"""),
+			).andExpect(status().isOk)
+
+		assertEquals(UserPreferences.Language.DE, forwardedProfile(bodyCaptor).preferences.language)
 	}
 
 	@Test

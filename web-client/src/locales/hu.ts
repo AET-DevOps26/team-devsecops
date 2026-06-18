@@ -15,6 +15,7 @@ export const HU = {
 			logout: 'Kijelentkezés',
 			preferences: 'Beállítások',
 			language: 'Nyelv',
+			detectLanguage: 'Auto',
 			english: 'English',
 			german: 'Deutsch',
 			hungarian: 'Magyar',

@@ -12,6 +12,7 @@ from .recipe_input import RecipeInput
 from .recipe_nutrients import RecipeNutrients
 from .recipe_request import RecipeRequest
 from .recipe_request_forwarded import RecipeRequestForwarded
+from .recipe_request_language import RecipeRequestLanguage
 from .recipe_update import RecipeUpdate
 from .user_credentials import UserCredentials
 from .user_preferences import UserPreferences
@@ -32,6 +33,7 @@ __all__ = (
     "RecipeNutrients",
     "RecipeRequest",
     "RecipeRequestForwarded",
+    "RecipeRequestLanguage",
     "RecipeUpdate",
     "UserCredentials",
     "UserPreferences",

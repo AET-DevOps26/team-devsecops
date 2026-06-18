@@ -12,6 +12,7 @@ import {localizeTagLabel} from '../locales/recipeTagLabels'
 import {usePressPulse} from '../usePressPulse'
 import {errorMessage} from '../apiError'
 import {SessionExpiredError, useApi} from '../useApi'
+import {currentLanguage} from '../i18n'
 
 // id is stored on the recipe once it is saved
 type Recipe = components['schemas']['RecipeInput'] & { id?: number }
@@ -76,7 +77,7 @@ export function GenerateFlow() {
 		try {
 			const tagLabels = selectedTags.map((id) => tagsById.get(id)?.label).filter(Boolean)
 			const fullPrompt = tagLabels.length > 0 ? `${prompt}\n\nPreferences: ${tagLabels.join(', ')}` : prompt
-			const body: RecipeRequest = {prompt: fullPrompt}
+			const body: RecipeRequest = {prompt: fullPrompt, language: currentLanguage()}
 			const response = await apiFetch('/ai/recipes', {
 				method: 'POST',
 				headers: {'content-type': 'application/json'},

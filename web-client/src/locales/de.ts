@@ -15,6 +15,7 @@ export const DE = {
 			logout: 'Abmelden',
 			preferences: 'Einstellungen',
 			language: 'Sprache',
+			detectLanguage: 'Automatisch',
 			english: 'English',
 			german: 'Deutsch',
 			hungarian: 'Magyar',

@@ -1,6 +1,8 @@
 package org.openapitools.model
 
+import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonProperty
+import com.fasterxml.jackson.annotation.JsonValue
 import io.swagger.v3.oas.annotations.media.Schema
 import jakarta.validation.Valid
 import jakarta.validation.constraints.DecimalMax
@@ -16,9 +18,33 @@ import java.util.Objects
 /**
  *
  * @param prompt
+ * @param language Active UI language; generated recipe content is written in it
  */
 data class RecipeRequest(
 	@get:Size(min = 1, max = 4096)
 	@Schema(example = "null", required = true, description = "")
 	@get:JsonProperty("prompt", required = true) val prompt: kotlin.String,
-)
+	@Schema(example = "null", description = "Active UI language; generated recipe content is written in it")
+	@get:JsonProperty("language") val language: RecipeRequest.Language? = null,
+) {
+	/**
+	 * Active UI language; generated recipe content is written in it
+	 * Values: EN,DE,HU
+	 */
+	enum class Language(
+		@get:JsonValue val value: kotlin.String,
+	) {
+		EN("EN"),
+		DE("DE"),
+		HU("HU"),
+		;
+
+		companion object {
+			@JvmStatic
+			@JsonCreator
+			fun forValue(value: kotlin.String): Language =
+				values().firstOrNull { it -> it.value == value }
+					?: throw IllegalArgumentException("Unexpected value '$value' for enum 'Language'")
+		}
+	}
+}

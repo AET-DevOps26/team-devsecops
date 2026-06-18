@@ -55,12 +55,19 @@ class AIApiController(
 		@Valid recipeRequest: RecipeRequest,
 	): ResponseEntity<List<RecipeInput>> {
 		val user = userRepository.findByUsername(currentUsername()).orElseThrow()
+		// the client sends the active UI language so generated recipes match what the user sees,
+		// even when no language is stored in their preferences
+		val profile = user.toProfile()
+		val profileWithLanguage =
+			recipeRequest.language?.let {
+				profile.copy(preferences = profile.preferences.copy(language = it))
+			} ?: profile
 		val recipes =
 			aiRecipeWebClient
 				.post()
 				.uri("/ai/recipes")
 				.contentType(MediaType.APPLICATION_JSON)
-				.bodyValue(mapOf("profile" to user.toProfile(), "prompt" to recipeRequest.prompt))
+				.bodyValue(mapOf("profile" to profileWithLanguage, "prompt" to recipeRequest.prompt))
 				.retrieve()
 				.bodyToMono(object : ParameterizedTypeReference<List<RecipeInput>>() {})
 				.timeout(aiTimeout)

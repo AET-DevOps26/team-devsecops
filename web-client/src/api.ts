@@ -784,6 +784,11 @@ export interface components {
         };
         RecipeRequest: {
             prompt: string;
+            /**
+             * @description Active UI language; generated recipe content is written in it
+             * @enum {string}
+             */
+            language?: "EN" | "DE" | "HU";
         };
         RecipeRequestForwarded: {
             profile: components["schemas"]["UserProfile"];

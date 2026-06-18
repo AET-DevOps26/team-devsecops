@@ -14,7 +14,7 @@ const FALLBACK_LANGUAGE: Language = 'EN'
 const isSupported = (lang: string): lang is Language =>
 	(SUPPORTED_LANGUAGES as readonly string[]).includes(lang)
 
-function detectInitialLanguage(): Language {
+export function detectInitialLanguage(): Language {
 	for (const tag of navigator.languages ?? [navigator.language]) {
 		const base = tag.toUpperCase().split('-')[0]
 		if (isSupported(base)) return base
@@ -30,6 +30,11 @@ i18n.use(initReactI18next).init({
 	interpolation: { escapeValue: false }, // React already escapes
 	returnNull: false,
 })
+
+export function currentLanguage(): Language {
+	const lang = i18n.resolvedLanguage
+	return lang && isSupported(lang) ? lang : FALLBACK_LANGUAGE
+}
 
 export function applyUserLanguage(lang: string | undefined | null) {
 	if (lang && isSupported(lang) && i18n.resolvedLanguage !== lang) {

@@ -662,6 +662,10 @@ components:
           type: string
           minLength: 1
           maxLength: 4096
+        language:
+          type: string
+          enum: [EN, DE, HU]
+          description: Active UI language; generated recipe content is written in it
 
     RecipeRequestForwarded:
       type: object

@@ -15,20 +15,24 @@ import { usePressPulse } from '../usePressPulse'
 import { usePrefsAutosave } from '../usePrefsAutosave'
 import { errorMessage } from '../apiError'
 import { SessionExpiredError, useApi } from '../useApi'
+import { detectInitialLanguage } from '../i18n'
 
 type UserProfile = components['schemas']['UserProfile']
 type UserProfileUpdate = components['schemas']['UserProfileUpdate']
 
 type Language = NonNullable<components['schemas']['UserPreferences']['language']>
 
+type LanguageSetting = Language | 'detect'
+
 const LANGUAGE_OPTIONS = [
+	{ code: 'detect', labelKey: 'profile.detectLanguage' },
 	{ code: 'EN', labelKey: 'profile.english' },
 	{ code: 'DE', labelKey: 'profile.german' },
 	{ code: 'HU', labelKey: 'profile.hungarian' },
-] as const satisfies readonly { code: Language; labelKey: string }[]
+] as const satisfies readonly { code: LanguageSetting; labelKey: string }[]
 
 // un-trimmed preferences as held by the inputs
-type PrefsDraft = { language: Language; aboutMe: string[]; diet: string[]; allergies: string[] }
+type PrefsDraft = { language: LanguageSetting; aboutMe: string[]; diet: string[]; allergies: string[] }
 
 const trimList = (xs: string[]) => xs.map((x) => x.trim()).filter((x) => x !== '')
 
@@ -53,7 +57,7 @@ export function ProfilePage() {
 	const newUsername = usernameDraft ?? username ?? ''
 	const [newPassword, setNewPassword] = useState('')
 	const [repeatNewPassword, setRepeatNewPassword] = useState('')
-	const [language, setLanguage] = useState<Language>('EN')
+	const [language, setLanguage] = useState<LanguageSetting>('detect')
 	const [aboutMe, setAboutMe] = useState<string[]>([])
 	const [diet, setDiet] = useState<string[]>([''])
 	const [allergies, setAllergies] = useState<string[]>(['', ''])
@@ -78,7 +82,7 @@ export function ProfilePage() {
 				const data = (await res.json()) as UserProfile
 				if (cancelled) return
 				const prefs = data.preferences ?? {}
-				setLanguage(prefs.language ?? 'EN')
+				setLanguage(prefs.language ?? 'detect')
 				setAboutMe(prefs.aboutMe ?? [])
 				setDiet(prefs.diet?.length ? prefs.diet : [''])
 				setAllergies(prefs.allergies?.length ? prefs.allergies : ['', ''])
@@ -117,7 +121,7 @@ export function ProfilePage() {
 		updateProfile(
 			{
 				preferences: {
-					language: draft.language,
+					language: draft.language === 'detect' ? undefined : draft.language,
 					diet: trimList(draft.diet),
 					allergies: trimList(draft.allergies),
 					aboutMe: trimList(draft.aboutMe),
@@ -289,12 +293,13 @@ export function ProfilePage() {
 								<button
 									key={code}
 									type="button"
+									aria-pressed={language === code}
 									className={`relative z-10 w-24 rounded-md py-1 text-sm font-medium transition-colors ${
 										language === code ? 'text-orange-600' : 'text-gray-500'
 									}`}
 									onClick={() => {
 										setLanguage(code)
-										void i18n.changeLanguage(code)
+										void i18n.changeLanguage(code === 'detect' ? detectInitialLanguage() : code)
 										editPrefs('language', livePrefs({ language: code }))
 									}}
 								>
