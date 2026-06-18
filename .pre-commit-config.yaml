@@ -14,14 +14,16 @@ repos:
     hooks:
       - id: ruff
         name: ruff check
-        entry: ruff check --fix
-        language: system
+        entry: bash -c 'r=$(which -a ruff 2>/dev/null | grep -v pre-commit | head -1); exec "${r:-ruff}" check --fix "$@"' --
+        language: python
+        additional_dependencies: ['ruff']
         types: [python]
 
       - id: ruff-format
         name: ruff format
-        entry: ruff format
-        language: system
+        entry: bash -c 'r=$(which -a ruff 2>/dev/null | grep -v pre-commit | head -1); exec "${r:-ruff}" format "$@"' --
+        language: python
+        additional_dependencies: ['ruff']
         types: [python]
 
       - id: redocly-lint
@@ -34,7 +36,7 @@ repos:
 
       - id: ktlint
         name: ktlint
-        entry: ktlint -F
+        entry: bash -c 'command -v ktlint >/dev/null 2>&1 && exec ktlint -F "$@" || exec services/spring-api/gradlew -p services/spring-api ktlintFormat' --
         language: system
         types: [kotlin]
 
