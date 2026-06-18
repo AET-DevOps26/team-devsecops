@@ -5,9 +5,11 @@ import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.security.Keys
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
+import java.security.MessageDigest
+import java.time.Instant
 import java.util.Date
 
-<span class="fc" id="L10">@Component</span>
+<span class="fc" id="L12">@Component</span>
 class JwtUtils {
 	@Value(&quot;\${app.jwt.secret}&quot;)
 	private lateinit var jwtSecret: String
@@ -15,36 +17,50 @@ class JwtUtils {
 	@Value(&quot;\${app.jwt.expiration-ms}&quot;)
 	private var jwtExpirationMs: Long = 0
 
-<span class="fc" id="L18">	private fun key() = Keys.hmacShaKeyFor(jwtSecret.toByteArray())</span>
+<span class="fc" id="L20">	private fun key() = Keys.hmacShaKeyFor(jwtSecret.toByteArray())</span>
 
 	fun generateToken(userId: Long): String =
 		Jwts
-<span class="fc" id="L22">			.builder()</span>
-<span class="fc" id="L23">			.subject(userId.toString())</span>
-<span class="fc" id="L24">			.issuedAt(Date())</span>
-<span class="fc" id="L25">			.expiration(Date(System.currentTimeMillis() + jwtExpirationMs))</span>
-<span class="fc" id="L26">			.signWith(key())</span>
-<span class="fc" id="L27">			.compact()</span>
+<span class="fc" id="L24">			.builder()</span>
+<span class="fc" id="L25">			.subject(userId.toString())</span>
+<span class="fc" id="L26">			.issuedAt(Date())</span>
+<span class="fc" id="L27">			.expiration(Date(System.currentTimeMillis() + jwtExpirationMs))</span>
+<span class="fc" id="L28">			.signWith(key())</span>
+<span class="fc" id="L29">			.compact()</span>
 
 	fun getUserIdFromToken(token: String): Long =
 		Jwts
-<span class="fc" id="L31">			.parser()</span>
-<span class="fc" id="L32">			.verifyWith(key())</span>
-<span class="fc" id="L33">			.build()</span>
-<span class="fc" id="L34">			.parseSignedClaims(token)</span>
-<span class="fc" id="L35">			.payload.subject</span>
-<span class="fc" id="L36">			.toLong()</span>
+<span class="fc" id="L33">			.parser()</span>
+<span class="fc" id="L34">			.verifyWith(key())</span>
+<span class="fc" id="L35">			.build()</span>
+<span class="fc" id="L36">			.parseSignedClaims(token)</span>
+<span class="fc" id="L37">			.payload.subject</span>
+<span class="fc" id="L38">			.toLong()</span>
 
 	fun validateToken(token: String): Boolean =
-<span class="fc" id="L39">		try {</span>
+<span class="fc" id="L41">		try {</span>
 			Jwts
-<span class="fc" id="L41">				.parser()</span>
-<span class="fc" id="L42">				.verifyWith(key())</span>
-<span class="fc" id="L43">				.build()</span>
-<span class="fc" id="L44">				.parseSignedClaims(token)</span>
-<span class="fc" id="L45">			true</span>
-<span class="nc" id="L46">		} catch (e: JwtException) {</span>
-<span class="pc" id="L47">			false</span>
-<span class="fc" id="L48">		}</span>
+<span class="fc" id="L43">				.parser()</span>
+<span class="fc" id="L44">				.verifyWith(key())</span>
+<span class="fc" id="L45">				.build()</span>
+<span class="fc" id="L46">				.parseSignedClaims(token)</span>
+<span class="fc" id="L47">			true</span>
+<span class="nc" id="L48">		} catch (e: JwtException) {</span>
+<span class="pc" id="L49">			false</span>
+<span class="fc" id="L50">		}</span>
+
+	fun getExpirationFromToken(token: String): Instant =
+		Jwts
+<span class="fc" id="L54">			.parser()</span>
+<span class="fc" id="L55">			.verifyWith(key())</span>
+<span class="fc" id="L56">			.build()</span>
+<span class="fc" id="L57">			.parseSignedClaims(token)</span>
+<span class="fc" id="L58">			.payload.expiration</span>
+<span class="fc" id="L59">			.toInstant()</span>
+
+	fun tokenHash(token: String): String {
+<span class="fc" id="L62">		val bytes = MessageDigest.getInstance(&quot;SHA-256&quot;).digest(token.toByteArray())</span>
+<span class="fc" id="L63">		return bytes.joinToString(&quot;&quot;) { &quot;%02x&quot;.format(it) }</span>
+	}
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>
