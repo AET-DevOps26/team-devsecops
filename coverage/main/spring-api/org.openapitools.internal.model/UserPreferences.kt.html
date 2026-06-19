@@ -37,7 +37,7 @@ import com.squareup.moshi.JsonClass
 
 <span class="pc" id="L38">data class UserPreferences(</span>
 	// Preferred UI and AI-content language as an ISO 639-1 code
-<span class="pc" id="L40">	@Json(name = &quot;language&quot;)</span>
+<span class="fc" id="L40">	@Json(name = &quot;language&quot;)</span>
 <span class="nc" id="L41">	val language: UserPreferences.Language? = null,</span>
 	// Dietary restriction or style (e.g. vegan, keto)
 <span class="pc" id="L43">	@Json(name = &quot;diet&quot;)</span>
@@ -55,17 +55,17 @@ import com.squareup.moshi.JsonClass
 	 * Values: EN,DE,HU
 	 */
 	@JsonClass(generateAdapter = false)
-<span class="nc" id="L58">	enum class Language(</span>
-<span class="nc" id="L59">		val value: kotlin.String,</span>
+<span class="fc" id="L58">	enum class Language(</span>
+<span class="pc" id="L59">		val value: kotlin.String,</span>
 	) {
 		@Json(name = &quot;EN&quot;)
-<span class="nc" id="L62">		EN(&quot;EN&quot;),</span>
+<span class="fc" id="L62">		EN(&quot;EN&quot;),</span>
 
 		@Json(name = &quot;DE&quot;)
-<span class="nc" id="L65">		DE(&quot;DE&quot;),</span>
+<span class="fc" id="L65">		DE(&quot;DE&quot;),</span>
 
 		@Json(name = &quot;HU&quot;)
-<span class="nc" id="L68">		HU(&quot;HU&quot;),</span>
+<span class="fc" id="L68">		HU(&quot;HU&quot;),</span>
 	}
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>
