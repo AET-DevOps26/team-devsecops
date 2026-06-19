@@ -804,16 +804,7 @@ export interface components {
             /** @description Active UI language; generated recipe content is written in it */
             language?: components["schemas"]["Language"];
         };
-        RecipeRequestForwarded: {
-            profile: components["schemas"]["UserProfile"];
-            prompt: string;
-        };
         HelpRequest: {
-            recipe: components["schemas"]["RecipeInput"];
-            prompt: string;
-        };
-        HelpRequestForwarded: {
-            profile: components["schemas"]["UserProfile"];
             recipe: components["schemas"]["RecipeInput"];
             prompt: string;
         };

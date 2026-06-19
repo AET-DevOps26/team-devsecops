@@ -1,0 +1,47 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+      - id: check-merge-conflict
+      - id: check-yaml
+        args: [--allow-multiple-documents]
+      - id: check-json
+        exclude: tsconfig.*\.json$
+
+  - repo: local
+    hooks:
+      - id: ruff
+        name: ruff check
+        entry: bash -c 'r=$(which -a ruff 2>/dev/null | grep -v pre-commit | head -1); exec "${r:-ruff}" check --fix "$@"' --
+        language: python
+        additional_dependencies: ['ruff']
+        types: [python]
+
+      - id: ruff-format
+        name: ruff format
+        entry: bash -c 'r=$(which -a ruff 2>/dev/null | grep -v pre-commit | head -1); exec "${r:-ruff}" format "$@"' --
+        language: python
+        additional_dependencies: ['ruff']
+        types: [python]
+
+      - id: redocly-lint
+        name: Redocly OpenAPI lint
+        entry: redocly lint api/openapi.yaml
+        language: node
+        additional_dependencies: ['@redocly/cli@2.34.0']
+        pass_filenames: false
+        files: ^api/openapi\.yaml$
+
+      - id: ktlint
+        name: ktlint
+        entry: bash -c 'command -v ktlint >/dev/null 2>&1 && exec ktlint -F "$@" || exec services/spring-api/gradlew -p services/spring-api ktlintFormat' --
+        language: system
+        types: [kotlin]
+
+      - id: eslint
+        name: eslint
+        entry: web-client/node_modules/.bin/eslint
+        language: system
+        files: web-client/.*\.(ts|tsx|js|jsx)$

@@ -1,13 +1,13 @@
 [tool.poetry]
-name = "cooking-assistant-api-client"
+name = "cooking-assistant-gen-ai-services-api-internal-client"
 version = "1.0.0"
-description = "A client library for accessing Cooking Assistant API"
+description = "A client library for accessing Cooking Assistant GenAI Services API (Internal)"
 authors = []
 readme = "README.md"
 packages = [
-    { include = "cooking_assistant_api_client" },
+    { include = "cooking_assistant_gen_ai_services_api_internal_client" },
 ]
-include = ["cooking_assistant_api_client/py.typed"]
+include = ["cooking_assistant_gen_ai_services_api_internal_client/py.typed"]
 
 [tool.poetry.dependencies]
 python = "^3.11"
