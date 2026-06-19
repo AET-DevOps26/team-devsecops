@@ -36,7 +36,7 @@ import java.util.Objects
 <span class="fc" id="L36">	@get:JsonProperty(&quot;instructions&quot;) val instructions: kotlin.collections.List&lt;kotlin.String&gt;? = null,</span>
 <span class="fc" id="L37">	@get:DecimalMin(value = &quot;0.5&quot;)</span>
 	@Schema(example = &quot;null&quot;, description = &quot;&quot;)
-<span class="fc" id="L39">	@get:JsonProperty(&quot;portions&quot;) val portions: java.math.BigDecimal? = null,</span>
+<span class="fc" id="L39">	@get:JsonProperty(&quot;portions&quot;) val portions: kotlin.Double? = null,</span>
 <span class="fc" id="L40">	@field:Valid</span>
 	@Schema(example = &quot;null&quot;, description = &quot;&quot;)
 <span class="fc" id="L42">	@get:JsonProperty(&quot;nutrients&quot;) val nutrients: RecipeNutrients? = null,</span>

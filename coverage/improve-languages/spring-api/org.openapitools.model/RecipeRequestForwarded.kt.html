@@ -19,11 +19,11 @@ import java.util.Objects
  * @param profile
  * @param prompt
  */
-<span class="fc" id="L22">data class RecipeRequestForwarded(</span>
-<span class="fc" id="L23">	@field:Valid</span>
+<span class="nc" id="L22">data class RecipeRequestForwarded(</span>
+<span class="nc" id="L23">	@field:Valid</span>
 	@Schema(example = &quot;null&quot;, required = true, description = &quot;&quot;)
 	@get:JsonProperty(&quot;profile&quot;, required = true) val profile: UserProfile,
-<span class="pc" id="L26">	@get:Size(min = 1)</span>
+<span class="nc" id="L26">	@get:Size(min = 1)</span>
 	@Schema(example = &quot;null&quot;, required = true, description = &quot;&quot;)
 	@get:JsonProperty(&quot;prompt&quot;, required = true) val prompt: kotlin.String,
 )

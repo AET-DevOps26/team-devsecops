@@ -40,7 +40,7 @@ import java.util.Objects
 	@get:JsonProperty(&quot;instructions&quot;, required = true) val instructions: kotlin.collections.List&lt;kotlin.String&gt;,
 <span class="fc" id="L41">	@get:DecimalMin(value = &quot;0.5&quot;)</span>
 	@Schema(example = &quot;null&quot;, required = true, description = &quot;&quot;)
-	@get:JsonProperty(&quot;portions&quot;, required = true) val portions: java.math.BigDecimal,
+	@get:JsonProperty(&quot;portions&quot;, required = true) val portions: kotlin.Double,
 <span class="fc" id="L44">	@get:Min(value = 1L)</span>
 	@Schema(example = &quot;null&quot;, required = true, description = &quot;&quot;)
 	@get:JsonProperty(&quot;id&quot;, required = true) val id: kotlin.Long,

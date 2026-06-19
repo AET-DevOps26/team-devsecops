@@ -1,19 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AiConfig.kt</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openapi-spring</a> &gt; <a href="index.source.html" class="el_package">org.openapitools.config</a> &gt; <span class="el_source">AiConfig.kt</span></div><h1>AiConfig.kt</h1><pre class="source lang-java linenums">package org.openapitools.config
 
+import com.squareup.moshi.Moshi
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
+import okhttp3.ConnectionPool
+import okhttp3.OkHttpClient
+import org.openapitools.internal.client.HelpServiceApi
+import org.openapitools.internal.client.RecipeServiceApi
+import org.openapitools.security.InternalHmacInterceptor
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.http.client.reactive.ReactorClientHttpConnector
-import org.springframework.web.reactive.function.client.ExchangeFilterFunction
-import org.springframework.web.reactive.function.client.WebClient
-import reactor.netty.http.client.HttpClient
-import reactor.netty.resources.ConnectionProvider
-import java.nio.charset.StandardCharsets
-import java.time.Duration
-import javax.crypto.Mac
-import javax.crypto.spec.SecretKeySpec
+import retrofit2.Retrofit
+import retrofit2.converter.moshi.MoshiConverterFactory
+import java.util.concurrent.TimeUnit
 
-<span class="fc" id="L16">@Configuration</span>
+<span class="fc" id="L17">@Configuration</span>
 class AiConfig {
 	@Value(&quot;\${ai.recipe.service.url:http://localhost:8090}&quot;)
 	private lateinit var aiRecipeServiceUrl: String
@@ -24,123 +25,44 @@ class AiConfig {
 	@Value(&quot;\${ai.hmac.secret}&quot;)
 	private lateinit var internalAuthSecret: String
 
-	@Bean
-	fun aiRecipeWebClient(): WebClient {
-<span class="fc" id="L29">		val pool =</span>
-			ConnectionProvider
-<span class="fc" id="L31">				.builder(&quot;recipe&quot;)</span>
-<span class="fc" id="L32">				.maxIdleTime(Duration.ofSeconds(2))</span>
-<span class="fc" id="L33">				.build()</span>
-<span class="fc" id="L34">		return WebClient</span>
-<span class="fc" id="L35">			.builder()</span>
-<span class="fc" id="L36">			.baseUrl(aiRecipeServiceUrl)</span>
-<span class="fc" id="L37">			.clientConnector(ReactorClientHttpConnector(HttpClient.create(pool)))</span>
-<span class="fc" id="L38">			.filter(calculateAndAddHmacHeader())</span>
-<span class="fc" id="L39">			.build()</span>
-	}
+	private fun createBaseHttpClient(): OkHttpClient =
+		OkHttpClient
+<span class="fc" id="L30">			.Builder()</span>
+<span class="fc" id="L31">			.connectionPool(ConnectionPool(5, 2, TimeUnit.SECONDS))</span>
+<span class="fc" id="L32">			.callTimeout(60, TimeUnit.SECONDS)</span>
+<span class="fc" id="L33">			.addInterceptor(InternalHmacInterceptor(internalAuthSecret))</span>
+<span class="fc" id="L34">			.build()</span>
+
+	private val moshi =
+		Moshi
+<span class="fc" id="L38">			.Builder()</span>
+<span class="fc" id="L39">			.addLast(KotlinJsonAdapterFactory())</span>
+<span class="fc" id="L40">			.build()</span>
 
 	@Bean
-	fun aiHelpWebClient(): WebClient {
-<span class="fc" id="L44">		val pool =</span>
-			ConnectionProvider
-<span class="fc" id="L46">				.builder(&quot;ai&quot;)</span>
-<span class="fc" id="L47">				.maxIdleTime(Duration.ofSeconds(2))</span>
-<span class="fc" id="L48">				.build()</span>
-<span class="fc" id="L49">		return WebClient</span>
-<span class="fc" id="L50">			.builder()</span>
-<span class="fc" id="L51">			.baseUrl(aiHelpServiceUrl)</span>
-<span class="fc" id="L52">			.clientConnector(ReactorClientHttpConnector(HttpClient.create(pool)))</span>
-<span class="fc" id="L53">			.filter(calculateAndAddHmacHeader())</span>
-<span class="fc" id="L54">			.build()</span>
+	fun aiHelpServiceApi(): HelpServiceApi {
+<span class="fc" id="L44">		val retrofit =</span>
+			Retrofit
+<span class="fc" id="L46">				.Builder()</span>
+<span class="pc bpc" id="L47" title="1 of 2 branches missed.">				.baseUrl(aiHelpServiceUrl.let { if (it.endsWith(&quot;/&quot;)) it else &quot;$it/&quot; })</span>
+<span class="fc" id="L48">				.client(createBaseHttpClient())</span>
+<span class="fc" id="L49">				.addConverterFactory(MoshiConverterFactory.create(moshi))</span>
+<span class="fc" id="L50">				.build()</span>
+
+<span class="fc" id="L52">		return retrofit.create(HelpServiceApi::class.java)</span>
 	}
 
-	private fun calculateAndAddHmacHeader(): ExchangeFilterFunction {
-<span class="fc" id="L58">		return ExchangeFilterFunction { request, next -&gt;</span>
-<span class="nc" id="L59">			val timestamp = (System.currentTimeMillis() / 1000L).toString()</span>
+	@Bean
+	fun aiRecipeServiceApi(): RecipeServiceApi {
+<span class="fc" id="L57">		val retrofit =</span>
+			Retrofit
+<span class="fc" id="L59">				.Builder()</span>
+<span class="pc bpc" id="L60" title="1 of 2 branches missed.">				.baseUrl(aiRecipeServiceUrl.let { if (it.endsWith(&quot;/&quot;)) it else &quot;$it/&quot; })</span>
+<span class="fc" id="L61">				.client(createBaseHttpClient())</span>
+<span class="fc" id="L62">				.addConverterFactory(MoshiConverterFactory.create(moshi))</span>
+<span class="fc" id="L63">				.build()</span>
 
-			// 1. Generate an empty-body baseline signature as a fallback
-<span class="nc" id="L62">			val fallbackData = &quot;$timestamp.&quot;</span>
-<span class="nc" id="L63">			val fallbackSignature = calculateHmacSha256(internalAuthSecret, fallbackData)</span>
-
-			// 2. Attach timestamp and baseline signature up front
-<span class="nc" id="L66">			val requestWithFallback =</span>
-				org.springframework.web.reactive.function.client.ClientRequest
-<span class="nc" id="L68">					.from(request)</span>
-<span class="nc" id="L69">					.header(&quot;X-Internal-Timestamp&quot;, timestamp)</span>
-<span class="nc" id="L70">					.header(&quot;X-Internal-Signature&quot;, fallbackSignature)</span>
-<span class="nc" id="L71">					.build()</span>
-
-<span class="nc" id="L73">			val method = requestWithFallback.method()</span>
-
-			// 3. For GET, HEAD, or OPTIONS requests, no body will ever exist. Ship it immediately.
-<span class="nc bnc" id="L76" title="All 2 branches missed.">			if (method == org.springframework.http.HttpMethod.GET ||</span>
-<span class="nc bnc" id="L77" title="All 2 branches missed.">				method == org.springframework.http.HttpMethod.HEAD ||</span>
-<span class="nc bnc" id="L78" title="All 2 branches missed.">				method == org.springframework.http.HttpMethod.OPTIONS</span>
-			) {
-<span class="nc" id="L80">				return@ExchangeFilterFunction next.exchange(requestWithFallback)</span>
-			}
-
-			// 4. For payload-bearing requests (POST/PUT), intercept the serialization stream
-<span class="nc" id="L84">			val authenticatedRequest =</span>
-				org.springframework.web.reactive.function.client.ClientRequest
-<span class="nc" id="L86">					.from(requestWithFallback)</span>
-<span class="nc" id="L87">					.body { outputMessage, context -&gt;</span>
-<span class="nc" id="L88">						val bodyDecorator =</span>
-<span class="nc" id="L89">							object : org.springframework.http.client.reactive.ClientHttpRequestDecorator(outputMessage) {</span>
-								override fun writeWith(
-									body: org.reactivestreams.Publisher&lt;out org.springframework.core.io.buffer.DataBuffer&gt;,
-								): reactor.core.publisher.Mono&lt;Void&gt; =
-									org.springframework.core.io.buffer.DataBufferUtils
-<span class="nc" id="L94">										.join(body)</span>
-<span class="nc" id="L95">										.flatMap { dataBuffer -&gt;</span>
-											// Extract the raw bytes exactly as they will be sent over the wire
-<span class="nc" id="L97">											val bytes = ByteArray(dataBuffer.readableByteCount())</span>
-<span class="nc" id="L98">											dataBuffer.read(bytes)</span>
-											org.springframework.core.io.buffer.DataBufferUtils
-<span class="nc" id="L100">												.release(dataBuffer)</span>
-
-<span class="nc" id="L102">											val payloadString = String(bytes, java.nio.charset.StandardCharsets.UTF_8)</span>
-<span class="nc" id="L103">											val dataToSign = &quot;$timestamp.$payloadString&quot;</span>
-<span class="nc" id="L104">											val signature = calculateHmacSha256(internalAuthSecret, dataToSign)</span>
-
-											// Dynamically overwrite the baseline signature header with the real payload signature
-<span class="nc" id="L107">											this.headers.set(&quot;X-Internal-Signature&quot;, signature)</span>
-
-											// Re-wrap the bytes into a new data buffer so the request chain can proceed natively
-<span class="nc" id="L110">											val factory = this.delegate.bufferFactory()</span>
-<span class="nc" id="L111">											val newBuffer = factory.wrap(bytes)</span>
-<span class="nc" id="L112">											super.writeWith(</span>
-												reactor.core.publisher.Mono
-<span class="nc" id="L114">													.just(newBuffer),</span>
-<span class="nc" id="L115">											)</span>
-<span class="nc" id="L116">										}.switchIfEmpty(</span>
-<span class="nc" id="L117">											reactor.core.publisher.Mono.defer {</span>
-												// Fallback if a POST/PUT body stream happens to be completely empty
-<span class="nc" id="L119">												super.writeWith(body)</span>
-											},
-<span class="nc" id="L121">										)</span>
-							}
-<span class="nc" id="L123">						request.body().insert(bodyDecorator, context)</span>
-<span class="nc" id="L124">					}.build()</span>
-
-<span class="nc" id="L126">			next.exchange(authenticatedRequest)</span>
-		}
-	}
-
-	private fun calculateHmacSha256(
-		secret: String,
-		data: String,
-	): String {
-<span class="nc" id="L134">		try {</span>
-<span class="nc" id="L135">			val sha256HMAC = Mac.getInstance(&quot;HmacSHA256&quot;)</span>
-<span class="nc" id="L136">			val secretKeySpec = SecretKeySpec(secret.toByteArray(StandardCharsets.UTF_8), &quot;HmacSHA256&quot;)</span>
-<span class="nc" id="L137">			sha256HMAC.init(secretKeySpec)</span>
-<span class="nc" id="L138">			val hashBytes = sha256HMAC.doFinal(data.toByteArray(StandardCharsets.UTF_8))</span>
-
-<span class="nc" id="L140">			return hashBytes.joinToString(&quot;&quot;) { &quot;%02x&quot;.format(it) }</span>
-<span class="nc" id="L141">		} catch (e: Exception) {</span>
-<span class="nc" id="L142">			throw RuntimeException(&quot;Failed to generate internal HMAC authentication signature&quot;, e)</span>
-		}
+<span class="fc" id="L65">		return retrofit.create(RecipeServiceApi::class.java)</span>
 	}
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>
