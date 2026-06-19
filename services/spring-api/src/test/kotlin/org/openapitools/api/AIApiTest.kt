@@ -9,6 +9,8 @@ import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 import org.mockito.Mockito
 import org.mockito.kotlin.any
+import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.openapitools.internal.client.HelpServiceApi
 import org.openapitools.internal.client.RecipeServiceApi
@@ -29,6 +31,7 @@ import retrofit2.Call
 import retrofit2.Response
 import java.io.InterruptedIOException
 import java.math.BigDecimal
+import kotlin.test.assertEquals
 
 @Import(AIApiTest.MockApiServices::class)
 class AIApiTest : ApiTestBase() {
@@ -238,6 +241,27 @@ class AIApiTest : ApiTestBase() {
 			).andExpect(status().isOk)
 			.andExpect(jsonPath("$").isArray)
 			.andExpect(jsonPath("$[0].title").value("AI Pasta"))
+	}
+
+	@Test
+	fun `ai recipes - forwards the request language so recipes match the UI`() {
+		val token = register()
+		stubRecipeClient(listOf(sampleInternalRecipeInput))
+		val bodyCaptor = argumentCaptor<org.openapitools.internal.model.RecipeRequestForwarded>()
+
+		mockMvc
+			.perform(
+				post("/api/v1/ai/recipes")
+					.header("Authorization", "Bearer $token")
+					.contentType(MediaType.APPLICATION_JSON)
+					.content("""{"prompt":"Give me a pasta recipe","language":"DE"}"""),
+			).andExpect(status().isOk)
+
+		verify(mockApiServices.recipeServiceApi).aiRecipesPost(any(), any(), bodyCaptor.capture())
+		assertEquals(
+			org.openapitools.internal.model.UserPreferences.Language.DE,
+			bodyCaptor.firstValue.profile.preferences.language,
+		)
 	}
 
 	@Test

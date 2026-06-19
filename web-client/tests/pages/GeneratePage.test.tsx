@@ -63,6 +63,22 @@ describe('GeneratePage', () => {
 		expect(await screen.findByText('No recipes returned.')).toBeInTheDocument()
 	})
 
+	it('sends the active UI language with the recipe request', async () => {
+		fetchMock.mockResolvedValueOnce(jsonResponse([recipe]))
+		const user = userEvent.setup()
+		render()
+
+		await user.type(screen.getByPlaceholderText(/Type what you think/i), 'pasta')
+		await user.click(screen.getByRole('button', { name: 'Generate' }))
+
+		const post = fetchMock.mock.calls.find(([, init]) => init?.method === 'POST')
+		expect(post).toBeDefined()
+		expect(JSON.parse(post![1]!.body as string)).toMatchObject({
+			prompt: expect.stringContaining('pasta'),
+			language: 'EN',
+		})
+	})
+
 	it('shows a server error on the results page', async () => {
 		fetchMock.mockResolvedValueOnce(jsonResponse({ message: 'GenAI down' }, { status: 503 }))
 		const user = userEvent.setup()

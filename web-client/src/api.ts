@@ -708,6 +708,11 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /**
+         * @description Supported UI and AI-content language as an ISO 639-1 code
+         * @enum {string}
+         */
+        Language: "EN" | "DE" | "HU";
         ErrorResponse: {
             message: string;
         };
@@ -731,11 +736,8 @@ export interface components {
             password?: string;
         };
         UserPreferences: {
-            /**
-             * @description Preferred UI and AI-content language as an ISO 639-1 code
-             * @enum {string}
-             */
-            language?: "EN" | "DE" | "HU";
+            /** @description Preferred UI and AI-content language as an ISO 639-1 code */
+            language?: components["schemas"]["Language"];
             /** @description Dietary restriction or style (e.g. vegan, keto) */
             diet?: string[];
             /** @description List of ingredients the user is allergic to */
@@ -799,6 +801,8 @@ export interface components {
         };
         RecipeRequest: {
             prompt: string;
+            /** @description Active UI language; generated recipe content is written in it */
+            language?: components["schemas"]["Language"];
         };
         HelpRequest: {
             recipe: components["schemas"]["RecipeInput"];

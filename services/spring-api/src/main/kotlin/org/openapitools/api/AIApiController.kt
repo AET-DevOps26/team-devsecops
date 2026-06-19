@@ -63,9 +63,24 @@ class AIApiController(
 	): ResponseEntity<List<RecipeInput>> {
 		val user = userRepository.findByUsername(currentUsername()).orElseThrow()
 
+		// the client sends the active UI language so generated recipes match what the user sees,
+		// even when no language is stored in their preferences
+		val profile = user.toInternalProfile()
+		val profileWithLanguage =
+			recipeRequest.language?.let { lang ->
+				profile.copy(
+					preferences =
+						profile.preferences.copy(
+							language =
+								org.openapitools.internal.model.UserPreferences.Language
+									.valueOf(lang.name),
+						),
+				)
+			} ?: profile
+
 		val internalRequest =
 			org.openapitools.internal.model.RecipeRequestForwarded(
-				profile = user.toInternalProfile(),
+				profile = profileWithLanguage,
 				prompt = recipeRequest.prompt,
 			)
 
