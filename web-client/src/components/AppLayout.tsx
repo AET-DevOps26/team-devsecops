@@ -2,7 +2,7 @@ import { Outlet, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { Nav } from './Nav'
 import { ThemeIconToggle } from './ThemeToggle'
-import { useUserLanguage } from '../useUserLanguage'
+import { useUserPreferences } from '../useUserPreferences'
 
 const titleKeys = {
 	generate: 'layout.generate',
@@ -13,7 +13,7 @@ const titleKeys = {
 export function AppLayout() {
 	const { t } = useTranslation()
 	const { pathname } = useLocation()
-	useUserLanguage()
+	useUserPreferences()
 	const section = pathname.split('/')[1]
 	const titleKey = titleKeys[section as keyof typeof titleKeys] ?? 'layout.generate'
 	const title = t(titleKey)

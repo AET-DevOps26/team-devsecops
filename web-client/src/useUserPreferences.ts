@@ -1,26 +1,29 @@
 import { useEffect } from 'react'
 import type { components } from './api'
 import { applyUserLanguage } from './i18n'
+import { applyTheme, THEME_MODES } from './theme'
 import { SessionExpiredError, useApi } from './useApi'
 
 type UserProfile = components['schemas']['UserProfile']
 
-// Fetch the signed-in user's saved language once and apply it app-wide. This
-// takes precedence over the browser-based language picked at startup.
-export function useUserLanguage() {
+export function useUserPreferences() {
 	const apiFetch = useApi()
 	useEffect(() => {
 		let cancelled = false
 		apiFetch('/users/profile')
 			.then(async (res) => {
 				if (!res.ok) return
-				const data = (await res.json()) as UserProfile
-				if (!cancelled) applyUserLanguage(data.preferences?.language)
+				const userProfile = (await res.json()) as UserProfile
+				if (cancelled) return
+				applyUserLanguage(userProfile.preferences?.language)
+				const theme = userProfile.preferences?.theme
+				if (theme && THEME_MODES.includes(theme)) applyTheme(theme)
 			})
 			.catch((e) => {
 				if (e instanceof SessionExpiredError) return
-				// a failed language lookup shouldn't break the app — keep the default
+				// a failed lookup shouldn't break the app (except for ProfilePage where this is explicitly handled)
 			})
+
 		return () => {
 			cancelled = true
 		}

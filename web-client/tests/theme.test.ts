@@ -135,6 +135,44 @@ describe('following the OS while in AUTO', () => {
 	})
 })
 
+describe('persisting to the profile', () => {
+	let fetchMock: ReturnType<typeof vi.fn>
+
+	beforeEach(() => {
+		fetchMock = vi.fn().mockResolvedValue(new Response(null, { status: 200 }))
+		vi.stubGlobal('fetch', fetchMock)
+	})
+
+	it('saves an explicit change to the signed-in user profile', async () => {
+		localStorage.setItem('auth_token', 'tkn')
+		const { setThemeMode } = await loadTheme({ storedTheme: 'LIGHT', isSystemDark: false })
+
+		setThemeMode('DARK')
+
+		expect(fetchMock).toHaveBeenCalledTimes(1)
+		const [url, init] = fetchMock.mock.calls[0]
+		expect(url).toContain('/api/v1/users/profile')
+		expect(init.method).toBe('PUT')
+		expect(init.headers.authorization).toBe('Bearer tkn')
+		expect(JSON.parse(init.body)).toEqual({ preferences: { theme: 'DARK' } })
+	})
+})
+
+describe('applyStoredThemeMode', () => {
+	it('applies a profile-loaded mode and stores to localStorage', async () => {
+		const { applyTheme, getThemeMode } = await loadTheme({
+			storedTheme: 'LIGHT',
+			isSystemDark: false,
+		})
+
+		applyTheme('DARK')
+
+		expect(getThemeMode()).toBe('DARK')
+		expect(isDark()).toBe(true)
+		expect(localStorage.getItem('theme')).toBe('DARK')
+	})
+})
+
 describe('useThemeMode', () => {
 	it('returns the current mode and re-renders on change', async () => {
 		const { useThemeMode, setThemeMode } = await loadTheme({ storedTheme: 'LIGHT', isSystemDark: false })

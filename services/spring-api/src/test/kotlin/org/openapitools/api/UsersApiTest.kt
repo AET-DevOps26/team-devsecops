@@ -205,6 +205,77 @@ class UsersApiTest : ApiTestBase() {
 	}
 
 	@Test
+	fun `profile put - stores and returns the theme preference`() {
+		val token = register()
+		mockMvc
+			.perform(
+				put("/api/v1/users/profile")
+					.header("Authorization", "Bearer $token")
+					.contentType(MediaType.APPLICATION_JSON)
+					.content("""{"preferences":{"theme":"DARK"}}"""),
+			).andExpect(status().isOk)
+
+		mockMvc
+			.perform(get("/api/v1/users/profile").header("Authorization", "Bearer $token"))
+			.andExpect(status().isOk)
+			.andExpect(jsonPath("$.preferences.theme").value("DARK"))
+	}
+
+	@Test
+	fun `profile put - a theme-only update preserves the other preferences`() {
+		val token = register()
+		mockMvc
+			.perform(
+				put("/api/v1/users/profile")
+					.header("Authorization", "Bearer $token")
+					.contentType(MediaType.APPLICATION_JSON)
+					.content("""{"preferences":{"language":"DE","diet":["vegan"],"allergies":["nuts"]}}"""),
+			).andExpect(status().isOk)
+
+		mockMvc
+			.perform(
+				put("/api/v1/users/profile")
+					.header("Authorization", "Bearer $token")
+					.contentType(MediaType.APPLICATION_JSON)
+					.content("""{"preferences":{"theme":"DARK"}}"""),
+			).andExpect(status().isOk)
+
+		mockMvc
+			.perform(get("/api/v1/users/profile").header("Authorization", "Bearer $token"))
+			.andExpect(status().isOk)
+			.andExpect(jsonPath("$.preferences.theme").value("DARK"))
+			.andExpect(jsonPath("$.preferences.language").value("DE"))
+			.andExpect(jsonPath("$.preferences.diet[0]").value("vegan"))
+			.andExpect(jsonPath("$.preferences.allergies[0]").value("nuts"))
+	}
+
+	@Test
+	fun `profile put - updating other preferences preserves a previously saved theme`() {
+		val token = register()
+		mockMvc
+			.perform(
+				put("/api/v1/users/profile")
+					.header("Authorization", "Bearer $token")
+					.contentType(MediaType.APPLICATION_JSON)
+					.content("""{"preferences":{"theme":"DARK"}}"""),
+			).andExpect(status().isOk)
+
+		mockMvc
+			.perform(
+				put("/api/v1/users/profile")
+					.header("Authorization", "Bearer $token")
+					.contentType(MediaType.APPLICATION_JSON)
+					.content("""{"preferences":{"diet":["keto"]}}"""),
+			).andExpect(status().isOk)
+
+		mockMvc
+			.perform(get("/api/v1/users/profile").header("Authorization", "Bearer $token"))
+			.andExpect(status().isOk)
+			.andExpect(jsonPath("$.preferences.theme").value("DARK"))
+			.andExpect(jsonPath("$.preferences.diet[0]").value("keto"))
+	}
+
+	@Test
 	fun `profile put - username conflict returns 409`() {
 		register("taken", "testpass1234")
 		val token = register("other", "testpass1234")

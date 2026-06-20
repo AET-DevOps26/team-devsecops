@@ -1,4 +1,6 @@
 import { useSyncExternalStore } from 'react'
+import { TOKEN_KEY } from './auth'
+import { API_BASE } from './useApi'
 
 export type ThemeMode = 'LIGHT' | 'DARK' | 'AUTO'
 
@@ -21,40 +23,57 @@ function readStored(): ThemeMode {
 	return 'AUTO'
 }
 
-let currentMode: ThemeMode = readStored()
+let currentTheme: ThemeMode = readStored()
 const listeners = new Set<() => void>()
+
+function persistTheme(newTheme: ThemeMode): void {
+	const token = localStorage.getItem(TOKEN_KEY)
+	if (!token) return
+	fetch(`${API_BASE}/users/profile`, {
+		method: 'PUT',
+		headers: { 'content-type': 'application/json', authorization: `Bearer ${token}` },
+		body: JSON.stringify({ preferences: { theme: newTheme } }),
+	}).catch(() => {
+	})
+}
 
 function updateTheme(): void {
 	if (typeof document === 'undefined') return
-	const dark = currentMode === 'DARK' || (currentMode === 'AUTO' && (darkQuery?.matches ?? false))
+	const dark = currentTheme === 'DARK' || (currentTheme === 'AUTO' && (darkQuery?.matches ?? false))
 	document.documentElement.classList.toggle('dark', dark)
 }
 
 // while in AUTO, follow the OS theme as it changes
 darkQuery?.addEventListener('change', () => {
-	if (currentMode === 'AUTO') updateTheme()
+	if (currentTheme === 'AUTO') updateTheme()
 })
 
 updateTheme()
 
 export function getThemeMode(): ThemeMode {
-	return currentMode
+	return currentTheme
 }
 
 export function systemPrefersDark(): boolean {
 	return darkQuery?.matches ?? false
 }
 
-export function setThemeMode(mode: ThemeMode): void {
-	if (mode === currentMode) return
-	currentMode = mode
+export function applyTheme(newTheme: ThemeMode): void {
+	if (newTheme === currentTheme) return
+	currentTheme = newTheme
 	try {
-		localStorage.setItem(STORAGE_KEY, mode)
+		localStorage.setItem(STORAGE_KEY, newTheme)
 	} catch {
 		// ignore persistence failures — the choice still applies for this session
 	}
 	updateTheme()
 	listeners.forEach((listener) => listener())
+}
+
+export function setThemeMode(newTheme: ThemeMode): void {
+	if (newTheme === currentTheme) return
+	applyTheme(newTheme)
+	persistTheme(newTheme)
 }
 
 export function useThemeMode(): ThemeMode {
