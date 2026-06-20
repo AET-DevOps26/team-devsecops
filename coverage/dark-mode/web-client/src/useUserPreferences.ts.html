@@ -3,7 +3,7 @@
 <html lang="en">
 
 <head>
-    <title>Code coverage report for src/useApi.ts</title>
+    <title>Code coverage report for src/useUserPreferences.ts</title>
     <meta charset="utf-8" />
     <link rel="stylesheet" href="../prettify.css" />
     <link rel="stylesheet" href="../base.css" />
@@ -19,34 +19,34 @@
 <body>
 <div class='wrapper'>
     <div class='pad1'>
-        <h1><a href="../index.html">All files</a> / <a href="index.html">src</a> useApi.ts</h1>
+        <h1><a href="../index.html">All files</a> / <a href="index.html">src</a> useUserPreferences.ts</h1>
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">69.23% </span>
+                <span class="strong">76.47% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>9/13</span>
+                <span class='fraction'>13/17</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">88.88% </span>
+                <span class="strong">60% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>8/9</span>
+                <span class='fraction'>6/10</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">66.66% </span>
+                <span class="strong">80% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>2/3</span>
+                <span class='fraction'>4/5</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">66.66% </span>
+                <span class="strong">92.3% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>8/12</span>
+                <span class='fraction'>12/13</span>
             </div>
         
             
@@ -91,61 +91,70 @@
 <a name='L26'></a><a href='#L26'>26</a>
 <a name='L27'></a><a href='#L27'>27</a>
 <a name='L28'></a><a href='#L28'>28</a>
-<a name='L29'></a><a href='#L29'>29</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L29'></a><a href='#L29'>29</a>
+<a name='L30'></a><a href='#L30'>30</a>
+<a name='L31'></a><a href='#L31'>31</a>
+<a name='L32'></a><a href='#L32'>32</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">19x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">186x</span>
-<span class="cline-any cline-yes">186x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">45x</span>
-<span class="cline-any cline-yes">45x</span>
-<span class="cline-any cline-yes">45x</span>
-<span class="cline-any cline-yes">43x</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">43x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import { useCallback } from 'react'
-import { useAuth } from './auth'
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import { useEffect } from 'react'
+import type { components } from './api'
+import { applyUserLanguage } from './i18n'
+import { applyTheme, THEME_MODES } from './theme'
+import { SessionExpiredError, useApi } from './useApi'
 &nbsp;
-export const API_BASE = (import.meta.env.VITE_API_BASE ?? '') + '/api/v1'
+type UserProfile = components['schemas']['UserProfile']
 &nbsp;
-export class SessionExpiredError extends Error {
-<span class="fstat-no" title="function not covered" >	constructor() {</span>
-<span class="cstat-no" title="statement not covered" >		super('Session expired')</span>
-<span class="cstat-no" title="statement not covered" >		this.name = 'SessionExpiredError'</span>
-	}
-}
+export function useUserPreferences() {
+	const apiFetch = useApi()
+	useEffect(() =&gt; {
+		let cancelled = false
+		apiFetch('/users/profile')
+			.then(async (res) =&gt; {
+				<span class="missing-if-branch" title="if path not taken" >I</span>if (!res.ok) <span class="cstat-no" title="statement not covered" >return</span>
+				const userProfile = (await res.json()) as UserProfile
+				<span class="missing-if-branch" title="if path not taken" >I</span>if (cancelled) <span class="cstat-no" title="statement not covered" >return</span>
+				applyUserLanguage(userProfile.preferences?.language)
+				const theme = userProfile.preferences?.theme
+				if (theme &amp;&amp; THEME_MODES.includes(theme)) applyTheme(theme)
+			})
+			.catch(<span class="fstat-no" title="function not covered" >(e</span>) =&gt; {
+<span class="cstat-no" title="statement not covered" >				if (e instanceof SessionExpiredError) <span class="cstat-no" title="statement not covered" >return</span></span>
+				// a failed lookup shouldn't break the app (except for ProfilePage where this is explicitly handled)
+			})
 &nbsp;
-export function useApi() {
-	const { token, signOut } = useAuth()
-	return useCallback(
-		async (path: string, init: RequestInit = {}): Promise&lt;Response&gt; =&gt; {
-			const headers = new Headers(init.headers)
-			if (token) headers.set('authorization', `Bearer ${token}`)
-			const res = await fetch(`${API_BASE}${path}`, { ...init, headers })
-			<span class="missing-if-branch" title="if path not taken" >I</span>if (res.status === 401 || res.status === 403) {
-<span class="cstat-no" title="statement not covered" >				signOut()</span>
-<span class="cstat-no" title="statement not covered" >				throw new SessionExpiredError()</span>
-			}
-			return res
-		},
-		[token, signOut],
-	)
+		return () =&gt; {
+			cancelled = true
+		}
+	}, [apiFetch])
 }
 &nbsp;</pre></td></tr></table></pre>
 
