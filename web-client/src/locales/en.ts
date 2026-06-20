@@ -21,6 +21,7 @@ export const EN = {
 			logout: 'Log out',
 			preferences: 'Preferences',
 			language: 'Language',
+			detectLanguage: 'Auto',
 			english: 'English',
 			german: 'Deutsch',
 			hungarian: 'Magyar',

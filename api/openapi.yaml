@@ -24,6 +24,7 @@ paths:
     post:
       tags: [Users]
       summary: Register a new user
+      security: []
       requestBody:
         required: true
         content:
@@ -50,6 +51,7 @@ paths:
     post:
       tags: [Users]
       summary: Login and receive a JWT token
+      security: []
       requestBody:
         required: true
         content:
@@ -456,6 +458,11 @@ components:
   # -------------------------
 
   schemas:
+    Language:
+      type: string
+      enum: [EN, DE, HU]
+      description: Supported UI and AI-content language as an ISO 639-1 code
+
     ErrorResponse:
       type: object
       required: [message]
@@ -522,8 +529,7 @@ components:
       additionalProperties: false
       properties:
         language:
-          type: string
-          enum: [EN, DE, HU]
+          $ref: '#/components/schemas/Language'
           description: Preferred UI and AI-content language as an ISO 639-1 code
         diet:
           type: array
@@ -675,17 +681,9 @@ components:
           type: string
           minLength: 1
           maxLength: 4096
-
-    RecipeRequestForwarded:
-      type: object
-      required: [profile, prompt]
-      additionalProperties: false
-      properties:
-        profile:
-          $ref: "#/components/schemas/UserProfile"
-        prompt:
-          type: string
-          minLength: 1
+        language:
+          $ref: '#/components/schemas/Language'
+          description: Active UI language; generated recipe content is written in it
 
     HelpRequest:
       type: object
@@ -698,19 +696,6 @@ components:
           type: string
           minLength: 1
           maxLength: 4096
-
-    HelpRequestForwarded:
-      type: object
-      required: [profile, recipe, prompt]
-      additionalProperties: false
-      properties:
-        profile:
-          $ref: "#/components/schemas/UserProfile"
-        recipe:
-          $ref: "#/components/schemas/RecipeInput"
-        prompt:
-          type: string
-          minLength: 1
 
     HelpResponse:
       type: object

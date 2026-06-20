@@ -47,7 +47,8 @@ def test_generate_help_success(mock_llm):
             "preferences": {
                 "diet": ["vegan"],
                 "allergies": [],
-                "aboutMe": []
+                "about_me": [],
+                "language": "EN"
             }
         },
         "recipe": {
@@ -86,7 +87,12 @@ def test_generate_help_invalid_payload(mock_llm):
     response = client.post("/ai/help", json=payload, headers=headers)
     
     assert response.status_code == 400
-    assert "Invalid request format" in response.json()["detail"]
+
+    response_json = response.json()
+    if "detail" in response_json:
+        assert "Invalid request format" in str(response_json["detail"])
+    else:
+        assert "Invalid request format" in response_json["message"]
 
 
 def test_generate_help_unauthorized():
@@ -101,5 +107,14 @@ def test_generate_help_invalid_signature():
         "X-Internal-Timestamp": str(int(time.time())),
         "X-Internal-Signature": "wrong-signature"
     }
+
     response = client.post("/ai/help", json=payload, headers=headers)
     assert response.status_code == 403
+    
+    response_json = response.json()
+    if "detail" in response_json:
+        assert "message" in response_json["detail"]
+        assert "Forbidden" in response_json["detail"]["message"]
+    else:
+        assert "message" in response_json
+        assert "Forbidden" in response_json["message"]

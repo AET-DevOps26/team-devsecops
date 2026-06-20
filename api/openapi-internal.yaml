@@ -1,0 +1,305 @@
+openapi: 3.1.1
+info:
+  title: Cooking Assistant GenAI Services API (Internal)
+  version: 1.0.0
+  description: Private backend contract between the Spring API gateway and the Python GenAI microservices.
+
+servers:
+  - url: http://localhost:8080
+
+tags:
+  - name: Help Service
+    description: Endpoints managed by the py-help-service container
+  - name: Recipe Service
+    description: Endpoints managed by the py-recipe-service container
+
+paths:
+  # ---------------------------------------------
+  # INFRASTRUCTURE ENDPOINTS (SHARED)
+  # ---------------------------------------------
+  /health:
+    get:
+      tags:
+        - Help Service
+        - Recipe Service
+      summary: Service Health Check
+      description: Verifies that the targeted internal microservice instance is responding normally.
+      responses:
+        "200":
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status]
+                additionalProperties: false
+                properties:
+                  status:
+                    type: string
+                    example: "healthy"
+
+  # ---------------------------------------------
+  # HELP SERVICE ENDPOINTS
+  # ---------------------------------------------
+  /ai/help:
+    post:
+      tags: [Help Service]
+      summary: Process contextual help request via LLM
+      description: Receives a cooking query bundled with rich user profile constraints and active recipe schemas to build safe prompts.
+      parameters:
+        - $ref: "#/components/parameters/X-Internal-Timestamp"
+        - $ref: "#/components/parameters/X-Internal-Signature"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/HelpRequestForwarded"
+      responses:
+        "200":
+          description: AI help generation completed successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HelpResponse"
+        "400":
+          description: Invalid request payload syntax or corrupted internal header data (e.g. non-numeric timestamp)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Unauthorized due to missing headers or an expired timestamp window
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Forbidden due to an invalid cryptographic HMAC validation mismatch
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "504":
+          description: Upstream LangChain LLM orchestration layer timed out
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  # ---------------------------------------------
+  # RECIPE SERVICE ENDPOINTS
+  # ---------------------------------------------
+  /ai/recipes:
+    post:
+      tags: [Recipe Service]
+      summary: Generate cooking recipes via LLM
+      description: Forwards user prompt queries along with their profiles to create new recipe suggestions.
+      parameters:
+        - $ref: "#/components/parameters/X-Internal-Timestamp"
+        - $ref: "#/components/parameters/X-Internal-Signature"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RecipeRequestForwarded"
+      responses:
+        "200":
+          description: AI recipe generation completed successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/RecipeInput"
+        "400":
+          description: Invalid prompt processing structure
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Missing security headers
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: HMAC signature mismatch
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "504":
+          description: Upstream LangChain LLM orchestration layer timed out
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+components:
+  # ---------------------------------------------
+  # SECURITY HEADERS (HMAC Architecture)
+  # ---------------------------------------------
+  parameters:
+    X-Internal-Timestamp:
+      name: X-Internal-Timestamp
+      in: header
+      required: true
+      description: Linux Unix epoch timestamp string binding the generation window to block replay attacks.
+      schema:
+        type: string
+    X-Internal-Signature:
+      name: X-Internal-Signature
+      in: header
+      required: true
+      description: Hex-encoded HMAC-SHA256 signature validating data package integrity over private networks.
+      schema:
+        type: string
+
+  # ---------------------------------------------
+  # DATA SCHEMAS
+  # ---------------------------------------------
+
+  schemas:
+    ErrorResponse:
+      type: object
+      required: [message]
+      additionalProperties: false
+      properties:
+        message:
+          type: string
+          minLength: 1
+
+    UserProfile:
+      type: object
+      required: [username, preferences]
+      additionalProperties: false
+      properties:
+        username:
+          type: string
+          minLength: 1
+        preferences:
+          $ref: "#/components/schemas/UserPreferences"
+
+    UserPreferences:
+      type: object
+      additionalProperties: false
+      properties:
+        language:
+          type: string
+          enum: [EN, DE, HU]
+          description: Preferred UI and AI-content language as an ISO 639-1 code
+        diet:
+          type: array
+          items:
+            type: string
+          description: Dietary restriction or style (e.g. vegan, keto)
+        allergies:
+          type: array
+          items:
+            type: string
+          description: List of ingredients the user is allergic to
+        aboutMe:
+          type: array
+          items:
+            type: string
+          description: Free-form user context provided to the AI
+
+    RecipeIngredient:
+      type: object
+      required: [quantity, unit, name]
+      additionalProperties: false
+      properties:
+        quantity:
+          type: number
+          minimum: 0
+        unit:
+          type: string
+          minLength: 1
+          description: Unit of measurement (e.g. g, ml, cup, tbsp)
+        name:
+          type: string
+          minLength: 1
+
+    RecipeNutrients:
+      type: object
+      required: [calories, protein, fat, carbs]
+      additionalProperties: false
+      properties:
+        calories:
+          type: integer
+          minimum: 0
+          description: Number of Calories (kcal)
+        protein:
+          type: integer
+          minimum: 0
+          description: Protein in grams
+        fat:
+          type: integer
+          minimum: 0
+          description: Fat in grams
+        carbs:
+          type: integer
+          minimum: 0
+          description: Carbohydrates in grams
+
+    RecipeInput:
+      type: object
+      required: [title, ingredients, instructions, portions]
+      additionalProperties: false
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 255
+        ingredients:
+          type: array
+          items:
+            $ref: "#/components/schemas/RecipeIngredient"
+          minItems: 1
+        instructions:
+          type: array
+          items:
+            type: string
+            minLength: 1
+          minItems: 1
+        portions:
+          type: number
+          minimum: 0.5
+        nutrients:
+          $ref: "#/components/schemas/RecipeNutrients"
+
+    HelpResponse:
+      type: object
+      required: [response]
+      additionalProperties: false
+      properties:
+        response:
+          type: string
+          minLength: 1
+
+    HelpRequestForwarded:
+      type: object
+      required: [profile, prompt]
+      additionalProperties: false
+      properties:
+        profile:
+          $ref: "#/components/schemas/UserProfile"
+        recipe:
+          $ref: "#/components/schemas/RecipeInput"
+        prompt:
+          type: string
+          minLength: 1
+
+    RecipeRequestForwarded:
+      type: object
+      required: [profile, prompt]
+      additionalProperties: false
+      properties:
+        profile:
+          $ref: "#/components/schemas/UserProfile"
+        prompt:
+          type: string
+          minLength: 1

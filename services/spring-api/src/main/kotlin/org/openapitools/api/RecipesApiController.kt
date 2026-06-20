@@ -44,7 +44,7 @@ class RecipesApiController(
 					title = recipeInput.title,
 					ingredients = objectMapper.writeValueAsString(recipeInput.ingredients),
 					instructions = objectMapper.writeValueAsString(recipeInput.instructions),
-					portions = recipeInput.portions,
+					portions = java.math.BigDecimal.valueOf(recipeInput.portions),
 					nutrientKcal = recipeInput.nutrients?.calories ?: 0,
 					nutrientCarb = recipeInput.nutrients?.carbs ?: 0,
 					nutrientProt = recipeInput.nutrients?.protein ?: 0,
@@ -75,7 +75,7 @@ class RecipesApiController(
 		recipeUpdate.title?.let { entity.title = it }
 		recipeUpdate.ingredients?.let { entity.ingredients = objectMapper.writeValueAsString(it) }
 		recipeUpdate.instructions?.let { entity.instructions = objectMapper.writeValueAsString(it) }
-		recipeUpdate.portions?.let { entity.portions = it }
+		recipeUpdate.portions?.let { entity.portions = java.math.BigDecimal.valueOf(it) }
 		recipeUpdate.nutrients?.let {
 			entity.nutrientKcal = it.calories
 			entity.nutrientCarb = it.carbs
@@ -104,7 +104,7 @@ class RecipesApiController(
 			title = title,
 			ingredients = objectMapper.readValue(ingredients, object : TypeReference<List<RecipeIngredient>>() {}),
 			instructions = objectMapper.readValue(instructions, object : TypeReference<List<String>>() {}),
-			portions = portions,
+			portions = portions.toDouble(),
 			nutrients =
 				RecipeNutrients(
 					calories = nutrientKcal,

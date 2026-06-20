@@ -3,6 +3,7 @@ import {act, cleanup, screen, waitFor, within} from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import {afterEach, beforeEach, vi} from 'vitest'
 import {ProfilePage} from '../../src/pages/ProfilePage'
+import i18n from '../../src/i18n'
 import {jsonResponse, renderWithProviders} from '../utils'
 
 const fetchMock = vi.fn<typeof fetch>()
@@ -82,6 +83,50 @@ describe('ProfilePage', () => {
 		expect(deleteCalls).toHaveLength(1)
 		expect(String(deleteCalls[0][0])).toContain('/users/profile')
 		expect(await screen.findByText('login page')).toBeInTheDocument()
+	})
+
+	describe('language slider', () => {
+		// picking a language flips the app-wide i18n language, so restore it between tests
+		afterEach(async () => {
+			await i18n.changeLanguage('EN')
+		})
+
+		const putCalls = () => fetchMock.mock.calls.filter(([, init]) => init?.method === 'PUT')
+		const lastPutBody = () => JSON.parse(putCalls().at(-1)![1]!.body as string)
+
+		function profileFetch(preferences: Record<string, unknown>) {
+			fetchMock.mockImplementation((_input, init) => {
+				if ((init?.method ?? 'GET') === 'GET') {
+					return Promise.resolve(jsonResponse({username: 'alice', preferences}))
+				}
+				return Promise.resolve(jsonResponse({}))
+			})
+		}
+
+		it('defaults to Auto when the profile has no stored language', async () => {
+			profileFetch({})
+			render()
+			expect(await screen.findByRole('button', {name: 'Auto', pressed: true})).toBeInTheDocument()
+		})
+
+		it('clears the stored language and re-detects the browser language when Auto is picked', async () => {
+			// start with the app shown in German and German selected
+			await i18n.changeLanguage('DE')
+			profileFetch({language: 'DE'})
+			const user = userEvent.setup()
+			render()
+			await screen.findByRole('button', {name: 'Deutsch', pressed: true})
+			expect(screen.getByText('Sprache')).toBeInTheDocument()
+
+			await user.click(screen.getByRole('button', {name: 'Automatisch'}))
+
+			// jsdom reports en-US, so detection falls back to English
+			expect(await screen.findByText('Language')).toBeInTheDocument()
+			expect(screen.getByRole('button', {name: 'Auto', pressed: true})).toBeInTheDocument()
+			// no language is sent, clearing the stored preference
+			await waitFor(() => expect(putCalls().length).toBeGreaterThan(0), {timeout: 2000})
+			expect(lastPutBody().preferences.language).toBeUndefined()
+		})
 	})
 
 	describe('taste-preferences autosave', () => {
