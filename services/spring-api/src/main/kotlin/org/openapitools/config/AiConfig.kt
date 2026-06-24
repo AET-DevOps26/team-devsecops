@@ -29,6 +29,7 @@ class AiConfig {
 		OkHttpClient
 			.Builder()
 			.connectionPool(ConnectionPool(5, 2, TimeUnit.SECONDS))
+        	.readTimeout(60, TimeUnit.SECONDS) // Time allowed for Python to process and stream back data
 			.callTimeout(60, TimeUnit.SECONDS)
 			.addInterceptor(InternalHmacInterceptor(internalAuthSecret))
 			.build()

@@ -1,5 +1,7 @@
 fastapi==0.111.0
 uvicorn==0.30.1
+langchain
+langchain-openai
 langchain-google-genai==2.1.12
 langchain-core==1.4.0
 pydantic==2.7.4

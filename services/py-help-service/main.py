@@ -7,7 +7,7 @@ from typing import Any
 from fastapi import Depends, FastAPI, HTTPException, Header, Request
 from dotenv import load_dotenv
 from fastapi.responses import JSONResponse
-from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain.chat_models import init_chat_model
 from langchain_core.messages import HumanMessage, SystemMessage
 
 from client.cooking_assistant_gen_ai_services_api_internal_client.models.help_request_forwarded import HelpRequestForwarded
@@ -74,13 +74,41 @@ async def verify_internal_hmac(
 	if not hmac.compare_digest(expected_signature, x_internal_signature):
 		raise HTTPException(status_code=403, detail={"message": "Forbidden: HMAC signature validation mismatch."})
 
-
 def get_llm():
-	return ChatGoogleGenerativeAI(
-		model="gemini-3.1-flash-lite",
-		google_api_key=os.getenv("SERVICE_API_KEY"),
-		timeout=30,
-	)
+    """
+    Dynamically builds the correct LLM structure using environment variables.
+    """
+    # Fix 1: Normalize provider string variants safely
+    provider = os.getenv("PROVIDER", "google_genai")
+    
+    kwargs = {"timeout": 30}
+
+    if provider == "openai":
+        logos_key = os.getenv("LOGOS_KEY")
+        if not logos_key:
+            raise RuntimeError("CRITICAL: LOGOS_KEY is missing!")
+            
+        kwargs["base_url"] = os.getenv("LOGOS_BASE_URL", "[https://logos.aet.cit.tum.de/v1](https://logos.aet.cit.tum.de/v1)")
+        kwargs["api_key"] = logos_key
+        model_name = os.getenv("LOGOS_MODEL", "openai/gpt-oss-120b")
+        
+    else:
+        gemini_key = os.getenv("GEMINI_RECIPE_SERVICE_KEY")
+        if not gemini_key:
+            raise RuntimeError("CRITICAL: GEMINI_RECIPE_SERVICE_KEY is missing!")
+            
+        kwargs["google_api_key"] = gemini_key
+        kwargs["response_format"] = {"type": "application/json"}
+        model_name = os.getenv("GEMINI_MODEL", "gemini-3.1-flash-lite")
+
+    try:
+        return init_chat_model(
+            model=model_name,
+            model_provider=provider,
+            **kwargs
+        )
+    except Exception as e:
+        raise RuntimeError(f"Failed to boot LLM provider '{provider}': {e}")
 
 
 @app.get("/health")
@@ -89,7 +117,7 @@ def health_check():
 
 
 @app.post("/ai/help", dependencies=[Depends(verify_internal_hmac)])
-async def generate_help(request_data: dict[str, Any], llm: ChatGoogleGenerativeAI = Depends(get_llm)):
+async def generate_help(request_data: dict[str, Any], llm = Depends(get_llm)):
 	try:
 		request = HelpRequestForwarded.from_dict(request_data)
 	except Exception as e:
