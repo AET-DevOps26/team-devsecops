@@ -107,7 +107,7 @@ def get_llm():
 			raise RuntimeError("CRITICAL: LOGOS_KEY is missing!")
 
 		kwargs["base_url"] = os.getenv(
-			"LOGOS_BASE_URL", "https://logos.aet.cit.tum.de/v1]"
+			"LOGOS_BASE_URL", "https://logos.aet.cit.tum.de/v1"
 		)
 		kwargs["api_key"] = logos_key
 		model_name = os.getenv("LOGOS_MODEL", "openai/gpt-oss-120b")
