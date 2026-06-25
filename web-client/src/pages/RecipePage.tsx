@@ -186,6 +186,17 @@ function RecipeView({
 	const scale = recipe.portions ? portions / recipe.portions : 1
 	const pages = pagination && pagination.count > 1 ? pagination : null
 
+	const scaledIngredients = recipe.ingredients.map((ing) => ({
+		...ing,
+		quantity: ing.quantity != null ? ing.quantity * scale : ing.quantity,
+	}))
+	const scaledNutrients = recipe.nutrients && {
+		calories: recipe.nutrients.calories != null ? Math.round(recipe.nutrients.calories * scale) : recipe.nutrients.calories,
+		protein: recipe.nutrients.protein != null ? Math.round(recipe.nutrients.protein * scale) : recipe.nutrients.protein,
+		fat: recipe.nutrients.fat != null ? Math.round(recipe.nutrients.fat * scale) : recipe.nutrients.fat,
+		carbs: recipe.nutrients.carbs != null ? Math.round(recipe.nutrients.carbs * scale) : recipe.nutrients.carbs,
+	}
+
 	async function handleGetHelp() {
 		const question = helpPrompt.trim()
 		if (question === '') return
@@ -196,17 +207,9 @@ function RecipeView({
 			const body: HelpRequest = {
 				recipe: {
 					title: recipe.title,
-					ingredients: recipe.ingredients.map((ing) => ({
-						...ing,
-						quantity: ing.quantity != null ? ing.quantity * scale : ing.quantity,
-					})),
+					ingredients: scaledIngredients,
 					instructions: recipe.instructions,
-					nutrients: recipe.nutrients && {
-						calories: recipe.nutrients.calories != null ? Math.round(recipe.nutrients.calories * scale) : recipe.nutrients.calories,
-						protein: recipe.nutrients.protein != null ? Math.round(recipe.nutrients.protein * scale) : recipe.nutrients.protein,
-						fat: recipe.nutrients.fat != null ? Math.round(recipe.nutrients.fat * scale) : recipe.nutrients.fat,
-						carbs: recipe.nutrients.carbs != null ? Math.round(recipe.nutrients.carbs * scale) : recipe.nutrients.carbs,
-					},
+					nutrients: scaledNutrients,
 					portions,
 				},
 				prompt: question,
@@ -309,7 +312,7 @@ function RecipeView({
 				<div>
 					<h3 className="font-medium">{t('recipe.ingredients')}</h3>
 					<ul className="flex flex-col gap-1">
-						{recipe.ingredients.map((ing, j) => {
+						{scaledIngredients.map((ing, j) => {
 							const checked = checkedIngredients.has(j)
 							return (
 								<li key={j}>
@@ -321,7 +324,7 @@ function RecipeView({
 										/>
 										<span className={checked ? 'line-through text-gray-400 dark:text-neutral-500' : ''}>
 											{[
-												ing.quantity != null ? formatQuantity(ing.quantity, scale) : null,
+												ing.quantity != null ? formatQuantity(ing.quantity) : null,
 												ing.unit,
 												ing.name,
 											]
@@ -358,12 +361,12 @@ function RecipeView({
 				</div>
 
 				{/* Nutrients */}
-				{recipe.nutrients && (
+				{scaledNutrients && (
 					<div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-gray-600 dark:text-neutral-300">
-						{recipe.nutrients.calories != null && <span>{t('common.kcal', { value: Math.round(recipe.nutrients.calories * scale) })}</span>}
-						{recipe.nutrients.protein != null && <span>{t('common.protein', { value: Math.round(recipe.nutrients.protein * scale) })}</span>}
-						{recipe.nutrients.fat != null && <span>{t('common.fat', { value: Math.round(recipe.nutrients.fat * scale) })}</span>}
-						{recipe.nutrients.carbs != null && <span>{t('common.carbs', { value: Math.round(recipe.nutrients.carbs * scale) })}</span>}
+						{scaledNutrients.calories != null && <span>{t('common.kcal', { value: scaledNutrients.calories })}</span>}
+						{scaledNutrients.protein != null && <span>{t('common.protein', { value: scaledNutrients.protein })}</span>}
+						{scaledNutrients.fat != null && <span>{t('common.fat', { value: scaledNutrients.fat })}</span>}
+						{scaledNutrients.carbs != null && <span>{t('common.carbs', { value: scaledNutrients.carbs })}</span>}
 					</div>
 				)}
 			</article>
