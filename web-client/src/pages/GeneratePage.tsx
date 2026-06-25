@@ -2,7 +2,7 @@ import {useEffect, useState} from 'react'
 import type {Dispatch, SetStateAction} from 'react'
 import {Outlet, useLocation, useNavigate, useOutletContext} from 'react-router-dom'
 import {useTranslation} from 'react-i18next'
-import {ChevronRightIcon, PencilSquareIcon} from '@heroicons/react/24/outline'
+import {ChevronRightIcon, PencilSquareIcon, XMarkIcon} from '@heroicons/react/24/outline'
 import type {components} from '../api'
 import {Button} from '../components/Button'
 import {RecipeCard} from '../components/RecipeCard'
@@ -166,15 +166,31 @@ export function GeneratePage() {
 
 			<TagSelector selectedTags={selectedTags} onChange={setSelectedTags}/>
 
-			<Button
-				ref={generateBtnRef}
-				type="button"
-				className="self-center"
-				onClick={generate}
-				disabled={loading || (prompt.trim() === '' && selectedTags.length === 0)}
-			>
-				{loading ? t('generate.generating') : t('generate.generate')}
-			</Button>
+			<div className="flex flex-col items-center gap-3">
+				{/* Clear selection button */}
+				<button
+					type="button"
+					className="flex items-center gap-1 text-sm text-gray-500 dark:text-neutral-400 cursor-pointer transition-transform duration-100 hover:scale-98 disabled:cursor-default disabled:opacity-40 disabled:hover:scale-100"
+					onClick={() => {
+						setPrompt('')
+						setSelectedTags([])
+					}}
+					disabled={prompt.trim() === '' && selectedTags.length === 0}
+				>
+					<XMarkIcon className="h-4 w-4"/>
+					{t('generate.clear')}
+				</button>
+
+				{/* Generate button */}
+				<Button
+					ref={generateBtnRef}
+					type="button"
+					onClick={generate}
+					disabled={loading || (prompt.trim() === '' && selectedTags.length === 0)}
+				>
+					{loading ? t('generate.generating') : t('generate.generate')}
+				</Button>
+			</div>
 		</>
 	)
 }

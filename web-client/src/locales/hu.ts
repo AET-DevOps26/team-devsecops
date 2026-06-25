@@ -106,6 +106,7 @@ export const HU = {
 			noRecipes: 'Nem érkezett recept.',
 			generating: 'Készül…',
 			generate: 'Készítés',
+			clear: 'Kijelölés törlése',
 		},
 		library: {
 			emptyTitle: 'Nincs még elmentett recepted',

@@ -79,6 +79,25 @@ describe('GeneratePage', () => {
 		})
 	})
 
+	it('clears the prompt and selected tags via the clear button', async () => {
+		const user = userEvent.setup()
+		render()
+
+		const clear = screen.getByRole('button', { name: 'Clear selection' })
+		expect(clear).toBeDisabled()
+
+		const prompt = screen.getByPlaceholderText(/Type what you think/i)
+		await user.type(prompt, 'pasta')
+		await user.click(screen.getByRole('button', { name: 'Dinner' }))
+		expect(clear).toBeEnabled()
+
+		await user.click(clear)
+
+		expect(prompt).toHaveValue('')
+		expect(screen.queryByRole('button', { name: 'Curry' })).not.toBeInTheDocument()
+		expect(clear).toBeDisabled()
+	})
+
 	it('shows a server error on the results page', async () => {
 		fetchMock.mockResolvedValueOnce(jsonResponse({ message: 'GenAI down' }, { status: 503 }))
 		const user = userEvent.setup()
