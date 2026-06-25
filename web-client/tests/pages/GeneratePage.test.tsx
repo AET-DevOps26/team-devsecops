@@ -4,6 +4,7 @@ import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, vi } from 'vitest'
 import type { components } from '../../src/api'
 import { GenerateFlow, GeneratePage, GenerateResultsPage } from '../../src/pages/GeneratePage'
+import { RecipeGenerationProvider } from '../../src/recipeGeneration'
 import { jsonResponse, renderWithProviders } from '../utils'
 
 type Recipe = components['schemas']['Recipe']
@@ -32,12 +33,14 @@ afterEach(() => {
 
 function render(route = '/generate') {
 	renderWithProviders(
-		<Routes>
-			<Route path="/generate" element={<GenerateFlow />}>
-				<Route index element={<GeneratePage />} />
-				<Route path="results" element={<GenerateResultsPage />} />
-			</Route>
-		</Routes>,
+		<RecipeGenerationProvider>
+			<Routes>
+				<Route path="/generate" element={<GenerateFlow />}>
+					<Route index element={<GeneratePage />} />
+					<Route path="results" element={<GenerateResultsPage />} />
+				</Route>
+			</Routes>
+		</RecipeGenerationProvider>,
 		{ route, token: { value: 'tkn', username: 'alice' } },
 	)
 }
