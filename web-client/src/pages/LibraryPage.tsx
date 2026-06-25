@@ -43,8 +43,8 @@ export function LibraryPage() {
 		}
 	}, [apiFetch, t])
 
-	if (phase === 'loading') return <p className="text-gray-500">{t('common.loading')}</p>
-	if (phase === 'error') return <p className="text-red-600">{error}</p>
+	if (phase === 'loading') return <p className="text-gray-500 dark:text-neutral-400">{t('common.loading')}</p>
+	if (phase === 'error') return <p className="text-red-600 dark:text-red-400">{error}</p>
 
 	if (recipes.length === 0) {
 		return (
@@ -52,18 +52,18 @@ export function LibraryPage() {
 				<BookOpenIcon className="h-12 w-12 text-orange-200"/>
 				<div className="flex flex-col gap-1">
 					<h2 className="text-lg font-bold">{t('library.emptyTitle')}</h2>
-					<p className="max-w-xs text-gray-500">
+					<p className="max-w-xs text-gray-500 dark:text-neutral-400">
 						<Trans
 							i18nKey="library.emptyBody"
 							components={{
-								bookmark: <BookmarkIcon className="inline h-4 w-4 -translate-y-0.5 text-orange-400"/>,
+								bookmark: <BookmarkIcon className="inline h-4 w-4 -translate-y-0.5 text-orange-400 dark:text-orange-300"/>,
 							}}
 						/>
 					</p>
 				</div>
 				<Link
 					to="/generate"
-					className="flex items-center gap-2 rounded bg-orange-500 px-4 py-2 text-white transition-transform duration-100 hover:scale-98"
+					className="flex items-center gap-2 rounded bg-orange-500 dark:bg-orange-700 px-4 py-2 text-white transition-transform duration-100 hover:scale-98"
 				>
 					<BoltIcon className="h-5 w-5"/>
 					{t('library.generateRecipe')}

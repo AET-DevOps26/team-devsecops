@@ -37,7 +37,7 @@ export function PasswordInput({
 				type="button"
 				onMouseDown={(e) => e.preventDefault()}
 				onClick={toggleVisibility}
-				className="absolute inset-y-0 right-0 flex items-center px-2 text-gray-400 cursor-pointer transition-transform duration-100 hover:scale-98"
+				className="absolute inset-y-0 right-0 flex items-center px-2 text-gray-400 dark:text-neutral-500 cursor-pointer transition-transform duration-100 hover:scale-98"
 				aria-label={visible ? 'Hide password' : 'Show password'}
 			>
 				{visible ? (

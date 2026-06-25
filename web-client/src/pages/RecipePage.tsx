@@ -113,14 +113,14 @@ function LibraryRecipePage() {
 		}
 	}, [apiFetch, recipeId, t])
 
-	if (phase === 'loading') return <p className="text-gray-500">{t('common.loading')}</p>
-	if (phase === 'error') return <p className="text-red-600">{error}</p>
+	if (phase === 'loading') return <p className="text-gray-500 dark:text-neutral-400">{t('common.loading')}</p>
+	if (phase === 'error') return <p className="text-red-600 dark:text-red-400">{error}</p>
 	if (phase === 'notfound' || !recipe) {
 		return (
 			<div className="flex min-h-[60vh] flex-col items-center justify-center gap-4 text-center">
 				<h2 className="text-lg font-bold">{t('recipe.notFoundTitle')}</h2>
-				<p className="max-w-xs text-gray-500">{t('recipe.notFoundBody')}</p>
-				<Link to="/library" className="text-orange-600 hover:underline">
+				<p className="max-w-xs text-gray-500 dark:text-neutral-400">{t('recipe.notFoundBody')}</p>
+				<Link to="/library" className="text-orange-600 dark:text-orange-400 hover:underline">
 					{t('recipe.backToLibrary')}
 				</Link>
 			</div>
@@ -186,6 +186,17 @@ function RecipeView({
 	const scale = recipe.portions ? portions / recipe.portions : 1
 	const pages = pagination && pagination.count > 1 ? pagination : null
 
+	const scaledIngredients = recipe.ingredients.map((ing) => ({
+		...ing,
+		quantity: ing.quantity != null ? ing.quantity * scale : ing.quantity,
+	}))
+	const scaledNutrients = recipe.nutrients && {
+		calories: recipe.nutrients.calories != null ? Math.round(recipe.nutrients.calories * scale) : recipe.nutrients.calories,
+		protein: recipe.nutrients.protein != null ? Math.round(recipe.nutrients.protein * scale) : recipe.nutrients.protein,
+		fat: recipe.nutrients.fat != null ? Math.round(recipe.nutrients.fat * scale) : recipe.nutrients.fat,
+		carbs: recipe.nutrients.carbs != null ? Math.round(recipe.nutrients.carbs * scale) : recipe.nutrients.carbs,
+	}
+
 	async function handleGetHelp() {
 		const question = helpPrompt.trim()
 		if (question === '') return
@@ -196,9 +207,9 @@ function RecipeView({
 			const body: HelpRequest = {
 				recipe: {
 					title: recipe.title,
-					ingredients: recipe.ingredients,
+					ingredients: scaledIngredients,
 					instructions: recipe.instructions,
-					nutrients: recipe.nutrients,
+					nutrients: scaledNutrients,
 					portions,
 				},
 				prompt: question,
@@ -225,36 +236,36 @@ function RecipeView({
 			{/* Back to the section list */}
 			<button
 				type="button"
-				className="flex items-center gap-1 self-start text-gray-500 cursor-pointer transition-transform duration-100 hover:scale-98"
+				className="flex items-center gap-1 self-start text-gray-500 dark:text-neutral-400 cursor-pointer transition-transform duration-100 hover:scale-98"
 				onClick={() => navigate(parentPath)}
 			>
 				<ChevronLeftIcon className="h-5 w-5" />
 				{t('common.back')}
 			</button>
 
-			<article className="relative w-full rounded-lg border border-gray-200 bg-white p-6 shadow-sm flex flex-col gap-4">
+			<article className="relative w-full rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 p-6 shadow-sm flex flex-col gap-4">
 
 				{/* previous / next recipe (desktop) */}
 				{pages && (
 					<>
 						<button
 							type="button"
-							className="hidden lg:flex absolute top-1/2 -left-16 -translate-y-1/2 flex-col items-center gap-1 cursor-pointer text-gray-500 transition-transform duration-100 hover:scale-95 disabled:opacity-40 disabled:hover:scale-100"
+							className="hidden lg:flex absolute top-1/2 -left-16 -translate-y-1/2 flex-col items-center gap-1 cursor-pointer text-gray-500 dark:text-neutral-400 transition-transform duration-100 hover:scale-95 disabled:opacity-40 disabled:hover:scale-100"
 							onClick={() => pages.onNavigate(pages.index - 1)}
 							disabled={pages.index <= 0}
 						>
-							<span className="flex h-9 w-9 items-center justify-center rounded-full border border-gray-300 bg-white text-gray-600 shadow-sm">
+							<span className="flex h-9 w-9 items-center justify-center rounded-full border border-gray-300 dark:border-neutral-600 bg-white dark:bg-neutral-800 text-gray-600 dark:text-neutral-300 shadow-sm">
 								<ChevronLeftIcon className="h-5 w-5" />
 							</span>
 							<span className="text-xs">{t('recipe.previous')}</span>
 						</button>
 						<button
 							type="button"
-							className="hidden lg:flex absolute top-1/2 -right-16 -translate-y-1/2 flex-col items-center gap-1 cursor-pointer text-gray-500 transition-transform duration-100 hover:scale-95 disabled:opacity-40 disabled:hover:scale-100"
+							className="hidden lg:flex absolute top-1/2 -right-16 -translate-y-1/2 flex-col items-center gap-1 cursor-pointer text-gray-500 dark:text-neutral-400 transition-transform duration-100 hover:scale-95 disabled:opacity-40 disabled:hover:scale-100"
 							onClick={() => pages.onNavigate(pages.index + 1)}
 							disabled={pages.index >= pages.count - 1}
 						>
-							<span className="flex h-9 w-9 items-center justify-center rounded-full border border-gray-300 bg-white text-gray-600 shadow-sm">
+							<span className="flex h-9 w-9 items-center justify-center rounded-full border border-gray-300 dark:border-neutral-600 bg-white dark:bg-neutral-800 text-gray-600 dark:text-neutral-300 shadow-sm">
 								<ChevronRightIcon className="h-5 w-5" />
 							</span>
 							<span className="text-xs">{t('recipe.next')}</span>
@@ -276,19 +287,19 @@ function RecipeView({
 					<div className="flex items-center gap-2">
 						<button
 							type="button"
-							className="flex h-7 w-7 items-center justify-center rounded-full border border-gray-300 cursor-pointer text-gray-600 transition-transform duration-100 hover:scale-95 disabled:opacity-40"
+							className="flex h-7 w-7 items-center justify-center rounded-full border border-gray-300 dark:border-neutral-600 cursor-pointer text-gray-600 dark:text-neutral-300 transition-transform duration-100 hover:scale-95 disabled:opacity-40"
 							onClick={() => setPortions((p) => Math.max(0.5, p - (p <= 5 ? 0.5 : 1)))}
 							disabled={portions <= 0.5}
 							aria-label={t('recipe.decreasePortions')}
 						>
 							<MinusIcon className="h-4 w-4 stroke-2" />
 						</button>
-						<span className="w-20 text-center text-sm text-gray-600">
+						<span className="w-20 text-center text-sm text-gray-600 dark:text-neutral-300">
 							{formatQuantity(portions)} {portions <= 1 ? t('common.portion') : t('common.portions')}
 						</span>
 						<button
 							type="button"
-							className="flex h-7 w-7 items-center justify-center rounded-full border border-gray-300 cursor-pointer text-gray-600 transition-transform duration-100 hover:scale-95"
+							className="flex h-7 w-7 items-center justify-center rounded-full border border-gray-300 dark:border-neutral-600 cursor-pointer text-gray-600 dark:text-neutral-300 transition-transform duration-100 hover:scale-95"
 							onClick={() => setPortions((p) => p + (p < 5 ? 0.5 : 1))}
 							aria-label={t('recipe.increasePortions')}
 						>
@@ -301,7 +312,7 @@ function RecipeView({
 				<div>
 					<h3 className="font-medium">{t('recipe.ingredients')}</h3>
 					<ul className="flex flex-col gap-1">
-						{recipe.ingredients.map((ing, j) => {
+						{scaledIngredients.map((ing, j) => {
 							const checked = checkedIngredients.has(j)
 							return (
 								<li key={j}>
@@ -311,9 +322,9 @@ function RecipeView({
 											checked={checked}
 											onChange={() => setCheckedIngredients((s) => toggleSetItem(s, j))}
 										/>
-										<span className={checked ? 'line-through text-gray-400' : ''}>
+										<span className={checked ? 'line-through text-gray-400 dark:text-neutral-500' : ''}>
 											{[
-												ing.quantity != null ? formatQuantity(ing.quantity, scale) : null,
+												ing.quantity != null ? formatQuantity(ing.quantity) : null,
 												ing.unit,
 												ing.name,
 											]
@@ -340,8 +351,8 @@ function RecipeView({
 										onClick={() => setCheckedSteps((s) => toggleSetItem(s, j))}
 										className="flex items-baseline gap-2 text-left cursor-pointer"
 									>
-										<span className="text-sm font-medium text-gray-400">{j + 1}.</span>
-										<span className={checked ? 'line-through text-gray-400' : ''}>{step}</span>
+										<span className="text-sm font-medium text-gray-400 dark:text-neutral-500">{j + 1}.</span>
+										<span className={checked ? 'line-through text-gray-400 dark:text-neutral-500' : ''}>{step}</span>
 									</button>
 								</li>
 							)
@@ -350,12 +361,12 @@ function RecipeView({
 				</div>
 
 				{/* Nutrients */}
-				{recipe.nutrients && (
-					<div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-gray-600">
-						{recipe.nutrients.calories != null && <span>{t('common.kcal', { value: Math.round(recipe.nutrients.calories * scale) })}</span>}
-						{recipe.nutrients.protein != null && <span>{t('common.protein', { value: Math.round(recipe.nutrients.protein * scale) })}</span>}
-						{recipe.nutrients.fat != null && <span>{t('common.fat', { value: Math.round(recipe.nutrients.fat * scale) })}</span>}
-						{recipe.nutrients.carbs != null && <span>{t('common.carbs', { value: Math.round(recipe.nutrients.carbs * scale) })}</span>}
+				{scaledNutrients && (
+					<div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-gray-600 dark:text-neutral-300">
+						{scaledNutrients.calories != null && <span>{t('common.kcal', { value: scaledNutrients.calories })}</span>}
+						{scaledNutrients.protein != null && <span>{t('common.protein', { value: scaledNutrients.protein })}</span>}
+						{scaledNutrients.fat != null && <span>{t('common.fat', { value: scaledNutrients.fat })}</span>}
+						{scaledNutrients.carbs != null && <span>{t('common.carbs', { value: scaledNutrients.carbs })}</span>}
 					</div>
 				)}
 			</article>
@@ -367,7 +378,7 @@ function RecipeView({
 					<textarea
 						ref={helpInputRef}
 						rows={1}
-						className="w-full min-h-20 resize-none overflow-hidden border border-gray-300 rounded-lg p-3 pr-14"
+						className="w-full min-h-20 resize-none overflow-hidden border border-gray-300 dark:border-neutral-600 rounded-lg p-3 pr-14"
 						placeholder={t('recipe.helpPlaceholder')}
 						value={helpPrompt}
 						onChange={(e) => setHelpPrompt(e.target.value)}
@@ -384,7 +395,7 @@ function RecipeView({
 					<button
 						ref={sendBtnRef}
 						type="button"
-						className="absolute bottom-3 right-3 flex h-9 w-9 items-center justify-center rounded-full bg-orange-500 text-white cursor-pointer transition-transform duration-100 hover:scale-95 disabled:opacity-50 disabled:hover:scale-100"
+						className="absolute bottom-3 right-3 flex h-9 w-9 items-center justify-center rounded-full bg-orange-500 dark:bg-orange-700 text-white cursor-pointer transition-transform duration-100 hover:scale-95 disabled:opacity-50 disabled:hover:scale-100"
 						onClick={handleGetHelp}
 						disabled={helpLoading || helpPrompt.trim() === ''}
 						aria-label={t('recipe.getHelp')}
@@ -396,16 +407,16 @@ function RecipeView({
 						)}
 					</button>
 				</div>
-				{helpError && <p className="text-red-600">{helpError}</p>}
+				{helpError && <p className="text-red-600 dark:text-red-400">{helpError}</p>}
 			</div>
 
 			{/* Preview while loading */}
 			{helpLoading && (
-				<div className="w-full rounded-lg border border-gray-200 bg-white p-6 shadow-sm flex flex-col gap-2">
-					<p className="self-start rounded-lg bg-orange-50 px-3 py-2 font-medium text-orange-900 first-letter:uppercase">
+				<div className="w-full rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 p-6 shadow-sm flex flex-col gap-2">
+					<p className="self-start rounded-lg bg-orange-50 dark:bg-orange-500/15 px-3 py-2 font-medium text-orange-900 dark:text-orange-200 first-letter:uppercase">
 						{pendingQuestion}
 					</p>
-					<p className="animate-pulse text-gray-400">{t('recipe.thinking')}</p>
+					<p className="animate-pulse text-gray-400 dark:text-neutral-500">{t('recipe.thinking')}</p>
 				</div>
 			)}
 
@@ -413,12 +424,12 @@ function RecipeView({
 			{answers.map((entry, i) => (
 				<div
 					key={i}
-					className="w-full rounded-lg border border-gray-200 bg-white p-6 shadow-sm flex flex-col gap-2"
+					className="w-full rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 p-6 shadow-sm flex flex-col gap-2"
 				>
-					<p className="self-start rounded-lg bg-orange-50 px-3 py-2 font-medium text-orange-900 first-letter:uppercase">
+					<p className="self-start rounded-lg bg-orange-50 dark:bg-orange-500/15 px-3 py-2 font-medium text-orange-900 dark:text-orange-200 first-letter:uppercase">
 						{entry.question}
 					</p>
-					<div className="prose prose-sm max-w-none">
+					<div className="prose prose-sm dark:prose-invert max-w-none">
 						<Markdown>{entry.answer}</Markdown>
 					</div>
 				</div>
@@ -427,22 +438,22 @@ function RecipeView({
 			{/* previous / next recipe (mobile) */}
 			{pages && (
 				<div className="pointer-events-none fixed inset-x-0 bottom-20 z-20 flex justify-center px-4 md:left-56 lg:hidden">
-					<div className="pointer-events-auto flex items-center gap-3 rounded-full border border-gray-200 bg-white/90 py-2 pl-2 pr-2 shadow-lg backdrop-blur">
+					<div className="pointer-events-auto flex items-center gap-3 rounded-full border border-gray-200 dark:border-neutral-700 bg-white/90 dark:bg-neutral-800/90 py-2 pl-2 pr-2 shadow-lg backdrop-blur">
 						<button
 							type="button"
-							className="flex h-8 w-8 items-center justify-center cursor-pointer text-gray-600 transition-transform duration-100 hover:scale-95 disabled:opacity-40 disabled:hover:scale-100"
+							className="flex h-8 w-8 items-center justify-center cursor-pointer text-gray-600 dark:text-neutral-300 transition-transform duration-100 hover:scale-95 disabled:opacity-40 disabled:hover:scale-100"
 							onClick={() => pages.onNavigate(pages.index - 1)}
 							disabled={pages.index <= 0}
 							aria-label={t('recipe.previousRecipe')}
 						>
 							<ChevronLeftIcon className="h-5 w-5" />
 						</button>
-						<span className="text-sm text-gray-500 tabular-nums">
+						<span className="text-sm text-gray-500 dark:text-neutral-400 tabular-nums">
 							{t('recipe.pageOf', { current: pages.index + 1, total: pages.count })}
 						</span>
 						<button
 							type="button"
-							className="flex h-8 w-8 items-center justify-center cursor-pointer text-gray-600 transition-transform duration-100 hover:scale-95 disabled:opacity-40 disabled:hover:scale-100"
+							className="flex h-8 w-8 items-center justify-center cursor-pointer text-gray-600 dark:text-neutral-300 transition-transform duration-100 hover:scale-95 disabled:opacity-40 disabled:hover:scale-100"
 							onClick={() => pages.onNavigate(pages.index + 1)}
 							disabled={pages.index >= pages.count - 1}
 							aria-label={t('recipe.nextRecipe')}

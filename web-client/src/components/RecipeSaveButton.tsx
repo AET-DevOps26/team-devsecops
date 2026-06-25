@@ -151,7 +151,7 @@ export function RecipeSaveButton({
 			>
 				<span className={`relative h-6 w-6 ${saving ? 'animate-pulse' : ''}`}>
 					<Outline
-						className={`absolute inset-0 h-6 w-6 transition-colors duration-300 ease-out group-hover:text-white ${failed || showTrash ? 'text-red-500' : 'text-gray-400'}`}
+						className={`absolute inset-0 h-6 w-6 transition-colors duration-300 ease-out group-hover:text-white ${failed || showTrash ? 'text-red-500 dark:text-red-400' : 'text-gray-400 dark:text-neutral-500'}`}
 					/>
 					<Solid
 						className={`absolute inset-0 h-6 w-6 ${fillColor} [clip-path:inset(100%_0_0_0)] transition-[clip-path] duration-300 ease-out group-hover:[clip-path:inset(0_0_0_0)]`}
@@ -172,16 +172,16 @@ export function RecipeSaveButton({
         	>
         		<div
         			onClick={(e) => e.stopPropagation()}
-        			className="w-full max-w-sm rounded-lg bg-white p-6 shadow-xl"
+        			className="w-full max-w-sm rounded-lg bg-white dark:bg-neutral-800 p-6 shadow-xl"
         		>
-        			<h2 id="recipe-delete-title" className="text-lg font-medium text-gray-900">
+        			<h2 id="recipe-delete-title" className="text-lg font-medium text-gray-900 dark:text-neutral-100">
         				{t('save.confirmTitle')}
         			</h2>
         			<div className="mt-6 flex justify-end gap-2">
         				<button
         					type="button"
         					onClick={cancelDelete}
-        					className="px-4 py-2 rounded text-gray-700 cursor-pointer hover:bg-gray-100"
+        					className="px-4 py-2 rounded text-gray-700 dark:text-neutral-200 cursor-pointer hover:bg-gray-100 dark:hover:bg-neutral-800"
         				>
         					{t('common.cancel')}
         				</button>

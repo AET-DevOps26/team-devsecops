@@ -738,6 +738,11 @@ export interface components {
         UserPreferences: {
             /** @description Preferred UI and AI-content language as an ISO 639-1 code */
             language?: components["schemas"]["Language"];
+            /**
+             * @description Preferred UI colour theme; AUTO follows the OS preference
+             * @enum {string}
+             */
+            theme?: "LIGHT" | "DARK" | "AUTO";
             /** @description Dietary restriction or style (e.g. vegan, keto) */
             diet?: string[];
             /** @description List of ingredients the user is allergic to */

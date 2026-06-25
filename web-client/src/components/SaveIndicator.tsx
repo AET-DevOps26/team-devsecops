@@ -27,22 +27,22 @@ export function SaveIndicator({
 			{(status === 'saving' || status === 'resaving') && (
 				<span
 					data-testid="save-spinner"
-					className="absolute h-5 w-5 animate-spin rounded-full border-2 border-gray-300 border-t-orange-500"
+					className="absolute h-5 w-5 animate-spin rounded-full border-2 border-gray-300 dark:border-neutral-600 border-t-orange-500"
 				/>
 			)}
 			{status === 'resaving' && (
-				<CheckIcon className="relative h-3 w-3 text-green-600 stroke-[3]" />
+				<CheckIcon className="relative h-3 w-3 text-green-600 dark:text-green-400 stroke-[3]" />
 			)}
 			{status === 'saved' && (
 				<CheckIcon
 					data-testid="save-check"
-					className="h-5 w-5 text-green-600 stroke-[3] animate-fade-out"
+					className="h-5 w-5 text-green-600 dark:text-green-400 stroke-[3] animate-fade-out"
 				/>
 			)}
 			{status === 'error' && (
 				<ExclamationTriangleIcon
 					data-testid="save-error"
-					className="h-5 w-5 text-amber-500 stroke-[2.5] animate-fade-in"
+					className="h-5 w-5 text-amber-500 dark:text-amber-400 stroke-[2.5] animate-fade-in"
 				/>
 			)}
 		</span>

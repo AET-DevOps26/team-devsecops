@@ -23,6 +23,7 @@ import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import tools.jackson.databind.ObjectMapper
+import tools.jackson.databind.node.ObjectNode
 
 @RestController
 @Validated
@@ -97,7 +98,12 @@ class UsersApiController(
 		@Valid userProfileUpdate: UserProfileUpdate,
 	): ResponseEntity<Unit> {
 		val user = userRepository.findByUsername(currentUsername()).orElseThrow()
-		userProfileUpdate.preferences?.let { user.preferences = objectMapper.writeValueAsString(it) }
+		userProfileUpdate.preferences?.let { incoming ->
+			// merge so a partial update keeps other preferences
+			val merged = (user.preferences?.let { objectMapper.readTree(it) } as? ObjectNode) ?: objectMapper.createObjectNode()
+			merged.setAll(objectMapper.valueToTree<ObjectNode>(incoming))
+			user.preferences = objectMapper.writeValueAsString(merged)
+		}
 		userProfileUpdate.username?.let { newUsername ->
 			if (newUsername != user.username && userRepository.existsByUsername(newUsername)) {
 				throw ConflictException("Username already taken")
