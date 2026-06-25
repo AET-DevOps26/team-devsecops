@@ -67,6 +67,7 @@ function renderLibraryRecipe(recipeId: number, ids?: number[]) {
 describe('RecipePage', () => {
 	it('scales ingredient quantities and kcal when portions are doubled', async () => {
 		const user = userEvent.setup()
+		fetchMock.mockResolvedValueOnce(jsonResponse({response: 'sure'}))
 		renderGeneratedRecipe(0)
 
 		// baseline: 4 pcs tomato, 500 kcal at 2 portions
@@ -81,6 +82,16 @@ describe('RecipePage', () => {
 
 		expect(screen.getByText(/8 pcs tomato/i)).toBeInTheDocument()
 		expect(screen.getByText('1000 kcal')).toBeInTheDocument()
+
+		// the same scaled values must reach the help request, not the originals
+		await user.type(screen.getByPlaceholderText(/.+/), 'can I swap the tomato?')
+		await user.click(screen.getByRole('button', {name: 'Get help'}))
+
+		const [, options] = fetchMock.mock.calls.find(([url]) => String(url).includes('/ai/help'))!
+		const body = JSON.parse(String(options!.body))
+		expect(body.recipe.portions).toBe(4)
+		expect(body.recipe.ingredients).toEqual([{name: 'tomato', quantity: 8, unit: 'pcs'}])
+		expect(body.recipe.nutrients).toEqual({calories: 1000, protein: 40, fat: 20, carbs: 120})
 	})
 
 	it('disables Previous on the first recipe and Next on the last', () => {
