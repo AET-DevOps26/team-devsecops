@@ -106,6 +106,15 @@ jobs:
           kubectl apply -f infra/k8s/web-client/
           kubectl apply -f infra/k8s/ingress.yaml
 
+      - name: Upsert Grafana secret
+        run: |
+          kubectl create secret generic grafana-secret -n monitoring \
+            --from-literal=admin-password="${{ secrets.GRAFANA_ADMIN_PASSWORD }}" \
+            --dry-run=client -o yaml | kubectl apply -f -
+
+      - name: Deploy monitoring
+        run: kubectl apply -f infra/k8s/monitoring/
+
       - name: Restart deployments to pull latest images
         if: github.event_name != 'push'
         run: |
