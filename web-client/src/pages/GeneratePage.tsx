@@ -198,7 +198,11 @@ export function GeneratePage() {
 export function GenerateResultsPage() {
 	const {t, i18n} = useTranslation()
 	const navigate = useNavigate()
-	const {prompt, selectedTags, recipes, status, setRecipes} = useOutletContext<RecipeGenerationContext>()
+	const {recipes, status, setRecipes} = useOutletContext<RecipeGenerationContext>()
+
+	// read from sessionStorage instead of context so unsaved edits are not shown the results header
+	const lastPrompt = sessionStorage.getItem('recipe_prompt') ?? ''
+	const lastTags = JSON.parse(sessionStorage.getItem('recipe_tags') ?? '[]') as string[]
 
 	function handleSavedIdChange(index: number, newId: number | undefined) {
 		setRecipes((prev) => prev.map((prevRecipe, prevIndex) => (prevIndex === index ? {
@@ -211,10 +215,10 @@ export function GenerateResultsPage() {
 		<>
 			<div className="flex items-start justify-between gap-3 rounded-lg border border-gray-200 dark:border-neutral-700 bg-gray-50 dark:bg-neutral-800 p-3">
 				<div className="flex min-w-0 flex-col gap-2">
-					{prompt.trim() !== '' && <p className="text-sm text-gray-700 dark:text-neutral-200 line-clamp-2">{prompt}</p>}
-					{selectedTags.length > 0 && (
+					{lastPrompt.trim() !== '' && <p className="text-sm text-gray-700 dark:text-neutral-200 line-clamp-2">{lastPrompt}</p>}
+					{lastTags.length > 0 && (
 						<div className="flex flex-wrap gap-1.5">
-							{selectedTags.map((id) => (
+							{lastTags.map((id) => (
 								<span key={id}
 								      className="rounded-full border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 px-2 py-0.5 text-xs text-gray-600 dark:text-neutral-300">
 									{localizeTagLabel(id, tagsById.get(id)?.label ?? id, i18n.language)}
@@ -222,7 +226,7 @@ export function GenerateResultsPage() {
 							))}
 						</div>
 					)}
-					{prompt.trim() === '' && selectedTags.length === 0 && (
+					{lastPrompt.trim() === '' && lastTags.length === 0 && (
 						<p className="text-sm text-gray-400 dark:text-neutral-500">{t('generate.noOptions')}</p>
 					)}
 				</div>

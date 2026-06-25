@@ -98,6 +98,27 @@ describe('GeneratePage', () => {
 		expect(clear).toBeDisabled()
 	})
 
+	it('keeps the results header showing the generated inputs after later edits', async () => {
+		fetchMock.mockResolvedValueOnce(jsonResponse([recipe]))
+		const user = userEvent.setup()
+		render()
+
+		await user.type(screen.getByPlaceholderText(/Type what you think/i), 'pasta')
+		await user.click(screen.getByRole('button', { name: 'Generate' }))
+		expect(await screen.findByText('pasta')).toBeInTheDocument()
+
+		// go back, edit the prompt, and return without regenerating
+		await user.click(screen.getByRole('button', { name: 'Edit' }))
+		const input = screen.getByPlaceholderText(/Type what you think/i)
+		await user.clear(input)
+		await user.type(input, 'soup')
+		await user.click(screen.getByRole('button', { name: 'View recipes' }))
+
+		// the header reflects what was generated, not the unsaved edit
+		expect(screen.getByText('pasta')).toBeInTheDocument()
+		expect(screen.queryByText('soup')).not.toBeInTheDocument()
+	})
+
 	it('shows a server error on the results page', async () => {
 		fetchMock.mockResolvedValueOnce(jsonResponse({ message: 'GenAI down' }, { status: 503 }))
 		const user = userEvent.setup()
