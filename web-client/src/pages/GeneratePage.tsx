@@ -138,7 +138,7 @@ export function GeneratePage() {
 				{recipes.length > 0 && (
 					<button
 						type="button"
-						className="flex shrink-0 items-center gap-1 text-sm text-gray-500 cursor-pointer transition-transform duration-100 hover:scale-98"
+						className="flex shrink-0 items-center gap-1 text-sm text-gray-500 dark:text-neutral-400 cursor-pointer transition-transform duration-100 hover:scale-98"
 						onClick={() => navigate('/generate/results')}
 					>
 						{t('generate.viewRecipes')}
@@ -147,7 +147,7 @@ export function GeneratePage() {
 				)}
 			</div>
 			<textarea
-				className="w-full min-h-32 border border-gray-300 rounded p-3"
+				className="w-full min-h-32 border border-gray-300 dark:border-neutral-600 rounded p-3"
 				placeholder={t('generate.placeholder')}
 				value={prompt}
 				onChange={(e) => setPrompt(e.target.value)}
@@ -193,26 +193,26 @@ export function GenerateResultsPage() {
 
 	return (
 		<>
-			<div className="flex items-start justify-between gap-3 rounded-lg border border-gray-200 bg-gray-50 p-3">
+			<div className="flex items-start justify-between gap-3 rounded-lg border border-gray-200 dark:border-neutral-700 bg-gray-50 dark:bg-neutral-800 p-3">
 				<div className="flex min-w-0 flex-col gap-2">
-					{prompt.trim() !== '' && <p className="text-sm text-gray-700 line-clamp-2">{prompt}</p>}
+					{prompt.trim() !== '' && <p className="text-sm text-gray-700 dark:text-neutral-200 line-clamp-2">{prompt}</p>}
 					{selectedTags.length > 0 && (
 						<div className="flex flex-wrap gap-1.5">
 							{selectedTags.map((id) => (
 								<span key={id}
-								      className="rounded-full border border-gray-200 bg-white px-2 py-0.5 text-xs text-gray-600">
+								      className="rounded-full border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 px-2 py-0.5 text-xs text-gray-600 dark:text-neutral-300">
 									{localizeTagLabel(id, tagsById.get(id)?.label ?? id, i18n.language)}
 								</span>
 							))}
 						</div>
 					)}
 					{prompt.trim() === '' && selectedTags.length === 0 && (
-						<p className="text-sm text-gray-400">{t('generate.noOptions')}</p>
+						<p className="text-sm text-gray-400 dark:text-neutral-500">{t('generate.noOptions')}</p>
 					)}
 				</div>
 				<button
 					type="button"
-					className="flex shrink-0 items-center gap-1 self-start text-sm text-gray-500 cursor-pointer transition-transform duration-100 hover:scale-98"
+					className="flex shrink-0 items-center gap-1 self-start text-sm text-gray-500 dark:text-neutral-400 cursor-pointer transition-transform duration-100 hover:scale-98"
 					onClick={() => navigate('/generate')}
 				>
 					<PencilSquareIcon className="h-4 w-4"/>
@@ -220,7 +220,7 @@ export function GenerateResultsPage() {
 				</button>
 			</div>
 
-			{status && <p className="text-gray-600">{status}</p>}
+			{status && <p className="text-gray-600 dark:text-neutral-300">{status}</p>}
 
 			{recipes.map((recipe, index) => (
 				<RecipeCard

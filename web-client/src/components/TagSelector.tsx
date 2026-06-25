@@ -3,12 +3,14 @@ import {facets, tags, tagsById} from '../recipeFormat'
 import {localizeFacetLabel, localizeTagLabel} from '../locales/recipeTagLabels'
 
 // background by reveal order: defaults (0) are neutral, each further hop is a touch more orange.
+// In dark mode the orange is layered as translucent tints over the dark surface so it deepens
+// with each hop without the biting brightness of the light palette.
 const TINT_BY_ORDER = [
-	'bg-white text-gray-700 border-gray-300 hover:border-orange-400',
-	'bg-orange-50 text-gray-800 border-orange-200 hover:border-orange-400',
-	'bg-orange-100 text-gray-800 border-orange-300 hover:border-orange-400',
-	'bg-orange-200 text-gray-900 border-orange-300 hover:border-orange-500',
-	'bg-orange-300 text-gray-900 border-orange-400 hover:border-orange-500',
+	'bg-white text-gray-700 border-gray-300 hover:border-orange-400 dark:bg-neutral-800 dark:text-neutral-200 dark:border-neutral-600',
+	'bg-orange-50 text-gray-800 border-orange-200 hover:border-orange-400 dark:bg-orange-500/10 dark:text-orange-100 dark:border-orange-500/30',
+	'bg-orange-100 text-gray-800 border-orange-300 hover:border-orange-400 dark:bg-orange-500/20 dark:text-orange-100 dark:border-orange-500/40',
+	'bg-orange-200 text-gray-900 border-orange-300 hover:border-orange-500 dark:bg-orange-500/30 dark:text-orange-50 dark:border-orange-500/50',
+	'bg-orange-300 text-gray-900 border-orange-400 hover:border-orange-500 dark:bg-orange-500/40 dark:text-orange-50 dark:border-orange-500/60',
 ]
 
 interface TagSelectorProps {
@@ -53,7 +55,7 @@ export function TagSelector({selectedTags, onChange}: TagSelectorProps) {
 				if (facetTags.length === 0) return null
 				return (
 					<div key={facet.id}>
-						<h3 className="text-sm font-semibold text-gray-700 mb-1">{localizeFacetLabel(facet.id, facet.label, i18n.language)}</h3>
+						<h3 className="text-sm font-semibold text-gray-700 dark:text-neutral-200 mb-1">{localizeFacetLabel(facet.id, facet.label, i18n.language)}</h3>
 						<div className="flex flex-wrap gap-2">
 							{facetTags.map((tag) => {
 								const active = selectedTagsSet.has(tag.id)
@@ -65,7 +67,7 @@ export function TagSelector({selectedTags, onChange}: TagSelectorProps) {
 										aria-pressed={active}
 										onClick={() => toggle(tag.id)}
 										className={`px-3 py-1 rounded-full border text-sm cursor-pointer transition-colors ${
-											active ? 'bg-orange-500 text-white border-orange-500' : tint
+											active ? 'bg-orange-500 dark:bg-orange-700 text-white border-orange-500 dark:border-orange-700' : tint
 										}`}
 									>
 										{localizeTagLabel(tag.id, tag.label, i18n.language)}

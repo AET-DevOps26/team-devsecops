@@ -10,6 +10,12 @@ export const DE = {
 			library: 'Kochbuch',
 			profile: 'Profil',
 		},
+		theme: {
+			light: 'Hell',
+			auto: 'Auto',
+			dark: 'Dunkel',
+			switchTo: 'Darstellung auf {{mode}} wechseln',
+		},
 		profile: {
 			signedInAs: 'Angemeldet als <1>{{username}}</1>.',
 			logout: 'Abmelden',

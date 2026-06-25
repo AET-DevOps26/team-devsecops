@@ -2,7 +2,7 @@ import { createContext, useContext, useState } from 'react'
 import type { ReactNode } from 'react'
 import { errorMessage } from './apiError'
 
-const TOKEN_KEY = 'auth_token'
+export const TOKEN_KEY = 'auth_token'
 const USERNAME_KEY = 'auth_username'
 const API_BASE = import.meta.env.VITE_API_BASE ?? ''
 

@@ -266,7 +266,7 @@ export function ProfilePage() {
 				</p>
 				<button
 					type="button"
-					className="flex items-center gap-1 self-center text-red-600 cursor-pointer transition-transform duration-100 hover:scale-98"
+					className="flex items-center gap-1 self-center text-red-600 dark:text-red-400 cursor-pointer transition-transform duration-100 hover:scale-98"
 					onClick={() => {
 						signOut()
 						navigate('/login')
@@ -278,7 +278,7 @@ export function ProfilePage() {
 			</div>
 
 			{/* Preferences */}
-			<div className="w-full max-w-md rounded-lg border border-gray-200 bg-white p-6 shadow-sm self-center md:self-start">
+			<div className="w-full max-w-md rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 p-6 shadow-sm self-center md:self-start">
 				<div className="flex flex-col gap-4">
 					<h2 className="text-lg font-bold">{t('profile.preferences')}</h2>
 
@@ -290,7 +290,7 @@ export function ProfilePage() {
 						</div>
 						{/* Native dropdown on mobile, where the segmented control would overflow */}
 						<select
-							className="self-start rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium sm:hidden"
+							className="self-start rounded-lg border border-gray-300 dark:border-neutral-600 bg-white dark:bg-neutral-800 px-3 py-2 text-sm font-medium sm:hidden"
 							value={language}
 							onChange={(e) => changeLanguage(e.target.value as LanguageSetting)}
 						>
@@ -300,9 +300,9 @@ export function ProfilePage() {
 								</option>
 							))}
 						</select>
-						<div className="relative hidden self-start rounded-lg bg-gray-100 p-1 sm:inline-flex">
+						<div className="relative hidden self-start rounded-lg bg-gray-100 dark:bg-neutral-700 p-1 sm:inline-flex">
 							<span
-								className="pointer-events-none absolute inset-y-1 left-1 w-24 rounded-md bg-white shadow-sm transition-transform duration-200 ease-out"
+								className="pointer-events-none absolute inset-y-1 left-1 w-24 rounded-md bg-white dark:bg-neutral-800 shadow-sm transition-transform duration-200 ease-out"
 								style={{
 									transform: `translateX(${LANGUAGE_OPTIONS.findIndex((o) => o.code === language) * 100}%)`,
 								}}
@@ -313,7 +313,7 @@ export function ProfilePage() {
 									type="button"
 									aria-pressed={language === code}
 									className={`relative z-10 w-24 rounded-md py-1 text-sm font-medium transition-colors ${
-										language === code ? 'text-orange-600' : 'text-gray-500'
+										language === code ? 'text-orange-600 dark:text-orange-400' : 'text-gray-500 dark:text-neutral-400'
 									}`}
 									onClick={() => changeLanguage(code)}
 								>
@@ -330,7 +330,7 @@ export function ProfilePage() {
 							<SaveIndicator status={prefsStatuses['aboutMe'] ?? 'idle'} />
 						</div>
 						<textarea
-							className="w-full border border-gray-300 rounded p-2"
+							className="w-full border border-gray-300 dark:border-neutral-600 rounded p-2"
 							rows={3}
 							value={aboutMe[0] ?? ''}
 							onChange={(e) => {
@@ -355,7 +355,7 @@ export function ProfilePage() {
 							>
 								<input
 									type="text"
-									className="flex-1 border border-gray-300 rounded p-2 disabled:bg-gray-100"
+									className="flex-1 border border-gray-300 dark:border-neutral-600 rounded p-2 disabled:bg-gray-100 dark:disabled:bg-neutral-700"
 									value={d}
 									disabled={pendingDietDeletion === i}
 									onChange={(e) => {
@@ -367,7 +367,7 @@ export function ProfilePage() {
 								/>
 								<button
 									type="button"
-									className="cursor-pointer text-gray-400 hover:text-red-600 transition-transform duration-100 hover:scale-98 disabled:cursor-not-allowed disabled:text-gray-300 disabled:hover:text-gray-300 disabled:hover:scale-100"
+									className="cursor-pointer text-gray-400 dark:text-neutral-500 hover:text-red-600 dark:hover:text-red-400 transition-transform duration-100 hover:scale-98 disabled:cursor-not-allowed disabled:text-gray-300 dark:disabled:text-neutral-600 disabled:hover:text-gray-300 dark:disabled:hover:text-neutral-600 disabled:hover:scale-100"
 									disabled={pendingDietDeletion !== null}
 									onClick={() => deleteRow('diet', i)}
 								>
@@ -377,11 +377,11 @@ export function ProfilePage() {
 						))}
 						<button
 							type="button"
-							className="flex items-center gap-2 self-center mt-1 cursor-pointer text-gray-500 transition-transform duration-100 hover:scale-98"
+							className="flex items-center gap-2 self-center mt-1 cursor-pointer text-gray-500 dark:text-neutral-400 transition-transform duration-100 hover:scale-98"
 							onClick={() => setDiet([...diet, ''])}
 						>
-							<span className="flex h-5 w-5 items-center justify-center rounded-full border border-gray-400">
-								<PlusIcon className="h-4 w-4 text-gray-400 stroke-2" />
+							<span className="flex h-5 w-5 items-center justify-center rounded-full border border-gray-400 dark:border-neutral-500">
+								<PlusIcon className="h-4 w-4 text-gray-400 dark:text-neutral-500 stroke-2" />
 							</span>
 							{t('profile.addDiet')}
 						</button>
@@ -400,7 +400,7 @@ export function ProfilePage() {
 							>
 								<input
 									type="text"
-									className="flex-1 border border-gray-300 rounded p-2 disabled:bg-gray-100"
+									className="flex-1 border border-gray-300 dark:border-neutral-600 rounded p-2 disabled:bg-gray-100 dark:disabled:bg-neutral-700"
 									value={allergy}
 									disabled={pendingAllergyDeletion === i}
 									onChange={(e) => {
@@ -412,7 +412,7 @@ export function ProfilePage() {
 								/>
 								<button
 									type="button"
-									className="cursor-pointer text-gray-400 hover:text-red-600 transition-transform duration-100 hover:scale-98 disabled:cursor-not-allowed disabled:text-gray-300 disabled:hover:text-gray-300 disabled:hover:scale-100"
+									className="cursor-pointer text-gray-400 dark:text-neutral-500 hover:text-red-600 dark:hover:text-red-400 transition-transform duration-100 hover:scale-98 disabled:cursor-not-allowed disabled:text-gray-300 dark:disabled:text-neutral-600 disabled:hover:text-gray-300 dark:disabled:hover:text-neutral-600 disabled:hover:scale-100"
 									disabled={pendingAllergyDeletion !== null}
 									onClick={() => deleteRow('allergies', i)}
 								>
@@ -422,18 +422,18 @@ export function ProfilePage() {
 						))}
 						<button
 							type="button"
-							className="flex items-center gap-2 self-center mt-1 cursor-pointer text-gray-500 transition-transform duration-100 hover:scale-98"
+							className="flex items-center gap-2 self-center mt-1 cursor-pointer text-gray-500 dark:text-neutral-400 transition-transform duration-100 hover:scale-98"
 							onClick={() => setAllergies([...allergies, ''])}
 						>
-							<span className="flex h-5 w-5 items-center justify-center rounded-full border border-gray-400">
-								<PlusIcon className="h-4 w-4 text-gray-400 stroke-2" />
+							<span className="flex h-5 w-5 items-center justify-center rounded-full border border-gray-400 dark:border-neutral-500">
+								<PlusIcon className="h-4 w-4 text-gray-400 dark:text-neutral-500 stroke-2" />
 							</span>
 							{t('profile.addAllergy')}
 						</button>
 					</div>
 
 					{prefsStatus && (
-						<p className={prefsStatus.kind === 'error' ? 'text-red-600' : 'text-green-600'}>
+						<p className={prefsStatus.kind === 'error' ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'}>
 							{prefsStatus.msg}
 						</p>
 					)}
@@ -441,7 +441,7 @@ export function ProfilePage() {
 			</div>
 
 			{/* Update username */}
-			<div className="w-full max-w-md rounded-lg border border-gray-200 bg-white p-6 shadow-sm self-center md:self-start">
+			<div className="w-full max-w-md rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 p-6 shadow-sm self-center md:self-start">
 				<form
 					className="flex flex-col gap-4"
 					onSubmit={(e) => {
@@ -455,7 +455,7 @@ export function ProfilePage() {
 						<span className="font-medium">{t('profile.newUsername')}</span>
 						<input
 							type="text"
-							className="w-full border border-gray-300 rounded p-2"
+							className="w-full border border-gray-300 dark:border-neutral-600 rounded p-2"
 							value={newUsername}
 							onChange={(e) => setUsernameDraft(e.target.value)}
 							autoComplete="username"
@@ -467,7 +467,7 @@ export function ProfilePage() {
 					</Button>
 
 					{usernameStatus && (
-						<p className={usernameStatus.kind === 'error' ? 'text-red-600' : 'text-green-600'}>
+						<p className={usernameStatus.kind === 'error' ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'}>
 							{usernameStatus.msg}
 						</p>
 					)}
@@ -475,7 +475,7 @@ export function ProfilePage() {
 			</div>
 
 			{/* Update password */}
-			<div className="w-full max-w-md rounded-lg border border-gray-200 bg-white p-6 shadow-sm self-center md:self-start">
+			<div className="w-full max-w-md rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 p-6 shadow-sm self-center md:self-start">
 				<form
 					className="flex flex-col gap-4"
 					onSubmit={(e) => {
@@ -488,7 +488,7 @@ export function ProfilePage() {
 					<label className="flex flex-col gap-1">
 						<span className="font-medium">{t('profile.newPassword')}</span>
 						<PasswordInput
-							className="w-full border border-gray-300 rounded p-2"
+							className="w-full border border-gray-300 dark:border-neutral-600 rounded p-2"
 							value={newPassword}
 							onChange={(e) => setNewPassword(e.target.value)}
 							autoComplete="new-password"
@@ -498,7 +498,7 @@ export function ProfilePage() {
 					<label className="flex flex-col gap-1">
 						<span className="font-medium">{t('profile.repeatNewPassword')}</span>
 						<PasswordInput
-							className="w-full border border-gray-300 rounded p-2"
+							className="w-full border border-gray-300 dark:border-neutral-600 rounded p-2"
 							value={repeatNewPassword}
 							onChange={(e) => setRepeatNewPassword(e.target.value)}
 							autoComplete="new-password"
@@ -510,7 +510,7 @@ export function ProfilePage() {
 					</Button>
 
 					{passwordStatus && (
-						<p className={passwordStatus.kind === 'error' ? 'text-red-600' : 'text-green-600'}>
+						<p className={passwordStatus.kind === 'error' ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'}>
 							{passwordStatus.msg}
 						</p>
 					)}
@@ -518,17 +518,17 @@ export function ProfilePage() {
 			</div>
 
 			{/* Delete account */}
-			<div className="w-full max-w-md rounded-lg border border-gray-200 bg-white p-6 shadow-sm self-center md:self-start">
+			<div className="w-full max-w-md rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 p-6 shadow-sm self-center md:self-start">
 				<div className="flex flex-col gap-4">
 					<h2 className="text-lg font-bold">{t('profile.deleteAccount')}</h2>
 
 					{confirmingDelete ? (
 						<>
-							<p className="text-red-600">{t('profile.deleteAccountWarning')}</p>
+							<p className="text-red-600 dark:text-red-400">{t('profile.deleteAccountWarning')}</p>
 							<div className="flex items-center justify-center gap-4">
 								<button
 									type="button"
-									className="cursor-pointer text-gray-500 transition-transform duration-100 hover:scale-98 disabled:cursor-not-allowed disabled:opacity-50"
+									className="cursor-pointer text-gray-500 dark:text-neutral-400 transition-transform duration-100 hover:scale-98 disabled:cursor-not-allowed disabled:opacity-50"
 									disabled={deleting}
 									onClick={() => setConfirmingDelete(false)}
 								>
@@ -536,7 +536,7 @@ export function ProfilePage() {
 								</button>
 								<button
 									type="button"
-									className="flex items-center gap-1 cursor-pointer text-red-600 transition-transform duration-100 hover:scale-98 disabled:cursor-not-allowed disabled:opacity-50"
+									className="flex items-center gap-1 cursor-pointer text-red-600 dark:text-red-400 transition-transform duration-100 hover:scale-98 disabled:cursor-not-allowed disabled:opacity-50"
 									disabled={deleting}
 									onClick={handleDeleteAccount}
 								>
@@ -548,7 +548,7 @@ export function ProfilePage() {
 					) : (
 						<button
 							type="button"
-							className="flex items-center gap-1 self-center text-red-600 cursor-pointer transition-transform duration-100 hover:scale-98"
+							className="flex items-center gap-1 self-center text-red-600 dark:text-red-400 cursor-pointer transition-transform duration-100 hover:scale-98"
 							onClick={() => {
 								setDeleteStatus(null)
 								setConfirmingDelete(true)
@@ -559,7 +559,7 @@ export function ProfilePage() {
 						</button>
 					)}
 
-					{deleteStatus && <p className="text-red-600">{deleteStatus.msg}</p>}
+					{deleteStatus && <p className="text-red-600 dark:text-red-400">{deleteStatus.msg}</p>}
 				</div>
 			</div>
 		</>
