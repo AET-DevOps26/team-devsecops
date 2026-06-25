@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AiConfig.kt</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openapi-spring</a> &gt; <a href="index.source.html" class="el_package">org.openapitools.config</a> &gt; <span class="el_source">AiConfig.kt</span></div><h1>AiConfig.kt</h1><pre class="source lang-java linenums">package org.openapitools.config
+
+import com.squareup.moshi.Moshi
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
+import okhttp3.ConnectionPool
+import okhttp3.OkHttpClient
+import org.openapitools.internal.client.HelpServiceApi
+import org.openapitools.internal.client.RecipeServiceApi
+import org.openapitools.security.InternalHmacInterceptor
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Configuration
+import retrofit2.Retrofit
+import retrofit2.converter.moshi.MoshiConverterFactory
+import java.util.concurrent.TimeUnit
+
+<span class="fc" id="L17">@Configuration</span>
+class AiConfig {
+	@Value(&quot;\${ai.recipe.service.url:http://localhost:8090}&quot;)
+	private lateinit var aiRecipeServiceUrl: String
+
+	@Value(&quot;\${ai.help.service.url:http://localhost:8091}&quot;)
+	private lateinit var aiHelpServiceUrl: String
+
+	@Value(&quot;\${ai.hmac.secret}&quot;)
+	private lateinit var internalAuthSecret: String
+
+	private fun createBaseHttpClient(): OkHttpClient =
+		OkHttpClient
+<span class="fc" id="L30">			.Builder()</span>
+<span class="fc" id="L31">			.connectionPool(ConnectionPool(5, 2, TimeUnit.SECONDS))</span>
+<span class="fc" id="L32">			.callTimeout(60, TimeUnit.SECONDS)</span>
+<span class="fc" id="L33">			.addInterceptor(InternalHmacInterceptor(internalAuthSecret))</span>
+<span class="fc" id="L34">			.build()</span>
+
+	private val moshi =
+		Moshi
+<span class="fc" id="L38">			.Builder()</span>
+<span class="fc" id="L39">			.addLast(KotlinJsonAdapterFactory())</span>
+<span class="fc" id="L40">			.build()</span>
+
+	@Bean
+	fun aiHelpServiceApi(): HelpServiceApi {
+<span class="fc" id="L44">		val retrofit =</span>
+			Retrofit
+<span class="fc" id="L46">				.Builder()</span>
+<span class="pc bpc" id="L47" title="1 of 2 branches missed.">				.baseUrl(aiHelpServiceUrl.let { if (it.endsWith(&quot;/&quot;)) it else &quot;$it/&quot; })</span>
+<span class="fc" id="L48">				.client(createBaseHttpClient())</span>
+<span class="fc" id="L49">				.addConverterFactory(MoshiConverterFactory.create(moshi))</span>
+<span class="fc" id="L50">				.build()</span>
+
+<span class="fc" id="L52">		return retrofit.create(HelpServiceApi::class.java)</span>
+	}
+
+	@Bean
+	fun aiRecipeServiceApi(): RecipeServiceApi {
+<span class="fc" id="L57">		val retrofit =</span>
+			Retrofit
+<span class="fc" id="L59">				.Builder()</span>
+<span class="pc bpc" id="L60" title="1 of 2 branches missed.">				.baseUrl(aiRecipeServiceUrl.let { if (it.endsWith(&quot;/&quot;)) it else &quot;$it/&quot; })</span>
+<span class="fc" id="L61">				.client(createBaseHttpClient())</span>
+<span class="fc" id="L62">				.addConverterFactory(MoshiConverterFactory.create(moshi))</span>
+<span class="fc" id="L63">				.build()</span>
+
+<span class="fc" id="L65">		return retrofit.create(RecipeServiceApi::class.java)</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>
