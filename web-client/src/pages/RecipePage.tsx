@@ -196,9 +196,17 @@ function RecipeView({
 			const body: HelpRequest = {
 				recipe: {
 					title: recipe.title,
-					ingredients: recipe.ingredients,
+					ingredients: recipe.ingredients.map((ing) => ({
+						...ing,
+						quantity: ing.quantity != null ? ing.quantity * scale : ing.quantity,
+					})),
 					instructions: recipe.instructions,
-					nutrients: recipe.nutrients,
+					nutrients: recipe.nutrients && {
+						calories: recipe.nutrients.calories != null ? Math.round(recipe.nutrients.calories * scale) : recipe.nutrients.calories,
+						protein: recipe.nutrients.protein != null ? Math.round(recipe.nutrients.protein * scale) : recipe.nutrients.protein,
+						fat: recipe.nutrients.fat != null ? Math.round(recipe.nutrients.fat * scale) : recipe.nutrients.fat,
+						carbs: recipe.nutrients.carbs != null ? Math.round(recipe.nutrients.carbs * scale) : recipe.nutrients.carbs,
+					},
 					portions,
 				},
 				prompt: question,
