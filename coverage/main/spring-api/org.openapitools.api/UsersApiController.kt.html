@@ -23,98 +23,104 @@ import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import tools.jackson.databind.ObjectMapper
+import tools.jackson.databind.node.ObjectNode
 
 @RestController
 @Validated
 @RequestMapping(&quot;\${api.base-path:/api/v1}&quot;)
-<span class="fc" id="L30">class UsersApiController(</span>
-<span class="fc" id="L31">	private val userRepository: UserRepository,</span>
-<span class="fc" id="L32">	private val passwordEncoder: PasswordEncoder,</span>
-<span class="fc" id="L33">	private val authManager: AuthenticationManager,</span>
-<span class="fc" id="L34">	private val jwtUtils: JwtUtils,</span>
-<span class="fc" id="L35">	private val objectMapper: ObjectMapper,</span>
-<span class="fc" id="L36">	private val tokenBlocklist: TokenBlocklistRepository,</span>
+<span class="fc" id="L31">class UsersApiController(</span>
+<span class="fc" id="L32">	private val userRepository: UserRepository,</span>
+<span class="fc" id="L33">	private val passwordEncoder: PasswordEncoder,</span>
+<span class="fc" id="L34">	private val authManager: AuthenticationManager,</span>
+<span class="fc" id="L35">	private val jwtUtils: JwtUtils,</span>
+<span class="fc" id="L36">	private val objectMapper: ObjectMapper,</span>
+<span class="fc" id="L37">	private val tokenBlocklist: TokenBlocklistRepository,</span>
 ) : UsersApi {
-<span class="fc" id="L38">	private val log = LoggerFactory.getLogger(javaClass)</span>
+<span class="fc" id="L39">	private val log = LoggerFactory.getLogger(javaClass)</span>
 
 	override fun usersRegisterPost(
 		@Valid authRequest: AuthRequest,
 	): ResponseEntity&lt;Unit&gt; {
-<span class="fc bfc" id="L43" title="All 2 branches covered.">		if (userRepository.existsByUsername(authRequest.username)) {</span>
-<span class="fc" id="L44">			throw ConflictException(&quot;Username already taken&quot;)</span>
+<span class="fc bfc" id="L44" title="All 2 branches covered.">		if (userRepository.existsByUsername(authRequest.username)) {</span>
+<span class="fc" id="L45">			throw ConflictException(&quot;Username already taken&quot;)</span>
 		}
-<span class="fc" id="L46">		userRepository.save(</span>
-<span class="fc" id="L47">			UserEntity(</span>
-<span class="fc" id="L48">				username = authRequest.username,</span>
-<span class="fc" id="L49">				password = passwordEncoder.encode(authRequest.password)!!,</span>
-<span class="fc" id="L50">				preferences = objectMapper.writeValueAsString(UserPreferences()),</span>
+<span class="fc" id="L47">		userRepository.save(</span>
+<span class="fc" id="L48">			UserEntity(</span>
+<span class="fc" id="L49">				username = authRequest.username,</span>
+<span class="fc" id="L50">				password = passwordEncoder.encode(authRequest.password)!!,</span>
+<span class="fc" id="L51">				preferences = objectMapper.writeValueAsString(UserPreferences()),</span>
 			),
 		)
-<span class="fc" id="L53">		log.info(&quot;User registered [user={}]&quot;, authRequest.username)</span>
-<span class="fc" id="L54">		return ResponseEntity(HttpStatus.CREATED)</span>
+<span class="fc" id="L54">		log.info(&quot;User registered [user={}]&quot;, authRequest.username)</span>
+<span class="fc" id="L55">		return ResponseEntity(HttpStatus.CREATED)</span>
 	}
 
 	override fun usersLoginPost(
 		@Valid authRequest: AuthRequest,
 	): ResponseEntity&lt;AuthResponse&gt; {
-<span class="fc" id="L60">		try {</span>
-<span class="fc" id="L61">			authManager.authenticate(</span>
-<span class="fc" id="L62">				UsernamePasswordAuthenticationToken(authRequest.username, authRequest.password),</span>
+<span class="fc" id="L61">		try {</span>
+<span class="fc" id="L62">			authManager.authenticate(</span>
+<span class="fc" id="L63">				UsernamePasswordAuthenticationToken(authRequest.username, authRequest.password),</span>
 			)
-<span class="fc" id="L64">		} catch (e: BadCredentialsException) {</span>
-<span class="fc" id="L65">			throw UnauthorizedException(&quot;Invalid username or password&quot;)</span>
+<span class="fc" id="L65">		} catch (e: BadCredentialsException) {</span>
+<span class="fc" id="L66">			throw UnauthorizedException(&quot;Invalid username or password&quot;)</span>
 		}
-<span class="fc" id="L67">		val user = userRepository.findByUsername(authRequest.username).orElseThrow()</span>
-<span class="fc" id="L68">		log.info(&quot;User logged in [user={}]&quot;, authRequest.username)</span>
-<span class="fc" id="L69">		return ResponseEntity.ok(AuthResponse(token = jwtUtils.generateToken(user.id)))</span>
+<span class="fc" id="L68">		val user = userRepository.findByUsername(authRequest.username).orElseThrow()</span>
+<span class="fc" id="L69">		log.info(&quot;User logged in [user={}]&quot;, authRequest.username)</span>
+<span class="fc" id="L70">		return ResponseEntity.ok(AuthResponse(token = jwtUtils.generateToken(user.id)))</span>
 	}
 
 	override fun usersLogoutPost(): ResponseEntity&lt;Unit&gt; {
-<span class="fc" id="L73">		val username = currentUsername()</span>
-<span class="pc bpc" id="L74" title="2 of 4 branches missed.">		val token = SecurityContextHolder.getContext().authentication?.credentials as? String</span>
-<span class="pc bpc" id="L75" title="1 of 2 branches missed.">		if (token != null) {</span>
-<span class="fc" id="L76">			tokenBlocklist.save(</span>
-<span class="fc" id="L77">				TokenBlocklistEntry(</span>
-<span class="fc" id="L78">					tokenHash = jwtUtils.tokenHash(token),</span>
-<span class="fc" id="L79">					expiresAt = jwtUtils.getExpirationFromToken(token),</span>
+<span class="fc" id="L74">		val username = currentUsername()</span>
+<span class="pc bpc" id="L75" title="2 of 4 branches missed.">		val token = SecurityContextHolder.getContext().authentication?.credentials as? String</span>
+<span class="pc bpc" id="L76" title="1 of 2 branches missed.">		if (token != null) {</span>
+<span class="fc" id="L77">			tokenBlocklist.save(</span>
+<span class="fc" id="L78">				TokenBlocklistEntry(</span>
+<span class="fc" id="L79">					tokenHash = jwtUtils.tokenHash(token),</span>
+<span class="fc" id="L80">					expiresAt = jwtUtils.getExpirationFromToken(token),</span>
 				),
 			)
 		}
-<span class="fc" id="L83">		log.info(&quot;User logged out [user={}]&quot;, username)</span>
-<span class="fc" id="L84">		return ResponseEntity(HttpStatus.OK)</span>
+<span class="fc" id="L84">		log.info(&quot;User logged out [user={}]&quot;, username)</span>
+<span class="fc" id="L85">		return ResponseEntity(HttpStatus.OK)</span>
 	}
 
 	override fun usersProfileGet(): ResponseEntity&lt;UserProfile&gt; {
-<span class="fc" id="L88">		val user = userRepository.findByUsername(currentUsername()).orElseThrow()</span>
-<span class="fc" id="L89">		val prefs =</span>
-<span class="pc bpc" id="L90" title="2 of 4 branches missed.">			user.preferences?.let {</span>
-<span class="fc" id="L91">				objectMapper.readValue(it, UserPreferences::class.java)</span>
-<span class="nc" id="L92">			} ?: UserPreferences()</span>
-<span class="fc" id="L93">		return ResponseEntity.ok(UserProfile(username = user.username, preferences = prefs))</span>
+<span class="fc" id="L89">		val user = userRepository.findByUsername(currentUsername()).orElseThrow()</span>
+<span class="fc" id="L90">		val prefs =</span>
+<span class="pc bpc" id="L91" title="2 of 4 branches missed.">			user.preferences?.let {</span>
+<span class="fc" id="L92">				objectMapper.readValue(it, UserPreferences::class.java)</span>
+<span class="nc" id="L93">			} ?: UserPreferences()</span>
+<span class="fc" id="L94">		return ResponseEntity.ok(UserProfile(username = user.username, preferences = prefs))</span>
 	}
 
 	override fun usersProfilePut(
 		@Valid userProfileUpdate: UserProfileUpdate,
 	): ResponseEntity&lt;Unit&gt; {
-<span class="fc" id="L99">		val user = userRepository.findByUsername(currentUsername()).orElseThrow()</span>
-<span class="fc bfc" id="L100" title="All 2 branches covered.">		userProfileUpdate.preferences?.let { user.preferences = objectMapper.writeValueAsString(it) }</span>
-<span class="fc bfc" id="L101" title="All 2 branches covered.">		userProfileUpdate.username?.let { newUsername -&gt;</span>
-<span class="pc bpc" id="L102" title="1 of 4 branches missed.">			if (newUsername != user.username &amp;&amp; userRepository.existsByUsername(newUsername)) {</span>
-<span class="fc" id="L103">				throw ConflictException(&quot;Username already taken&quot;)</span>
-			}
-<span class="fc" id="L105">			user.username = newUsername</span>
+<span class="fc" id="L100">		val user = userRepository.findByUsername(currentUsername()).orElseThrow()</span>
+<span class="fc bfc" id="L101" title="All 2 branches covered.">		userProfileUpdate.preferences?.let { incoming -&gt;</span>
+			// merge so a partial update keeps other preferences
+<span class="pc bpc" id="L103" title="3 of 6 branches missed.">			val merged = (user.preferences?.let { objectMapper.readTree(it) } as? ObjectNode) ?: objectMapper.createObjectNode()</span>
+<span class="fc" id="L104">			merged.setAll(objectMapper.valueToTree&lt;ObjectNode&gt;(incoming))</span>
+<span class="fc" id="L105">			user.preferences = objectMapper.writeValueAsString(merged)</span>
 <span class="fc" id="L106">		}</span>
-<span class="fc bfc" id="L107" title="All 2 branches covered.">		userProfileUpdate.password?.let { user.password = passwordEncoder.encode(it)!! }</span>
-<span class="fc" id="L108">		userRepository.save(user)</span>
-<span class="fc" id="L109">		return ResponseEntity(HttpStatus.OK)</span>
+<span class="fc bfc" id="L107" title="All 2 branches covered.">		userProfileUpdate.username?.let { newUsername -&gt;</span>
+<span class="pc bpc" id="L108" title="1 of 4 branches missed.">			if (newUsername != user.username &amp;&amp; userRepository.existsByUsername(newUsername)) {</span>
+<span class="fc" id="L109">				throw ConflictException(&quot;Username already taken&quot;)</span>
+			}
+<span class="fc" id="L111">			user.username = newUsername</span>
+<span class="fc" id="L112">		}</span>
+<span class="fc bfc" id="L113" title="All 2 branches covered.">		userProfileUpdate.password?.let { user.password = passwordEncoder.encode(it)!! }</span>
+<span class="fc" id="L114">		userRepository.save(user)</span>
+<span class="fc" id="L115">		return ResponseEntity(HttpStatus.OK)</span>
 	}
 
 	override fun usersProfileDelete(): ResponseEntity&lt;Unit&gt; {
-<span class="fc" id="L113">		val user = userRepository.findByUsername(currentUsername()).orElseThrow()</span>
-<span class="fc" id="L114">		userRepository.delete(user)</span>
-<span class="fc" id="L115">		return ResponseEntity(HttpStatus.NO_CONTENT)</span>
+<span class="fc" id="L119">		val user = userRepository.findByUsername(currentUsername()).orElseThrow()</span>
+<span class="fc" id="L120">		userRepository.delete(user)</span>
+<span class="fc" id="L121">		return ResponseEntity(HttpStatus.NO_CONTENT)</span>
 	}
 
-<span class="fc" id="L118">	private fun currentUsername(): String = SecurityContextHolder.getContext().authentication!!.name</span>
+<span class="fc" id="L124">	private fun currentUsername(): String = SecurityContextHolder.getContext().authentication!!.name</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>
