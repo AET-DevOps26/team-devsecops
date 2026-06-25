@@ -23,30 +23,30 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">54.54% </span>
+                <span class="strong">55.97% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>72/132</span>
+                <span class='fraction'>75/134</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">48.71% </span>
+                <span class="strong">54.7% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>57/117</span>
+                <span class='fraction'>64/117</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">30.76% </span>
+                <span class="strong">33.33% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>12/39</span>
+                <span class='fraction'>13/39</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">60.17% </span>
+                <span class="strong">61.4% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>68/113</span>
+                <span class='fraction'>70/114</span>
             </div>
         
             
@@ -531,7 +531,10 @@
 <a name='L466'></a><a href='#L466'>466</a>
 <a name='L467'></a><a href='#L467'>467</a>
 <a name='L468'></a><a href='#L468'>468</a>
-<a name='L469'></a><a href='#L469'>469</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L469'></a><a href='#L469'>469</a>
+<a name='L470'></a><a href='#L470'>470</a>
+<a name='L471'></a><a href='#L471'>471</a>
+<a name='L472'></a><a href='#L472'>472</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -719,6 +722,17 @@
 <span class="cline-any cline-yes">8x</span>
 <span class="cline-any cline-yes">8x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">8x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">8x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -727,14 +741,6 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -1187,6 +1193,17 @@ function RecipeView({
 	const scale = recipe.portions ? portions / recipe.portions : <span class="branch-1 cbranch-no" title="branch not covered" >1</span>
 	const pages = pagination &amp;&amp; pagination.count &gt; 1 ? pagination : null
 &nbsp;
+	const scaledIngredients = recipe.ingredients.map((ing) =&gt; ({
+		...ing,
+		quantity: ing.quantity != null ? ing.quantity * scale : <span class="branch-1 cbranch-no" title="branch not covered" >ing.quantity,</span>
+	}))
+	const scaledNutrients = recipe.nutrients &amp;&amp; {
+		calories: recipe.nutrients.calories != null ? Math.round(recipe.nutrients.calories * scale) : <span class="branch-1 cbranch-no" title="branch not covered" >recipe.nutrients.calories,</span>
+		protein: recipe.nutrients.protein != null ? Math.round(recipe.nutrients.protein * scale) : <span class="branch-1 cbranch-no" title="branch not covered" >recipe.nutrients.protein,</span>
+		fat: recipe.nutrients.fat != null ? Math.round(recipe.nutrients.fat * scale) : <span class="branch-1 cbranch-no" title="branch not covered" >recipe.nutrients.fat,</span>
+		carbs: recipe.nutrients.carbs != null ? Math.round(recipe.nutrients.carbs * scale) : <span class="branch-1 cbranch-no" title="branch not covered" >recipe.nutrients.carbs,</span>
+	}
+&nbsp;
 	async function <span class="fstat-no" title="function not covered" >handleGetHelp() {</span>
 		const question = <span class="cstat-no" title="statement not covered" >helpPrompt.trim()</span>
 <span class="cstat-no" title="statement not covered" >		if (question === '') <span class="cstat-no" title="statement not covered" >return</span></span>
@@ -1197,17 +1214,9 @@ function RecipeView({
 			const body: HelpRequest = <span class="cstat-no" title="statement not covered" >{</span>
 				recipe: {
 					title: recipe.title,
-					ingredients: recipe.ingredients.map(<span class="fstat-no" title="function not covered" >(i</span>ng) =&gt; (<span class="cstat-no" title="statement not covered" >{</span>
-						...ing,
-						quantity: ing.quantity != null ? ing.quantity * scale : ing.quantity,
-					})),
+					ingredients: scaledIngredients,
 					instructions: recipe.instructions,
-					nutrients: recipe.nutrients &amp;&amp; {
-						calories: recipe.nutrients.calories != null ? Math.round(recipe.nutrients.calories * scale) : recipe.nutrients.calories,
-						protein: recipe.nutrients.protein != null ? Math.round(recipe.nutrients.protein * scale) : recipe.nutrients.protein,
-						fat: recipe.nutrients.fat != null ? Math.round(recipe.nutrients.fat * scale) : recipe.nutrients.fat,
-						carbs: recipe.nutrients.carbs != null ? Math.round(recipe.nutrients.carbs * scale) : recipe.nutrients.carbs,
-					},
+					nutrients: scaledNutrients,
 					portions,
 				},
 				prompt: question,
@@ -1310,7 +1319,7 @@ function RecipeView({
 				&lt;div&gt;
 					&lt;h3 className="font-medium"&gt;{t('recipe.ingredients')}&lt;/h3&gt;
 					&lt;ul className="flex flex-col gap-1"&gt;
-						{recipe.ingredients.map((ing, j) =&gt; {
+						{scaledIngredients.map((ing, j) =&gt; {
 							const checked = checkedIngredients.has(j)
 							return (
 								&lt;li key={j}&gt;
@@ -1322,7 +1331,7 @@ function RecipeView({
 										/&gt;
 										&lt;span className={checked ? <span class="branch-0 cbranch-no" title="branch not covered" >'line-through text-gray-400 dark:text-neutral-500' : '</span>'}&gt;
 											{[
-												ing.quantity != null ? formatQuantity(ing.quantity, scale) : <span class="branch-1 cbranch-no" title="branch not covered" >null,</span>
+												ing.quantity != null ? formatQuantity(ing.quantity) : <span class="branch-1 cbranch-no" title="branch not covered" >null,</span>
 												ing.unit,
 												ing.name,
 											]
@@ -1359,12 +1368,12 @@ function RecipeView({
 				&lt;/div&gt;
 &nbsp;
 				{/* Nutrients */}
-				{recipe.nutrients &amp;&amp; (
+				{scaledNutrients &amp;&amp; (
 					&lt;div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-gray-600 dark:text-neutral-300"&gt;
-						{recipe.nutrients.calories != null &amp;&amp; &lt;span&gt;{t('common.kcal', { value: Math.round(recipe.nutrients.calories * scale) })}&lt;/span&gt;}
-						{recipe.nutrients.protein != null &amp;&amp; &lt;span&gt;{t('common.protein', { value: Math.round(recipe.nutrients.protein * scale) })}&lt;/span&gt;}
-						{recipe.nutrients.fat != null &amp;&amp; &lt;span&gt;{t('common.fat', { value: Math.round(recipe.nutrients.fat * scale) })}&lt;/span&gt;}
-						{recipe.nutrients.carbs != null &amp;&amp; &lt;span&gt;{t('common.carbs', { value: Math.round(recipe.nutrients.carbs * scale) })}&lt;/span&gt;}
+						{scaledNutrients.calories != null &amp;&amp; &lt;span&gt;{t('common.kcal', { value: scaledNutrients.calories })}&lt;/span&gt;}
+						{scaledNutrients.protein != null &amp;&amp; &lt;span&gt;{t('common.protein', { value: scaledNutrients.protein })}&lt;/span&gt;}
+						{scaledNutrients.fat != null &amp;&amp; &lt;span&gt;{t('common.fat', { value: scaledNutrients.fat })}&lt;/span&gt;}
+						{scaledNutrients.carbs != null &amp;&amp; &lt;span&gt;{t('common.carbs', { value: scaledNutrients.carbs })}&lt;/span&gt;}
 					&lt;/div&gt;
 				)}
 			&lt;/article&gt;
@@ -1474,7 +1483,7 @@ function RecipeView({
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-06-25T17:50:03.622Z
+                at 2026-06-25T17:57:14.761Z
             </div>
         <script src="../../prettify.js"></script>
         <script>
