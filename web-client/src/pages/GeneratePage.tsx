@@ -1,34 +1,15 @@
 import {useEffect, useState} from 'react'
-import type {Dispatch, SetStateAction} from 'react'
-import {Outlet, useLocation, useNavigate, useOutletContext} from 'react-router-dom'
+import {Outlet, useLocation, useNavigate} from 'react-router-dom'
 import {useTranslation} from 'react-i18next'
 import {ChevronRightIcon, PencilSquareIcon} from '@heroicons/react/24/outline'
-import type {components} from '../api'
 import {Button} from '../components/Button'
 import {RecipeCard} from '../components/RecipeCard'
 import {TagSelector} from '../components/TagSelector'
 import {tagsById} from '../recipeFormat'
 import {localizeTagLabel} from '../locales/recipeTagLabels'
 import {usePressPulse} from '../usePressPulse'
-import {errorMessage} from '../apiError'
-import {SessionExpiredError, useApi} from '../useApi'
-import {currentLanguage} from '../i18n'
-
-// id is stored on the recipe once it is saved
-type Recipe = components['schemas']['RecipeInput'] & { id?: number }
-type RecipeRequest = components['schemas']['RecipeRequest']
-
-export interface RecipeGenerationContext {
-	prompt: string
-	setPrompt: Dispatch<SetStateAction<string>>
-	selectedTags: string[]
-	setSelectedTags: Dispatch<SetStateAction<string[]>>
-	recipes: Recipe[]
-	setRecipes: Dispatch<SetStateAction<Recipe[]>>
-	status: string | null
-	loading: boolean
-	generate: () => void
-}
+import {useApi} from '../useApi'
+import {useRecipeGeneration} from '../recipeGeneration'
 
 const VIEW_ORDER = {options: 0, results: 1, recipe: 2} as const
 
@@ -39,61 +20,14 @@ function viewName(pathname: string): keyof typeof VIEW_ORDER {
 }
 
 export function GenerateFlow() {
-	const {t} = useTranslation()
 	const apiFetch = useApi()
-	const navigate = useNavigate()
 	const {pathname} = useLocation()
-
-	const [prompt, setPrompt] = useState(() => sessionStorage.getItem('recipe_prompt') ?? '')
-	const [selectedTags, setSelectedTags] = useState<string[]>(() => {
-		const stored = sessionStorage.getItem('recipe_tags')
-		return stored ? (JSON.parse(stored) as string[]) : []
-	})
-	// keep the last results so the list is restored when returning from a recipe page
-	const [recipes, setRecipes] = useState<Recipe[]>(() => {
-		const stored = sessionStorage.getItem('generated_recipes')
-		return stored ? (JSON.parse(stored) as Recipe[]) : []
-	})
-	const [status, setStatus] = useState<string | null>(null)
-	const [loading, setLoading] = useState(false)
 
 	// Confirm the session is still valid
 	useEffect(() => {
 		// on failure, this will automatically redirect to /login
 		apiFetch('/users/profile')
 	}, [apiFetch])
-
-	useEffect(() => {
-		sessionStorage.setItem('generated_recipes', JSON.stringify(recipes))
-	}, [recipes])
-
-	async function generate() {
-		setLoading(true)
-		setStatus(t('generate.generatingStatus'))
-		setRecipes([])
-		sessionStorage.setItem('recipe_prompt', prompt)
-		sessionStorage.setItem('recipe_tags', JSON.stringify(selectedTags))
-		navigate('/generate/results')
-		try {
-			const tagLabels = selectedTags.map((id) => tagsById.get(id)?.label).filter(Boolean)
-			const fullPrompt = tagLabels.length > 0 ? `${prompt}\n\nPreferences: ${tagLabels.join(', ')}` : prompt
-			const body: RecipeRequest = {prompt: fullPrompt, language: currentLanguage()}
-			const response = await apiFetch('/ai/recipes', {
-				method: 'POST',
-				headers: {'content-type': 'application/json'},
-				body: JSON.stringify(body),
-			})
-			if (!response.ok) throw new Error(await errorMessage(response))
-			const data = (await response.json()) as Recipe[]
-			setRecipes(data)
-			setStatus(data.length === 0 ? t('generate.noRecipes') : null)
-		} catch (e) {
-			if (e instanceof SessionExpiredError) return
-			setStatus(t('common.error', {message: e instanceof Error ? e.message : String(e)}))
-		} finally {
-			setLoading(false)
-		}
-	}
 
 	const view = viewName(pathname)
 	const [prevView, setPrevView] = useState(view)
@@ -103,16 +37,12 @@ export function GenerateFlow() {
 		setPrevView(view)
 	}
 
-	const context: RecipeGenerationContext = {
-		prompt, setPrompt, selectedTags, setSelectedTags, recipes, setRecipes, status, loading, generate,
-	}
-
 	return (
 		<div
 			key={view}
 			className={`flex flex-col gap-4 ${slideDirectionBack ? 'animate-slide-from-left' : 'animate-slide-from-right'}`}
 		>
-			<Outlet context={context}/>
+			<Outlet/>
 		</div>
 	)
 }
@@ -128,7 +58,7 @@ export function GeneratePage() {
 		recipes,
 		loading,
 		generate
-	} = useOutletContext<RecipeGenerationContext>()
+	} = useRecipeGeneration()
 	const [generateBtnRef, pulseGenerate] = usePressPulse<HTMLButtonElement>()
 
 	return (
@@ -182,7 +112,7 @@ export function GeneratePage() {
 export function GenerateResultsPage() {
 	const {t, i18n} = useTranslation()
 	const navigate = useNavigate()
-	const {prompt, selectedTags, recipes, status, setRecipes} = useOutletContext<RecipeGenerationContext>()
+	const {prompt, selectedTags, recipes, status, setRecipes} = useRecipeGeneration()
 
 	function handleSavedIdChange(index: number, newId: number | undefined) {
 		setRecipes((prev) => prev.map((prevRecipe, prevIndex) => (prevIndex === index ? {
