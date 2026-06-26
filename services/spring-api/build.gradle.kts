@@ -20,35 +20,35 @@ repositories {
 }
 
 kotlin {
-    compilerOptions {
-        jvmTarget.set(JvmTarget.JVM_17)
-        freeCompilerArgs.add("-Xannotation-default-target=param-property")
-    }
+	compilerOptions {
+		jvmTarget.set(JvmTarget.JVM_17)
+		freeCompilerArgs.add("-Xannotation-default-target=param-property")
+	}
 
-    sourceSets {
-        getByName("test") {
-            kotlin.srcDir("src/test/kotlin")
-        }
-    }
+	sourceSets {
+		getByName("test") {
+			kotlin.srcDir("src/test/kotlin")
+		}
+	}
 }
 
 tasks.test {
-    useJUnitPlatform()
+	useJUnitPlatform()
 
-    jvmArgs("-XX:+EnableDynamicAgentLoading")
+	jvmArgs("-XX:+EnableDynamicAgentLoading")
 
-    reports {
-        junitXml.required.set(true)
-        html.required.set(true)
-    }
+	reports {
+		junitXml.required.set(true)
+		html.required.set(true)
+	}
 
-    testLogging {
-        events("passed", "skipped", "failed")
-        exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
-        showExceptions = true
-        showCauses = true
-    }
-    finalizedBy(tasks.jacocoTestReport)
+	testLogging {
+		events("passed", "skipped", "failed")
+		exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+		showExceptions = true
+		showCauses = true
+	}
+	finalizedBy(tasks.jacocoTestReport)
 }
 
 tasks.jacocoTestReport {
@@ -87,6 +87,7 @@ dependencies {
 
 	// Observability
 	implementation("org.springframework.boot:spring-boot-starter-actuator")
+	runtimeOnly("io.micrometer:micrometer-registry-prometheus")
 
 	// Auth
 	implementation("org.springframework.boot:spring-boot-starter-security")
@@ -94,24 +95,28 @@ dependencies {
 	runtimeOnly("io.jsonwebtoken:jjwt-impl:0.12.6")
 	runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.12.6")
 
-    // Tests
-    testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
-    testImplementation("org.springframework.boot:spring-boot-starter-test") {
-        exclude(module = "junit")
-    }
-    testImplementation("org.mockito.kotlin:mockito-kotlin:5.4.0")
-    testImplementation("org.springframework.boot:spring-boot-webmvc-test")
-    testImplementation("org.springframework.security:spring-security-test")
+	// Tests
+	testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
+	testImplementation("org.springframework.boot:spring-boot-starter-test") {
+		exclude(module = "junit")
+	}
+	testImplementation("org.mockito.kotlin:mockito-kotlin:5.4.0")
+	testImplementation("org.springframework.boot:spring-boot-webmvc-test")
+	testImplementation("org.springframework.security:spring-security-test")
 
-    // Retrofit
-    implementation("com.squareup.retrofit2:retrofit:2.11.0")
-    implementation("com.squareup.retrofit2:converter-jackson:2.11.0")
+	// Retrofit
+	implementation("com.squareup.retrofit2:retrofit:2.11.0")
+	implementation("com.squareup.retrofit2:converter-jackson:2.11.0")
 
-    // OkHttp
-    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+	// OkHttp
+	implementation("com.squareup.okhttp3:okhttp:4.12.0")
 
-    // JSON multiplatform runtime
-    implementation("com.squareup.moshi:moshi:1.15.1")
-    implementation("com.squareup.moshi:moshi-kotlin:1.15.1")
-    implementation("com.squareup.retrofit2:converter-moshi:2.11.0")
+	// JSON multiplatform runtime
+	implementation("com.squareup.moshi:moshi:1.15.1")
+	implementation("com.squareup.moshi:moshi-kotlin:1.15.1")
+	implementation("com.squareup.retrofit2:converter-moshi:2.11.0")
+}
+
+springBoot {
+	buildInfo()
 }

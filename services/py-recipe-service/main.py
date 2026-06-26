@@ -12,6 +12,7 @@ from fastapi.responses import JSONResponse
 from langchain.chat_models import init_chat_model
 from langchain_core.messages import HumanMessage, SystemMessage
 
+from prometheus_fastapi_instrumentator import Instrumentator
 from client.cooking_assistant_gen_ai_services_api_internal_client.models.recipe_request_forwarded import (
 	RecipeRequestForwarded,
 )
@@ -20,6 +21,7 @@ from client.cooking_assistant_gen_ai_services_api_internal_client.models.recipe_
 load_dotenv()
 
 app = FastAPI(title="Cooking Assistant GenAI Service")
+Instrumentator().instrument(app).expose(app)
 
 
 @app.exception_handler(HTTPException)

@@ -9,6 +9,8 @@ Rancher deployment (Kubernetes): https://devsecops.stud.k8s.aet.cit.tum.de
 Coverage reports: https://aet-devops26.github.io/team-devsecops/
 
 API scheme (Swagger UI): https://devsecops.stud.k8s.aet.cit.tum.de/swagger-ui/index.html
+
+Monitoring (Grafana): https://devsecops.stud.k8s.aet.cit.tum.de/grafana
 ## Local development
 
 The full stack runs under Docker Compose with live-reload:
