@@ -73,12 +73,22 @@ jobs:
             --dry-run=client -o yaml | kubectl apply -f -
 
           kubectl create secret generic py-recipe-secret -n app \
-            --from-literal=SERVICE_API_KEY="${{ secrets.RECIPE_SERVICE_KEY }}" \
+            --from-literal=PROVIDER="${{ vars.PROVIDER }}" \
+            --from-literal=LOGOS_MODEL="${{ vars.LOGOS_MODEL }}" \
+            --from-literal=LOGOS_BASE_URL="${{ vars.LOGOS_BASE_URL }}" \
+            --from-literal=LOGOS_KEY="${{ secrets.LOGOS_KEY }}" \
+            --from-literal=GEMINI_MODEL="${{ vars.GEMINI_MODEL }}" \
+            --from-literal=GEMINI_RECIPE_SERVICE_KEY="${{ secrets.GEMINI_RECIPE_SERVICE_KEY }}" \
             --from-literal=INTERNAL_AUTH_SECRET="${{ secrets.INTERNAL_AUTH_SECRET }}" \
             --dry-run=client -o yaml | kubectl apply -f -
 
           kubectl create secret generic py-help-secret -n app \
-            --from-literal=SERVICE_API_KEY="${{ secrets.HELP_SERVICE_KEY }}" \
+            --from-literal=PROVIDER="${{ vars.PROVIDER }}" \
+            --from-literal=LOGOS_MODEL="${{ vars.LOGOS_MODEL }}" \
+            --from-literal=LOGOS_BASE_URL="${{ vars.LOGOS_BASE_URL }}" \
+            --from-literal=LOGOS_KEY="${{ secrets.LOGOS_KEY }}" \
+            --from-literal=GEMINI_MODEL="${{ vars.GEMINI_MODEL }}" \
+            --from-literal=GEMINI_HELP_SERVICE_KEY="${{ secrets.GEMINI_HELP_SERVICE_KEY }}" \
             --from-literal=INTERNAL_AUTH_SECRET="${{ secrets.INTERNAL_AUTH_SECRET }}" \
             --dry-run=client -o yaml | kubectl apply -f -
 
