@@ -43,3 +43,4 @@ Thumbs.db
 
 # Ansible
 local_secrets.yml
+id_rsa
