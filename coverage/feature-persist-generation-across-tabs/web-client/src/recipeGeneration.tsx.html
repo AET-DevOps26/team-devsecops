@@ -23,30 +23,30 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">93.33% </span>
+                <span class="strong">91.48% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>42/45</span>
+                <span class='fraction'>43/47</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">72.22% </span>
+                <span class="strong">75% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>13/18</span>
+                <span class='fraction'>12/16</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">88.88% </span>
+                <span class="strong">90% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>8/9</span>
+                <span class='fraction'>9/10</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">100% </span>
+                <span class="strong">97.5% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>40/40</span>
+                <span class='fraction'>39/40</span>
             </div>
         
             
@@ -158,7 +158,10 @@
 <a name='L93'></a><a href='#L93'>93</a>
 <a name='L94'></a><a href='#L94'>94</a>
 <a name='L95'></a><a href='#L95'>95</a>
-<a name='L96'></a><a href='#L96'>96</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L96'></a><a href='#L96'>96</a>
+<a name='L97'></a><a href='#L97'>97</a>
+<a name='L98'></a><a href='#L98'>98</a>
+<a name='L99'></a><a href='#L99'>99</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -187,6 +190,15 @@
 <span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">16x</span>
+<span class="cline-any cline-yes">16x</span>
+<span class="cline-any cline-yes">16x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">57x</span>
 <span class="cline-any cline-yes">57x</span>
@@ -194,13 +206,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">57x</span>
 <span class="cline-any cline-yes">57x</span>
-<span class="cline-any cline-yes">8x</span>
-<span class="cline-any cline-yes">8x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">57x</span>
-<span class="cline-any cline-yes">8x</span>
-<span class="cline-any cline-yes">8x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">57x</span>
 <span class="cline-any cline-yes">57x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -253,101 +259,104 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import { createContext, useCallback, useContext, useEffect, useState } from 'react'
-import type { Dispatch, ReactNode, SetStateAction } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { useTranslation } from 'react-i18next'
-import type { components } from './api'
-import { tagsById } from './recipeFormat'
-import { errorMessage } from './apiError'
-import { SessionExpiredError, useApi } from './useApi'
-import { currentLanguage } from './i18n'
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import type {Dispatch, ReactNode, SetStateAction} from 'react';
+import {createContext, useCallback, useContext, useEffect, useState} from 'react';
+import {useNavigate} from 'react-router-dom';
+import {useTranslation} from 'react-i18next';
+import type {components} from './api';
+import {tagsById} from './recipeFormat';
+import {errorMessage} from './apiError';
+import {SessionExpiredError, useApi} from './useApi';
+import {currentLanguage} from './i18n';
 &nbsp;
 // id is stored on the recipe once it is saved
 type Recipe = components['schemas']['RecipeInput'] &amp; { id?: number }
 type RecipeRequest = components['schemas']['RecipeRequest']
 &nbsp;
 export interface RecipeGenerationContextValue {
-	prompt: string
-	setPrompt: Dispatch&lt;SetStateAction&lt;string&gt;&gt;
-	selectedTags: string[]
-	setSelectedTags: Dispatch&lt;SetStateAction&lt;string[]&gt;&gt;
-	recipes: Recipe[]
-	setRecipes: Dispatch&lt;SetStateAction&lt;Recipe[]&gt;&gt;
-	status: string | null
-	loading: boolean
-	generate: () =&gt; void
+	prompt: string;
+	setPrompt: Dispatch&lt;SetStateAction&lt;string&gt;&gt;;
+	selectedTags: string[];
+	setSelectedTags: Dispatch&lt;SetStateAction&lt;string[]&gt;&gt;;
+	recipes: Recipe[];
+	setRecipes: Dispatch&lt;SetStateAction&lt;Recipe[]&gt;&gt;;
+	status: string | null;
+	loading: boolean;
+	generate: () =&gt; void;
 }
 &nbsp;
-const RecipeGenerationContext = createContext&lt;RecipeGenerationContextValue | null&gt;(null)
+const RecipeGenerationContext = createContext&lt;RecipeGenerationContextValue | null&gt;(null);
+&nbsp;
+function safeGetArrayFromStorage(key: string) {
+	try {
+		const stored = sessionStorage.getItem(key);
+		return stored ? (JSON.parse(stored)) : [];
+	} catch {
+<span class="cstat-no" title="statement not covered" >		return [];</span>
+	}
+}
 &nbsp;
 // Lives above the tab layout so an ongoing generation survives navigating to another tab
-export function RecipeGenerationProvider({ children }: { children: ReactNode }) {
-	const { t } = useTranslation()
-	const apiFetch = useApi()
-	const navigate = useNavigate()
+export function RecipeGenerationProvider({children}: { children: ReactNode }) {
+	const {t} = useTranslation();
+	const apiFetch = useApi();
+	const navigate = useNavigate();
 &nbsp;
-	const [prompt, setPrompt] = useState(() =&gt; sessionStorage.getItem('recipe_prompt') ?? '')
-	const [selectedTags, setSelectedTags] = useState&lt;string[]&gt;(() =&gt; {
-		const stored = sessionStorage.getItem('recipe_tags')
-		return stored ? (<span class="branch-0 cbranch-no" title="branch not covered" >JSON.parse(stored) as string[]) : [</span>]
-	})
-	const [recipes, setRecipes] = useState&lt;Recipe[]&gt;(() =&gt; {
-		const stored = sessionStorage.getItem('generated_recipes')
-		return stored ? (JSON.parse(stored) as Recipe[]) : []
-	})
-	const [status, setStatus] = useState&lt;string | null&gt;(null)
-	const [loading, setLoading] = useState(false)
+	const [prompt, setPrompt] = useState(() =&gt; sessionStorage.getItem('recipe_prompt') ?? '');
+	const [selectedTags, setSelectedTags] = useState&lt;string[]&gt;(() =&gt; safeGetArrayFromStorage('recipe_tags'));
+	const [recipes, setRecipes] = useState&lt;Recipe[]&gt;(() =&gt; safeGetArrayFromStorage('generated_recipes'));
+	const [status, setStatus] = useState&lt;string | null&gt;(null);
+	const [loading, setLoading] = useState(false);
 &nbsp;
 	useEffect(() =&gt; {
-		sessionStorage.setItem('generated_recipes', JSON.stringify(recipes))
-	}, [recipes])
+		sessionStorage.setItem('generated_recipes', JSON.stringify(recipes));
+	}, [recipes]);
 &nbsp;
 	const generate = useCallback(() =&gt; {
-		setLoading(true)
-		setStatus(t('generate.generatingStatus'))
-		setRecipes([])
-		sessionStorage.setItem('recipe_prompt', prompt)
-		sessionStorage.setItem('recipe_tags', JSON.stringify(selectedTags))
-		navigate('/generate/results')
+		setLoading(true);
+		setStatus(t('generate.generatingStatus'));
+		setRecipes([]);
+		sessionStorage.setItem('recipe_prompt', prompt);
+		sessionStorage.setItem('recipe_tags', JSON.stringify(selectedTags));
+		navigate('/generate/results');
 &nbsp;
 		void (async () =&gt; {
 			try {
-				const tagLabels = selectedTags.map(<span class="fstat-no" title="function not covered" >(i</span>d) =&gt; <span class="cstat-no" title="statement not covered" >tagsById.get(id)?.label)</span>.filter(Boolean)
-				const fullPrompt = tagLabels.length &gt; 0 ? <span class="branch-0 cbranch-no" title="branch not covered" >`${prompt}\n\nPreferences: ${tagLabels.join(', ')}` : p</span>rompt
-				const body: RecipeRequest = { prompt: fullPrompt, language: currentLanguage() }
+				const tagLabels = selectedTags.map(<span class="fstat-no" title="function not covered" >(i</span>d) =&gt; <span class="cstat-no" title="statement not covered" >tagsById.get(id)?.label)</span>.filter(Boolean);
+				const fullPrompt = tagLabels.length &gt; 0 ? <span class="branch-0 cbranch-no" title="branch not covered" >`${prompt}\n\nPreferences: ${tagLabels.join(', ')}` : p</span>rompt;
+				const body: RecipeRequest = {prompt: fullPrompt, language: currentLanguage()};
 				const response = await apiFetch('/ai/recipes', {
 					method: 'POST',
-					headers: { 'content-type': 'application/json' },
+					headers: {'content-type': 'application/json'},
 					body: JSON.stringify(body),
-				})
-				if (!response.ok) throw new Error(await errorMessage(response))
-				const data = (await response.json()) as Recipe[]
-				setRecipes(data)
-				setStatus(data.length === 0 ? t('generate.noRecipes') : null)
+				});
+				if (!response.ok) throw new Error(await errorMessage(response));
+				const data = (await response.json()) as Recipe[];
+				setRecipes(data);
+				setStatus(data.length === 0 ? t('generate.noRecipes') : null);
 			} catch (e) {
-				<span class="missing-if-branch" title="if path not taken" >I</span>if (e instanceof SessionExpiredError) <span class="cstat-no" title="statement not covered" >return</span>
-				setStatus(t('common.error', { message: e instanceof Error ? e.message : <span class="branch-1 cbranch-no" title="branch not covered" >String(e) }</span>))
+				<span class="missing-if-branch" title="if path not taken" >I</span>if (e instanceof SessionExpiredError) <span class="cstat-no" title="statement not covered" >return;</span>
+				setStatus(t('common.error', {message: e instanceof Error ? e.message : <span class="branch-1 cbranch-no" title="branch not covered" >String(e)}</span>));
 			} finally {
-				setLoading(false)
+				setLoading(false);
 			}
-		})()
-	}, [apiFetch, navigate, prompt, selectedTags, t])
+		})();
+	}, [apiFetch, navigate, prompt, selectedTags, t]);
 &nbsp;
 	const value: RecipeGenerationContextValue = {
 		prompt, setPrompt, selectedTags, setSelectedTags, recipes, setRecipes, status, loading, generate,
-	}
-	return &lt;RecipeGenerationContext.Provider value={value}&gt;{children}&lt;/RecipeGenerationContext.Provider&gt;
+	};
+	return &lt;RecipeGenerationContext.Provider value={value}&gt;{children}&lt;/RecipeGenerationContext.Provider&gt;;
 }
 &nbsp;
 // eslint-disable-next-line react-refresh/only-export-components
 export function useRecipeGeneration(): RecipeGenerationContextValue {
-	const ctx = useContext(RecipeGenerationContext)
-	<span class="missing-if-branch" title="if path not taken" >I</span>if (!ctx) <span class="cstat-no" title="statement not covered" >throw new Error('useRecipeGeneration must be used within a RecipeGenerationProvider')</span>
-	return ctx
+	const ctx = useContext(RecipeGenerationContext);
+	<span class="missing-if-branch" title="if path not taken" >I</span>if (!ctx) <span class="cstat-no" title="statement not covered" >throw new Error('useRecipeGeneration must be used within a RecipeGenerationProvider');</span>
+	return ctx;
 }
 &nbsp;
-export type { Recipe }
+export type {Recipe};
 &nbsp;</pre></td></tr></table></pre>
 
                 <div class='push'></div><!-- for sticky footer -->
@@ -355,7 +364,7 @@ export type { Recipe }
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-07-02T14:40:36.376Z
+                at 2026-07-02T16:22:04.908Z
             </div>
         <script src="../prettify.js"></script>
         <script>
