@@ -29,6 +29,7 @@ beforeEach(() => {
 afterEach(() => {
 	fetchMock.mockReset()
 	vi.unstubAllGlobals()
+	sessionStorage.clear()
 })
 
 function render(route = '/generate') {
