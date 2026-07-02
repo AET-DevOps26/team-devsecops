@@ -106,6 +106,7 @@ export const EN = {
 			noRecipes: 'No recipes returned.',
 			generating: 'Generating…',
 			generate: 'Generate',
+			clear: 'Clear selection',
 		},
 		library: {
 			emptyTitle: 'Your cookbook is empty',

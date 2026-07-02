@@ -106,6 +106,7 @@ export const DE = {
 			noRecipes: 'Keine Rezepte erhalten.',
 			generating: 'Wird erstellt…',
 			generate: 'Erstellen',
+			clear: 'Auswahl löschen',
 		},
 		library: {
 			emptyTitle: 'Dein Kochbuch ist leer',

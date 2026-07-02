@@ -23,9 +23,6 @@ services:
       - "8080"
     networks:
       - backend
-    environment:
-      SERVICE_API_KEY: ${RECIPE_SERVICE_KEY}
-      INTERNAL_AUTH_SECRET: ${INTERNAL_AUTH_SECRET}
 
   py-help-service:
     build: ../services/py-help-service
@@ -34,9 +31,6 @@ services:
       - "8080"
     networks:
       - backend
-    environment:
-      SERVICE_API_KEY: ${HELP_SERVICE_KEY}
-      INTERNAL_AUTH_SECRET: ${INTERNAL_AUTH_SECRET}
 
   postgres-db:
     image: postgres:15-alpine

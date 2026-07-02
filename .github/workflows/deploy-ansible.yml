@@ -45,8 +45,9 @@ jobs:
           ansible-playbook -i infra/inventory.ini ansible/site.yml \
           -u azureuser \
           -e "app_branch=${{ github.head_ref || github.ref_name }}" \
-          -e "help_service_key=${{ secrets.HELP_SERVICE_KEY }}" \
-          -e "recipe_service_key=${{ secrets.RECIPE_SERVICE_KEY }}" \
+          -e "gemini_model=${{ vars.GEMINI_MODEL }}" \
+          -e "gemini_help_service_key=${{ secrets.GEMINI_HELP_SERVICE_KEY }}" \
+          -e "gemini_recipe_service_key=${{ secrets.GEMINI_RECIPE_SERVICE_KEY }}" \
           -e "internal_auth_secret=${{ secrets.INTERNAL_AUTH_SECRET }}" \
           -e "db_user=${{ secrets.AZURE_DB_USER }}" \
           -e "db_password=${{ secrets.AZURE_DB_PASSWORD }}"
