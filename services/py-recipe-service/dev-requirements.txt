@@ -4,3 +4,4 @@ pytest-cov
 httpx
 pytest-asyncio
 pytest-env
+schemathesis==4.22.3
