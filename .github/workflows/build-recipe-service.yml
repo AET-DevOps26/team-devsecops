@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - 'services/py-recipe-service/**'
+      - 'api/openapi-internal.yaml'
       - '.github/workflows/build-recipe-service.yml'
   workflow_dispatch:
   workflow_call:
