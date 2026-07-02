@@ -4,7 +4,7 @@
 
 Rancher deployment (Kubernetes): https://devsecops.stud.k8s.aet.cit.tum.de
 
-~Azure deployment (Docker Compose): http://135.116.196.120/~ _Currently unavailable since we ran out of credits, will be setup again soon_
+Azure deployment (Docker Compose): http://4.223.70.80/
 
 Coverage reports: https://aet-devops26.github.io/team-devsecops/
 
