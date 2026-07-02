@@ -104,6 +104,9 @@ dependencies {
 	testImplementation("org.springframework.boot:spring-boot-webmvc-test")
 	testImplementation("org.springframework.security:spring-security-test")
 
+	// Pact provider-side contract verification (web-client -> spring-api)
+	testImplementation("au.com.dius.pact.provider:junit5:4.6.17")
+
 	// Retrofit
 	implementation("com.squareup.retrofit2:retrofit:2.11.0")
 	implementation("com.squareup.retrofit2:converter-jackson:2.11.0")

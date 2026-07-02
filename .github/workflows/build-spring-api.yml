@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - 'services/spring-api/**'
+      - 'web-client/pacts/**'
       - '.github/workflows/build-spring-api.yml'
   workflow_dispatch:
   workflow_call:
