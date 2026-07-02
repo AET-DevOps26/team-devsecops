@@ -124,6 +124,11 @@ def get_llm():
 			raise RuntimeError("CRITICAL: GEMINI_HELP_SERVICE_KEY is missing!")
 
 		kwargs["google_api_key"] = gemini_key
+		kwargs["thinking_level"] = (
+			"low"  # inference time fluctuate a lot
+			# minimal doesn't seem a lot faster than low but seemingly produces more mistakes in json output formatting
+			# medium and high seem noticeably slower than low
+		)
 		model_name = os.getenv("GEMINI_MODEL", "gemini-3.1-flash-lite")
 
 	try:

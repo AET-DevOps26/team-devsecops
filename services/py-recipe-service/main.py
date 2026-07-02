@@ -4,7 +4,7 @@ import hmac
 import os
 import time
 import traceback
-from typing import Any, List
+from typing import Any, List, Optional
 from fastapi import Depends, FastAPI, HTTPException, Header, Request
 from dotenv import load_dotenv
 from fastapi.responses import JSONResponse
@@ -46,7 +46,7 @@ class LocalRecipeInput(BaseModel):
 	ingredients: List[LocalRecipeIngredient]
 	instructions: List[str]
 	portions: float
-	nutrients: LocalRecipeNutrients
+	nutrients: Optional[LocalRecipeNutrients] = None
 
 
 # local wrapper for recipes - llms are optimized for producing json whereas api spec expects array of json
@@ -153,7 +153,9 @@ def get_llm():
 
 		kwargs["google_api_key"] = gemini_key
 		kwargs["thinking_level"] = (
-			"high"  # minimal, medium, low, high with negligible inference time difference
+			"low"  # inference time fluctuate a lot
+			# minimal doesn't seem a lot faster than low but results in more mistakes in json output formatting
+			# medium and high are usually significantly slower than low
 		)
 		model_name = os.getenv("GEMINI_MODEL", "gemini-3.1-flash-lite")
 
