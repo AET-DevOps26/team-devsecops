@@ -8,10 +8,10 @@ import {
 	PlusIcon,
 } from '@heroicons/react/24/outline'
 import Markdown from 'react-markdown'
-import { Link, Navigate, useLocation, useNavigate, useOutletContext, useParams } from 'react-router-dom'
+import { Link, Navigate, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import type { components } from '../api'
-import type { RecipeGenerationContext } from './GeneratePage'
+import { useRecipeGeneration } from '../recipeGeneration'
 import { RecipeSaveButton } from '../components/RecipeSaveButton.tsx'
 import { formatQuantity } from '../recipeFormat'
 import { usePressPulse } from '../usePressPulse'
@@ -37,13 +37,13 @@ export function RecipePage() {
 	return pathname.startsWith('/library/') ? <LibraryRecipePage key={pathname} /> : <GeneratedRecipePage />
 }
 
-// Generated recipes are shared with the GenerateFlow layout (which persists them to sessionStorage)
+// Generated recipes are shared via the RecipeGeneration provider (which persists them to sessionStorage)
 // and are paged through by list index in router state.
 function GeneratedRecipePage() {
 	const location = useLocation()
 	const navigate = useNavigate()
 	const index = (location.state as { index?: number } | null)?.index ?? 0
-	const { recipes, setRecipes } = useOutletContext<RecipeGenerationContext>()
+	const { recipes, setRecipes } = useRecipeGeneration()
 	const [helpAnswers, setHelpAnswers] = useState<Record<number, HelpEntry[]>>({})
 	const recipe = recipes[index]
 

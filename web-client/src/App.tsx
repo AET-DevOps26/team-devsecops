@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from './auth'
 import { AppLayout } from './components/AppLayout'
+import { RecipeGenerationProvider } from './recipeGeneration'
 import { GenerateFlow, GeneratePage, GenerateResultsPage } from './pages/GeneratePage'
 import { LibraryPage } from './pages/LibraryPage'
 import { LoginPage } from './pages/LoginPage'
@@ -24,7 +25,9 @@ export default function App() {
 					<Route
 						element={
 							<RequireAuth>
-								<AppLayout />
+								<RecipeGenerationProvider>
+									<AppLayout />
+								</RecipeGenerationProvider>
 							</RequireAuth>
 						}
 					>
