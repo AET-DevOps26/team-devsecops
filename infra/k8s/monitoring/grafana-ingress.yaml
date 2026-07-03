@@ -1,5 +1,6 @@
 ---
 # Exposes Grafana at https://devsecops.stud.k8s.aet.cit.tum.de/grafana/
+# TLS is already handled by app-ingress in the app namespace for this host.
 # Grafana is configured with GF_SERVER_SERVE_FROM_SUB_PATH=true so it handles
 # the /grafana/ prefix itself — no rewrite-target needed.
 apiVersion: networking.k8s.io/v1
@@ -8,14 +9,9 @@ metadata:
   name: grafana-ingress
   namespace: monitoring
   annotations:
-    cert-manager.io/cluster-issuer: letsencrypt-prod
     nginx.ingress.kubernetes.io/proxy-read-timeout: "60"
 spec:
   ingressClassName: nginx
-  tls:
-    - hosts:
-        - devsecops.stud.k8s.aet.cit.tum.de
-      secretName: grafana-tls-cert
   rules:
     - host: devsecops.stud.k8s.aet.cit.tum.de
       http:
