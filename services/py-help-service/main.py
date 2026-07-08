@@ -101,7 +101,17 @@ def get_llm():
 
 	kwargs = {"timeout": 60}
 
-	if provider == "openai":
+	if provider == "local":
+		kwargs["base_url"] = os.getenv(
+			"LOCAL_BASE_URL", "http://host.docker.internal:1234/v1"
+		)
+		kwargs["api_key"] = os.getenv("LOCAL_KEY", "not-needed")
+		model_name = os.getenv("LOCAL_MODEL", "local-model")
+
+		# We explicitly enforce the underlying OpenAI integration layout
+		provider_target = "openai"
+
+	elif provider == "openai":
 		logos_key = os.getenv("LOGOS_KEY")
 		if not logos_key:
 			raise RuntimeError("CRITICAL: LOGOS_KEY is missing!")
@@ -112,6 +122,8 @@ def get_llm():
 		kwargs["api_key"] = logos_key
 		model_name = os.getenv("LOGOS_MODEL", "openai/gpt-oss-120b")
 
+		provider_target = "openai"
+
 	else:
 		gemini_key = os.getenv("GEMINI_HELP_SERVICE_KEY")
 		if not gemini_key:
@@ -121,8 +133,12 @@ def get_llm():
 		kwargs["response_format"] = {"type": "application/json"}
 		model_name = os.getenv("GEMINI_MODEL", "gemini-3.1-flash-lite")
 
+		provider_target = "google_genai"
+
 	try:
-		return init_chat_model(model=model_name, model_provider=provider, **kwargs)
+		return init_chat_model(
+			model=model_name, model_provider=provider_target, **kwargs
+		)
 	except Exception as e:
 		raise RuntimeError(f"Failed to boot LLM provider '{provider}': {e}")
 
