@@ -16,9 +16,11 @@ export function AppLayout() {
 	useUserPreferences()
 	const section = pathname.split('/')[1]
 	const titleKey = titleKeys[section as keyof typeof titleKeys] ?? 'layout.generate'
-	const title = t(titleKey)
+	// the recipe editor takes over the section title instead of showing a separate heading
+	const isEditing = pathname.endsWith('/edit')
+	const title = isEditing ? t('recipe.edit') : t(titleKey)
 	// the generate/default section keeps the bold "Cooking Assistant" header
-	const bold = titleKey === 'layout.generate'
+	const bold = !isEditing && titleKey === 'layout.generate'
 
 	return (
 		<div className="min-h-screen md:flex">

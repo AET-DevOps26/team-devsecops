@@ -1,10 +1,11 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import {
 	ArrowPathIcon,
 	ArrowRightIcon,
 	ChevronLeftIcon,
 	ChevronRightIcon,
 	MinusIcon,
+	PencilSquareIcon,
 	PlusIcon,
 } from '@heroicons/react/24/outline'
 import Markdown from 'react-markdown'
@@ -12,6 +13,7 @@ import { Link, Navigate, useLocation, useNavigate, useParams } from 'react-route
 import { useTranslation } from 'react-i18next'
 import type { components } from '../api'
 import { useRecipeGeneration } from '../recipeGeneration'
+import { AutoTextarea } from '../components/AutoTextarea'
 import { RecipeSaveButton } from '../components/RecipeSaveButton.tsx'
 import { formatQuantity } from '../recipeFormat'
 import { usePressPulse } from '../usePressPulse'
@@ -61,6 +63,7 @@ function GeneratedRecipePage() {
 			recipe={recipe}
 			parentPath="/generate/results"
 			onSavedIdChange={handleSavedIdChange}
+			onEdit={() => navigate('/generate/recipe/edit', { state: { index } })}
 			answers={helpAnswers[index] ?? []}
 			onAnswer={(entry) => setHelpAnswers((m) => ({ ...m, [index]: [entry, ...(m[index] ?? [])] }))}
 			pagination={{
@@ -137,6 +140,11 @@ function LibraryRecipePage() {
 		<RecipeView
 			recipe={recipe}
 			parentPath="/library"
+			onEdit={() =>
+				navigate(`/library/recipe/${recipeId}/edit`, {
+					state: recipeIdsInLibrary ? { ids: recipeIdsInLibrary } : undefined,
+				})
+			}
 			answers={answers}
 			onAnswer={(entry) => setAnswers((a) => [entry, ...a])}
 			pagination={pagination}
@@ -148,6 +156,7 @@ function RecipeView({
 	recipe,
 	parentPath,
 	onSavedIdChange,
+	onEdit,
 	answers,
 	onAnswer,
 	pagination,
@@ -155,6 +164,7 @@ function RecipeView({
   recipe: Recipe
   parentPath: string
   onSavedIdChange?: (id: number | undefined) => void
+  onEdit: () => void
   answers: HelpEntry[]
   onAnswer: (entry: HelpEntry) => void
   pagination?: Pagination
@@ -173,15 +183,6 @@ function RecipeView({
 	const [helpLoading, setHelpLoading] = useState(false)
 
 	const [sendBtnRef, pulseSend] = usePressPulse<HTMLButtonElement>()
-
-	// grow the help input to fit its content
-	const helpInputRef = useRef<HTMLTextAreaElement>(null)
-	useLayoutEffect(() => {
-		const el = helpInputRef.current
-		if (!el) return
-		el.style.height = 'auto'
-		el.style.height = `${el.scrollHeight}px`
-	}, [helpPrompt])
 
 	const scale = recipe.portions ? portions / recipe.portions : 1
 	const pages = pagination && pagination.count > 1 ? pagination : null
@@ -275,16 +276,8 @@ function RecipeView({
 
 				{/* Title & portion selector */}
 				<header className="flex items-center justify-between gap-3">
-					<div className="flex items-center gap-1">
-						<h2 className="text-lg font-bold">{recipe.title}</h2>
-						<RecipeSaveButton
-							recipe={recipe}
-							recipeId={recipe.id}
-							onSavedIdChange={onSavedIdChange}
-							onDeleted={() => navigate(parentPath)}
-						/>
-					</div>
-					<div className="flex items-center gap-2">
+					<h2 className="text-lg font-bold">{recipe.title}</h2>
+					<div className="flex shrink-0 items-center gap-2">
 						<button
 							type="button"
 							className="flex h-7 w-7 items-center justify-center rounded-full border border-gray-300 dark:border-neutral-600 cursor-pointer text-gray-600 dark:text-neutral-300 transition-transform duration-100 hover:scale-95 disabled:opacity-40"
@@ -369,16 +362,33 @@ function RecipeView({
 						{scaledNutrients.carbs != null && <span>{t('common.carbs', { value: scaledNutrients.carbs })}</span>}
 					</div>
 				)}
+
+				{/* Edit / delete (or save-to-library) actions */}
+				<div className="flex items-center justify-center gap-4 pt-1">
+					<button
+						type="button"
+						onClick={onEdit}
+						className="flex items-center gap-1 cursor-pointer text-gray-600 dark:text-neutral-300 hover:text-orange-600 dark:hover:text-orange-400 transition-colors"
+					>
+						<PencilSquareIcon className="h-5 w-5" />
+						{t('common.edit')}
+					</button>
+					<RecipeSaveButton
+						variant="text"
+						recipe={recipe}
+						recipeId={recipe.id}
+						onSavedIdChange={onSavedIdChange}
+						onDeleted={() => navigate(parentPath)}
+					/>
+				</div>
 			</article>
 
 			{/* Get help */}
 			<div className="w-full flex flex-col gap-3 py-4">
 				<h3 className="font-medium">{t('recipe.getHelp')}</h3>
 				<div className="relative">
-					<textarea
-						ref={helpInputRef}
-						rows={1}
-						className="w-full min-h-20 resize-none overflow-hidden border border-gray-300 dark:border-neutral-600 rounded-lg p-3 pr-14"
+					<AutoTextarea
+						className="w-full min-h-20 border border-gray-300 dark:border-neutral-600 rounded-lg p-3 pr-14"
 						placeholder={t('recipe.helpPlaceholder')}
 						value={helpPrompt}
 						onChange={(e) => setHelpPrompt(e.target.value)}

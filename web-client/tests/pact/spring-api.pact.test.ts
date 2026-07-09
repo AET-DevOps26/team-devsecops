@@ -151,6 +151,17 @@ describe('web-client → spring-api pact', () => {
 
 		pact
 			.given('a user testuser has a recipe')
+			.uponReceiving('a request to update a recipe by id')
+			.withRequest({
+				method: 'PUT',
+				path: '/api/v1/recipes/1',
+				headers: { ...bearer, ...jsonHeaders },
+				body: recipeInputBody,
+			})
+			.willRespondWith({ status: 200, headers: jsonResponse, body: like(recipeResponseShape) })
+
+		pact
+			.given('a user testuser has a recipe')
 			.uponReceiving('a request to delete a recipe by id')
 			.withRequest({
 				method: 'DELETE',
@@ -269,6 +280,11 @@ describe('web-client → spring-api pact', () => {
 			})
 			expect((await created.json()).id).toBeGreaterThan(0)
 			expect((await call('/recipes/1')).status).toBe(200)
+			await call('/recipes/1', {
+				method: 'PUT',
+				headers: jsonHeaders,
+				body: JSON.stringify(recipeInputBody),
+			})
 			expect((await call('/recipes/1', { method: 'DELETE' })).status).toBe(204)
 
 			// GenAI
