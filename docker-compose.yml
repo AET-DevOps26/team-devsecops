@@ -3,6 +3,8 @@ services:
     build: ./services/py-recipe-service
     ports:
       - "8090:8080"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     env_file:
       - ./.env
     develop:
@@ -22,6 +24,8 @@ services:
     build: ./services/py-help-service
     ports:
       - "8091:8080"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     env_file:
       - ./.env
     develop:
