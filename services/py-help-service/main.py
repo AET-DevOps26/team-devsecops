@@ -190,11 +190,9 @@ async def generate_help(
 			if ingredients:
 				recipe_ctx.append("\nIngredients:")
 				for ing in ingredients:
-					recipe_ctx.append(f"- {ing}")
+					recipe_ctx.append(f"- {ing.quantity} {ing.unit} {ing.name}")
 
-			instructions = getattr(request.recipe, "instructions", None) or getattr(
-				request.recipe, "steps", None
-			)
+			instructions = getattr(request.recipe, "instructions", None)
 			if instructions:
 				recipe_ctx.append("\nInstructions:")
 				for idx, step in enumerate(instructions, 1):

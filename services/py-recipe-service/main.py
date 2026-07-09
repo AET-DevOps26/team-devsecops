@@ -220,7 +220,6 @@ async def generate_recipes(
 		# return array of recipes as expeted from the api spec
 		final_recipes = []
 		for r in response.recipes:
-			# exclude_none=True ensures that if nutrients is None, it won't be included in the dict keys at all
 			recipe_dict = r.model_dump()
 			final_recipes.append(RecipeInput.from_dict(recipe_dict))
 
