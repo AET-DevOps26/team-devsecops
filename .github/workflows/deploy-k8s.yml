@@ -118,6 +118,8 @@ jobs:
         run: |
           kubectl rollout status deployment/prometheus -n monitoring --timeout=300s
           kubectl rollout status deployment/grafana -n monitoring --timeout=180s
+          kubectl rollout status deployment/loki -n monitoring --timeout=180s
+          kubectl rollout status deployment/alloy -n monitoring --timeout=120s
 
       - name: Restart deployments to pull latest images
         if: github.event_name != 'push'

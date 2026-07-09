@@ -13,6 +13,13 @@ data:
         url: http://prometheus.monitoring.svc.cluster.local:9090
         isDefault: true
         access: proxy
+  loki.yaml: |
+    apiVersion: 1
+    datasources:
+      - name: Loki
+        type: loki
+        url: http://loki.monitoring.svc.cluster.local:3100
+        access: proxy
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -33,6 +40,7 @@ metadata:
   namespace: monitoring
 spec:
   replicas: 1
+  revisionHistoryLimit: 2
   strategy:
     type: Recreate
   selector:
@@ -47,16 +55,16 @@ spec:
         fsGroup: 472
       containers:
         - name: grafana
-          image: grafana/grafana:11.6.1
+          image: grafana/grafana:11.6.16
           env:
             - name: GF_SECURITY_ADMIN_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: grafana-secret
                   key: admin-password
-            - name: GF_SERVER_ROOT_URL
-              value: https://devsecops.stud.k8s.aet.cit.tum.de/grafana/
-            - name: GF_SERVER_SERVE_FROM_SUB_PATH
+            - name: GF_INSTALL_PLUGINS
+              value: "grafana-metricsdrilldown-app,grafana-lokiexplore-app,grafana-exploretraces-app,grafana-pyroscope-app"
+            - name: GF_PLUGINS_PREINSTALL_DISABLED
               value: "true"
           ports:
             - containerPort: 3000
