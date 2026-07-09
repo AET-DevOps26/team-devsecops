@@ -275,7 +275,7 @@ function RecipeView({
 				)}
 
 				{/* Title & portion selector */}
-				<header className="flex items-center justify-between gap-3">
+				<header className="flex flex-col items-start gap-2 md:flex-row md:items-center md:justify-between md:gap-3">
 					<h2 className="text-lg font-bold">{recipe.title}</h2>
 					<div className="flex shrink-0 items-center gap-2">
 						<button
