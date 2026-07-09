@@ -1,0 +1,25 @@
+---
+# Exposes Grafana at https://devsecops.stud.k8s.aet.cit.tum.de/grafana/
+# TLS is already handled by app-ingress in the app namespace for this host.
+# Grafana is configured with GF_SERVER_SERVE_FROM_SUB_PATH=true so it handles
+# the /grafana/ prefix itself — no rewrite-target needed.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: grafana-ingress
+  namespace: monitoring
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "60"
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: devsecops.stud.k8s.aet.cit.tum.de
+      http:
+        paths:
+          - path: /grafana
+            pathType: Prefix
+            backend:
+              service:
+                name: grafana
+                port:
+                  number: 3000

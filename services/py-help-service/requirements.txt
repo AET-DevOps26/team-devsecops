@@ -8,3 +8,4 @@ pydantic==2.7.4
 python-dotenv==1.0.1
 attrs==23.2.0
 python-dateutil==2.9.0.post0
+prometheus-fastapi-instrumentator==7.1.0
