@@ -105,6 +105,7 @@ def get_llm():
 			"LOCAL_BASE_URL", "http://host.docker.internal:1234/v1"
 		)
 		kwargs["api_key"] = os.getenv("LOCAL_KEY", "not-needed")
+		kwargs["response_format"] = {"type": "json_object"}
 		model_name = os.getenv("LOCAL_MODEL", "local-model")
 
 		# We explicitly enforce the underlying OpenAI integration layout
@@ -125,9 +126,9 @@ def get_llm():
 		provider_target = "openai"
 
 	else:
-		gemini_key = os.getenv("GEMINI_HELP_SERVICE_KEY")
+		gemini_key = os.getenv("GEMINI_RECIPE_SERVICE_KEY")
 		if not gemini_key:
-			raise RuntimeError("CRITICAL: GEMINI_HELP_SERVICE_KEY is missing!")
+			raise RuntimeError("CRITICAL: GEMINI_RECIPE_SERVICE_KEY is missing!")
 
 		kwargs["google_api_key"] = gemini_key
 		kwargs["response_format"] = {"type": "application/json"}
