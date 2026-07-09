@@ -1,4 +1,4 @@
-import {useEffect, useState} from 'react'
+import {useEffect, useMemo, useState} from 'react'
 import {flushSync} from 'react-dom'
 import {Link, useNavigate} from 'react-router-dom'
 import {Trans, useTranslation} from 'react-i18next'
@@ -8,6 +8,7 @@ import type {components} from '../api'
 import {RecipeCard} from '../components/RecipeCard'
 import {errorMessage} from '../apiError'
 import {SessionExpiredError, useApi} from '../useApi'
+import {useColumnCount} from '../useColumnCount'
 
 type Recipe = components['schemas']['Recipe']
 
@@ -43,6 +44,12 @@ export function LibraryPage() {
 		}
 	}, [apiFetch, t])
 
+	const columnCount = useColumnCount()
+	const columns = useMemo(
+		() => Array.from({length: columnCount}, (_, column) => recipes.filter((_, index) => index % columnCount === column)),
+		[recipes, columnCount],
+	)
+
 	if (phase === 'loading') return <p className="text-gray-500 dark:text-neutral-400">{t('common.loading')}</p>
 	if (phase === 'error') return <p className="text-red-600 dark:text-red-400">{error}</p>
 
@@ -73,31 +80,31 @@ export function LibraryPage() {
 	}
 
 	return (
-		<div className="columns-1 gap-4 md:columns-2 lg:columns-3">
-			{recipes.map((recipe) => (
-				<div
-					key={recipe.id}
-					className="mb-4 break-inside-avoid"
-					style={{viewTransitionName: `recipe-card-${recipe.id}`}}
-				>
-					<RecipeCard
-						recipe={recipe}
-						recipeId={recipe.id}
-						onSavedIdChange={(newId) => {
-							if (newId != null) return
+		<div className="grid grid-cols-1 items-start gap-4 md:grid-cols-2 lg:grid-cols-3">
+			{columns.map((column, index) => (
+				<div key={index} className="flex flex-col gap-4">
+					{column.map((recipe) => (
+						<div key={recipe.id} style={{viewTransitionName: `recipe-card-${recipe.id}`}}>
+							<RecipeCard
+								recipe={recipe}
+								recipeId={recipe.id}
+								onSavedIdChange={(newId) => {
+									if (newId != null) return
 
-							// this recipe got deleted, make the others rearrange with a smooth transition
-							const deleteRecipe = () => {
-								flushSync(() => {
-									setRecipes((prev) => prev.filter((r) => r.id !== recipe.id))
-								})
-							}
-							if (document.startViewTransition) document.startViewTransition(deleteRecipe)
-							else deleteRecipe()
-						}}
-						// carry the ordered ids so the recipe page can offer prev/next without re-fetching the list
-						onOpen={() => navigate(`/library/recipe/${recipe.id}`, {state: {ids: recipes.map((r) => r.id)}})}
-					/>
+									// this recipe got deleted, make the others rearrange with a smooth transition
+									const deleteRecipe = () => {
+										flushSync(() => {
+											setRecipes((prev) => prev.filter((r) => r.id !== recipe.id))
+										})
+									}
+									if (document.startViewTransition) document.startViewTransition(deleteRecipe)
+									else deleteRecipe()
+								}}
+								// carry the ordered ids so the recipe page can offer prev/next without re-fetching the list
+								onOpen={() => navigate(`/library/recipe/${recipe.id}`, {state: {ids: recipes.map((r) => r.id)}})}
+							/>
+						</div>
+					))}
 				</div>
 			))}
 		</div>
