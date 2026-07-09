@@ -8,6 +8,7 @@ import {
 	PlusIcon,
 } from '@heroicons/react/24/outline'
 import Markdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 import { Link, Navigate, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import type { components } from '../api'
@@ -430,7 +431,7 @@ function RecipeView({
 						{entry.question}
 					</p>
 					<div className="prose prose-sm dark:prose-invert max-w-none">
-						<Markdown>{entry.answer}</Markdown>
+						<Markdown remarkPlugins={[remarkGfm]}>{entry.answer}</Markdown>
 					</div>
 				</div>
 			))}
