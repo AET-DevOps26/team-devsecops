@@ -13,6 +13,7 @@ from pydantic import BaseModel
 
 from client.cooking_assistant_gen_ai_services_api_internal_client.types import Unset
 
+from prometheus_fastapi_instrumentator import Instrumentator
 from client.cooking_assistant_gen_ai_services_api_internal_client.models.help_request_forwarded import (
 	HelpRequestForwarded,
 )
@@ -27,6 +28,7 @@ class LocalHelpResponse(BaseModel):
 load_dotenv()
 
 app = FastAPI(title="Cooking Assistant GenAI Service")
+Instrumentator().instrument(app).expose(app)
 
 
 @app.exception_handler(HTTPException)
@@ -124,6 +126,11 @@ def get_llm():
 			raise RuntimeError("CRITICAL: GEMINI_HELP_SERVICE_KEY is missing!")
 
 		kwargs["google_api_key"] = gemini_key
+		kwargs["thinking_level"] = (
+			"low"  # inference time fluctuate a lot
+			# minimal doesn't seem a lot faster than low but seemingly produces more mistakes in json output formatting
+			# medium and high seem noticeably slower than low
+		)
 		model_name = os.getenv("GEMINI_MODEL", "gemini-3.1-flash-lite")
 
 	try:
@@ -185,11 +192,9 @@ async def generate_help(
 			if ingredients:
 				recipe_ctx.append("\nIngredients:")
 				for ing in ingredients:
-					recipe_ctx.append(f"- {ing}")
+					recipe_ctx.append(f"- {ing.quantity} {ing.unit} {ing.name}")
 
-			instructions = getattr(request.recipe, "instructions", None) or getattr(
-				request.recipe, "steps", None
-			)
+			instructions = getattr(request.recipe, "instructions", None)
 			if instructions:
 				recipe_ctx.append("\nInstructions:")
 				for idx, step in enumerate(instructions, 1):

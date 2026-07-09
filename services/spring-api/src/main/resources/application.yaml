@@ -42,7 +42,10 @@ management:
   endpoints:
     web:
       exposure:
-        include: health  # only /actuator/health is exposed, not info/metrics/env/etc.
+        include: health,prometheus,info
+  info:
+    build:
+      enabled: true
   endpoint:
     health:
       probes:

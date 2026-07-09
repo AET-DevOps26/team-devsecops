@@ -4,11 +4,13 @@
 
 Rancher deployment (Kubernetes): https://devsecops.stud.k8s.aet.cit.tum.de
 
-~Azure deployment (Docker Compose): http://135.116.196.120/~ _Currently unavailable since we ran out of credits, will be setup again soon_
+Azure deployment (Docker Compose): http://4.223.70.80/
 
 Coverage reports: https://aet-devops26.github.io/team-devsecops/
 
 API scheme (Swagger UI): https://devsecops.stud.k8s.aet.cit.tum.de/swagger-ui/index.html
+
+Monitoring (Grafana): https://devsecops.stud.k8s.aet.cit.tum.de/grafana
 ## Local development
 
 The full stack runs under Docker Compose with live-reload:

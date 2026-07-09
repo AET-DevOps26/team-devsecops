@@ -87,6 +87,7 @@ dependencies {
 
 	// Observability
 	implementation("org.springframework.boot:spring-boot-starter-actuator")
+	runtimeOnly("io.micrometer:micrometer-registry-prometheus")
 
 	// Auth
 	implementation("org.springframework.boot:spring-boot-starter-security")
@@ -117,4 +118,8 @@ dependencies {
 	implementation("com.squareup.moshi:moshi:1.15.1")
 	implementation("com.squareup.moshi:moshi-kotlin:1.15.1")
 	implementation("com.squareup.retrofit2:converter-moshi:2.11.0")
+}
+
+springBoot {
+	buildInfo()
 }

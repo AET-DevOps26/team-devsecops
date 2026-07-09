@@ -54,12 +54,13 @@ jobs:
       # run, updates on subsequent runs, never errors if the secret already exists.
       #
       # Required GitHub Secrets (Settings → Secrets and variables → Actions):
-      #   DB_PASSWORD          — PostgreSQL password
-      #   JWT_SECRET           — JWT signing key
-      #   INTERNAL_AUTH_SECRET — shared HMAC key between spring-api and python services
-      #   HELP_SERVICE_KEY     — Gemini API key for py-help-service
-      #   RECIPE_SERVICE_KEY   — Gemini API key for py-recipe-service
-      #   KUBE_CONFIG          — base64-encoded kubeconfig (base64 -w0 on Linux)
+      #   DB_PASSWORD            — PostgreSQL password
+      #   JWT_SECRET             — JWT signing key
+      #   INTERNAL_AUTH_SECRET   — shared HMAC key between spring-api and python services
+      #   HELP_SERVICE_KEY       — Gemini API key for py-help-service
+      #   RECIPE_SERVICE_KEY     — Gemini API key for py-recipe-service
+      #   GRAFANA_ADMIN_PASSWORD — Grafana admin password
+      #   KUBE_CONFIG            — base64-encoded kubeconfig (base64 -w0 on Linux)
       - name: Upsert K8s secrets
         run: |
           kubectl create secret generic postgres-secret -n app \
@@ -92,6 +93,10 @@ jobs:
             --from-literal=INTERNAL_AUTH_SECRET="${{ secrets.INTERNAL_AUTH_SECRET }}" \
             --dry-run=client -o yaml | kubectl apply -f -
 
+          kubectl create secret generic grafana-secret -n monitoring \
+            --from-literal=admin-password="${{ secrets.GRAFANA_ADMIN_PASSWORD }}" \
+            --dry-run=client -o yaml | kubectl apply -f -
+
       - name: Deploy PostgreSQL (StatefulSet)
         run: kubectl apply -f infra/k8s/postgres/
 
@@ -105,6 +110,14 @@ jobs:
           kubectl apply -f infra/k8s/py-help-service/
           kubectl apply -f infra/k8s/web-client/
           kubectl apply -f infra/k8s/ingress.yaml
+
+      - name: Deploy monitoring
+        run: kubectl apply -f infra/k8s/monitoring/
+
+      - name: Wait for monitoring rollouts
+        run: |
+          kubectl rollout status deployment/prometheus -n monitoring --timeout=300s
+          kubectl rollout status deployment/grafana -n monitoring --timeout=180s
 
       - name: Restart deployments to pull latest images
         if: github.event_name != 'push'
