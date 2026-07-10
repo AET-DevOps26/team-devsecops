@@ -5,12 +5,25 @@
 */
 package org.openapitools.api
 
+import org.openapitools.model.AuthRequest
+import org.openapitools.model.AuthResponse
+import org.openapitools.model.ErrorResponse
+import org.openapitools.model.UserProfile
+import org.openapitools.model.UserProfileUpdate
 import io.swagger.v3.oas.annotations.*
 import io.swagger.v3.oas.annotations.enums.*
 import io.swagger.v3.oas.annotations.media.*
 import io.swagger.v3.oas.annotations.responses.*
 import io.swagger.v3.oas.annotations.security.*
-import jakarta.validation.Valid
+import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
+import org.springframework.http.ResponseEntity
+
+import org.springframework.web.bind.annotation.*
+import org.springframework.validation.annotation.Validated
+import org.springframework.web.context.request.NativeWebRequest
+import org.springframework.beans.factory.annotation.Autowired
+
 import jakarta.validation.constraints.DecimalMax
 import jakarta.validation.constraints.DecimalMin
 import jakarta.validation.constraints.Email
@@ -19,199 +32,158 @@ import jakarta.validation.constraints.Min
 import jakarta.validation.constraints.NotNull
 import jakarta.validation.constraints.Pattern
 import jakarta.validation.constraints.Size
-import org.openapitools.model.AuthRequest
-import org.openapitools.model.AuthResponse
-import org.openapitools.model.ErrorResponse
-import org.openapitools.model.UserProfile
-import org.openapitools.model.UserProfileUpdate
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.http.HttpStatus
-import org.springframework.http.MediaType
-import org.springframework.http.ResponseEntity
-import org.springframework.validation.annotation.Validated
-import org.springframework.web.bind.annotation.*
-import org.springframework.web.context.request.NativeWebRequest
+import jakarta.validation.Valid
+
 import kotlin.collections.List
 import kotlin.collections.Map
 
 @RestController
 @Validated
 interface UsersApi {
-	@Operation(
-		tags = ["Users"],
-		summary = "Login and receive a JWT token",
-		operationId = "usersLoginPost",
-		description = """""",
-		responses = [
-			ApiResponse(
-				responseCode = "200",
-				description = "JWT token returned",
-				content = [Content(schema = Schema(implementation = AuthResponse::class))],
-			),
-			ApiResponse(
-				responseCode = "401",
-				description = "Invalid username or password",
-				content = [Content(schema = Schema(implementation = ErrorResponse::class))],
-			),
-		],
-	)
-	@RequestMapping(
-		method = [RequestMethod.POST],
-		// "/users/login"
-		value = [PATH_USERS_LOGIN_POST],
-		produces = ["application/json"],
-		consumes = ["application/json"],
-	)
-	fun usersLoginPost(
-		@Parameter(description = "", required = true) @Valid @RequestBody authRequest: AuthRequest,
-	): ResponseEntity<AuthResponse> = ResponseEntity(HttpStatus.NOT_IMPLEMENTED)
 
-	@Operation(
-		tags = ["Users"],
-		summary = "Logout",
-		operationId = "usersLogoutPost",
-		description = """""",
-		responses = [
-			ApiResponse(responseCode = "200", description = "Logged out successfully"),
-			ApiResponse(
-				responseCode = "401",
-				description = "Missing or invalid token",
-				content = [Content(schema = Schema(implementation = ErrorResponse::class))],
-			),
-		],
-		security = [SecurityRequirement(name = "bearerAuth")],
-	)
-	@RequestMapping(
-		method = [RequestMethod.POST],
-		// "/users/logout"
-		value = [PATH_USERS_LOGOUT_POST],
-		produces = ["application/json"],
-	)
-	fun usersLogoutPost(): ResponseEntity<Unit> = ResponseEntity(HttpStatus.NOT_IMPLEMENTED)
+    @Operation(
+        tags = ["Users",],
+        summary = "Login and receive a JWT token",
+        operationId = "usersLoginPost",
+        description = """""",
+        responses = [
+            ApiResponse(responseCode = "200", description = "JWT token returned", content = [Content(schema = Schema(implementation = AuthResponse::class))]),
+            ApiResponse(responseCode = "401", description = "Invalid username or password", content = [Content(schema = Schema(implementation = ErrorResponse::class))])
+        ]
+    )
+    @RequestMapping(
+        method = [RequestMethod.POST],
+        // "/users/login"
+        value = [PATH_USERS_LOGIN_POST],
+        produces = ["application/json"],
+        consumes = ["application/json"]
+    )
+    fun usersLoginPost(
+        @Parameter(description = "", required = true) @Valid @RequestBody authRequest: AuthRequest
+    ): ResponseEntity<AuthResponse> {
+        return ResponseEntity(HttpStatus.NOT_IMPLEMENTED)
+    }
 
-	@Operation(
-		tags = ["Users"],
-		summary = "Delete current user account and all associated recipes (cascade)",
-		operationId = "usersProfileDelete",
-		description = """""",
-		responses = [
-			ApiResponse(responseCode = "204", description = "User account and all associated data deleted"),
-			ApiResponse(
-				responseCode = "401",
-				description = "Missing or invalid token",
-				content = [Content(schema = Schema(implementation = ErrorResponse::class))],
-			),
-		],
-		security = [SecurityRequirement(name = "bearerAuth")],
-	)
-	@RequestMapping(
-		method = [RequestMethod.DELETE],
-		// "/users/profile"
-		value = [PATH_USERS_PROFILE_DELETE],
-		produces = ["application/json"],
-	)
-	fun usersProfileDelete(): ResponseEntity<Unit> = ResponseEntity(HttpStatus.NOT_IMPLEMENTED)
+    @Operation(
+        tags = ["Users",],
+        summary = "Logout",
+        operationId = "usersLogoutPost",
+        description = """""",
+        responses = [
+            ApiResponse(responseCode = "200", description = "Logged out successfully"),
+            ApiResponse(responseCode = "401", description = "Missing or invalid token", content = [Content(schema = Schema(implementation = ErrorResponse::class))])
+        ],
+        security = [ SecurityRequirement(name = "bearerAuth") ]
+    )
+    @RequestMapping(
+        method = [RequestMethod.POST],
+        // "/users/logout"
+        value = [PATH_USERS_LOGOUT_POST],
+        produces = ["application/json"]
+    )
+    fun usersLogoutPost(): ResponseEntity<Unit> {
+        return ResponseEntity(HttpStatus.NOT_IMPLEMENTED)
+    }
 
-	@Operation(
-		tags = ["Users"],
-		summary = "Get current user profile and preferences",
-		operationId = "usersProfileGet",
-		description = """""",
-		responses = [
-			ApiResponse(
-				responseCode = "200",
-				description = "User profile and preferences",
-				content = [Content(schema = Schema(implementation = UserProfile::class))],
-			),
-			ApiResponse(
-				responseCode = "401",
-				description = "Missing or invalid token",
-				content = [Content(schema = Schema(implementation = ErrorResponse::class))],
-			),
-		],
-		security = [SecurityRequirement(name = "bearerAuth")],
-	)
-	@RequestMapping(
-		method = [RequestMethod.GET],
-		// "/users/profile"
-		value = [PATH_USERS_PROFILE_GET],
-		produces = ["application/json"],
-	)
-	fun usersProfileGet(): ResponseEntity<UserProfile> = ResponseEntity(HttpStatus.NOT_IMPLEMENTED)
+    @Operation(
+        tags = ["Users",],
+        summary = "Delete current user account and all associated recipes (cascade)",
+        operationId = "usersProfileDelete",
+        description = """""",
+        responses = [
+            ApiResponse(responseCode = "204", description = "User account and all associated data deleted"),
+            ApiResponse(responseCode = "401", description = "Missing or invalid token", content = [Content(schema = Schema(implementation = ErrorResponse::class))])
+        ],
+        security = [ SecurityRequirement(name = "bearerAuth") ]
+    )
+    @RequestMapping(
+        method = [RequestMethod.DELETE],
+        // "/users/profile"
+        value = [PATH_USERS_PROFILE_DELETE],
+        produces = ["application/json"]
+    )
+    fun usersProfileDelete(): ResponseEntity<Unit> {
+        return ResponseEntity(HttpStatus.NOT_IMPLEMENTED)
+    }
 
-	@Operation(
-		tags = ["Users"],
-		summary = "Update user profile and preferences",
-		operationId = "usersProfilePut",
-		description = """""",
-		responses = [
-			ApiResponse(responseCode = "200", description = "Profile and preferences updated"),
-			ApiResponse(
-				responseCode = "400",
-				description = "Invalid request body (e.g. blank password, username contains invalid characters)",
-				content = [Content(schema = Schema(implementation = ErrorResponse::class))],
-			),
-			ApiResponse(
-				responseCode = "401",
-				description = "Missing or invalid token",
-				content = [Content(schema = Schema(implementation = ErrorResponse::class))],
-			),
-			ApiResponse(
-				responseCode = "409",
-				description = "Username already taken",
-				content = [Content(schema = Schema(implementation = ErrorResponse::class))],
-			),
-		],
-		security = [SecurityRequirement(name = "bearerAuth")],
-	)
-	@RequestMapping(
-		method = [RequestMethod.PUT],
-		// "/users/profile"
-		value = [PATH_USERS_PROFILE_PUT],
-		produces = ["application/json"],
-		consumes = ["application/json"],
-	)
-	fun usersProfilePut(
-		@Parameter(description = "", required = true) @Valid @RequestBody userProfileUpdate: UserProfileUpdate,
-	): ResponseEntity<Unit> = ResponseEntity(HttpStatus.NOT_IMPLEMENTED)
+    @Operation(
+        tags = ["Users",],
+        summary = "Get current user profile and preferences",
+        operationId = "usersProfileGet",
+        description = """""",
+        responses = [
+            ApiResponse(responseCode = "200", description = "User profile and preferences", content = [Content(schema = Schema(implementation = UserProfile::class))]),
+            ApiResponse(responseCode = "401", description = "Missing or invalid token", content = [Content(schema = Schema(implementation = ErrorResponse::class))])
+        ],
+        security = [ SecurityRequirement(name = "bearerAuth") ]
+    )
+    @RequestMapping(
+        method = [RequestMethod.GET],
+        // "/users/profile"
+        value = [PATH_USERS_PROFILE_GET],
+        produces = ["application/json"]
+    )
+    fun usersProfileGet(): ResponseEntity<UserProfile> {
+        return ResponseEntity(HttpStatus.NOT_IMPLEMENTED)
+    }
 
-	@Operation(
-		tags = ["Users"],
-		summary = "Register a new user",
-		operationId = "usersRegisterPost",
-		description = """""",
-		responses = [
-			ApiResponse(responseCode = "201", description = "User created successfully"),
-			ApiResponse(
-				responseCode = "400",
-				description = "Invalid request body (e.g. blank username or password, username contains invalid characters)",
-				content = [Content(schema = Schema(implementation = ErrorResponse::class))],
-			),
-			ApiResponse(
-				responseCode = "409",
-				description = "Username already taken",
-				content = [Content(schema = Schema(implementation = ErrorResponse::class))],
-			),
-		],
-	)
-	@RequestMapping(
-		method = [RequestMethod.POST],
-		// "/users/register"
-		value = [PATH_USERS_REGISTER_POST],
-		produces = ["application/json"],
-		consumes = ["application/json"],
-	)
-	fun usersRegisterPost(
-		@Parameter(description = "", required = true) @Valid @RequestBody authRequest: AuthRequest,
-	): ResponseEntity<Unit> = ResponseEntity(HttpStatus.NOT_IMPLEMENTED)
+    @Operation(
+        tags = ["Users",],
+        summary = "Update user profile and preferences",
+        operationId = "usersProfilePut",
+        description = """""",
+        responses = [
+            ApiResponse(responseCode = "200", description = "Profile and preferences updated"),
+            ApiResponse(responseCode = "400", description = "Invalid request body (e.g. blank password, username contains invalid characters)", content = [Content(schema = Schema(implementation = ErrorResponse::class))]),
+            ApiResponse(responseCode = "401", description = "Missing or invalid token", content = [Content(schema = Schema(implementation = ErrorResponse::class))]),
+            ApiResponse(responseCode = "409", description = "Username already taken", content = [Content(schema = Schema(implementation = ErrorResponse::class))])
+        ],
+        security = [ SecurityRequirement(name = "bearerAuth") ]
+    )
+    @RequestMapping(
+        method = [RequestMethod.PUT],
+        // "/users/profile"
+        value = [PATH_USERS_PROFILE_PUT],
+        produces = ["application/json"],
+        consumes = ["application/json"]
+    )
+    fun usersProfilePut(
+        @Parameter(description = "", required = true) @Valid @RequestBody userProfileUpdate: UserProfileUpdate
+    ): ResponseEntity<Unit> {
+        return ResponseEntity(HttpStatus.NOT_IMPLEMENTED)
+    }
 
-	companion object {
-		// for your own safety never directly reuse these path definitions in tests
-		const val PATH_USERS_LOGIN_POST: String = "/users/login"
-		const val PATH_USERS_LOGOUT_POST: String = "/users/logout"
-		const val PATH_USERS_PROFILE_DELETE: String = "/users/profile"
-		const val PATH_USERS_PROFILE_GET: String = "/users/profile"
-		const val PATH_USERS_PROFILE_PUT: String = "/users/profile"
-		const val PATH_USERS_REGISTER_POST: String = "/users/register"
-	}
+    @Operation(
+        tags = ["Users",],
+        summary = "Register a new user",
+        operationId = "usersRegisterPost",
+        description = """""",
+        responses = [
+            ApiResponse(responseCode = "201", description = "User created successfully"),
+            ApiResponse(responseCode = "400", description = "Invalid request body (e.g. blank username or password, username contains invalid characters)", content = [Content(schema = Schema(implementation = ErrorResponse::class))]),
+            ApiResponse(responseCode = "409", description = "Username already taken", content = [Content(schema = Schema(implementation = ErrorResponse::class))])
+        ]
+    )
+    @RequestMapping(
+        method = [RequestMethod.POST],
+        // "/users/register"
+        value = [PATH_USERS_REGISTER_POST],
+        produces = ["application/json"],
+        consumes = ["application/json"]
+    )
+    fun usersRegisterPost(
+        @Parameter(description = "", required = true) @Valid @RequestBody authRequest: AuthRequest
+    ): ResponseEntity<Unit> {
+        return ResponseEntity(HttpStatus.NOT_IMPLEMENTED)
+    }
+
+    companion object {
+        //for your own safety never directly reuse these path definitions in tests
+        const val PATH_USERS_LOGIN_POST: String = "/users/login"
+        const val PATH_USERS_LOGOUT_POST: String = "/users/logout"
+        const val PATH_USERS_PROFILE_DELETE: String = "/users/profile"
+        const val PATH_USERS_PROFILE_GET: String = "/users/profile"
+        const val PATH_USERS_PROFILE_PUT: String = "/users/profile"
+        const val PATH_USERS_REGISTER_POST: String = "/users/register"
+    }
 }

@@ -398,6 +398,50 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
 
+  /ai/nutrients:
+    post:
+      tags: [AI]
+      summary: Generate nutritional information for a recipe using an LLM
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NutrientRequest"
+      responses:
+        "200":
+          description: AI-generated nutritional breakdown completed successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RecipeNutrients"
+        "400":
+          description: Invalid request body or recipe structure
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Missing or invalid token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "502":
+          description: GenAI service unavailable or returned an unparseable response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "504":
+          description: GenAI service timed out
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
   /ai/help:
     post:
       tags: [AI]
@@ -709,3 +753,14 @@ components:
         response:
           type: string
           minLength: 1
+
+    NutrientRequest:
+      type: object
+      required: [recipe]
+      additionalProperties: false
+      properties:
+        recipe:
+          $ref: "#/components/schemas/RecipeInput"
+        language:
+          $ref: '#/components/schemas/Language'
+          description: Optional active language context for any generated metadata text

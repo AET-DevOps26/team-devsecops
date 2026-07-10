@@ -98,6 +98,28 @@ class AIApiController(
 		return ResponseEntity.ok(publicRecipes)
 	}
 
+	override fun aiNutrientsPost(
+		@Valid nutrientRequest: org.openapitools.model.NutrientRequest,
+	): ResponseEntity<org.openapitools.model.RecipeNutrients> {
+		val internalRequest =
+			org.openapitools.internal.model.NutrientRequestForwarded(
+				recipe = nutrientRequest.recipe.toInternalRecipe(),
+			)
+
+		val retrofitResponse =
+			try {
+				recipeServiceApi.aiNutrientsPost("", "", internalRequest).execute()
+			} catch (e: InterruptedIOException) {
+				throw ResponseStatusException(HttpStatus.GATEWAY_TIMEOUT, "Upstream AI service timed out", e)
+			} catch (e: Exception) {
+				throw ResponseStatusException(HttpStatus.BAD_GATEWAY, e.message ?: "Upstream service unreachable", e)
+			}
+
+		val internalNutrients = handleRetrofitResponse(retrofitResponse)
+		val publicNutrients = internalNutrients.toPublicNutrients()
+		return ResponseEntity.ok(publicNutrients)
+	}
+
 	private fun currentUsername(): String = SecurityContextHolder.getContext().authentication!!.name
 
 	/**
@@ -212,5 +234,13 @@ class AIApiController(
 				this.nutrients?.let {
 					org.openapitools.model.RecipeNutrients(calories = it.calories, protein = it.protein, fat = it.fat, carbs = it.carbs)
 				},
+		)
+
+	private fun org.openapitools.internal.model.RecipeNutrients.toPublicNutrients(): org.openapitools.model.RecipeNutrients =
+		org.openapitools.model.RecipeNutrients(
+			calories = this.calories,
+			protein = this.protein,
+			fat = this.fat,
+			carbs = this.carbs,
 		)
 }

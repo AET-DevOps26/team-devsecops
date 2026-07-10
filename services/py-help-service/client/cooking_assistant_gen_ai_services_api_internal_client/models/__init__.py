@@ -4,6 +4,7 @@ from .error_response import ErrorResponse
 from .get_health_response_200 import GetHealthResponse200
 from .help_request_forwarded import HelpRequestForwarded
 from .help_response import HelpResponse
+from .nutrient_request_forwarded import NutrientRequestForwarded
 from .recipe_ingredient import RecipeIngredient
 from .recipe_input import RecipeInput
 from .recipe_nutrients import RecipeNutrients
@@ -17,6 +18,7 @@ __all__ = (
     "GetHealthResponse200",
     "HelpRequestForwarded",
     "HelpResponse",
+    "NutrientRequestForwarded",
     "RecipeIngredient",
     "RecipeInput",
     "RecipeNutrients",
