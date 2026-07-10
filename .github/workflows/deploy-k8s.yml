@@ -60,6 +60,7 @@ jobs:
       #   HELP_SERVICE_KEY       — Gemini API key for py-help-service
       #   RECIPE_SERVICE_KEY     — Gemini API key for py-recipe-service
       #   GRAFANA_ADMIN_PASSWORD — Grafana admin password
+      #   DISCORD_WEBHOOK_URL    — Discord webhook URL for Grafana alert notifications
       #   KUBE_CONFIG            — base64-encoded kubeconfig (base64 -w0 on Linux)
       - name: Upsert K8s secrets
         run: |
@@ -95,6 +96,10 @@ jobs:
 
           kubectl create secret generic grafana-secret -n monitoring \
             --from-literal=admin-password="${{ secrets.GRAFANA_ADMIN_PASSWORD }}" \
+            --dry-run=client -o yaml | kubectl apply -f -
+
+          kubectl create secret generic grafana-discord-secret -n monitoring \
+            --from-literal=webhook-url="${{ secrets.DISCORD_WEBHOOK_URL }}" \
             --dry-run=client -o yaml | kubectl apply -f -
 
       - name: Deploy PostgreSQL (StatefulSet)
