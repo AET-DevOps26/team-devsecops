@@ -11,15 +11,15 @@ import java.time.Instant
 <span class="fc" id="L11">	val id: Long = 0,</span>
 <span class="fc" id="L12">	@Column(nullable = false)</span>
 <span class="fc" id="L13">	var title: String,</span>
-<span class="pc" id="L14">	@Column(columnDefinition = &quot;TEXT&quot;, nullable = false)</span>
-<span class="nc" id="L15">	var ingredients: String, // JSON array string, e.g. [&quot;flour&quot;,&quot;eggs&quot;,&quot;milk&quot;]</span>
-<span class="pc" id="L16">	@Column(columnDefinition = &quot;TEXT&quot;, nullable = false)</span>
-<span class="nc" id="L17">	var instructions: String,</span>
-<span class="pc" id="L18">	var portions: java.math.BigDecimal,</span>
-<span class="pc" id="L19">	var nutrientKcal: Int,</span>
-<span class="pc" id="L20">	var nutrientCarb: Int,</span>
-<span class="pc" id="L21">	var nutrientProt: Int,</span>
-<span class="pc" id="L22">	var nutrientFat: Int,</span>
+<span class="fc" id="L14">	@Column(columnDefinition = &quot;TEXT&quot;, nullable = false)</span>
+<span class="fc" id="L15">	var ingredients: String, // JSON array string, e.g. [&quot;flour&quot;,&quot;eggs&quot;,&quot;milk&quot;]</span>
+<span class="fc" id="L16">	@Column(columnDefinition = &quot;TEXT&quot;, nullable = false)</span>
+<span class="fc" id="L17">	var instructions: String,</span>
+<span class="fc" id="L18">	var portions: java.math.BigDecimal,</span>
+<span class="fc" id="L19">	var nutrientKcal: Int,</span>
+<span class="fc" id="L20">	var nutrientCarb: Int,</span>
+<span class="fc" id="L21">	var nutrientProt: Int,</span>
+<span class="fc" id="L22">	var nutrientFat: Int,</span>
 <span class="fc" id="L23">	@Column(nullable = false, updatable = false)</span>
 <span class="fc" id="L24">	val createdAt: Instant = Instant.now(),</span>
 <span class="fc" id="L25">	@Column(nullable = false)</span>

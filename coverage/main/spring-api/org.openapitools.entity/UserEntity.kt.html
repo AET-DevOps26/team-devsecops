@@ -13,7 +13,7 @@ import jakarta.persistence.*
 <span class="fc" id="L13">	@Column(nullable = false)</span>
 <span class="fc" id="L14">	var password: String, // always stored as a BCrypt hash</span>
 <span class="fc" id="L15">	@Column(columnDefinition = &quot;TEXT&quot;)</span>
-<span class="pc" id="L16">	var preferences: String? = null, // stored as a JSON string</span>
+<span class="fc" id="L16">	var preferences: String? = null, // stored as a JSON string</span>
 <span class="pc" id="L17">	@OneToMany(mappedBy = &quot;user&quot;, cascade = [CascadeType.ALL], orphanRemoval = true)</span>
 <span class="fc" id="L18">	val recipes: MutableList&lt;RecipeEntity&gt; = mutableListOf(),</span>
 <span class="fc" id="L19">)</span>

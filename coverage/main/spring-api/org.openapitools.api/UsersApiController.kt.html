@@ -88,9 +88,9 @@ import tools.jackson.databind.node.ObjectNode
 	override fun usersProfileGet(): ResponseEntity&lt;UserProfile&gt; {
 <span class="fc" id="L89">		val user = userRepository.findByUsername(currentUsername()).orElseThrow()</span>
 <span class="fc" id="L90">		val prefs =</span>
-<span class="pc bpc" id="L91" title="2 of 4 branches missed.">			user.preferences?.let {</span>
+<span class="pc bpc" id="L91" title="1 of 4 branches missed.">			user.preferences?.let {</span>
 <span class="fc" id="L92">				objectMapper.readValue(it, UserPreferences::class.java)</span>
-<span class="nc" id="L93">			} ?: UserPreferences()</span>
+<span class="fc" id="L93">			} ?: UserPreferences()</span>
 <span class="fc" id="L94">		return ResponseEntity.ok(UserProfile(username = user.username, preferences = prefs))</span>
 	}
 
@@ -100,7 +100,7 @@ import tools.jackson.databind.node.ObjectNode
 <span class="fc" id="L100">		val user = userRepository.findByUsername(currentUsername()).orElseThrow()</span>
 <span class="fc bfc" id="L101" title="All 2 branches covered.">		userProfileUpdate.preferences?.let { incoming -&gt;</span>
 			// merge so a partial update keeps other preferences
-<span class="pc bpc" id="L103" title="3 of 6 branches missed.">			val merged = (user.preferences?.let { objectMapper.readTree(it) } as? ObjectNode) ?: objectMapper.createObjectNode()</span>
+<span class="fc bfc" id="L103" title="All 6 branches covered.">			val merged = (user.preferences?.let { objectMapper.readTree(it) } as? ObjectNode) ?: objectMapper.createObjectNode()</span>
 <span class="fc" id="L104">			merged.setAll(objectMapper.valueToTree&lt;ObjectNode&gt;(incoming))</span>
 <span class="fc" id="L105">			user.preferences = objectMapper.writeValueAsString(merged)</span>
 <span class="fc" id="L106">		}</span>

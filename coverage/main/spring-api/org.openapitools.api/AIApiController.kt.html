@@ -149,13 +149,13 @@ import java.io.InterruptedIOException
 
 	private fun UserEntity.toInternalProfile(): org.openapitools.internal.model.UserProfile {
 <span class="fc" id="L151">		val publicPrefs =</span>
-<span class="pc bpc" id="L152" title="2 of 4 branches missed.">			preferences?.let {</span>
+<span class="pc bpc" id="L152" title="1 of 4 branches missed.">			preferences?.let {</span>
 <span class="fc" id="L153">				try {</span>
 <span class="fc" id="L154">					objectMapper.readValue(it, UserPreferences::class.java)</span>
 <span class="nc" id="L155">				} catch (_: Exception) {</span>
 <span class="pc" id="L156">					null</span>
 <span class="fc" id="L157">				}</span>
-<span class="nc" id="L158">			} ?: UserPreferences()</span>
+<span class="fc" id="L158">			} ?: UserPreferences()</span>
 
 <span class="fc" id="L160">		return org.openapitools.internal.model.UserProfile(</span>
 <span class="fc" id="L161">			username = username,</span>
@@ -189,13 +189,13 @@ import java.io.InterruptedIOException
 <span class="fc" id="L189">						.RecipeIngredient(name = it.name, quantity = it.quantity, unit = it.unit)</span>
 				},
 			nutrients =
-<span class="pc bpc" id="L192" title="1 of 2 branches missed.">				this.nutrients?.let {</span>
-<span class="nc" id="L193">					org.openapitools.internal.model.RecipeNutrients(</span>
-<span class="nc" id="L194">						calories = it.calories,</span>
-<span class="nc" id="L195">						protein = it.protein,</span>
-<span class="nc" id="L196">						fat = it.fat,</span>
-<span class="nc" id="L197">						carbs = it.carbs,</span>
-<span class="nc" id="L198">					)</span>
+<span class="fc bfc" id="L192" title="All 2 branches covered.">				this.nutrients?.let {</span>
+<span class="fc" id="L193">					org.openapitools.internal.model.RecipeNutrients(</span>
+<span class="fc" id="L194">						calories = it.calories,</span>
+<span class="fc" id="L195">						protein = it.protein,</span>
+<span class="fc" id="L196">						fat = it.fat,</span>
+<span class="fc" id="L197">						carbs = it.carbs,</span>
+<span class="fc" id="L198">					)</span>
 				},
 <span class="fc" id="L200">		)</span>
 
