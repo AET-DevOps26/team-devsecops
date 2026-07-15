@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - 'services/py-help-service/**'
+      - 'api/openapi-internal.yaml'
       - '.github/workflows/build-help-service.yml'
   workflow_dispatch:
   workflow_call:
