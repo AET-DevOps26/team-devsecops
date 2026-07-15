@@ -15,7 +15,9 @@ from main import app, get_llm, verify_internal_hmac, RecipeListWrapper, LocalRec
 _CONTRACT = (
 	pathlib.Path(__file__).resolve().parents[3] / "api" / "openapi-internal.yaml"
 )
-app.openapi_schema = schemathesis.openapi.from_path(_CONTRACT).raw_schema
+_ORIGINAL_OPENAPI_SCHEMA = app.openapi_schema
+_CONTRACT_SCHEMA = schemathesis.openapi.from_path(_CONTRACT).raw_schema
+app.openapi_schema = _CONTRACT_SCHEMA
 
 # /ai/help belongs to py-help-service
 schema = schemathesis.openapi.from_asgi("/openapi.json", app).exclude(path="/ai/help")
@@ -27,6 +29,7 @@ schema.config.phases.update(phases=["examples", "fuzzing"])
 
 @pytest.fixture(autouse=True)
 def _stub_provider_dependencies():
+	app.openapi_schema = _CONTRACT_SCHEMA
 	app.dependency_overrides[verify_internal_hmac] = lambda: None
 
 	conforming = RecipeListWrapper(
@@ -47,7 +50,9 @@ def _stub_provider_dependencies():
 	app.dependency_overrides[get_llm] = lambda: llm
 
 	yield
-	app.dependency_overrides.clear()
+	del app.dependency_overrides[verify_internal_hmac]
+	del app.dependency_overrides[get_llm]
+	app.openapi_schema = _ORIGINAL_OPENAPI_SCHEMA
 
 
 @schema.parametrize()

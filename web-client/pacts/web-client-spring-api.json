@@ -137,7 +137,19 @@
       },
       "response": {
         "body": {
-          "preferences": {},
+          "preferences": {
+            "aboutMe": [
+              "Home cook on a budget"
+            ],
+            "allergies": [
+              "peanuts"
+            ],
+            "diet": [
+              "vegan"
+            ],
+            "language": "EN",
+            "theme": "DARK"
+          },
           "username": "testuser"
         },
         "headers": {
@@ -147,6 +159,57 @@
         "matchingRules": {
           "body": {
             "$": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.preferences": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.preferences.aboutMe": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 1
+                }
+              ]
+            },
+            "$.preferences.allergies": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 1
+                }
+              ]
+            },
+            "$.preferences.diet": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 1
+                }
+              ]
+            },
+            "$.preferences.language": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.preferences.theme": {
               "combine": "AND",
               "matchers": [
                 {
@@ -180,7 +243,17 @@
       "request": {
         "body": {
           "preferences": {
-            "language": "EN"
+            "aboutMe": [
+              "Home cook on a budget"
+            ],
+            "allergies": [
+              "peanuts"
+            ],
+            "diet": [
+              "vegan"
+            ],
+            "language": "EN",
+            "theme": "DARK"
           }
         },
         "headers": {
@@ -643,6 +716,275 @@
               ]
             },
             "$.title": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          },
+          "header": {
+            "content-type": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "application/json.*"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      }
+    },
+    {
+      "description": "a request to delete a recipe by id",
+      "providerStates": [
+        {
+          "name": "a user testuser has a recipe"
+        }
+      ],
+      "request": {
+        "headers": {
+          "authorization": "Bearer header.payload.signature"
+        },
+        "matchingRules": {
+          "header": {
+            "authorization": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "Bearer .+"
+                }
+              ]
+            }
+          }
+        },
+        "method": "DELETE",
+        "path": "/api/v1/recipes/1"
+      },
+      "response": {
+        "status": 204
+      }
+    },
+    {
+      "description": "a request to generate recipes",
+      "providerStates": [
+        {
+          "name": "a user testuser exists"
+        }
+      ],
+      "request": {
+        "body": {
+          "language": "EN",
+          "prompt": "something quick with flour"
+        },
+        "headers": {
+          "Content-Type": "application/json",
+          "authorization": "Bearer header.payload.signature"
+        },
+        "matchingRules": {
+          "header": {
+            "authorization": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "Bearer .+"
+                }
+              ]
+            }
+          }
+        },
+        "method": "POST",
+        "path": "/api/v1/ai/recipes"
+      },
+      "response": {
+        "body": [
+          {
+            "ingredients": [
+              {
+                "name": "Flour",
+                "quantity": 1,
+                "unit": "cup"
+              }
+            ],
+            "instructions": [
+              "Mix the batter."
+            ],
+            "nutrients": {
+              "calories": 200,
+              "carbs": 35,
+              "fat": 3,
+              "protein": 5
+            },
+            "portions": 2,
+            "title": "Pancakes"
+          }
+        ],
+        "headers": {
+          "Content-Type": "application/json",
+          "content-type": "application/json"
+        },
+        "matchingRules": {
+          "body": {
+            "$": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 1
+                }
+              ]
+            },
+            "$[*].ingredients": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 1
+                }
+              ]
+            },
+            "$[*].ingredients[*].name": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$[*].ingredients[*].quantity": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$[*].ingredients[*].unit": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$[*].instructions": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 1
+                }
+              ]
+            },
+            "$[*].nutrients": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$[*].portions": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$[*].title": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          },
+          "header": {
+            "content-type": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "application/json.*"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      }
+    },
+    {
+      "description": "a request for cooking help",
+      "providerStates": [
+        {
+          "name": "a user testuser exists"
+        }
+      ],
+      "request": {
+        "body": {
+          "prompt": "How do I stop it sticking?",
+          "recipe": {
+            "ingredients": [
+              {
+                "name": "Flour",
+                "quantity": 1,
+                "unit": "cup"
+              }
+            ],
+            "instructions": [
+              "Mix the batter.",
+              "Cook on a griddle."
+            ],
+            "nutrients": {
+              "calories": 200,
+              "carbs": 35,
+              "fat": 3,
+              "protein": 5
+            },
+            "portions": 2,
+            "title": "Pancakes"
+          }
+        },
+        "headers": {
+          "Content-Type": "application/json",
+          "authorization": "Bearer header.payload.signature"
+        },
+        "matchingRules": {
+          "header": {
+            "authorization": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "Bearer .+"
+                }
+              ]
+            }
+          }
+        },
+        "method": "POST",
+        "path": "/api/v1/ai/help"
+      },
+      "response": {
+        "body": {
+          "response": "Grease the pan well."
+        },
+        "headers": {
+          "Content-Type": "application/json",
+          "content-type": "application/json"
+        },
+        "matchingRules": {
+          "body": {
+            "$": {
               "combine": "AND",
               "matchers": [
                 {

@@ -154,14 +154,21 @@ class SpringApiProviderPactTest {
 		context: PactVerificationContext,
 		request: HttpRequest,
 	) {
-		bearerToken?.let { request.setHeader("Authorization", "Bearer $it") }
+		if (request.containsHeader("Authorization")) {
+			bearerToken?.let { request.setHeader("Authorization", "Bearer $it") }
+		}
 		context.verifyInteraction()
 	}
 
 	private fun createUserAndToken(): UserEntity {
 		val user =
 			userRepository.save(
-				UserEntity(username = "testuser", password = passwordEncoder.encode("testpass1234")!!),
+				UserEntity(
+					username = "testuser",
+					password = passwordEncoder.encode("testpass1234")!!,
+					preferences =
+						"""{"language":"EN","theme":"DARK","diet":["vegan"],"allergies":["peanuts"],"aboutMe":["Home cook on a budget"]}""",
+				),
 			)
 		bearerToken = jwtUtils.generateToken(user.id)
 		return user
