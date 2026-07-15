@@ -154,7 +154,9 @@ class SpringApiProviderPactTest {
 		context: PactVerificationContext,
 		request: HttpRequest,
 	) {
-		bearerToken?.let { request.setHeader("Authorization", "Bearer $it") }
+		if (request.containsHeader("Authorization")) {
+			bearerToken?.let { request.setHeader("Authorization", "Bearer $it") }
+		}
 		context.verifyInteraction()
 	}
 
