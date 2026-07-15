@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>Coverage for main.py: 67%</title>
+    <title>Coverage for main.py: 73%</title>
     <link rel="icon" sizes="32x32" href="favicon_32_cb_c827f16f.png">
     <link rel="stylesheet" href="style_cb_4667309f.css" type="text/css">
     <script src="coverage_html_cb_dd2e7eb5.js" defer></script>
@@ -12,7 +12,7 @@
     <div class="content">
         <h1>
             <span class="text">Coverage for </span><b>main.py</b>:
-            <span class="pc_cov">67%</span>
+            <span class="pc_cov">73%</span>
         </h1>
         <aside id="help_panel_wrapper">
             <input id="help_panel_state" type="checkbox">
@@ -55,8 +55,8 @@
         </aside>
         <h2>
             <span class="text">128 statements &nbsp;</span>
-            <button type="button" class="run button_toggle_run" value="run" data-shortcut="r" title="Toggle lines run">86<span class="text"> run</span></button>
-            <button type="button" class="mis show_mis button_toggle_mis" value="mis" data-shortcut="m" title="Toggle lines missing">42<span class="text"> missing</span></button>
+            <button type="button" class="run button_toggle_run" value="run" data-shortcut="r" title="Toggle lines run">94<span class="text"> run</span></button>
+            <button type="button" class="mis show_mis button_toggle_mis" value="mis" data-shortcut="m" title="Toggle lines missing">34<span class="text"> missing</span></button>
             <button type="button" class="exc show_exc button_toggle_exc" value="exc" data-shortcut="x" title="Toggle lines excluded">0<span class="text"> excluded</span></button>
         </h2>
         <p class="text">
@@ -64,8 +64,8 @@
             <a id="indexLink" class="nav" href="index.html">&Hat; index</a> &nbsp; &nbsp;
             <a id="nextFileLink" class="nav" href="index.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
-            <a class="nav" href="https://coverage.readthedocs.io/en/7.15.0">coverage.py v7.15.0</a>,
-            created at 2026-07-09 14:34 +0000
+            <a class="nav" href="https://coverage.readthedocs.io/en/7.15.2">coverage.py v7.15.2</a>,
+            created at 2026-07-15 20:58 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -273,13 +273,13 @@
     <p class="pln"><span class="n"><a id="t191" href="#t191">191</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t192" href="#t192">192</a></span><span class="t">                        <span class="nam">about_me</span> <span class="op">=</span> <span class="nam">prefs</span><span class="op">.</span><span class="nam">about_me</span> <span class="key">or</span> <span class="op">[</span><span class="op">]</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t193" href="#t193">193</a></span><span class="t">                        <span class="key">if</span> <span class="nam">about_me</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t194" href="#t194">194</a></span><span class="t">                                <span class="nam">context</span><span class="op">.</span><span class="nam">append</span><span class="op">(</span><span class="str">f"The user specifies: {', '.join(about_me)}"</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t194" href="#t194">194</a></span><span class="t">                                <span class="nam">context</span><span class="op">.</span><span class="nam">append</span><span class="op">(</span><span class="str">f"The user specifies: {', '.join(about_me)}"</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t195" href="#t195">195</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t196" href="#t196">196</a></span><span class="t">                        <span class="nam">allergies</span> <span class="op">=</span> <span class="nam">prefs</span><span class="op">.</span><span class="nam">allergies</span> <span class="key">or</span> <span class="op">[</span><span class="op">]</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t197" href="#t197">197</a></span><span class="t">                        <span class="key">if</span> <span class="nam">allergies</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t198" href="#t198">198</a></span><span class="t">                                <span class="nam">context</span><span class="op">.</span><span class="nam">append</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis mis2 show_mis"><span class="n"><a id="t199" href="#t199">199</a></span><span class="t">                                        <span class="str">f"Important: The user is allergic to: {', '.join(allergies)}."</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis mis2 show_mis"><span class="n"><a id="t200" href="#t200">200</a></span><span class="t">                                <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t198" href="#t198">198</a></span><span class="t">                                <span class="nam">context</span><span class="op">.</span><span class="nam">append</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t199" href="#t199">199</a></span><span class="t">                                        <span class="str">f"Important: The user is allergic to: {', '.join(allergies)}."</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t200" href="#t200">200</a></span><span class="t">                                <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t201" href="#t201">201</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t202" href="#t202">202</a></span><span class="t">                <span class="key">if</span> <span class="nam">request</span><span class="op">.</span><span class="nam">recipe</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t203" href="#t203">203</a></span><span class="t">                        <span class="nam">recipe_ctx</span> <span class="op">=</span> <span class="op">[</span>&nbsp;</span><span class="r"></span></p>
@@ -301,12 +301,12 @@
     <p class="run"><span class="n"><a id="t219" href="#t219">219</a></span><span class="t">                        <span class="key">if</span> <span class="nam">request</span><span class="op">.</span><span class="nam">recipe</span><span class="op">.</span><span class="nam">nutrients</span> <span class="key">and</span> <span class="key">not</span> <span class="nam">isinstance</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
     <p class="run run2"><span class="n"><a id="t220" href="#t220">220</a></span><span class="t">                                <span class="nam">request</span><span class="op">.</span><span class="nam">recipe</span><span class="op">.</span><span class="nam">nutrients</span><span class="op">,</span> <span class="nam">Unset</span>&nbsp;</span><span class="r"></span></p>
     <p class="run run2"><span class="n"><a id="t221" href="#t221">221</a></span><span class="t">                        <span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t222" href="#t222">222</a></span><span class="t">                                <span class="nam">nut</span> <span class="op">=</span> <span class="nam">request</span><span class="op">.</span><span class="nam">recipe</span><span class="op">.</span><span class="nam">nutrients</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t223" href="#t223">223</a></span><span class="t">                                <span class="nam">recipe_ctx</span><span class="op">.</span><span class="nam">append</span><span class="op">(</span><span class="str">"\nNutritional Information (Total recipe):"</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t224" href="#t224">224</a></span><span class="t">                                <span class="nam">recipe_ctx</span><span class="op">.</span><span class="nam">append</span><span class="op">(</span><span class="str">f"- Calories: {nut.calories} kcal"</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t225" href="#t225">225</a></span><span class="t">                                <span class="nam">recipe_ctx</span><span class="op">.</span><span class="nam">append</span><span class="op">(</span><span class="str">f"- Protein: {nut.protein}g"</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t226" href="#t226">226</a></span><span class="t">                                <span class="nam">recipe_ctx</span><span class="op">.</span><span class="nam">append</span><span class="op">(</span><span class="str">f"- Fat: {nut.fat}g"</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t227" href="#t227">227</a></span><span class="t">                                <span class="nam">recipe_ctx</span><span class="op">.</span><span class="nam">append</span><span class="op">(</span><span class="str">f"- Carbohydrates: {nut.carbs}g"</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t222" href="#t222">222</a></span><span class="t">                                <span class="nam">nut</span> <span class="op">=</span> <span class="nam">request</span><span class="op">.</span><span class="nam">recipe</span><span class="op">.</span><span class="nam">nutrients</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t223" href="#t223">223</a></span><span class="t">                                <span class="nam">recipe_ctx</span><span class="op">.</span><span class="nam">append</span><span class="op">(</span><span class="str">"\nNutritional Information (Total recipe):"</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t224" href="#t224">224</a></span><span class="t">                                <span class="nam">recipe_ctx</span><span class="op">.</span><span class="nam">append</span><span class="op">(</span><span class="str">f"- Calories: {nut.calories} kcal"</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t225" href="#t225">225</a></span><span class="t">                                <span class="nam">recipe_ctx</span><span class="op">.</span><span class="nam">append</span><span class="op">(</span><span class="str">f"- Protein: {nut.protein}g"</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t226" href="#t226">226</a></span><span class="t">                                <span class="nam">recipe_ctx</span><span class="op">.</span><span class="nam">append</span><span class="op">(</span><span class="str">f"- Fat: {nut.fat}g"</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t227" href="#t227">227</a></span><span class="t">                                <span class="nam">recipe_ctx</span><span class="op">.</span><span class="nam">append</span><span class="op">(</span><span class="str">f"- Carbohydrates: {nut.carbs}g"</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t228" href="#t228">228</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t229" href="#t229">229</a></span><span class="t">                        <span class="nam">context</span><span class="op">.</span><span class="nam">append</span><span class="op">(</span><span class="str">"\n"</span><span class="op">.</span><span class="nam">join</span><span class="op">(</span><span class="nam">recipe_ctx</span><span class="op">)</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t230" href="#t230">230</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
@@ -336,8 +336,8 @@
             <a class="nav" href="index.html">&Hat; index</a> &nbsp; &nbsp;
             <a class="nav" href="index.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
-            <a class="nav" href="https://coverage.readthedocs.io/en/7.15.0">coverage.py v7.15.0</a>,
-            created at 2026-07-09 14:34 +0000
+            <a class="nav" href="https://coverage.readthedocs.io/en/7.15.2">coverage.py v7.15.2</a>,
+            created at 2026-07-15 20:58 +0000
         </p>
     </div>
 </footer>
