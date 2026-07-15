@@ -240,6 +240,40 @@ class RecipesApiTest : ApiTestBase() {
 	}
 
 	@Test
+	fun `recipes put - full payload replaces every field`() {
+		val token = register()
+		val id = postRecipe(token)
+		mockMvc
+			.perform(
+				put("/api/v1/recipes/$id")
+					.header("Authorization", "Bearer $token")
+					.contentType(MediaType.APPLICATION_JSON)
+					.content(
+						"""
+						{
+							"title": "Deluxe Pasta",
+							"ingredients": [
+								{"quantity": 250, "unit": "g", "name": "spaghetti"},
+								{"quantity": 3, "unit": "cloves", "name": "garlic"}
+							],
+							"instructions": ["Boil", "Fry garlic", "Combine"],
+							"portions": 1.5,
+							"nutrients": {"calories": 620, "protein": 18, "fat": 9, "carbs": 95}
+						}
+						""".trimIndent(),
+					),
+			).andExpect(status().isOk)
+			.andExpect(jsonPath("$.id").value(id))
+			.andExpect(jsonPath("$.title").value("Deluxe Pasta"))
+			.andExpect(jsonPath("$.portions").value(1.5))
+			.andExpect(jsonPath("$.ingredients.length()").value(2))
+			.andExpect(jsonPath("$.ingredients[1].name").value("garlic"))
+			.andExpect(jsonPath("$.instructions.length()").value(3))
+			.andExpect(jsonPath("$.instructions[2]").value("Combine"))
+			.andExpect(jsonPath("$.nutrients.carbs").value(95))
+	}
+
+	@Test
 	fun `recipes put - not found returns 404`() {
 		val token = register()
 		mockMvc

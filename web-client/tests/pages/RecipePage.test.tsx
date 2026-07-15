@@ -126,4 +126,34 @@ describe('RecipePage', () => {
 
 		expect(await screen.findByText('Recipe not found')).toBeInTheDocument()
 	})
+
+	it('shows Edit and Delete actions for a saved recipe and navigates to the edit page', async () => {
+		const user = userEvent.setup()
+		fetchMock.mockResolvedValueOnce(jsonResponse(a))
+		renderWithProviders(
+			<Routes>
+				<Route path="/library/recipe/:recipeId" element={<RecipePage/>}/>
+				<Route path="/library/recipe/:recipeId/edit" element={<div>edit page</div>}/>
+			</Routes>,
+			{route: '/library/recipe/1', token: {value: 'tkn', username: 'alice'}},
+		)
+		await screen.findByRole('heading', {name: 'Tomato Pasta'})
+
+		// saved recipe: Edit + Delete, no bookmark/save-to-library
+		expect(screen.getByRole('button', {name: 'Edit'})).toBeInTheDocument()
+		expect(screen.getByRole('button', {name: 'Delete'})).toBeInTheDocument()
+		expect(screen.queryByRole('button', {name: 'Save to library'})).not.toBeInTheDocument()
+
+		await user.click(screen.getByRole('button', {name: 'Edit'}))
+		expect(await screen.findByText('edit page')).toBeInTheDocument()
+	})
+
+	it('shows Edit and Save to library for an unsaved generated recipe', () => {
+		const unsaved = {...a, id: undefined} as unknown as Recipe
+		renderGeneratedRecipe(0, [unsaved])
+
+		expect(screen.getByRole('button', {name: 'Edit'})).toBeInTheDocument()
+		expect(screen.getByRole('button', {name: 'Save to library'})).toBeInTheDocument()
+		expect(screen.queryByRole('button', {name: 'Delete'})).not.toBeInTheDocument()
+	})
 })
