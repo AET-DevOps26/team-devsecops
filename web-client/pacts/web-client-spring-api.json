@@ -137,7 +137,19 @@
       },
       "response": {
         "body": {
-          "preferences": {},
+          "preferences": {
+            "aboutMe": [
+              "Home cook on a budget"
+            ],
+            "allergies": [
+              "peanuts"
+            ],
+            "diet": [
+              "vegan"
+            ],
+            "language": "EN",
+            "theme": "DARK"
+          },
           "username": "testuser"
         },
         "headers": {
@@ -147,6 +159,57 @@
         "matchingRules": {
           "body": {
             "$": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.preferences": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.preferences.aboutMe": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 1
+                }
+              ]
+            },
+            "$.preferences.allergies": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 1
+                }
+              ]
+            },
+            "$.preferences.diet": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 1
+                }
+              ]
+            },
+            "$.preferences.language": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.preferences.theme": {
               "combine": "AND",
               "matchers": [
                 {
@@ -180,7 +243,17 @@
       "request": {
         "body": {
           "preferences": {
-            "language": "EN"
+            "aboutMe": [
+              "Home cook on a budget"
+            ],
+            "allergies": [
+              "peanuts"
+            ],
+            "diet": [
+              "vegan"
+            ],
+            "language": "EN",
+            "theme": "DARK"
           }
         },
         "headers": {

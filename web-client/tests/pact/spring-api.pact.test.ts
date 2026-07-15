@@ -48,6 +48,22 @@ const recipeResponseShape = {
 	editedAt: like('2024-01-01T00:00:00Z'),
 }
 
+const preferencesBody = {
+	language: 'EN',
+	theme: 'DARK',
+	diet: ['vegan'],
+	allergies: ['peanuts'],
+	aboutMe: ['Home cook on a budget'],
+}
+
+const preferencesShape = {
+	language: like('EN'),
+	theme: like('DARK'),
+	diet: eachLike('vegan'),
+	allergies: eachLike('peanuts'),
+	aboutMe: eachLike('Home cook on a budget'),
+}
+
 beforeAll(async () => {
 	vi.stubEnv('VITE_API_BASE', `http://127.0.0.1:${MOCK_PORT}`)
 	auth = await import('../../src/auth')
@@ -101,7 +117,7 @@ describe('web-client → spring-api pact', () => {
 			.willRespondWith({
 				status: 200,
 				headers: jsonResponse,
-				body: like({ username: 'testuser', preferences: {} }),
+				body: like({ username: 'testuser', preferences: like(preferencesShape) }),
 			})
 
 		pact
@@ -111,7 +127,7 @@ describe('web-client → spring-api pact', () => {
 				method: 'PUT',
 				path: '/api/v1/users/profile',
 				headers: { ...bearer, ...jsonHeaders },
-				body: { preferences: { language: 'EN' } },
+				body: { preferences: preferencesBody },
 			})
 			.willRespondWith({ status: 200 })
 
@@ -257,7 +273,7 @@ describe('web-client → spring-api pact', () => {
 			await call('/users/profile', {
 				method: 'PUT',
 				headers: jsonHeaders,
-				body: JSON.stringify({ preferences: { language: 'EN' } }),
+				body: JSON.stringify({ preferences: preferencesBody }),
 			})
 
 			// Recipes
