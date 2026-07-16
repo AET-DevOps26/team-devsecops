@@ -24,7 +24,6 @@
 package org.openapitools.internal.model
 
 import com.squareup.moshi.Json
-import com.squareup.moshi.JsonClass
 import org.openapitools.internal.model.RecipeIngredient
 import org.openapitools.internal.model.RecipeNutrients
 
@@ -38,16 +37,16 @@ import org.openapitools.internal.model.RecipeNutrients
  * @param nutrients
  */
 
-<span class="pc" id="L41">data class RecipeInput(</span>
-<span class="fc" id="L42">	@Json(name = &quot;title&quot;)</span>
+<span class="pc" id="L40">data class RecipeInput(</span>
+<span class="fc" id="L41">	@Json(name = &quot;title&quot;)</span>
 	val title: kotlin.String,
-<span class="fc" id="L44">	@Json(name = &quot;ingredients&quot;)</span>
+<span class="fc" id="L43">	@Json(name = &quot;ingredients&quot;)</span>
 	val ingredients: kotlin.collections.List&lt;RecipeIngredient&gt;,
-<span class="fc" id="L46">	@Json(name = &quot;instructions&quot;)</span>
+<span class="fc" id="L45">	@Json(name = &quot;instructions&quot;)</span>
 	val instructions: kotlin.collections.List&lt;kotlin.String&gt;,
-<span class="fc" id="L48">	@Json(name = &quot;portions&quot;)</span>
+<span class="fc" id="L47">	@Json(name = &quot;portions&quot;)</span>
 	val portions: kotlin.Double,
-<span class="fc" id="L50">	@Json(name = &quot;nutrients&quot;)</span>
-<span class="nc" id="L51">	val nutrients: RecipeNutrients? = null,</span>
-<span class="nc" id="L52">)</span>
+<span class="fc" id="L49">	@Json(name = &quot;nutrients&quot;)</span>
+<span class="nc" id="L50">	val nutrients: RecipeNutrients? = null,</span>
+<span class="nc" id="L51">)</span>
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

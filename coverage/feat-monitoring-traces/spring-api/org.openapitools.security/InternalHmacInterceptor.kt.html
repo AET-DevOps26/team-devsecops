@@ -3,49 +3,48 @@
 import okhttp3.Interceptor
 import okhttp3.Response
 import okio.Buffer
-import java.security.MessageDigest
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
 
-<span class="fc" id="L10">class InternalHmacInterceptor(</span>
-<span class="fc" id="L11">	private val hmacSecret: String,</span>
+<span class="fc" id="L9">class InternalHmacInterceptor(</span>
+<span class="fc" id="L10">	private val hmacSecret: String,</span>
 ) : Interceptor {
 	override fun intercept(chain: Interceptor.Chain): Response {
-<span class="nc" id="L14">		val original = chain.request()</span>
+<span class="nc" id="L13">		val original = chain.request()</span>
 
-<span class="nc" id="L16">		val timestamp = (System.currentTimeMillis() / 1000).toString()</span>
+<span class="nc" id="L15">		val timestamp = (System.currentTimeMillis() / 1000).toString()</span>
 
-<span class="nc" id="L18">		val bodyBytes =</span>
-<span class="nc bnc" id="L19" title="All 2 branches missed.">			if (original.body != null) {</span>
-<span class="nc" id="L20">				val buffer = Buffer()</span>
-<span class="nc" id="L21">				original.body!!.writeTo(buffer)</span>
-<span class="nc" id="L22">				buffer.readByteArray()</span>
+<span class="nc" id="L17">		val bodyBytes =</span>
+<span class="nc bnc" id="L18" title="All 2 branches missed.">			if (original.body != null) {</span>
+<span class="nc" id="L19">				val buffer = Buffer()</span>
+<span class="nc" id="L20">				original.body!!.writeTo(buffer)</span>
+<span class="nc" id="L21">				buffer.readByteArray()</span>
 			} else {
-<span class="nc" id="L24">				ByteArray(0)</span>
+<span class="nc" id="L23">				ByteArray(0)</span>
 			}
 
-<span class="nc" id="L27">		val hexSignature =</span>
-<span class="nc" id="L28">			try {</span>
-<span class="nc" id="L29">				val mac = Mac.getInstance(&quot;HmacSHA256&quot;)</span>
-<span class="nc" id="L30">				val secretKey = SecretKeySpec(hmacSecret.toByteArray(Charsets.UTF_8), &quot;HmacSHA256&quot;)</span>
-<span class="nc" id="L31">				mac.init(secretKey)</span>
+<span class="nc" id="L26">		val hexSignature =</span>
+<span class="nc" id="L27">			try {</span>
+<span class="nc" id="L28">				val mac = Mac.getInstance(&quot;HmacSHA256&quot;)</span>
+<span class="nc" id="L29">				val secretKey = SecretKeySpec(hmacSecret.toByteArray(Charsets.UTF_8), &quot;HmacSHA256&quot;)</span>
+<span class="nc" id="L30">				mac.init(secretKey)</span>
 
-<span class="nc" id="L33">				mac.update(timestamp.toByteArray(Charsets.UTF_8))</span>
-<span class="nc" id="L34">				mac.update('.'.code.toByte())</span>
-<span class="nc" id="L35">				val rawHmac = mac.doFinal(bodyBytes)</span>
+<span class="nc" id="L32">				mac.update(timestamp.toByteArray(Charsets.UTF_8))</span>
+<span class="nc" id="L33">				mac.update('.'.code.toByte())</span>
+<span class="nc" id="L34">				val rawHmac = mac.doFinal(bodyBytes)</span>
 
-<span class="nc" id="L37">				rawHmac.joinToString(&quot;&quot;) { &quot;%02x&quot;.format(it) }</span>
-<span class="nc" id="L38">			} catch (e: Exception) {</span>
-<span class="nc" id="L39">				&quot;&quot;</span>
+<span class="nc" id="L36">				rawHmac.joinToString(&quot;&quot;) { &quot;%02x&quot;.format(it) }</span>
+<span class="nc" id="L37">			} catch (e: Exception) {</span>
+<span class="nc" id="L38">				&quot;&quot;</span>
 			}
 
-<span class="nc" id="L42">		val requestBuilder =</span>
-<span class="nc" id="L43">			original</span>
-<span class="nc" id="L44">				.newBuilder()</span>
-<span class="nc" id="L45">				.header(&quot;X-Internal-Timestamp&quot;, timestamp)</span>
-<span class="nc" id="L46">				.header(&quot;X-Internal-Signature&quot;, hexSignature)</span>
+<span class="nc" id="L41">		val requestBuilder =</span>
+<span class="nc" id="L42">			original</span>
+<span class="nc" id="L43">				.newBuilder()</span>
+<span class="nc" id="L44">				.header(&quot;X-Internal-Timestamp&quot;, timestamp)</span>
+<span class="nc" id="L45">				.header(&quot;X-Internal-Signature&quot;, hexSignature)</span>
 
-<span class="nc" id="L48">		return chain.proceed(requestBuilder.build())</span>
+<span class="nc" id="L47">		return chain.proceed(requestBuilder.build())</span>
 	}
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>
