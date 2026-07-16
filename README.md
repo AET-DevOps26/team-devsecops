@@ -110,9 +110,15 @@ These are: `SSH_PRIVATE_KEY` (SSH-Key to Azure-VM),  `GEMINI_MODEL`, `GEMINI_HEL
 
 The production environment is hosted on the TUM CIT Kubernetes cluster (managed via Rancher) using a GitOps-style approach.
 
-*   **Deployment Architecture & Setup:** The cluster infrastructure is defined declaratively in the `infra/k8s/` directory. External traffic is routed via an Ingress controller to the internal services (`web-client`, `spring-api`, and GenAI services). To deploy manually, apply the Kubernetes manifests and secrets directly to your designated namespace using `kubectl apply -f infra/k8s/`.
+*   **Deployment Architecture & Setup:** The cluster state is defined declaratively in `infra/k8s/`, with an Ingress controller routing external traffic to `web-client`, `spring-api` and the GenAI services. Deploying from scratch is three steps:
+
+    ```bash
+    cp infra/k8s-secrets.env.example infra/k8s-secrets.env   # then fill it in
+    kubectl apply -f infra/k8s/namespace.yaml
+    infra/k8s-secrets.sh && kubectl apply -R -f infra/k8s/
+    ```
 *   **CI/CD Pipeline:** Deployments are fully automated. When code is merged into the `main` branch, a GitHub Actions workflow validates the code, containerizes the updated components, pushes the images to the registry, and automatically rolls out the changes to the Rancher cluster.
-*   **Observability & Monitoring:** We utilize a Prometheus and Grafana stack to ensure system reliability. The Spring API and GenAI services expose metrics endpoints (e.g., via Spring Boot Actuator) that Prometheus automatically scrapes.
+*   **Observability & Monitoring:** We utilize a Prometheus and Grafana stack to ensure system reliability. The Spring API and GenAI services expose metrics endpoints (e.g., via Spring Boot Actuator) that Prometheus scrapes.
 *   **Live Dashboards:** System health, resource utilization, and API latencies are visualized and can be monitored in real-time through our [Live Grafana Dashboards](https://devsecops.stud.k8s.aet.cit.tum.de/grafana).
 
 ## Student Responsibilities
