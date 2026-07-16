@@ -1,6 +1,6 @@
 spring:
   application:
-    name: cookingAssistant
+    name: spring-api
   jackson:
     default-property-inclusion: non_null
   datasource:
@@ -55,6 +55,12 @@ management:
     distribution:
       percentiles-histogram:
         http.server.requests: true
+  tracing:
+    sampling:
+      probability: 0.1
+  otlp:
+    tracing:
+      endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT:http://alloy.monitoring.svc.cluster.local:4318}/v1/traces
 
 app:
   jwt:

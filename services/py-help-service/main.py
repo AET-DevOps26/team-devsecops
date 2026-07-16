@@ -9,6 +9,12 @@ from dotenv import load_dotenv
 from fastapi.responses import JSONResponse
 from langchain.chat_models import BaseChatModel, init_chat_model
 from langchain_core.messages import HumanMessage, SystemMessage
+from opentelemetry import trace
+from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
+from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
+from opentelemetry.sdk.resources import Resource, SERVICE_NAME
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
 from pydantic import BaseModel
 
 from client.cooking_assistant_gen_ai_services_api_internal_client.types import Unset
@@ -27,8 +33,18 @@ class LocalHelpResponse(BaseModel):
 # Load variables from .env for local testing
 load_dotenv()
 
+_otlp_base = os.getenv(
+	"OTEL_EXPORTER_OTLP_ENDPOINT", "http://alloy.monitoring.svc.cluster.local:4318"
+)
+_provider = TracerProvider(resource=Resource.create({SERVICE_NAME: "py-help-service"}))
+_provider.add_span_processor(
+	BatchSpanProcessor(OTLPSpanExporter(endpoint=f"{_otlp_base}/v1/traces"))
+)
+trace.set_tracer_provider(_provider)
+
 app = FastAPI(title="Cooking Assistant GenAI Service")
 Instrumentator().instrument(app).expose(app)
+FastAPIInstrumentor.instrument_app(app, excluded_urls="/health,/metrics")
 
 
 @app.exception_handler(HTTPException)

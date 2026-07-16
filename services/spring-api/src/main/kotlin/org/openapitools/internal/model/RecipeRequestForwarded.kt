@@ -24,7 +24,6 @@
 package org.openapitools.internal.model
 
 import com.squareup.moshi.Json
-import com.squareup.moshi.JsonClass
 import org.openapitools.internal.model.UserProfile
 
 /**

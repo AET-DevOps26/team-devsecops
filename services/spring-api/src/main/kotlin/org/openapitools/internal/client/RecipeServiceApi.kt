@@ -1,8 +1,5 @@
 package org.openapitools.internal.client
 
-import com.squareup.moshi.Json
-import okhttp3.RequestBody
-import org.openapitools.internal.model.ErrorResponse
 import org.openapitools.internal.model.HealthGet200Response
 import org.openapitools.internal.model.NutrientRequestForwarded
 import org.openapitools.internal.model.RecipeInput
