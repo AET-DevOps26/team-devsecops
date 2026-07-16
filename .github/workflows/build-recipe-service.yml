@@ -2,6 +2,14 @@ name: Python Recipe Service
 
 on:
   push:
+    branches: [main]
+    paths:
+      - 'services/py-recipe-service/**'
+      - 'api/openapi-internal.yaml'
+      - '.github/workflows/build-recipe-service.yml'
+  # Runs against the PR's merge commit, so a branch that is green in isolation
+  # but conflicts semantically with main is caught before merge.
+  pull_request:
     paths:
       - 'services/py-recipe-service/**'
       - 'api/openapi-internal.yaml'
