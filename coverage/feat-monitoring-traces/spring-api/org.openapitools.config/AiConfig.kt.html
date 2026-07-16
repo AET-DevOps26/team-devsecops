@@ -2,8 +2,12 @@
 
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
+import io.opentelemetry.api.OpenTelemetry
+import io.opentelemetry.context.Context
 import okhttp3.ConnectionPool
+import okhttp3.Interceptor
 import okhttp3.OkHttpClient
+import okhttp3.Response
 import org.openapitools.internal.client.HelpServiceApi
 import org.openapitools.internal.client.RecipeServiceApi
 import org.openapitools.security.InternalHmacInterceptor
@@ -14,8 +18,22 @@ import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import java.util.concurrent.TimeUnit
 
-<span class="fc" id="L17">@Configuration</span>
-class AiConfig {
+<span class="fc" id="L21">private class TracePropagationInterceptor(</span>
+<span class="fc" id="L22">	private val openTelemetry: OpenTelemetry,</span>
+) : Interceptor {
+	override fun intercept(chain: Interceptor.Chain): Response {
+<span class="nc" id="L25">		val builder = chain.request().newBuilder()</span>
+<span class="nc" id="L26">		openTelemetry.propagators.textMapPropagator.inject(Context.current(), builder) { b, key, value -&gt;</span>
+<span class="nc" id="L27">			b!!.header(key, value)</span>
+<span class="nc" id="L28">		}</span>
+<span class="nc" id="L29">		return chain.proceed(builder.build())</span>
+	}
+}
+
+@Configuration
+<span class="fc" id="L34">class AiConfig(</span>
+<span class="fc" id="L35">	private val openTelemetry: OpenTelemetry,</span>
+) {
 	@Value(&quot;\${ai.recipe.service.url:http://localhost:8090}&quot;)
 	private lateinit var aiRecipeServiceUrl: String
 
@@ -27,43 +45,44 @@ class AiConfig {
 
 	private fun createBaseHttpClient(): OkHttpClient =
 		OkHttpClient
-<span class="fc" id="L30">			.Builder()</span>
-<span class="fc" id="L31">			.connectionPool(ConnectionPool(5, 2, TimeUnit.SECONDS))</span>
-<span class="fc" id="L32">			.readTimeout(60, TimeUnit.SECONDS) // Time allowed for Python to process and stream back data</span>
-<span class="fc" id="L33">			.callTimeout(60, TimeUnit.SECONDS)</span>
-<span class="fc" id="L34">			.addInterceptor(InternalHmacInterceptor(internalAuthSecret))</span>
-<span class="fc" id="L35">			.build()</span>
+<span class="fc" id="L48">			.Builder()</span>
+<span class="fc" id="L49">			.connectionPool(ConnectionPool(5, 2, TimeUnit.SECONDS))</span>
+<span class="fc" id="L50">			.readTimeout(60, TimeUnit.SECONDS) // Time allowed for Python to process and stream back data</span>
+<span class="fc" id="L51">			.callTimeout(60, TimeUnit.SECONDS)</span>
+<span class="fc" id="L52">			.addInterceptor(TracePropagationInterceptor(openTelemetry))</span>
+<span class="fc" id="L53">			.addInterceptor(InternalHmacInterceptor(internalAuthSecret))</span>
+<span class="fc" id="L54">			.build()</span>
 
 	private val moshi =
 		Moshi
-<span class="fc" id="L39">			.Builder()</span>
-<span class="fc" id="L40">			.addLast(KotlinJsonAdapterFactory())</span>
-<span class="fc" id="L41">			.build()</span>
+<span class="fc" id="L58">			.Builder()</span>
+<span class="fc" id="L59">			.addLast(KotlinJsonAdapterFactory())</span>
+<span class="fc" id="L60">			.build()</span>
 
 	@Bean
 	fun aiHelpServiceApi(): HelpServiceApi {
-<span class="fc" id="L45">		val retrofit =</span>
+<span class="fc" id="L64">		val retrofit =</span>
 			Retrofit
-<span class="fc" id="L47">				.Builder()</span>
-<span class="pc bpc" id="L48" title="1 of 2 branches missed.">				.baseUrl(aiHelpServiceUrl.let { if (it.endsWith(&quot;/&quot;)) it else &quot;$it/&quot; })</span>
-<span class="fc" id="L49">				.client(createBaseHttpClient())</span>
-<span class="fc" id="L50">				.addConverterFactory(MoshiConverterFactory.create(moshi))</span>
-<span class="fc" id="L51">				.build()</span>
+<span class="fc" id="L66">				.Builder()</span>
+<span class="pc bpc" id="L67" title="1 of 2 branches missed.">				.baseUrl(aiHelpServiceUrl.let { if (it.endsWith(&quot;/&quot;)) it else &quot;$it/&quot; })</span>
+<span class="fc" id="L68">				.client(createBaseHttpClient())</span>
+<span class="fc" id="L69">				.addConverterFactory(MoshiConverterFactory.create(moshi))</span>
+<span class="fc" id="L70">				.build()</span>
 
-<span class="fc" id="L53">		return retrofit.create(HelpServiceApi::class.java)</span>
+<span class="fc" id="L72">		return retrofit.create(HelpServiceApi::class.java)</span>
 	}
 
 	@Bean
 	fun aiRecipeServiceApi(): RecipeServiceApi {
-<span class="fc" id="L58">		val retrofit =</span>
+<span class="fc" id="L77">		val retrofit =</span>
 			Retrofit
-<span class="fc" id="L60">				.Builder()</span>
-<span class="pc bpc" id="L61" title="1 of 2 branches missed.">				.baseUrl(aiRecipeServiceUrl.let { if (it.endsWith(&quot;/&quot;)) it else &quot;$it/&quot; })</span>
-<span class="fc" id="L62">				.client(createBaseHttpClient())</span>
-<span class="fc" id="L63">				.addConverterFactory(MoshiConverterFactory.create(moshi))</span>
-<span class="fc" id="L64">				.build()</span>
+<span class="fc" id="L79">				.Builder()</span>
+<span class="pc bpc" id="L80" title="1 of 2 branches missed.">				.baseUrl(aiRecipeServiceUrl.let { if (it.endsWith(&quot;/&quot;)) it else &quot;$it/&quot; })</span>
+<span class="fc" id="L81">				.client(createBaseHttpClient())</span>
+<span class="fc" id="L82">				.addConverterFactory(MoshiConverterFactory.create(moshi))</span>
+<span class="fc" id="L83">				.build()</span>
 
-<span class="fc" id="L66">		return retrofit.create(RecipeServiceApi::class.java)</span>
+<span class="fc" id="L85">		return retrofit.create(RecipeServiceApi::class.java)</span>
 	}
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>
