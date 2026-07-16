@@ -19,9 +19,9 @@ _ORIGINAL_OPENAPI_SCHEMA = app.openapi_schema
 _CONTRACT_SCHEMA = schemathesis.openapi.from_path(_CONTRACT).raw_schema
 app.openapi_schema = _CONTRACT_SCHEMA
 
-# /ai/recipes belongs to py-recipe-service
+# /ai/recipes and /ai/nutrients belong to py-recipe-service
 schema = schemathesis.openapi.from_asgi("/openapi.json", app).exclude(
-	path="/ai/recipes"
+	path_regex=r"^/ai/(recipes|nutrients)$"
 )
 
 # Happy path only. Auth rejection (missing/invalid HMAC headers) is covered in test_help_service.py.

@@ -10,7 +10,14 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 import schemathesis
 
-from main import app, get_llm, verify_internal_hmac, RecipeListWrapper, LocalRecipeInput
+from main import (
+	app,
+	get_llm,
+	verify_internal_hmac,
+	RecipeListWrapper,
+	LocalRecipeInput,
+	LocalRecipeNutrients,
+)
 
 _CONTRACT = (
 	pathlib.Path(__file__).resolve().parents[3] / "api" / "openapi-internal.yaml"
@@ -32,21 +39,29 @@ def _stub_provider_dependencies():
 	app.openapi_schema = _CONTRACT_SCHEMA
 	app.dependency_overrides[verify_internal_hmac] = lambda: None
 
-	conforming = RecipeListWrapper(
-		recipes=[
-			LocalRecipeInput(
-				title="Test Recipe",
-				ingredients=[{"quantity": 1.0, "unit": "cup", "name": "Flour"}],
-				instructions=["Mix.", "Bake."],
-				portions=2.0,
-				nutrients={"calories": 200, "protein": 5, "fat": 3, "carbs": 35},
-			)
-		]
-	)
-	structured_runnable = AsyncMock()
-	structured_runnable.ainvoke.return_value = conforming
+	nutrients = LocalRecipeNutrients(calories=200, protein=5, fat=3, carbs=35)
+	conforming = {
+		RecipeListWrapper: RecipeListWrapper(
+			recipes=[
+				LocalRecipeInput(
+					title="Test Recipe",
+					ingredients=[{"quantity": 1.0, "unit": "cup", "name": "Flour"}],
+					instructions=["Mix.", "Bake."],
+					portions=2.0,
+					nutrients=nutrients,
+				)
+			]
+		),
+		LocalRecipeNutrients: nutrients,
+	}
+
+	def _structured_output(schema_class):
+		runnable = AsyncMock()
+		runnable.ainvoke.return_value = conforming[schema_class]
+		return runnable
+
 	llm = MagicMock()
-	llm.with_structured_output.return_value = structured_runnable
+	llm.with_structured_output.side_effect = _structured_output
 	app.dependency_overrides[get_llm] = lambda: llm
 
 	yield
