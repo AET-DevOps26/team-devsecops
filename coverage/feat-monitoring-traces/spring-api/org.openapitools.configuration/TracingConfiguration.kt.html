@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TracingConfiguration.kt</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openapi-spring</a> &gt; <a href="index.source.html" class="el_package">org.openapitools.configuration</a> &gt; <span class="el_source">TracingConfiguration.kt</span></div><h1>TracingConfiguration.kt</h1><pre class="source lang-java linenums">package org.openapitools.configuration
+
+import io.micrometer.observation.ObservationRegistry
+import io.micrometer.tracing.handler.DefaultTracingObservationHandler
+import io.micrometer.tracing.handler.PropagatingReceiverTracingObservationHandler
+import io.micrometer.tracing.otel.bridge.OtelBaggageManager
+import io.micrometer.tracing.otel.bridge.OtelCurrentTraceContext
+import io.micrometer.tracing.otel.bridge.OtelPropagator
+import io.micrometer.tracing.otel.bridge.OtelTracer
+import io.opentelemetry.api.common.AttributeKey
+import io.opentelemetry.api.common.Attributes
+import io.opentelemetry.api.trace.propagation.W3CTraceContextPropagator
+import io.opentelemetry.context.propagation.ContextPropagators
+import io.opentelemetry.exporter.otlp.http.trace.OtlpHttpSpanExporter
+import io.opentelemetry.sdk.OpenTelemetrySdk
+import io.opentelemetry.sdk.resources.Resource
+import io.opentelemetry.sdk.trace.SdkTracerProvider
+import io.opentelemetry.sdk.trace.export.BatchSpanProcessor
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.boot.micrometer.observation.autoconfigure.ObservationRegistryCustomizer
+import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Configuration
+
+// Spring Boot 4.x removed tracing autoconfiguration; this class replaces it.
+@Configuration(proxyBeanMethods = false)
+<span class="fc" id="L26">class TracingConfiguration(</span>
+<span class="fc" id="L27">	@Value(&quot;\${spring.application.name:spring-api}&quot;)</span>
+	private val serviceName: String,
+<span class="fc" id="L29">	@Value(&quot;\${management.otlp.tracing.endpoint:http://alloy.monitoring.svc.cluster.local:4318/v1/traces}&quot;)</span>
+	private val otlpEndpoint: String,
+) {
+	@Bean
+<span class="fc" id="L33">	fun otlpHttpSpanExporter(): OtlpHttpSpanExporter = OtlpHttpSpanExporter.builder().setEndpoint(otlpEndpoint).build()</span>
+
+	@Bean
+	fun sdkTracerProvider(spanExporter: OtlpHttpSpanExporter): SdkTracerProvider {
+<span class="fc" id="L37">		val resource =</span>
+<span class="fc" id="L38">			Resource.getDefault().merge(</span>
+<span class="fc" id="L39">				Resource.create(Attributes.of(AttributeKey.stringKey(&quot;service.name&quot;), serviceName)),</span>
+			)
+<span class="fc" id="L41">		return SdkTracerProvider</span>
+<span class="fc" id="L42">			.builder()</span>
+<span class="fc" id="L43">			.setResource(resource)</span>
+<span class="fc" id="L44">			.addSpanProcessor(BatchSpanProcessor.builder(spanExporter).build())</span>
+<span class="fc" id="L45">			.build()</span>
+	}
+
+	@Bean
+	fun openTelemetrySdk(tracerProvider: SdkTracerProvider): OpenTelemetrySdk =
+		OpenTelemetrySdk
+<span class="fc" id="L51">			.builder()</span>
+<span class="fc" id="L52">			.setTracerProvider(tracerProvider)</span>
+<span class="fc" id="L53">			.setPropagators(ContextPropagators.create(W3CTraceContextPropagator.getInstance()))</span>
+<span class="fc" id="L54">			.build()</span>
+
+	@Bean
+<span class="fc" id="L57">	fun otelCurrentTraceContext(): OtelCurrentTraceContext = OtelCurrentTraceContext()</span>
+
+	@Bean
+	fun otelBaggageManager(currentTraceContext: OtelCurrentTraceContext): OtelBaggageManager =
+<span class="fc" id="L61">		OtelBaggageManager(currentTraceContext, emptyList(), emptyList())</span>
+
+	@Bean
+	fun otelTracer(
+		openTelemetry: OpenTelemetrySdk,
+		currentTraceContext: OtelCurrentTraceContext,
+		baggageManager: OtelBaggageManager,
+	): OtelTracer =
+<span class="fc" id="L69">		OtelTracer(</span>
+<span class="fc" id="L70">			openTelemetry.getTracer(&quot;io.micrometer.tracing.otel&quot;),</span>
+<span class="fc" id="L71">			currentTraceContext,</span>
+<span class="pc" id="L72">			OtelTracer.EventPublisher { },</span>
+<span class="fc" id="L73">			baggageManager,</span>
+<span class="fc" id="L74">		)</span>
+
+	@Bean
+	fun otelPropagator(openTelemetry: OpenTelemetrySdk): OtelPropagator =
+<span class="fc" id="L78">		OtelPropagator(openTelemetry.propagators, openTelemetry.getTracer(&quot;io.micrometer.tracing.otel&quot;))</span>
+
+	@Bean
+	fun tracingObservationRegistryCustomizer(
+		tracer: OtelTracer,
+		propagator: OtelPropagator,
+	): ObservationRegistryCustomizer&lt;ObservationRegistry&gt; =
+<span class="fc" id="L85">		ObservationRegistryCustomizer { registry -&gt;</span>
+<span class="fc" id="L86">			registry</span>
+<span class="fc" id="L87">				.observationConfig()</span>
+<span class="fc" id="L88">				.observationHandler(</span>
+<span class="fc" id="L89">					io.micrometer.observation.ObservationHandler.AllMatchingCompositeObservationHandler(</span>
+<span class="fc" id="L90">						PropagatingReceiverTracingObservationHandler(tracer, propagator),</span>
+<span class="fc" id="L91">						DefaultTracingObservationHandler(tracer),</span>
+					),
+				)
+<span class="fc" id="L94">		}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>
