@@ -761,6 +761,3 @@ components:
       properties:
         recipe:
           $ref: "#/components/schemas/RecipeInput"
-        language:
-          $ref: '#/components/schemas/Language'
-          description: Optional active language context for any generated metadata text
