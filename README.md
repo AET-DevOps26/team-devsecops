@@ -101,7 +101,14 @@ The playbook connects to the VM via ssh, clones the repository and deploys all c
 Before running the workflow make sure to set up all necessary repository variables and secrets.
 These are: `SSH_PRIVATE_KEY` (SSH-Key to Azure-VM),  `GEMINI_MODEL`, `GEMINI_HELP_SERVICE_KEY`, `GEMINI_RECIPE_SERVICE_KEY`, `INTERNAL_AUTH_SECRET` (Authentication between Server and GenAI Services), `AZURE_DB_USER` and `AZURE_DB_PASSWORD`.
 
-### K8s deployment including monitoring
+### K8s Deployment & Monitoring
+
+The production environment is hosted on the TUM CIT Kubernetes cluster (managed via Rancher) using a GitOps-style approach.
+
+*   **Deployment Architecture & Setup:** The cluster infrastructure is defined declaratively in the `infra/k8s/` directory. External traffic is routed via an Ingress controller to the internal services (`web-client`, `spring-api`, and GenAI services). To deploy manually, apply the Kubernetes manifests and secrets directly to your designated namespace using `kubectl apply -f infra/k8s/`.
+*   **CI/CD Pipeline:** Deployments are fully automated. When code is merged into the `main` branch, a GitHub Actions workflow validates the code, containerizes the updated components, pushes the images to the registry, and automatically rolls out the changes to the Rancher cluster.
+*   **Observability & Monitoring:** We utilize a Prometheus and Grafana stack to ensure system reliability. The Spring API and GenAI services expose metrics endpoints (e.g., via Spring Boot Actuator) that Prometheus automatically scrapes.
+*   **Live Dashboards:** System health, resource utilization, and API latencies are visualized and can be monitored in real-time through our [Live Grafana Dashboards](https://devsecops.stud.k8s.aet.cit.tum.de/grafana).
 
 ## Student Responsibilities
 
