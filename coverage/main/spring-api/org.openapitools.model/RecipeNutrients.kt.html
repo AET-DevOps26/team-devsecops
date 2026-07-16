@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RecipeNutrients.kt</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openapi-spring</a> &gt; <a href="index.source.html" class="el_package">org.openapitools.model</a> &gt; <span class="el_source">RecipeNutrients.kt</span></div><h1>RecipeNutrients.kt</h1><pre class="source lang-java linenums">package org.openapitools.model
 
+import java.util.Objects
 import com.fasterxml.jackson.annotation.JsonProperty
-import io.swagger.v3.oas.annotations.media.Schema
-import jakarta.validation.Valid
 import jakarta.validation.constraints.DecimalMax
 import jakarta.validation.constraints.DecimalMin
 import jakarta.validation.constraints.Email
@@ -11,7 +10,8 @@ import jakarta.validation.constraints.Min
 import jakarta.validation.constraints.NotNull
 import jakarta.validation.constraints.Pattern
 import jakarta.validation.constraints.Size
-import java.util.Objects
+import jakarta.validation.Valid
+import io.swagger.v3.oas.annotations.media.Schema
 
 /**
  *
@@ -21,17 +21,23 @@ import java.util.Objects
  * @param carbs Carbohydrates in grams
  */
 <span class="fc" id="L23">data class RecipeNutrients(</span>
-<span class="fc" id="L24">	@get:Min(value = 0)</span>
-	@Schema(example = &quot;null&quot;, required = true, description = &quot;Number of Calories (kcal)&quot;)
-	@get:JsonProperty(&quot;calories&quot;, required = true) val calories: kotlin.Int,
-<span class="fc" id="L27">	@get:Min(value = 0)</span>
-	@Schema(example = &quot;null&quot;, required = true, description = &quot;Protein in grams&quot;)
-	@get:JsonProperty(&quot;protein&quot;, required = true) val protein: kotlin.Int,
-<span class="fc" id="L30">	@get:Min(value = 0)</span>
-	@Schema(example = &quot;null&quot;, required = true, description = &quot;Fat in grams&quot;)
-	@get:JsonProperty(&quot;fat&quot;, required = true) val fat: kotlin.Int,
-<span class="fc" id="L33">	@get:Min(value = 0)</span>
-	@Schema(example = &quot;null&quot;, required = true, description = &quot;Carbohydrates in grams&quot;)
-	@get:JsonProperty(&quot;carbs&quot;, required = true) val carbs: kotlin.Int,
-)
+
+<span class="fc" id="L25">    @get:Min(value=0)</span>
+    @Schema(example = &quot;null&quot;, required = true, description = &quot;Number of Calories (kcal)&quot;)
+    @get:JsonProperty(&quot;calories&quot;, required = true) val calories: kotlin.Int,
+
+<span class="fc" id="L29">    @get:Min(value=0)</span>
+    @Schema(example = &quot;null&quot;, required = true, description = &quot;Protein in grams&quot;)
+    @get:JsonProperty(&quot;protein&quot;, required = true) val protein: kotlin.Int,
+
+<span class="fc" id="L33">    @get:Min(value=0)</span>
+    @Schema(example = &quot;null&quot;, required = true, description = &quot;Fat in grams&quot;)
+    @get:JsonProperty(&quot;fat&quot;, required = true) val fat: kotlin.Int,
+
+<span class="fc" id="L37">    @get:Min(value=0)</span>
+    @Schema(example = &quot;null&quot;, required = true, description = &quot;Carbohydrates in grams&quot;)
+    @get:JsonProperty(&quot;carbs&quot;, required = true) val carbs: kotlin.Int
+) {
+
+}
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

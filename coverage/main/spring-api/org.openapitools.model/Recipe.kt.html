@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Recipe.kt</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openapi-spring</a> &gt; <a href="index.source.html" class="el_package">org.openapitools.model</a> &gt; <span class="el_source">Recipe.kt</span></div><h1>Recipe.kt</h1><pre class="source lang-java linenums">package org.openapitools.model
 
+import java.util.Objects
 import com.fasterxml.jackson.annotation.JsonProperty
-import io.swagger.v3.oas.annotations.media.Schema
-import jakarta.validation.Valid
+import org.openapitools.model.RecipeIngredient
+import org.openapitools.model.RecipeNutrients
 import jakarta.validation.constraints.DecimalMax
 import jakarta.validation.constraints.DecimalMin
 import jakarta.validation.constraints.Email
@@ -11,9 +12,8 @@ import jakarta.validation.constraints.Min
 import jakarta.validation.constraints.NotNull
 import jakarta.validation.constraints.Pattern
 import jakarta.validation.constraints.Size
-import org.openapitools.model.RecipeIngredient
-import org.openapitools.model.RecipeNutrients
-import java.util.Objects
+import jakarta.validation.Valid
+import io.swagger.v3.oas.annotations.media.Schema
 
 /**
  *
@@ -28,30 +28,41 @@ import java.util.Objects
  * @param openedAt When the recipe was last opened (UTC)
  */
 <span class="pc" id="L30">data class Recipe(</span>
-<span class="fc" id="L31">	@get:Size(min = 1, max = 255)</span>
-	@Schema(example = &quot;null&quot;, required = true, description = &quot;&quot;)
-	@get:JsonProperty(&quot;title&quot;, required = true) val title: kotlin.String,
-<span class="fc" id="L34">	@field:Valid</span>
-	@get:Size(min = 1)
-	@Schema(example = &quot;null&quot;, required = true, description = &quot;&quot;)
-	@get:JsonProperty(&quot;ingredients&quot;, required = true) val ingredients: kotlin.collections.List&lt;RecipeIngredient&gt;,
-<span class="fc" id="L38">	@get:Size(min = 1)</span>
-	@Schema(example = &quot;null&quot;, required = true, description = &quot;&quot;)
-	@get:JsonProperty(&quot;instructions&quot;, required = true) val instructions: kotlin.collections.List&lt;kotlin.String&gt;,
-<span class="fc" id="L41">	@get:DecimalMin(value = &quot;0.5&quot;)</span>
-	@Schema(example = &quot;null&quot;, required = true, description = &quot;&quot;)
-	@get:JsonProperty(&quot;portions&quot;, required = true) val portions: kotlin.Double,
-<span class="fc" id="L44">	@get:Min(value = 1L)</span>
-	@Schema(example = &quot;null&quot;, required = true, description = &quot;&quot;)
-	@get:JsonProperty(&quot;id&quot;, required = true) val id: kotlin.Long,
-<span class="fc" id="L47">	@Schema(example = &quot;null&quot;, required = true, description = &quot;When the recipe was saved (UTC)&quot;)</span>
-	@get:JsonProperty(&quot;createdAt&quot;, required = true) val createdAt: java.time.OffsetDateTime,
-<span class="fc" id="L49">	@Schema(example = &quot;null&quot;, required = true, description = &quot;When the recipe was last edited (UTC)&quot;)</span>
-	@get:JsonProperty(&quot;editedAt&quot;, required = true) val editedAt: java.time.OffsetDateTime,
-<span class="fc" id="L51">	@field:Valid</span>
-	@Schema(example = &quot;null&quot;, description = &quot;&quot;)
-<span class="nc" id="L53">	@get:JsonProperty(&quot;nutrients&quot;) val nutrients: RecipeNutrients? = null,</span>
-<span class="fc" id="L54">	@Schema(example = &quot;null&quot;, description = &quot;When the recipe was last opened (UTC)&quot;)</span>
-<span class="nc" id="L55">	@get:JsonProperty(&quot;openedAt&quot;) val openedAt: java.time.OffsetDateTime? = null,</span>
-<span class="nc" id="L56">)</span>
+
+<span class="fc" id="L32">    @get:Size(min=1,max=255)</span>
+    @Schema(example = &quot;null&quot;, required = true, description = &quot;&quot;)
+    @get:JsonProperty(&quot;title&quot;, required = true) val title: kotlin.String,
+
+<span class="fc" id="L36">    @field:Valid</span>
+    @get:Size(min=1)
+    @Schema(example = &quot;null&quot;, required = true, description = &quot;&quot;)
+    @get:JsonProperty(&quot;ingredients&quot;, required = true) val ingredients: kotlin.collections.List&lt;RecipeIngredient&gt;,
+
+<span class="fc" id="L41">    @get:Size(min=1)</span>
+    @Schema(example = &quot;null&quot;, required = true, description = &quot;&quot;)
+    @get:JsonProperty(&quot;instructions&quot;, required = true) val instructions: kotlin.collections.List&lt;kotlin.String&gt;,
+
+<span class="fc" id="L45">    @get:DecimalMin(value=&quot;0.5&quot;)</span>
+    @Schema(example = &quot;null&quot;, required = true, description = &quot;&quot;)
+    @get:JsonProperty(&quot;portions&quot;, required = true) val portions: kotlin.Double,
+
+<span class="fc" id="L49">    @get:Min(value=1L)</span>
+    @Schema(example = &quot;null&quot;, required = true, description = &quot;&quot;)
+    @get:JsonProperty(&quot;id&quot;, required = true) val id: kotlin.Long,
+
+<span class="fc" id="L53">    @Schema(example = &quot;null&quot;, required = true, description = &quot;When the recipe was saved (UTC)&quot;)</span>
+    @get:JsonProperty(&quot;createdAt&quot;, required = true) val createdAt: java.time.OffsetDateTime,
+
+<span class="fc" id="L56">    @Schema(example = &quot;null&quot;, required = true, description = &quot;When the recipe was last edited (UTC)&quot;)</span>
+    @get:JsonProperty(&quot;editedAt&quot;, required = true) val editedAt: java.time.OffsetDateTime,
+
+<span class="fc" id="L59">    @field:Valid</span>
+    @Schema(example = &quot;null&quot;, description = &quot;&quot;)
+<span class="nc" id="L61">    @get:JsonProperty(&quot;nutrients&quot;) val nutrients: RecipeNutrients? = null,</span>
+
+<span class="fc" id="L63">    @Schema(example = &quot;null&quot;, description = &quot;When the recipe was last opened (UTC)&quot;)</span>
+<span class="nc" id="L64">    @get:JsonProperty(&quot;openedAt&quot;) val openedAt: java.time.OffsetDateTime? = null</span>
+<span class="nc" id="L65">) {</span>
+
+}
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>
