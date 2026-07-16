@@ -2,8 +2,12 @@ package org.openapitools.config
 
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
+import io.opentelemetry.api.OpenTelemetry
+import io.opentelemetry.context.Context
 import okhttp3.ConnectionPool
+import okhttp3.Interceptor
 import okhttp3.OkHttpClient
+import okhttp3.Response
 import org.openapitools.internal.client.HelpServiceApi
 import org.openapitools.internal.client.RecipeServiceApi
 import org.openapitools.security.InternalHmacInterceptor
@@ -14,8 +18,22 @@ import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import java.util.concurrent.TimeUnit
 
+private class TracePropagationInterceptor(
+	private val openTelemetry: OpenTelemetry,
+) : Interceptor {
+	override fun intercept(chain: Interceptor.Chain): Response {
+		val builder = chain.request().newBuilder()
+		openTelemetry.propagators.textMapPropagator.inject(Context.current(), builder) { b, key, value ->
+			b!!.header(key, value)
+		}
+		return chain.proceed(builder.build())
+	}
+}
+
 @Configuration
-class AiConfig {
+class AiConfig(
+	private val openTelemetry: OpenTelemetry,
+) {
 	@Value("\${ai.recipe.service.url:http://localhost:8090}")
 	private lateinit var aiRecipeServiceUrl: String
 
@@ -31,6 +49,7 @@ class AiConfig {
 			.connectionPool(ConnectionPool(5, 2, TimeUnit.SECONDS))
 			.readTimeout(60, TimeUnit.SECONDS) // Time allowed for Python to process and stream back data
 			.callTimeout(60, TimeUnit.SECONDS)
+			.addInterceptor(TracePropagationInterceptor(openTelemetry))
 			.addInterceptor(InternalHmacInterceptor(internalAuthSecret))
 			.build()
 
