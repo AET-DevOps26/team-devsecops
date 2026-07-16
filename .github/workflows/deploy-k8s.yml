@@ -119,6 +119,12 @@ jobs:
       - name: Deploy monitoring
         run: kubectl apply -f infra/k8s/monitoring/
 
+      - name: Restart monitoring to reload ConfigMap-based config
+        run: |
+          kubectl rollout restart deployment/grafana -n monitoring
+          kubectl rollout restart deployment/loki -n monitoring
+          kubectl rollout restart deployment/alloy -n monitoring
+
       - name: Wait for monitoring rollouts
         run: |
           kubectl rollout status deployment/prometheus -n monitoring --timeout=300s

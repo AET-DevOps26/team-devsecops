@@ -76,7 +76,15 @@ spec:
                   name: grafana-discord-secret
                   key: webhook-url
           ports:
-            - containerPort: 3000
+            - name: http
+              containerPort: 3000
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: http
+            initialDelaySeconds: 20
+            periodSeconds: 10
+            failureThreshold: 12
           volumeMounts:
             - name: datasources
               mountPath: /etc/grafana/provisioning/datasources
