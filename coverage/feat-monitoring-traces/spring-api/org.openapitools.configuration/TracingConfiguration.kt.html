@@ -87,12 +87,13 @@ import org.springframework.http.server.observation.ServerRequestObservationConte
 	@Bean
 	fun noNoisyObservations(): ObservationPredicate =
 <span class="fc" id="L89">		ObservationPredicate { name, context -&gt;</span>
-<span class="pc bpc" id="L90" title="1 of 4 branches missed.">			if (name == &quot;http.server.requests&quot; &amp;&amp; context is ServerRequestObservationContext) {</span>
-<span class="pc bpc" id="L91" title="4 of 8 branches missed.">				context.carrier?.requestURI?.startsWith(&quot;/actuator/&quot;) != true</span>
+<span class="fc bfc" id="L90" title="All 2 branches covered.">			if (name.startsWith(&quot;spring.security&quot;)) return@ObservationPredicate false</span>
+<span class="pc bpc" id="L91" title="1 of 4 branches missed.">			if (name == &quot;http.server.requests&quot; &amp;&amp; context is ServerRequestObservationContext) {</span>
+<span class="pc bpc" id="L92" title="4 of 8 branches missed.">				context.carrier?.requestURI?.startsWith(&quot;/actuator/&quot;) != true</span>
 			} else {
-<span class="fc" id="L93">				true</span>
-<span class="fc" id="L94">			}</span>
-<span class="fc" id="L95">		}</span>
+<span class="fc" id="L94">				true</span>
+<span class="fc" id="L95">			}</span>
+<span class="fc" id="L96">		}</span>
 
 	@Bean
 	fun tracingObservationRegistryCustomizer(
@@ -100,17 +101,17 @@ import org.springframework.http.server.observation.ServerRequestObservationConte
 		propagator: OtelPropagator,
 		noNoisyObservations: ObservationPredicate,
 	): ObservationRegistryCustomizer&lt;ObservationRegistry&gt; =
-<span class="fc" id="L103">		ObservationRegistryCustomizer { registry -&gt;</span>
-<span class="fc" id="L104">			registry</span>
-<span class="fc" id="L105">				.observationConfig()</span>
-<span class="fc" id="L106">				.observationPredicate(noNoisyObservations)</span>
-<span class="fc" id="L107">				.observationHandler(</span>
-<span class="fc" id="L108">					io.micrometer.observation.ObservationHandler.FirstMatchingCompositeObservationHandler(</span>
-<span class="fc" id="L109">						PropagatingReceiverTracingObservationHandler(tracer, propagator),</span>
-<span class="fc" id="L110">						PropagatingSenderTracingObservationHandler(tracer, propagator),</span>
-<span class="fc" id="L111">						DefaultTracingObservationHandler(tracer),</span>
+<span class="fc" id="L104">		ObservationRegistryCustomizer { registry -&gt;</span>
+<span class="fc" id="L105">			registry</span>
+<span class="fc" id="L106">				.observationConfig()</span>
+<span class="fc" id="L107">				.observationPredicate(noNoisyObservations)</span>
+<span class="fc" id="L108">				.observationHandler(</span>
+<span class="fc" id="L109">					io.micrometer.observation.ObservationHandler.FirstMatchingCompositeObservationHandler(</span>
+<span class="fc" id="L110">						PropagatingReceiverTracingObservationHandler(tracer, propagator),</span>
+<span class="fc" id="L111">						PropagatingSenderTracingObservationHandler(tracer, propagator),</span>
+<span class="fc" id="L112">						DefaultTracingObservationHandler(tracer),</span>
 					),
 				)
-<span class="fc" id="L114">		}</span>
+<span class="fc" id="L115">		}</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>
