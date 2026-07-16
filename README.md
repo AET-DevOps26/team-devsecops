@@ -10,7 +10,7 @@ Coverage reports: https://aet-devops26.github.io/team-devsecops/
 
 API scheme (Swagger UI): https://devsecops.stud.k8s.aet.cit.tum.de/swagger-ui/index.html
 
-Monitoring (Grafana): https://devsecops.stud.k8s.aet.cit.tum.de/grafana
+Monitoring (Grafana): https://grafana.devsecops.stud.k8s.aet.cit.tum.de
 ## Local development
 
 The full stack runs under Docker Compose with live-reload:

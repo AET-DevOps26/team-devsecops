@@ -60,6 +60,7 @@ jobs:
       #   HELP_SERVICE_KEY       — Gemini API key for py-help-service
       #   RECIPE_SERVICE_KEY     — Gemini API key for py-recipe-service
       #   GRAFANA_ADMIN_PASSWORD — Grafana admin password
+      #   DISCORD_WEBHOOK_URL    — Discord webhook URL for Grafana alert notifications
       #   KUBE_CONFIG            — base64-encoded kubeconfig (base64 -w0 on Linux)
       - name: Upsert K8s secrets
         run: |
@@ -97,6 +98,10 @@ jobs:
             --from-literal=admin-password="${{ secrets.GRAFANA_ADMIN_PASSWORD }}" \
             --dry-run=client -o yaml | kubectl apply -f -
 
+          kubectl create secret generic grafana-discord-secret -n monitoring \
+            --from-literal=webhook-url="${{ secrets.DISCORD_WEBHOOK_URL }}" \
+            --dry-run=client -o yaml | kubectl apply -f -
+
       - name: Deploy PostgreSQL (StatefulSet)
         run: kubectl apply -f infra/k8s/postgres/
 
@@ -114,10 +119,18 @@ jobs:
       - name: Deploy monitoring
         run: kubectl apply -f infra/k8s/monitoring/
 
+      - name: Restart monitoring to reload ConfigMap-based config
+        run: |
+          kubectl rollout restart deployment/grafana -n monitoring
+          kubectl rollout restart deployment/loki -n monitoring
+          kubectl rollout restart deployment/alloy -n monitoring
+
       - name: Wait for monitoring rollouts
         run: |
           kubectl rollout status deployment/prometheus -n monitoring --timeout=300s
           kubectl rollout status deployment/grafana -n monitoring --timeout=180s
+          kubectl rollout status deployment/loki -n monitoring --timeout=180s
+          kubectl rollout status deployment/alloy -n monitoring --timeout=120s
 
       - name: Restart deployments to pull latest images
         if: github.event_name != 'push'
