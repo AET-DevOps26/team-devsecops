@@ -1,8 +1,11 @@
 package org.openapitools.model
 
 import java.util.Objects
+import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonProperty
-import org.openapitools.model.UserPreferences
+import com.fasterxml.jackson.annotation.JsonValue
+import org.openapitools.model.Language
+import org.openapitools.model.RecipeInput
 import jakarta.validation.constraints.DecimalMax
 import jakarta.validation.constraints.DecimalMin
 import jakarta.validation.constraints.Email
@@ -16,18 +19,18 @@ import io.swagger.v3.oas.annotations.media.Schema
 
 /**
  *
- * @param username
- * @param preferences
+ * @param recipe
+ * @param language Optional active language context for any generated metadata text
  */
-data class UserProfile(
-
-    @get:Size(min=1)
-    @Schema(example = "null", required = true, description = "")
-    @get:JsonProperty("username", required = true) val username: kotlin.String,
+data class NutrientRequest(
 
     @field:Valid
     @Schema(example = "null", required = true, description = "")
-    @get:JsonProperty("preferences", required = true) val preferences: UserPreferences
+    @get:JsonProperty("recipe", required = true) val recipe: RecipeInput,
+
+    @field:Valid
+    @Schema(example = "null", description = "Optional active language context for any generated metadata text")
+    @get:JsonProperty("language") val language: Language? = null
 ) {
 
 }
