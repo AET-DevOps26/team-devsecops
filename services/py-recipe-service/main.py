@@ -45,6 +45,7 @@ _provider.add_span_processor(
 	BatchSpanProcessor(OTLPSpanExporter(endpoint=f"{_otlp_base}/v1/traces"))
 )
 trace.set_tracer_provider(_provider)
+_tracer = trace.get_tracer("py-recipe-service")
 
 app = FastAPI(title="Cooking Assistant GenAI Service")
 Instrumentator().instrument(app).expose(app)
@@ -258,7 +259,10 @@ async def generate_recipes(
 			HumanMessage(content=f"Generate 3 distinct recipes for: {request.prompt}"),
 		]
 
-		response = await asyncio.wait_for(structured_llm.ainvoke(messages), timeout=60)
+		with _tracer.start_as_current_span("llm.generate_recipes"):
+			response = await asyncio.wait_for(
+				structured_llm.ainvoke(messages), timeout=60
+			)
 
 		# return array of recipes as expeted from the api spec
 		final_recipes = []
@@ -311,7 +315,10 @@ async def generate_nutrients(
 			),
 		]
 
-		response = await asyncio.wait_for(structured_llm.ainvoke(messages), timeout=60)
+		with _tracer.start_as_current_span("llm.generate_nutrients"):
+			response = await asyncio.wait_for(
+				structured_llm.ainvoke(messages), timeout=60
+			)
 
 		return response.model_dump()
 

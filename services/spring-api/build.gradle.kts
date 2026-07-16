@@ -90,6 +90,7 @@ dependencies {
 	runtimeOnly("io.micrometer:micrometer-registry-prometheus")
 	implementation("io.micrometer:micrometer-tracing-bridge-otel")
 	implementation("io.opentelemetry:opentelemetry-exporter-otlp")
+	implementation("io.opentelemetry.instrumentation:opentelemetry-jdbc:2.16.0-alpha")
 
 	// Auth
 	implementation("org.springframework.boot:spring-boot-starter-security")

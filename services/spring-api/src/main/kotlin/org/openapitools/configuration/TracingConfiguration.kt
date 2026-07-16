@@ -87,6 +87,7 @@ class TracingConfiguration(
 	@Bean
 	fun noNoisyObservations(): ObservationPredicate =
 		ObservationPredicate { name, context ->
+			if (name.startsWith("spring.security")) return@ObservationPredicate false
 			if (name == "http.server.requests" && context is ServerRequestObservationContext) {
 				context.carrier?.requestURI?.startsWith("/actuator/") != true
 			} else {

@@ -41,6 +41,7 @@ _provider.add_span_processor(
 	BatchSpanProcessor(OTLPSpanExporter(endpoint=f"{_otlp_base}/v1/traces"))
 )
 trace.set_tracer_provider(_provider)
+_tracer = trace.get_tracer("py-help-service")
 
 app = FastAPI(title="Cooking Assistant GenAI Service")
 Instrumentator().instrument(app).expose(app)
@@ -250,9 +251,10 @@ async def generate_help(
 
 		structured_llm = llm.with_structured_output(LocalHelpResponse)
 
-		result: LocalHelpResponse = await asyncio.wait_for(
-			structured_llm.ainvoke([system_prompt, user_prompt]), timeout=60
-		)
+		with _tracer.start_as_current_span("llm.generate_help"):
+			result: LocalHelpResponse = await asyncio.wait_for(
+				structured_llm.ainvoke([system_prompt, user_prompt]), timeout=60
+			)
 
 		return result.model_dump()
 
