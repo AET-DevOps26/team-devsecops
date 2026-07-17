@@ -10,7 +10,7 @@ Coverage reports: https://aet-devops26.github.io/team-devsecops/
 
 Public API scheme (Swagger UI): https://devsecops.stud.k8s.aet.cit.tum.de/swagger-ui/index.html
 
-Monitoring (Grafana): https://devsecops.stud.k8s.aet.cit.tum.de/grafana
+Monitoring (Grafana): https://grafana.devsecops.stud.k8s.aet.cit.tum.de/
 
 ## Setup Guide
 
@@ -112,8 +112,8 @@ The production environment is hosted on the TUM CIT Kubernetes cluster (managed 
 
 *   **Deployment Architecture & Setup:** The cluster infrastructure is defined declaratively in the `infra/k8s/` directory. External traffic is routed via an Ingress controller to the internal services (`web-client`, `spring-api`, and GenAI services). To deploy manually, apply the Kubernetes manifests and secrets directly to your designated namespace using `kubectl apply -f infra/k8s/`.
 *   **CI/CD Pipeline:** Deployments are fully automated. When code is merged into the `main` branch, a GitHub Actions workflow validates the code, containerizes the updated components, pushes the images to the registry, and automatically rolls out the changes to the Rancher cluster.
-*   **Observability & Monitoring:** We utilize a Prometheus and Grafana stack to ensure system reliability. The Spring API and GenAI services expose metrics endpoints (e.g., via Spring Boot Actuator) that Prometheus automatically scrapes.
-*   **Live Dashboards:** System health, resource utilization, and API latencies are visualized and can be monitored in real-time through our [Live Grafana Dashboards](https://devsecops.stud.k8s.aet.cit.tum.de/grafana).
+*   **Observability & Monitoring:** We utilize Grafana, Prometheus, Alloy, Loki and Tempo for gathering and displaying metrics, logs, and traces. The Spring API and GenAI services expose metrics endpoints (e.g., via Spring Boot Actuator) that Prometheus scrapes, while traces and logs are collected by Alloy and stored in Tempo and Loki respectively.
+*   **Live Dashboards:** System health, resource utilization, API latencies, logs, and traces all can be monitored in real-time through our [Live Grafana Dashboards](https://grafana.devsecops.stud.k8s.aet.cit.tum.de/).
 
 ## Student Responsibilities
 
