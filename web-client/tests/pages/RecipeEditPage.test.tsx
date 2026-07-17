@@ -164,6 +164,83 @@ describe('RecipeEditPage', () => {
 		expect(screen.getByRole('button', {name: 'Save'})).toBeDisabled()
 	})
 
+	it('estimates nutrients from the live draft, sending the recipe without its nutrients', async () => {
+		const user = userEvent.setup()
+		fetchMock.mockResolvedValueOnce(jsonResponse(a)) // initial GET
+		renderLibraryEdit(1)
+
+		// edit an ingredient first: the estimate must reflect the draft, not the fetched recipe
+		const names = await screen.findAllByLabelText('Ingredient')
+		await user.clear(names[0])
+		await user.type(names[0], 'aubergine')
+
+		fetchMock.mockResolvedValueOnce(jsonResponse({calories: 123, protein: 7, fat: 4, carbs: 15}))
+		await user.click(screen.getByRole('button', {name: 'Estimate using AI'}))
+
+		const postCall = fetchMock.mock.calls.find(([url]) => String(url).endsWith('/ai/nutrients'))!
+		const body = JSON.parse(String(postCall[1]!.body))
+		expect(body.recipe).toEqual({
+			title: 'Tomato Pasta',
+			portions: 2,
+			ingredients: [{name: 'aubergine', quantity: 4, unit: 'pcs'}],
+			instructions: ['boil pasta', 'add sauce'],
+		})
+		expect(body.recipe).not.toHaveProperty('nutrients')
+
+		// the fixture's nutrients (500/20/10/60) are overwritten unconditionally
+		expect(await screen.findByDisplayValue('123')).toBeInTheDocument()
+		expect(screen.getByLabelText('Protein')).toHaveValue(7)
+		expect(screen.getByLabelText('Fat')).toHaveValue(4)
+		expect(screen.getByLabelText('Carbs')).toHaveValue(15)
+	})
+
+	it('accepts a zero nutrient estimate and stays saveable', async () => {
+		const user = userEvent.setup()
+		fetchMock.mockResolvedValueOnce(jsonResponse(a))
+		renderLibraryEdit(1)
+		await screen.findByDisplayValue('Tomato Pasta')
+
+		fetchMock.mockResolvedValueOnce(jsonResponse({calories: 0, protein: 0, fat: 0, carbs: 0}))
+		await user.click(screen.getByRole('button', {name: 'Estimate using AI'}))
+
+		const fat = await screen.findByLabelText('Fat')
+		expect(fat).toHaveValue(0)
+		expect(fat.className).not.toContain('border-red-500')
+		expect(screen.getByRole('button', {name: 'Save'})).toBeEnabled()
+	})
+
+	it('shows an error in the nutrients card when the estimate fails, keeping the values', async () => {
+		const user = userEvent.setup()
+		fetchMock.mockResolvedValueOnce(jsonResponse(a))
+		renderLibraryEdit(1)
+		await screen.findByDisplayValue('Tomato Pasta')
+
+		fetchMock.mockResolvedValueOnce(jsonResponse({message: 'GenAI service unavailable'}, {status: 502}))
+		await user.click(screen.getByRole('button', {name: 'Estimate using AI'}))
+
+		expect(await screen.findByText(/GenAI service unavailable/)).toBeInTheDocument()
+		expect(screen.getByLabelText('Calories')).toHaveValue(500)
+		expect(screen.getByRole('button', {name: 'Estimate using AI'})).toBeEnabled()
+	})
+
+	it('disables the estimate button until the recipe itself is complete', async () => {
+		const user = userEvent.setup()
+		fetchMock.mockResolvedValueOnce(jsonResponse(a))
+		renderLibraryEdit(1)
+
+		const title = await screen.findByDisplayValue('Tomato Pasta')
+		expect(screen.getByRole('button', {name: 'Estimate using AI'})).toBeEnabled()
+
+		// a blank title cannot be sent
+		await user.clear(title)
+		expect(screen.getByRole('button', {name: 'Estimate using AI'})).toBeDisabled()
+		await user.type(title, 'Tomato Pasta')
+
+		// the contract requires at least one ingredient (minItems: 1)
+		await user.click(screen.getByRole('button', {name: 'Remove ingredient'}))
+		expect(screen.getByRole('button', {name: 'Estimate using AI'})).toBeDisabled()
+	})
+
 	it('keeps an edited unsaved recipe as a draft without any network call', async () => {
 		const user = userEvent.setup()
 		const unsaved = {...a, id: undefined} as unknown as Recipe

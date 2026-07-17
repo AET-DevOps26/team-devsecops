@@ -147,6 +147,8 @@ export const EN = {
 			addStep: 'Add step',
 			removeStep: 'Remove step',
 			nutrients: 'Nutrients',
+			estimateNutrients: 'Estimate using AI',
+			estimatingNutrients: 'Estimating…',
 			caloriesLabel: 'Calories',
 			proteinLabel: 'Protein',
 			fatLabel: 'Fat',

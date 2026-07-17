@@ -191,6 +191,9 @@ class SpringApiProviderPactTest {
 			)
 		whenever(recipeServiceApi.aiRecipesPost(any(), any(), any())).thenReturn(recipesCall)
 
+		val nutrientsCall = mockCall(RecipeNutrients(calories = 200, protein = 5, fat = 3, carbs = 35))
+		whenever(recipeServiceApi.aiNutrientsPost(any(), any(), any())).thenReturn(nutrientsCall)
+
 		val helpCall = mockCall(InternalHelpResponse(response = "Grease the pan well."))
 		whenever(helpServiceApi.aiHelpPost(any(), any(), any())).thenReturn(helpCall)
 	}

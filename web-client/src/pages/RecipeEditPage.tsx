@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { ChevronLeftIcon, PlusIcon, TrashIcon } from '@heroicons/react/24/outline'
+import { ChevronLeftIcon, PlusIcon, SparklesIcon, TrashIcon } from '@heroicons/react/24/outline'
 import { createPortal } from 'react-dom'
 import { Link, Navigate, useBlocker, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
@@ -13,6 +13,7 @@ import { SessionExpiredError, useApi } from '../useApi'
 type Recipe = components['schemas']['RecipeInput'] & { id?: number }
 type RecipeInput = components['schemas']['RecipeInput']
 type RecipeCreated = components['schemas']['RecipeCreated']
+type RecipeNutrients = components['schemas']['RecipeNutrients']
 
 // Editable mirror of a recipe: every field is a string so the inputs stay controlled
 // while the user types (e.g. a half-entered number), and is parsed back on save.
@@ -35,6 +36,8 @@ const NUTRIENTS = [
 const numToStr = (n: number | null | undefined) => (n != null ? String(n) : '')
 
 const isInvalidCount = (s: string) => !(Number.parseFloat(s) >= 0.5)
+// Nutrients may legitimately be zero (a fat-free recipe), unlike portions and quantities.
+const isInvalidAmount = (s: string) => !(Number.parseFloat(s) >= 0)
 const isBlankIngredient = (ing: IngredientDraft) =>
 	ing.name.trim() === '' && ing.unit.trim() === '' && ing.quantity.trim() === ''
 
@@ -59,8 +62,9 @@ function toDraft(recipe: Recipe): RecipeDraft {
 
 const toInt = (s: string) => Math.round(Number.parseFloat(s))
 
-// Parse a validated draft into a RecipeInput payload: drop fully-blank rows, coerce numbers.
-function buildRecipeInput(draft: RecipeDraft): RecipeInput {
+// Parse a validated draft into the recipe itself: drop fully-blank rows, coerce numbers.
+// Nutrients are excluded — they are what the estimator derives from these fields.
+function buildRecipe(draft: RecipeDraft): Omit<RecipeInput, 'nutrients'> {
 	const ingredients = draft.ingredients
 		.filter((ing) => !isBlankIngredient(ing))
 		.map((ing) => ({
@@ -74,6 +78,12 @@ function buildRecipeInput(draft: RecipeDraft): RecipeInput {
 		ingredients,
 		instructions,
 		portions: Number.parseFloat(draft.portions),
+	}
+}
+
+function buildRecipeInput(draft: RecipeDraft): RecipeInput {
+	return {
+		...buildRecipe(draft),
 		nutrients: {
 			calories: toInt(draft.nutrients.calories),
 			protein: toInt(draft.nutrients.protein),
@@ -198,6 +208,8 @@ function RecipeEditor({
 	const [saving, setSaving] = useState(false)
 	const [saveError, setSaveError] = useState<string | null>(null)
 	const [askPersist, setAskPersist] = useState(false)
+	const [estimating, setEstimating] = useState(false)
+	const [nutrientsError, setNutrientsError] = useState<string | null>(null)
 
 	// warn if edits would get discarded
 	const [initialJson] = useState(() => JSON.stringify(toDraft(recipe)))
@@ -213,14 +225,19 @@ function RecipeEditor({
 
 	const titleInvalid = draft.title.trim() === ''
 	const portionsInvalid = isInvalidCount(draft.portions)
-	const nutrientInvalid = (key: (typeof NUTRIENTS)[number]['key']) => isInvalidCount(draft.nutrients[key])
+	const nutrientInvalid = (key: (typeof NUTRIENTS)[number]['key']) => isInvalidAmount(draft.nutrients[key])
 	const ingredientQtyInvalid = (ing: IngredientDraft) => !isBlankIngredient(ing) && isInvalidCount(ing.quantity)
 
-	const hasErrors =
-    titleInvalid ||
-    portionsInvalid ||
-    NUTRIENTS.some((n) => nutrientInvalid(n.key)) ||
-    draft.ingredients.some(ingredientQtyInvalid)
+	const recipeInvalid = titleInvalid ||
+		portionsInvalid ||
+		draft.ingredients.some(ingredientQtyInvalid)
+
+	const hasErrors = recipeInvalid || NUTRIENTS.some((n) => nutrientInvalid(n.key))
+
+	const estimatable =
+    !recipeInvalid &&
+    draft.ingredients.some((ing) => !isBlankIngredient(ing)) &&
+    draft.instructions.some((step) => step.trim() !== '')
 
 	// synchronized widths so the quantity and unit columns line up across every row
 	const qtyColWidth = columnWidth(draft.ingredients.map((i) => i.quantity), 4)
@@ -231,6 +248,35 @@ function RecipeEditor({
 			...d,
 			ingredients: d.ingredients.map((ing, i) => (i === index ? { ...ing, ...patch } : ing)),
 		}))
+	}
+
+	async function estimateNutrients() {
+		if (!estimatable) return
+		setEstimating(true)
+		setNutrientsError(null)
+		try {
+			const res = await apiFetch('/ai/nutrients', {
+				method: 'POST',
+				headers: { 'content-type': 'application/json' },
+				body: JSON.stringify({ recipe: buildRecipe(draft) }),
+			})
+			if (!res.ok) throw new Error(await errorMessage(res))
+			const estimated = (await res.json()) as RecipeNutrients
+			setDraft((d) => ({
+				...d,
+				nutrients: {
+					calories: numToStr(estimated.calories),
+					protein: numToStr(estimated.protein),
+					fat: numToStr(estimated.fat),
+					carbs: numToStr(estimated.carbs),
+				},
+			}))
+		} catch (e) {
+			if (e instanceof SessionExpiredError) return
+			setNutrientsError(t('common.error', { message: e instanceof Error ? e.message : String(e) }))
+		} finally {
+			setEstimating(false)
+		}
 	}
 
 	// `persist` only applies to a recipe that isn't in the library yet
@@ -427,25 +473,38 @@ function RecipeEditor({
 
 				{/* Nutrients */}
 				<div className={sectionCard}>
-					<h3 className="text-lg font-bold">{t('recipe.nutrients')}</h3>
+					<div className="flex items-center justify-between gap-3">
+						<h3 className="text-lg font-bold">{t('recipe.nutrients')}</h3>
+						<button
+							type="button"
+							onClick={() => void estimateNutrients()}
+							disabled={estimating || !estimatable}
+							className="flex items-center gap-1 text-gray-500 dark:text-neutral-400 cursor-pointer transition-transform duration-100 hover:scale-98 disabled:opacity-50 disabled:cursor-default"
+						>
+							<SparklesIcon className="h-5 w-5" />
+							{estimating ? t('recipe.estimatingNutrients') : t('recipe.estimateNutrients')}
+						</button>
+					</div>
 					<div className="mt-1 flex flex-col gap-2">
 						{NUTRIENTS.map(({ key, labelKey, unit }) => (
 							<label key={key} className="flex items-center gap-2">
 								<input
 									type="number"
-									min={0.5}
+									min={0}
 									value={draft.nutrients[key]}
+									disabled={estimating}
 									onChange={(e) =>
 										setDraft((d) => ({ ...d, nutrients: { ...d.nutrients, [key]: e.target.value } }))
 									}
 									aria-label={t(labelKey)}
-									className={`no-spinner w-20 text-right ${inputBase} ${borderFor(nutrientInvalid(key))}`}
+									className={`no-spinner w-20 text-right ${inputBase} ${borderFor(nutrientInvalid(key))} disabled:opacity-50`}
 								/>
 								<span className="w-10 text-gray-500 dark:text-neutral-400">{unit}</span>
 								<span className="font-medium">{t(labelKey)}</span>
 							</label>
 						))}
 					</div>
+					{nutrientsError && <p className="mt-2 text-red-600 dark:text-red-400">{nutrientsError}</p>}
 				</div>
 
 				{saveError && !askPersist && <p className="text-red-600 dark:text-red-400">{saveError}</p>}

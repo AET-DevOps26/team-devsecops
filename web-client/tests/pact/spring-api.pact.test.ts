@@ -5,6 +5,7 @@
  * server for every route the client uses, and generates a pact. The pact
  * (web-client/pacts/) is later replayed against the running Spring provider.
  */
+import { rmSync } from 'node:fs'
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
 import { act, renderHook } from '@testing-library/react'
 import { MatchersV3, PactV3 } from '@pact-foundation/pact'
@@ -37,6 +38,14 @@ const recipeInputBody = {
 	nutrients: { calories: 200, protein: 5, fat: 3, carbs: 35 },
 }
 
+// Nutrient estimation deliberately omits `nutrients` — they are what it derives.
+const recipeWithoutNutrientsBody = {
+	title: 'Pancakes',
+	ingredients: [{ quantity: 1, unit: 'cup', name: 'Flour' }],
+	instructions: ['Mix the batter.', 'Cook on a griddle.'],
+	portions: 2,
+}
+
 const recipeResponseShape = {
 	id: integer(1),
 	title: like('Pancakes'),
@@ -64,7 +73,10 @@ const preferencesShape = {
 	aboutMe: eachLike('Home cook on a budget'),
 }
 
+const PACT_FILE = 'pacts/web-client-spring-api.json'
+
 beforeAll(async () => {
+	rmSync(PACT_FILE, { force: true })
 	vi.stubEnv('VITE_API_BASE', `http://127.0.0.1:${MOCK_PORT}`)
 	auth = await import('../../src/auth')
 	api = await import('../../src/useApi')
@@ -223,6 +235,21 @@ describe('web-client → spring-api pact', () => {
 				body: like({ response: 'Grease the pan well.' }),
 			})
 
+		pact
+			.given('a user testuser exists')
+			.uponReceiving("a request to estimate a recipe's nutrients")
+			.withRequest({
+				method: 'POST',
+				path: '/api/v1/ai/nutrients',
+				headers: { ...bearer, ...jsonHeaders },
+				body: { recipe: recipeWithoutNutrientsBody },
+			})
+			.willRespondWith({
+				status: 200,
+				headers: jsonResponse,
+				body: like({ calories: 200, protein: 5, fat: 3, carbs: 35 }),
+			})
+
 		// --- Error responses the client branches on ---
 		// 401: useApi signs the user out. Distinguishable from the happy path by the
 		// absence of a token (Pact can't tell two identical requests apart by state).
@@ -316,6 +343,12 @@ describe('web-client → spring-api pact', () => {
 				body: JSON.stringify({ recipe: recipeInputBody, prompt: 'How do I stop it sticking?' }),
 			})
 			expect((await help.json()).response).toBeTruthy()
+			const nutrients = await call('/ai/nutrients', {
+				method: 'POST',
+				headers: jsonHeaders,
+				body: JSON.stringify({ recipe: recipeWithoutNutrientsBody }),
+			})
+			expect((await nutrients.json()).calories).toBeGreaterThanOrEqual(0)
 
 			// Error responses (useApi only throws on 401/403, so these return normally).
 			expect((await call('/recipes/999')).status).toBe(404)

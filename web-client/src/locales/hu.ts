@@ -147,6 +147,8 @@ export const HU = {
 			addStep: 'Lépés hozzáadása',
 			removeStep: 'Lépés eltávolítása',
 			nutrients: 'Tápértékek',
+			estimateNutrients: 'Becslés AI-val',
+			estimatingNutrients: 'Becslés folyamatban…',
 			caloriesLabel: 'Kalória',
 			proteinLabel: 'Fehérje',
 			fatLabel: 'Zsír',

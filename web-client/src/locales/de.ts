@@ -147,6 +147,8 @@ export const DE = {
 			addStep: 'Schritt hinzufügen',
 			removeStep: 'Schritt entfernen',
 			nutrients: 'Nährwerte',
+			estimateNutrients: 'Mit KI schätzen',
+			estimatingNutrients: 'Wird geschätzt…',
 			caloriesLabel: 'Kalorien',
 			proteinLabel: 'Eiweiß',
 			fatLabel: 'Fett',
