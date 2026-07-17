@@ -19,7 +19,12 @@ data:
       max_block_duration: 5m
     compactor:
       compaction:
-        block_retention: 48h
+        block_retention: 720h
+    query_frontend:
+      search:
+        max_duration: 720h
+      metrics:
+        max_duration: 720h
     metrics_generator:
       storage:
         path: /var/tempo/generator
@@ -30,8 +35,12 @@ data:
       processor:
         local_blocks:
           max_live_traces: 50000
+          max_block_duration: 10m
+          flush_to_storage: true
     overrides:
       defaults:
+        read:
+          max_search_duration: 720h
         metrics_generator:
           processors: [local-blocks, service-graphs, span-metrics]
     storage:
