@@ -112,6 +112,29 @@ data:
         url = "http://loki.monitoring.svc.cluster.local:3100/loki/api/v1/push"
       }
     }
+
+    // Receive OTLP traces from application services (gRPC :4317, HTTP :4318)
+    otelcol.receiver.otlp "default" {
+      grpc {
+        endpoint = "0.0.0.0:4317"
+      }
+      http {
+        endpoint = "0.0.0.0:4318"
+      }
+      output {
+        traces = [otelcol.exporter.otlp.tempo.input]
+      }
+    }
+
+    // Forward traces to Tempo
+    otelcol.exporter.otlp "tempo" {
+      client {
+        endpoint = "tempo.monitoring.svc.cluster.local:4317"
+        tls {
+          insecure = true
+        }
+      }
+    }
 ---
 # Single Deployment (not DaemonSet) — loki.source.kubernetes reads logs via the
 # K8s API, so one pod is sufficient regardless of how many nodes the cluster has.
@@ -134,7 +157,7 @@ spec:
       serviceAccountName: alloy
       containers:
         - name: alloy
-          image: grafana/alloy:v1.7.1
+          image: grafana/alloy:v1.17.1
           args:
             - run
             - /etc/alloy/config.alloy
@@ -143,6 +166,10 @@ spec:
           ports:
             - name: http
               containerPort: 12345
+            - name: otlp-grpc
+              containerPort: 4317
+            - name: otlp-http
+              containerPort: 4318
           readinessProbe:
             httpGet:
               path: /-/ready
@@ -168,3 +195,22 @@ spec:
             name: alloy-config
         - name: data
           emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: alloy
+  namespace: monitoring
+spec:
+  selector:
+    app: alloy
+  ports:
+    - name: http
+      port: 12345
+      targetPort: 12345
+    - name: otlp-grpc
+      port: 4317
+      targetPort: 4317
+    - name: otlp-http
+      port: 4318
+      targetPort: 4318

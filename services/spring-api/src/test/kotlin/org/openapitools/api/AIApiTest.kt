@@ -21,16 +21,13 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Import
-import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
-import org.springframework.web.server.ResponseStatusException
 import retrofit2.Call
 import retrofit2.Response
 import java.io.InterruptedIOException
-import java.math.BigDecimal
 import kotlin.test.assertEquals
 
 @Import(AIApiTest.MockApiServices::class)

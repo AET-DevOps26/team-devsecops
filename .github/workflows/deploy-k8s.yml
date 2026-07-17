@@ -124,6 +124,7 @@ jobs:
           kubectl rollout restart deployment/grafana -n monitoring
           kubectl rollout restart deployment/loki -n monitoring
           kubectl rollout restart deployment/alloy -n monitoring
+          kubectl rollout restart deployment/tempo -n monitoring
 
       - name: Wait for monitoring rollouts
         run: |
@@ -131,6 +132,7 @@ jobs:
           kubectl rollout status deployment/grafana -n monitoring --timeout=180s
           kubectl rollout status deployment/loki -n monitoring --timeout=180s
           kubectl rollout status deployment/alloy -n monitoring --timeout=120s
+          kubectl rollout status deployment/tempo -n monitoring --timeout=180s
 
       - name: Restart deployments to pull latest images
         if: github.event_name != 'push'

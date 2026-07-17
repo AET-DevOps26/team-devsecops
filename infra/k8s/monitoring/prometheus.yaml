@@ -64,11 +64,12 @@ spec:
         fsGroup: 65534
       containers:
         - name: prometheus
-          image: prom/prometheus:v3.4.1
+          image: prom/prometheus:v3.13.1
           args:
             - --config.file=/etc/prometheus/prometheus.yml
             - --storage.tsdb.path=/prometheus
             - --storage.tsdb.retention.time=7d
+            - --web.enable-remote-write-receiver
           ports:
             - containerPort: 9090
           volumeMounts:

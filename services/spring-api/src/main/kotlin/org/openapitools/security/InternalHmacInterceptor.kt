@@ -3,7 +3,6 @@ package org.openapitools.security
 import okhttp3.Interceptor
 import okhttp3.Response
 import okio.Buffer
-import java.security.MessageDigest
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
 

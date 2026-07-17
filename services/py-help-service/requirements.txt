@@ -9,3 +9,6 @@ python-dotenv==1.0.1
 attrs==23.2.0
 python-dateutil==2.9.0.post0
 prometheus-fastapi-instrumentator==7.1.0
+opentelemetry-sdk==1.43.0
+opentelemetry-exporter-otlp-proto-http==1.43.0
+opentelemetry-instrumentation-fastapi==0.64b0
