@@ -63,3 +63,8 @@ upsert py-help-secret -n app \
 
 upsert grafana-secret -n monitoring \
   --from-literal=admin-password="$GRAFANA_ADMIN_PASSWORD"
+
+if [[ -n "${DISCORD_WEBHOOK_URL:-}" ]]; then
+  upsert grafana-discord-secret -n monitoring \
+    --from-literal=webhook-url="$DISCORD_WEBHOOK_URL"
+fi
