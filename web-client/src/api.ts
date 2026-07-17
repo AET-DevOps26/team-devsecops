@@ -628,6 +628,82 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/ai/nutrients": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Generate nutritional information for a recipe using an LLM */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["NutrientRequest"];
+                };
+            };
+            responses: {
+                /** @description AI-generated nutritional breakdown completed successfully */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["RecipeNutrients"];
+                    };
+                };
+                /** @description Invalid request body or recipe structure */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+                /** @description Missing or invalid token */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+                /** @description GenAI service unavailable or returned an unparseable response */
+                502: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+                /** @description GenAI service timed out */
+                504: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/ai/help": {
         parameters: {
             query?: never;
@@ -815,6 +891,11 @@ export interface components {
         };
         HelpResponse: {
             response: string;
+        };
+        NutrientRequest: {
+            recipe: components["schemas"]["RecipeInput"];
+            /** @description Optional active language context for any generated metadata text */
+            language?: components["schemas"]["Language"];
         };
     };
     responses: never;

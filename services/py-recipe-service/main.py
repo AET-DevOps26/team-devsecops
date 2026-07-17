@@ -22,6 +22,10 @@ from client.cooking_assistant_gen_ai_services_api_internal_client.models.recipe_
 	RecipeInput,
 )
 
+from client.cooking_assistant_gen_ai_services_api_internal_client.models.nutrient_request_forwarded import (
+	NutrientRequestForwarded,
+)
+
 # Load variables from .env for local testing
 load_dotenv()
 
@@ -223,6 +227,9 @@ async def generate_recipes(
 			f"Constraint - Allergies: {allergies} (DO NOT USE THESE)\n"
 			f"User Context: {about}\n\n"
 			f"Write all recipe content (title, ingredients, units and instructions) in {language}. "
+			"Strictly use standard, lowercase abbreviated unit names (e.g., use 'tbsp' instead of 'tablespoon', "
+			"'tsp' instead of 'teaspoon', 'g' instead of 'grams', and 'ml' instead of 'milliliters').\n"
+			"Output the nutrients for the whole recipe in total, not per portion.\n"
 			f"Keep the JSON keys in English as specified."
 		)
 
@@ -243,6 +250,54 @@ async def generate_recipes(
 			final_recipes.append(RecipeInput.from_dict(recipe_dict))
 
 		return [r.to_dict() for r in final_recipes]
+
+	except asyncio.TimeoutError:
+		raise HTTPException(
+			status_code=504, detail={"message": "LLM connection timed out."}
+		)
+	except Exception as e:
+		traceback.print_exc()
+		raise HTTPException(status_code=500, detail={"message": str(e)})
+
+
+@app.post("/ai/nutrients", dependencies=[Depends(verify_internal_hmac)])
+async def generate_nutrients(
+	request_data: dict[str, Any], llm: BaseChatModel = Depends(get_llm)
+):
+	try:
+		request = NutrientRequestForwarded.from_dict(request_data)
+	except Exception as e:
+		raise HTTPException(
+			status_code=400, detail={"message": f"Invalid request format: {str(e)}"}
+		)
+
+	if not request.recipe:
+		raise HTTPException(
+			status_code=400, detail={"message": "Missing required recipe data."}
+		)
+
+	try:
+		recipe_dict = request.recipe.to_dict()
+
+		system_prompt = (
+			"You are an expert nutritional scientist. Calculate the macronutrients and total calories "
+			"for the provided recipe. Output the nutrients for the whole recipe in total, not per portion. "
+			"Evaluate ingredient quantities, units, and base portion sizes carefully. "
+			"Ensure the output strictly mirrors the exact target JSON object fields."
+		)
+
+		structured_llm = llm.with_structured_output(LocalRecipeNutrients)
+
+		messages = [
+			SystemMessage(content=system_prompt),
+			HumanMessage(
+				content=f"Calculate exact macronutrients for this recipe payload: {recipe_dict}"
+			),
+		]
+
+		response = await asyncio.wait_for(structured_llm.ainvoke(messages), timeout=60)
+
+		return response.model_dump()
 
 	except asyncio.TimeoutError:
 		raise HTTPException(

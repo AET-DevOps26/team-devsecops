@@ -24,6 +24,7 @@ export function RecipeSaveButton({
 	onSavedIdChange,
 	onDeleted,
 	confirmContainer,
+	variant = 'icon',
 	className = '',
 }: {
   recipe: RecipeInput
@@ -32,6 +33,7 @@ export function RecipeSaveButton({
   onDeleted?: () => void
   // When set, the confirm dialog is scoped (absolute) to this element instead of covering the whole viewport
   confirmContainer?: RefObject<HTMLElement | null>
+  variant?: 'icon' | 'text'
   className?: string
 }) {
 	const { t } = useTranslation()
@@ -134,30 +136,47 @@ export function RecipeSaveButton({
 
 	return (
 		<>
-			<button
-				type="button"
-				onClick={handleClick}
-				onMouseEnter={() => {
-					hoveredRef.current = true
-				}}
-				onMouseLeave={() => {
-					hoveredRef.current = false
-					setSuppressTrash(false)
-				}}
-				disabled={saving}
-				aria-label={saved ? t('save.removeAria') : t('save.saveTitle')}
-				title={title}
-				className={`group relative flex h-9 w-9 items-center justify-center rounded-full cursor-pointer disabled:cursor-default ${className}`}
-			>
-				<span className={`relative h-6 w-6 ${saving ? 'animate-pulse' : ''}`}>
-					<Outline
-						className={`absolute inset-0 h-6 w-6 transition-colors duration-300 ease-out group-hover:text-white ${failed || showTrash ? 'text-red-500 dark:text-red-400' : 'text-gray-400 dark:text-neutral-500'}`}
-					/>
-					<Solid
-						className={`absolute inset-0 h-6 w-6 ${fillColor} [clip-path:inset(100%_0_0_0)] transition-[clip-path] duration-300 ease-out group-hover:[clip-path:inset(0_0_0_0)]`}
-					/>
-				</span>
-			</button>
+			{variant === 'text' ? (
+				<button
+					type="button"
+					onClick={handleClick}
+					disabled={saving}
+					title={title}
+					className={`flex items-center gap-1 cursor-pointer transition-colors disabled:cursor-default disabled:opacity-60 ${
+						saved
+							? 'text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300'
+							: 'text-orange-600 dark:text-orange-400 hover:text-orange-700 dark:hover:text-orange-300'
+					} ${className}`}
+				>
+					{saved ? <TrashOutline className="h-5 w-5" /> : <BookmarkOutline className="h-5 w-5" />}
+					{saved ? t('common.delete') : t('save.toLibrary')}
+				</button>
+			) : (
+				<button
+					type="button"
+					onClick={handleClick}
+					onMouseEnter={() => {
+						hoveredRef.current = true
+					}}
+					onMouseLeave={() => {
+						hoveredRef.current = false
+						setSuppressTrash(false)
+					}}
+					disabled={saving}
+					aria-label={saved ? t('save.removeAria') : t('save.saveTitle')}
+					title={title}
+					className={`group relative flex h-9 w-9 items-center justify-center rounded-full cursor-pointer disabled:cursor-default ${className}`}
+				>
+					<span className={`relative h-6 w-6 ${saving ? 'animate-pulse' : ''}`}>
+						<Outline
+							className={`absolute inset-0 h-6 w-6 transition-colors duration-300 ease-out group-hover:text-white ${failed || showTrash ? 'text-red-500 dark:text-red-400' : 'text-gray-400 dark:text-neutral-500'}`}
+						/>
+						<Solid
+							className={`absolute inset-0 h-6 w-6 ${fillColor} [clip-path:inset(100%_0_0_0)] transition-[clip-path] duration-300 ease-out group-hover:[clip-path:inset(0_0_0_0)]`}
+						/>
+					</span>
+				</button>
+			)}
 
 			{confirming &&
         createPortal(

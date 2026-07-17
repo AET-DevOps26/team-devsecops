@@ -9,9 +9,18 @@ data:
     apiVersion: 1
     datasources:
       - name: Prometheus
+        uid: prometheus
         type: prometheus
         url: http://prometheus.monitoring.svc.cluster.local:9090
         isDefault: true
+        access: proxy
+  loki.yaml: |
+    apiVersion: 1
+    datasources:
+      - name: Loki
+        uid: loki
+        type: loki
+        url: http://loki.monitoring.svc.cluster.local:3100
         access: proxy
 ---
 apiVersion: v1
@@ -33,6 +42,7 @@ metadata:
   namespace: monitoring
 spec:
   replicas: 1
+  revisionHistoryLimit: 2
   strategy:
     type: Recreate
   selector:
@@ -47,22 +57,43 @@ spec:
         fsGroup: 472
       containers:
         - name: grafana
-          image: grafana/grafana:11.6.1
+          image: grafana/grafana:11.6.16
           env:
             - name: GF_SECURITY_ADMIN_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: grafana-secret
                   key: admin-password
-            - name: GF_SERVER_ROOT_URL
-              value: https://devsecops.stud.k8s.aet.cit.tum.de/grafana/
-            - name: GF_SERVER_SERVE_FROM_SUB_PATH
+            - name: GF_INSTALL_PLUGINS
+              value: "grafana-metricsdrilldown-app,grafana-lokiexplore-app,grafana-exploretraces-app,grafana-pyroscope-app"
+            - name: GF_PLUGINS_PREINSTALL_DISABLED
               value: "true"
+            - name: GF_SERVER_ROOT_URL
+              value: "https://grafana.devsecops.stud.k8s.aet.cit.tum.de"
+            - name: DISCORD_WEBHOOK_URL
+              valueFrom:
+                secretKeyRef:
+                  name: grafana-discord-secret
+                  key: webhook-url
           ports:
-            - containerPort: 3000
+            - name: http
+              containerPort: 3000
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: http
+            initialDelaySeconds: 20
+            periodSeconds: 10
+            failureThreshold: 12
           volumeMounts:
             - name: datasources
               mountPath: /etc/grafana/provisioning/datasources
+            - name: alerting
+              mountPath: /etc/grafana/provisioning/alerting
+            - name: dashboard-provider
+              mountPath: /etc/grafana/provisioning/dashboards
+            - name: dashboards
+              mountPath: /etc/grafana/dashboards
             - name: data
               mountPath: /var/lib/grafana
           resources:
@@ -76,6 +107,15 @@ spec:
         - name: datasources
           configMap:
             name: grafana-datasources
+        - name: alerting
+          configMap:
+            name: grafana-alerting
+        - name: dashboard-provider
+          configMap:
+            name: grafana-dashboard-provider
+        - name: dashboards
+          configMap:
+            name: grafana-dashboard-services
         - name: data
           persistentVolumeClaim:
             claimName: grafana-data

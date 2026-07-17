@@ -14,6 +14,17 @@
 	html.dark {
 		color-scheme: dark;
 	}
+
+	/* hide the native up/down spinner on number inputs (used in the recipe editor) */
+	.no-spinner::-webkit-inner-spin-button,
+	.no-spinner::-webkit-outer-spin-button {
+		-webkit-appearance: none;
+		margin: 0;
+	}
+	.no-spinner {
+		-moz-appearance: textfield;
+		appearance: textfield;
+	}
 }
 
 @font-face {

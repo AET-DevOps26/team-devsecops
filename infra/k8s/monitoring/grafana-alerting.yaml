@@ -1,0 +1,213 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-alerting
+  namespace: monitoring
+data:
+  templates.yaml: |
+    apiVersion: 1
+    templates:
+      - orgId: 1
+        name: discord-message
+        template: |
+          {{ define "discord-message" -}}
+          {{ range .Alerts -}}
+          {{ if eq .Status "firing" -}}
+          **{{ .Labels.alertname }}{{ if .Labels.service }} — {{ .Labels.service }}{{ end }}**
+          Status: 🔴 FIRING
+          {{ else -}}
+          **{{ .Labels.alertname }}{{ if .Labels.service }} — {{ .Labels.service }}{{ end }}**
+          Status: ✅ RESOLVED
+          {{ end -}}
+          {{ if .Annotations.value }}Value: {{ .Annotations.value }}
+          {{ end -}}
+          {{ if .Annotations.description }}{{ .Annotations.description }}
+          {{ end -}}
+          {{ if .GeneratorURL }}[View Alert]({{ .GeneratorURL }}){{ end }}
+          {{ end -}}
+          {{ end }}
+
+  contactpoints.yaml: |
+    apiVersion: 1
+    contactPoints:
+      - orgId: 1
+        name: discord-alerts
+        receivers:
+          - uid: discord-main
+            type: discord
+            disableResolveMessage: false
+            settings:
+              # Grafana substitutes ${VAR} from the container environment at startup.
+              # DISCORD_WEBHOOK_URL is injected from grafana-discord-secret.
+              url: ${DISCORD_WEBHOOK_URL}
+              message: '{{ template "discord-message" . }}'
+
+  notificationpolicies.yaml: |
+    apiVersion: 1
+    policies:
+      - orgId: 1
+        receiver: discord-alerts
+        group_by: ['alertname', 'service']
+        group_wait: 30s
+        group_interval: 5m
+        repeat_interval: 4h
+        routes:
+          - receiver: discord-alerts
+            matchers:
+              - severity = critical
+            group_wait: 0s
+            repeat_interval: 1h
+
+  alertrules.yaml: |
+    apiVersion: 1
+    groups:
+      - orgId: 1
+        name: api-health
+        folder: Alerting Rules
+        interval: 1m
+        rules:
+
+          # Fires when the Spring API 5xx error rate exceeds 5% for 5 consecutive minutes.
+          - uid: spring-api-high-error-rate
+            title: "High Error Rate — Spring API"
+            condition: B
+            data:
+              - refId: A
+                relativeTimeRange:
+                  from: 300
+                  to: 0
+                datasourceUid: prometheus
+                model:
+                  datasource:
+                    type: prometheus
+                    uid: prometheus
+                  expr: '100 * sum(rate(http_server_requests_seconds_count{job="spring-api",outcome="SERVER_ERROR"}[5m])) / sum(rate(http_server_requests_seconds_count{job="spring-api"}[5m]))'
+                  instant: true
+                  refId: A
+              - refId: B
+                datasourceUid: "__expr__"
+                model:
+                  conditions:
+                    - evaluator:
+                        params: [5]
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params: [A]
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                  datasource:
+                    type: __expr__
+                    uid: "__expr__"
+                  refId: B
+                  type: classic_conditions
+            noDataState: OK
+            execErrState: Error
+            for: 5m
+            annotations:
+              summary: "Spring API 5xx error rate exceeded 5%"
+              description: "The server error rate has been above 5% for 5 consecutive minutes."
+            labels:
+              severity: warning
+              service: spring-api
+
+          # Fires when the Spring API P95 response time exceeds 2 seconds for 5 consecutive minutes.
+          - uid: spring-api-high-latency
+            title: "High P95 Latency — Spring API"
+            condition: B
+            data:
+              - refId: A
+                relativeTimeRange:
+                  from: 300
+                  to: 0
+                datasourceUid: prometheus
+                model:
+                  datasource:
+                    type: prometheus
+                    uid: prometheus
+                  expr: 'histogram_quantile(0.95, sum(rate(http_server_requests_seconds_bucket{job="spring-api"}[5m])) by (le))'
+                  instant: true
+                  refId: A
+              - refId: B
+                datasourceUid: "__expr__"
+                model:
+                  conditions:
+                    - evaluator:
+                        params: [2]
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params: [A]
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                  datasource:
+                    type: __expr__
+                    uid: "__expr__"
+                  refId: B
+                  type: classic_conditions
+            noDataState: OK
+            execErrState: Error
+            for: 5m
+            annotations:
+              summary: "Spring API P95 latency exceeded 2 seconds"
+              description: "95th percentile response time has been above 2s for 5 consecutive minutes."
+            labels:
+              severity: warning
+              service: spring-api
+
+          # Fires one alert instance per service when Prometheus cannot scrape it.
+          # Uses reduce+math (not classic_conditions) so each firing instance carries
+          # the job label, making it clear which service is down.
+          # noDataState: Alerting fires even when the target disappears from Prometheus entirely.
+          - uid: service-down
+            title: "Service Down"
+            condition: C
+            data:
+              - refId: A
+                relativeTimeRange:
+                  from: 300
+                  to: 0
+                datasourceUid: prometheus
+                model:
+                  datasource:
+                    type: prometheus
+                    uid: prometheus
+                  expr: 'up{job=~"spring-api|py-help-service|py-recipe-service"}'
+                  instant: true
+                  refId: A
+              - refId: B
+                datasourceUid: "__expr__"
+                model:
+                  datasource:
+                    type: __expr__
+                    uid: "__expr__"
+                  expression: A
+                  reducer: last
+                  settings:
+                    mode: dropNN
+                  refId: B
+                  type: reduce
+              - refId: C
+                datasourceUid: "__expr__"
+                model:
+                  datasource:
+                    type: __expr__
+                    uid: "__expr__"
+                  expression: $B < 1
+                  refId: C
+                  type: math
+            noDataState: Alerting
+            execErrState: Alerting
+            for: 2m
+            annotations:
+              summary: "Service Down — {{ $labels.job }}"
+              description: "Prometheus cannot scrape {{ $labels.job }} for 2+ minutes. Pod may be down or in a crash loop."
+            labels:
+              severity: critical

@@ -138,6 +138,52 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
 
+  /ai/nutrients:
+    post:
+      tags: [Recipe Service]
+      summary: Calculate and generate nutritional data for a recipe via LLM
+      description: Receives raw recipe data to parse and calculate macro and calorie values.
+      parameters:
+        - $ref: "#/components/parameters/X-Internal-Timestamp"
+        - $ref: "#/components/parameters/X-Internal-Signature"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NutrientRequestForwarded"
+      responses:
+        "200":
+          description: AI nutrient generation completed successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RecipeNutrients"
+        "400":
+          description: Invalid payload syntax or corrupted header data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Missing security headers or timestamp window expired
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: HMAC signature validation mismatch
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "504":
+          description: Upstream LangChain LLM orchestration layer timed out
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
 components:
   # ---------------------------------------------
   # SECURITY HEADERS (HMAC Architecture)
@@ -303,3 +349,11 @@ components:
         prompt:
           type: string
           minLength: 1
+
+    NutrientRequestForwarded:
+      type: object
+      required: [recipe]
+      additionalProperties: false
+      properties:
+        recipe:
+          $ref: "#/components/schemas/RecipeInput"

@@ -2,8 +2,17 @@ name: Spring API
 
 on:
   push:
+    branches: [main]
     paths:
       - 'services/spring-api/**'
+      - 'web-client/pacts/**'
+      - '.github/workflows/build-spring-api.yml'
+  # Runs against the PR's merge commit, so a branch that is green in isolation
+  # but conflicts semantically with main is caught before merge.
+  pull_request:
+    paths:
+      - 'services/spring-api/**'
+      - 'web-client/pacts/**'
       - '.github/workflows/build-spring-api.yml'
   workflow_dispatch:
   workflow_call:

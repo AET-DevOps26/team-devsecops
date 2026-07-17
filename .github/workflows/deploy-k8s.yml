@@ -65,6 +65,10 @@ jobs:
           LOGOS_BASE_URL: ${{ vars.LOGOS_BASE_URL }}
         run: infra/k8s-secrets.sh
 
+          kubectl create secret generic grafana-discord-secret -n monitoring \
+            --from-literal=webhook-url="${{ secrets.DISCORD_WEBHOOK_URL }}" \
+            --dry-run=client -o yaml | kubectl apply -f -
+
       - name: Deploy PostgreSQL (StatefulSet)
         run: kubectl apply -f infra/k8s/postgres/
 
@@ -82,10 +86,18 @@ jobs:
       - name: Deploy monitoring
         run: kubectl apply -f infra/k8s/monitoring/
 
+      - name: Restart monitoring to reload ConfigMap-based config
+        run: |
+          kubectl rollout restart deployment/grafana -n monitoring
+          kubectl rollout restart deployment/loki -n monitoring
+          kubectl rollout restart deployment/alloy -n monitoring
+
       - name: Wait for monitoring rollouts
         run: |
           kubectl rollout status deployment/prometheus -n monitoring --timeout=300s
           kubectl rollout status deployment/grafana -n monitoring --timeout=180s
+          kubectl rollout status deployment/loki -n monitoring --timeout=180s
+          kubectl rollout status deployment/alloy -n monitoring --timeout=120s
 
       - name: Restart deployments to pull latest images
         if: github.event_name != 'push'

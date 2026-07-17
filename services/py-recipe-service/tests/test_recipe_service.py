@@ -5,7 +5,14 @@ import hashlib
 import json
 from unittest.mock import AsyncMock, MagicMock
 from fastapi.testclient import TestClient
-from main import app, get_llm, SECRET_KEY_STR, RecipeListWrapper, LocalRecipeInput
+from main import (
+	app,
+	get_llm,
+	SECRET_KEY_STR,
+	RecipeListWrapper,
+	LocalRecipeInput,
+	LocalRecipeNutrients,
+)
 
 client = TestClient(app)
 
@@ -119,4 +126,62 @@ def test_generate_recipes_invalid_signature():
 		"X-Internal-Signature": "wrong-signature",
 	}
 	response = client.post("/ai/recipes", json=payload, headers=headers)
+	assert response.status_code == 403
+
+
+def test_generate_nutrients_success(mock_llm):
+	mock_nutrients = LocalRecipeNutrients(calories=350, protein=12, fat=8, carbs=45)
+
+	mock_structured_runnable = mock_llm.with_structured_output.return_value
+	mock_structured_runnable.ainvoke.return_value = mock_nutrients
+
+	payload = {
+		"recipe": {
+			"title": "Oatmeal",
+			"portions": 1.0,
+			"ingredients": [
+				{"quantity": 0.5, "unit": "cup", "name": "Oats"},
+				{"quantity": 1.0, "unit": "cup", "name": "Water"},
+			],
+			"instructions": ["Boil water", "Add oats", "Simmer 5 minutes"],
+		}
+	}
+
+	headers = create_auth_headers(payload)
+	response = client.post("/ai/nutrients", json=payload, headers=headers)
+
+	assert response.status_code == 200
+	assert response.json() == {"calories": 350, "protein": 12, "fat": 8, "carbs": 45}
+
+	mock_llm.with_structured_output.assert_called_with(LocalRecipeNutrients)
+	mock_structured_runnable.ainvoke.assert_called_once()
+
+
+def test_generate_nutrients_missing_recipe(mock_llm):
+	payload = {}
+
+	headers = create_auth_headers(payload)
+	response = client.post("/ai/nutrients", json=payload, headers=headers)
+
+	assert response.status_code == 400
+
+	response_json = response.json()
+	if "detail" in response_json:
+		assert "message" in response_json["detail"] or len(response_json["detail"]) > 0
+	else:
+		assert "message" in response_json
+
+
+def test_generate_nutrients_unauthorized():
+	response = client.post("/ai/nutrients", json={"recipe": {"title": "Test"}})
+	assert response.status_code == 401
+
+
+def test_generate_nutrients_invalid_signature():
+	payload = {"recipe": {"title": "Test"}}
+	headers = {
+		"X-Internal-Timestamp": str(int(time.time())),
+		"X-Internal-Signature": "forged-signature-token-here",
+	}
+	response = client.post("/ai/nutrients", json=payload, headers=headers)
 	assert response.status_code == 403

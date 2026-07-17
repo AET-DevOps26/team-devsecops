@@ -2,8 +2,17 @@ name: Python Help Service
 
 on:
   push:
+    branches: [main]
     paths:
       - 'services/py-help-service/**'
+      - 'api/openapi-internal.yaml'
+      - '.github/workflows/build-help-service.yml'
+  # Runs against the PR's merge commit, so a branch that is green in isolation
+  # but conflicts semantically with main is caught before merge.
+  pull_request:
+    paths:
+      - 'services/py-help-service/**'
+      - 'api/openapi-internal.yaml'
       - '.github/workflows/build-help-service.yml'
   workflow_dispatch:
   workflow_call:

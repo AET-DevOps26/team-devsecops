@@ -1,0 +1,559 @@
+---
+# Dashboard provider: tells Grafana to load JSON files from /etc/grafana/dashboards.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboard-provider
+  namespace: monitoring
+data:
+  dashboards.yaml: |
+    apiVersion: 1
+    providers:
+      - name: default
+        orgId: 1
+        type: file
+        disableDeletion: true
+        updateIntervalSeconds: 30
+        allowUiUpdates: false
+        options:
+          path: /etc/grafana/dashboards
+          foldersFromFilesStructure: false
+---
+# Dashboard JSON: Services Overview (service health + Spring API metrics + logs).
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboard-services
+  namespace: monitoring
+data:
+  services-overview.json: |
+    {
+      "annotations": {"list": []},
+      "editable": false,
+      "graphTooltip": 1,
+      "id": null,
+      "links": [],
+      "panels": [
+        {
+          "id": 1,
+          "type": "stat",
+          "title": "spring-api",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "gridPos": {"h": 4, "w": 8, "x": 0, "y": 0},
+          "fieldConfig": {
+            "defaults": {
+              "color": {"mode": "thresholds"},
+              "mappings": [{"type": "value", "options": {"0": {"text": "DOWN", "color": "red", "index": 1}, "1": {"text": "UP", "color": "green", "index": 0}}}],
+              "thresholds": {"mode": "absolute", "steps": [{"color": "red", "value": null}, {"color": "green", "value": 1}]}
+            },
+            "overrides": []
+          },
+          "options": {"colorMode": "background", "graphMode": "none", "justifyMode": "center", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "auto", "wideLayout": true},
+          "targets": [{"datasource": {"type": "prometheus", "uid": "prometheus"}, "expr": "up{job=\"spring-api\"}", "instant": true, "refId": "A"}]
+        },
+        {
+          "id": 2,
+          "type": "stat",
+          "title": "py-help-service",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "gridPos": {"h": 4, "w": 8, "x": 8, "y": 0},
+          "fieldConfig": {
+            "defaults": {
+              "color": {"mode": "thresholds"},
+              "mappings": [{"type": "value", "options": {"0": {"text": "DOWN", "color": "red", "index": 1}, "1": {"text": "UP", "color": "green", "index": 0}}}],
+              "thresholds": {"mode": "absolute", "steps": [{"color": "red", "value": null}, {"color": "green", "value": 1}]}
+            },
+            "overrides": []
+          },
+          "options": {"colorMode": "background", "graphMode": "none", "justifyMode": "center", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "auto", "wideLayout": true},
+          "targets": [{"datasource": {"type": "prometheus", "uid": "prometheus"}, "expr": "up{job=\"py-help-service\"}", "instant": true, "refId": "A"}]
+        },
+        {
+          "id": 3,
+          "type": "stat",
+          "title": "py-recipe-service",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "gridPos": {"h": 4, "w": 8, "x": 16, "y": 0},
+          "fieldConfig": {
+            "defaults": {
+              "color": {"mode": "thresholds"},
+              "mappings": [{"type": "value", "options": {"0": {"text": "DOWN", "color": "red", "index": 1}, "1": {"text": "UP", "color": "green", "index": 0}}}],
+              "thresholds": {"mode": "absolute", "steps": [{"color": "red", "value": null}, {"color": "green", "value": 1}]}
+            },
+            "overrides": []
+          },
+          "options": {"colorMode": "background", "graphMode": "none", "justifyMode": "center", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "auto", "wideLayout": true},
+          "targets": [{"datasource": {"type": "prometheus", "uid": "prometheus"}, "expr": "up{job=\"py-recipe-service\"}", "instant": true, "refId": "A"}]
+        },
+        {
+          "id": 4,
+          "type": "stat",
+          "title": "Request Rate",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "gridPos": {"h": 4, "w": 6, "x": 0, "y": 4},
+          "fieldConfig": {
+            "defaults": {
+              "color": {"mode": "thresholds"},
+              "mappings": [],
+              "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "yellow", "value": 100}, {"color": "red", "value": 500}]},
+              "unit": "reqps"
+            },
+            "overrides": []
+          },
+          "options": {"colorMode": "value", "graphMode": "area", "justifyMode": "auto", "noValue": "0", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "auto", "wideLayout": true},
+          "targets": [{"datasource": {"type": "prometheus", "uid": "prometheus"}, "expr": "sum(rate(http_server_requests_seconds_count{job=\"spring-api\"}[5m]))", "instant": true, "refId": "A"}]
+        },
+        {
+          "id": 5,
+          "type": "stat",
+          "title": "Error Rate",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "gridPos": {"h": 4, "w": 6, "x": 6, "y": 4},
+          "fieldConfig": {
+            "defaults": {
+              "color": {"mode": "thresholds"},
+              "mappings": [{"type": "special", "options": {"match": "nan", "result": {"text": "N/A", "color": "blue", "index": 0}}}],
+              "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "yellow", "value": 1}, {"color": "red", "value": 5}]},
+              "unit": "percent",
+              "min": 0,
+              "max": 100
+            },
+            "overrides": []
+          },
+          "options": {"colorMode": "background", "graphMode": "area", "justifyMode": "auto", "noValue": "N/A", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "auto", "wideLayout": true},
+          "targets": [{"datasource": {"type": "prometheus", "uid": "prometheus"}, "expr": "100 * (sum(rate(http_server_requests_seconds_count{job=\"spring-api\",outcome=\"SERVER_ERROR\"}[5m])) or on() vector(0)) / sum(rate(http_server_requests_seconds_count{job=\"spring-api\"}[5m]))", "instant": true, "refId": "A"}]
+        },
+        {
+          "id": 6,
+          "type": "stat",
+          "title": "P95 Latency",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "gridPos": {"h": 4, "w": 6, "x": 12, "y": 4},
+          "fieldConfig": {
+            "defaults": {
+              "color": {"mode": "thresholds"},
+              "mappings": [{"type": "special", "options": {"match": "nan", "result": {"text": "N/A", "color": "blue", "index": 0}}}],
+              "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "yellow", "value": 0.5}, {"color": "red", "value": 2}]},
+              "unit": "s"
+            },
+            "overrides": []
+          },
+          "options": {"colorMode": "background", "graphMode": "area", "justifyMode": "auto", "noValue": "N/A", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "auto", "wideLayout": true},
+          "targets": [{"datasource": {"type": "prometheus", "uid": "prometheus"}, "expr": "histogram_quantile(0.95, sum(rate(http_server_requests_seconds_bucket{job=\"spring-api\"}[5m])) by (le))", "instant": true, "refId": "A"}]
+        },
+        {
+          "id": 7,
+          "type": "stat",
+          "title": "JVM Heap",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "gridPos": {"h": 4, "w": 6, "x": 18, "y": 4},
+          "fieldConfig": {
+            "defaults": {
+              "color": {"mode": "thresholds"},
+              "mappings": [],
+              "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "yellow", "value": 70}, {"color": "red", "value": 85}]},
+              "unit": "percent",
+              "min": 0,
+              "max": 100
+            },
+            "overrides": []
+          },
+          "options": {"colorMode": "background", "graphMode": "area", "justifyMode": "auto", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "auto", "wideLayout": true},
+          "targets": [{"datasource": {"type": "prometheus", "uid": "prometheus"}, "expr": "100 * sum(jvm_memory_used_bytes{job=\"spring-api\",area=\"heap\"}) / sum(jvm_memory_max_bytes{job=\"spring-api\",area=\"heap\"})", "instant": true, "refId": "A"}]
+        },
+        {
+          "id": 8,
+          "type": "timeseries",
+          "title": "HTTP Requests by Outcome",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "gridPos": {"h": 9, "w": 12, "x": 0, "y": 8},
+          "fieldConfig": {
+            "defaults": {
+              "color": {"mode": "palette-classic"},
+              "custom": {"axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "req/s", "axisPlacement": "auto", "drawStyle": "line", "fillOpacity": 15, "gradientMode": "none", "lineWidth": 2, "pointSize": 5, "scaleDistribution": {"type": "linear"}, "showPoints": "never", "spanNulls": false, "stacking": {"group": "A", "mode": "none"}, "thresholdsStyle": {"mode": "off"}},
+              "mappings": [],
+              "thresholds": {"mode": "absolute", "steps": [{"color": "green"}]},
+              "unit": "reqps"
+            },
+            "overrides": [
+              {"matcher": {"id": "byName", "options": "5xx Errors"}, "properties": [{"id": "color", "value": {"fixedColor": "red", "mode": "fixed"}}]},
+              {"matcher": {"id": "byName", "options": "4xx Errors"}, "properties": [{"id": "color", "value": {"fixedColor": "orange", "mode": "fixed"}}]},
+              {"matcher": {"id": "byName", "options": "Success"}, "properties": [{"id": "color", "value": {"fixedColor": "green", "mode": "fixed"}}]}
+            ]
+          },
+          "options": {"legend": {"calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom", "showLegend": true}, "tooltip": {"mode": "multi", "sort": "desc"}},
+          "targets": [
+            {"datasource": {"type": "prometheus", "uid": "prometheus"}, "expr": "sum(rate(http_server_requests_seconds_count{job=\"spring-api\",outcome=\"SUCCESS\"}[5m]))", "legendFormat": "Success", "refId": "A"},
+            {"datasource": {"type": "prometheus", "uid": "prometheus"}, "expr": "sum(rate(http_server_requests_seconds_count{job=\"spring-api\",outcome=\"CLIENT_ERROR\"}[5m]))", "legendFormat": "4xx Errors", "refId": "B"},
+            {"datasource": {"type": "prometheus", "uid": "prometheus"}, "expr": "sum(rate(http_server_requests_seconds_count{job=\"spring-api\",outcome=\"SERVER_ERROR\"}[5m]))", "legendFormat": "5xx Errors", "refId": "C"}
+          ]
+        },
+        {
+          "id": 9,
+          "type": "timeseries",
+          "title": "Response Time Percentiles",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "gridPos": {"h": 9, "w": 12, "x": 12, "y": 8},
+          "fieldConfig": {
+            "defaults": {
+              "color": {"mode": "palette-classic"},
+              "custom": {"axisCenteredZero": false, "axisColorMode": "text", "axisPlacement": "auto", "drawStyle": "line", "fillOpacity": 10, "gradientMode": "none", "lineWidth": 2, "pointSize": 5, "scaleDistribution": {"type": "linear"}, "showPoints": "never", "spanNulls": false, "stacking": {"group": "A", "mode": "none"}, "thresholdsStyle": {"mode": "line+area"}},
+              "mappings": [],
+              "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "red", "value": 2}]},
+              "unit": "s"
+            },
+            "overrides": []
+          },
+          "options": {"legend": {"calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom", "showLegend": true}, "tooltip": {"mode": "multi", "sort": "desc"}},
+          "targets": [
+            {"datasource": {"type": "prometheus", "uid": "prometheus"}, "expr": "histogram_quantile(0.50, sum(rate(http_server_requests_seconds_bucket{job=\"spring-api\"}[5m])) by (le))", "legendFormat": "p50", "refId": "A"},
+            {"datasource": {"type": "prometheus", "uid": "prometheus"}, "expr": "histogram_quantile(0.90, sum(rate(http_server_requests_seconds_bucket{job=\"spring-api\"}[5m])) by (le))", "legendFormat": "p90", "refId": "B"},
+            {"datasource": {"type": "prometheus", "uid": "prometheus"}, "expr": "histogram_quantile(0.95, sum(rate(http_server_requests_seconds_bucket{job=\"spring-api\"}[5m])) by (le))", "legendFormat": "p95", "refId": "C"},
+            {"datasource": {"type": "prometheus", "uid": "prometheus"}, "expr": "histogram_quantile(0.99, sum(rate(http_server_requests_seconds_bucket{job=\"spring-api\"}[5m])) by (le))", "legendFormat": "p99", "refId": "D"}
+          ]
+        },
+        {
+          "id": 10,
+          "type": "timeseries",
+          "title": "JVM Memory",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "gridPos": {"h": 9, "w": 12, "x": 0, "y": 17},
+          "fieldConfig": {
+            "defaults": {
+              "color": {"mode": "palette-classic"},
+              "custom": {"axisCenteredZero": false, "axisColorMode": "text", "axisPlacement": "auto", "drawStyle": "line", "fillOpacity": 10, "gradientMode": "none", "lineWidth": 1, "pointSize": 5, "scaleDistribution": {"type": "linear"}, "showPoints": "never", "spanNulls": false, "stacking": {"group": "A", "mode": "none"}, "thresholdsStyle": {"mode": "off"}},
+              "mappings": [],
+              "thresholds": {"mode": "absolute", "steps": [{"color": "green"}]},
+              "unit": "bytes"
+            },
+            "overrides": []
+          },
+          "options": {"legend": {"calcs": ["mean", "last"], "displayMode": "table", "placement": "bottom", "showLegend": true}, "tooltip": {"mode": "multi", "sort": "none"}},
+          "targets": [
+            {"datasource": {"type": "prometheus", "uid": "prometheus"}, "expr": "sum(jvm_memory_used_bytes{job=\"spring-api\"}) by (area)", "legendFormat": "used ({{area}})", "refId": "A"},
+            {"datasource": {"type": "prometheus", "uid": "prometheus"}, "expr": "sum(jvm_memory_max_bytes{job=\"spring-api\",area=\"heap\"})", "legendFormat": "max (heap)", "refId": "B"}
+          ]
+        },
+        {
+          "id": 11,
+          "type": "timeseries",
+          "title": "CPU Usage & JVM Threads",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "gridPos": {"h": 9, "w": 12, "x": 12, "y": 17},
+          "fieldConfig": {
+            "defaults": {
+              "color": {"mode": "palette-classic"},
+              "custom": {"axisCenteredZero": false, "axisColorMode": "text", "axisPlacement": "auto", "drawStyle": "line", "fillOpacity": 10, "gradientMode": "none", "lineWidth": 1, "pointSize": 5, "scaleDistribution": {"type": "linear"}, "showPoints": "never", "spanNulls": false, "stacking": {"group": "A", "mode": "none"}, "thresholdsStyle": {"mode": "off"}},
+              "mappings": [],
+              "thresholds": {"mode": "absolute", "steps": [{"color": "green"}]},
+              "unit": "percentunit"
+            },
+            "overrides": [
+              {"matcher": {"id": "byName", "options": "Threads"}, "properties": [{"id": "unit", "value": "short"}, {"id": "custom.axisPlacement", "value": "right"}]}
+            ]
+          },
+          "options": {"legend": {"calcs": ["mean", "last"], "displayMode": "table", "placement": "bottom", "showLegend": true}, "tooltip": {"mode": "multi", "sort": "none"}},
+          "targets": [
+            {"datasource": {"type": "prometheus", "uid": "prometheus"}, "expr": "process_cpu_usage{job=\"spring-api\"}", "legendFormat": "CPU", "refId": "A"},
+            {"datasource": {"type": "prometheus", "uid": "prometheus"}, "expr": "jvm_threads_live_threads{job=\"spring-api\"}", "legendFormat": "Threads", "refId": "B"}
+          ]
+        },
+        {
+          "id": 12,
+          "type": "logs",
+          "title": "Error & Exception Logs",
+          "datasource": {"type": "loki", "uid": "loki"},
+          "gridPos": {"h": 8, "w": 24, "x": 0, "y": 26},
+          "fieldConfig": {"defaults": {}, "overrides": []},
+          "options": {
+            "dedupStrategy": "none",
+            "enableLogDetails": true,
+            "prettifyLogMessage": false,
+            "showCommonLabels": false,
+            "showLabels": false,
+            "showTime": true,
+            "sortOrder": "Descending",
+            "wrapLogMessage": true
+          },
+          "targets": [
+            {"datasource": {"type": "loki", "uid": "loki"}, "expr": "{namespace=\"app\"} |~ \"(?i)(error|exception|warn)\"", "refId": "A"}
+          ]
+        }
+      ],
+      "refresh": "30s",
+      "schemaVersion": 39,
+      "tags": ["spring-boot", "api", "services"],
+      "templating": {"list": []},
+      "time": {"from": "now-3h", "to": "now"},
+      "timepicker": {},
+      "timezone": "browser",
+      "title": "Services Overview",
+      "uid": "services-overview",
+      "version": 1,
+      "weekStart": ""
+    }
+  jvm-container-stats.json: |
+    {
+      "annotations": {"list": []},
+      "editable": false,
+      "graphTooltip": 1,
+      "id": null,
+      "links": [],
+      "panels": [
+        {
+          "id": 1,
+          "type": "gauge",
+          "title": "CPU Busy",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "gridPos": {"h": 5, "w": 6, "x": 0, "y": 0},
+          "fieldConfig": {
+            "defaults": {
+              "color": {"mode": "thresholds"},
+              "mappings": [],
+              "max": 100,
+              "min": 0,
+              "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "yellow", "value": 60}, {"color": "red", "value": 80}]},
+              "unit": "percent"
+            },
+            "overrides": []
+          },
+          "options": {"minVizHeight": 75, "minVizWidth": 75, "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "showThresholdLabels": false, "showThresholdMarkers": true},
+          "targets": [{"datasource": {"type": "prometheus", "uid": "prometheus"}, "expr": "process_cpu_usage{job=\"spring-api\"} * 100", "instant": true, "legendFormat": "CPU", "refId": "A"}]
+        },
+        {
+          "id": 2,
+          "type": "gauge",
+          "title": "JVM Heap Used",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "gridPos": {"h": 5, "w": 6, "x": 6, "y": 0},
+          "fieldConfig": {
+            "defaults": {
+              "color": {"mode": "thresholds"},
+              "mappings": [],
+              "max": 100,
+              "min": 0,
+              "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "yellow", "value": 65}, {"color": "red", "value": 85}]},
+              "unit": "percent"
+            },
+            "overrides": []
+          },
+          "options": {"minVizHeight": 75, "minVizWidth": 75, "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "showThresholdLabels": false, "showThresholdMarkers": true},
+          "targets": [{"datasource": {"type": "prometheus", "uid": "prometheus"}, "expr": "100 * sum(jvm_memory_used_bytes{job=\"spring-api\",area=\"heap\"}) / sum(jvm_memory_max_bytes{job=\"spring-api\",area=\"heap\"})", "instant": true, "legendFormat": "Heap", "refId": "A"}]
+        },
+        {
+          "id": 3,
+          "type": "stat",
+          "title": "JVM Threads",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "gridPos": {"h": 5, "w": 4, "x": 12, "y": 0},
+          "fieldConfig": {
+            "defaults": {
+              "color": {"mode": "thresholds"},
+              "mappings": [],
+              "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "yellow", "value": 200}, {"color": "red", "value": 500}]},
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "options": {"colorMode": "value", "graphMode": "area", "justifyMode": "auto", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "auto", "wideLayout": true},
+          "targets": [{"datasource": {"type": "prometheus", "uid": "prometheus"}, "expr": "jvm_threads_live_threads{job=\"spring-api\"}", "instant": true, "refId": "A"}]
+        },
+        {
+          "id": 4,
+          "type": "stat",
+          "title": "Uptime",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "gridPos": {"h": 5, "w": 4, "x": 16, "y": 0},
+          "fieldConfig": {
+            "defaults": {
+              "color": {"mode": "thresholds"},
+              "mappings": [],
+              "thresholds": {"mode": "absolute", "steps": [{"color": "red", "value": null}, {"color": "yellow", "value": 60}, {"color": "green", "value": 3600}]},
+              "unit": "dtdurations"
+            },
+            "overrides": []
+          },
+          "options": {"colorMode": "value", "graphMode": "none", "justifyMode": "auto", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "auto", "wideLayout": true},
+          "targets": [{"datasource": {"type": "prometheus", "uid": "prometheus"}, "expr": "process_uptime_seconds{job=\"spring-api\"}", "instant": true, "refId": "A"}]
+        },
+        {
+          "id": 5,
+          "type": "stat",
+          "title": "GC Collections/s",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "gridPos": {"h": 5, "w": 4, "x": 20, "y": 0},
+          "fieldConfig": {
+            "defaults": {
+              "color": {"mode": "thresholds"},
+              "mappings": [],
+              "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "yellow", "value": 1}, {"color": "red", "value": 5}]},
+              "unit": "ops"
+            },
+            "overrides": []
+          },
+          "options": {"colorMode": "value", "graphMode": "area", "justifyMode": "auto", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "auto", "wideLayout": true},
+          "targets": [{"datasource": {"type": "prometheus", "uid": "prometheus"}, "expr": "sum(rate(jvm_gc_pause_seconds_count{job=\"spring-api\"}[5m]))", "instant": true, "refId": "A"}]
+        },
+        {
+          "id": 6,
+          "type": "timeseries",
+          "title": "CPU Usage",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "gridPos": {"h": 8, "w": 12, "x": 0, "y": 5},
+          "fieldConfig": {
+            "defaults": {
+              "color": {"mode": "palette-classic"},
+              "custom": {"axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "", "axisPlacement": "auto", "drawStyle": "line", "fillOpacity": 15, "gradientMode": "none", "lineWidth": 2, "pointSize": 5, "scaleDistribution": {"type": "linear"}, "showPoints": "never", "spanNulls": false, "stacking": {"group": "A", "mode": "none"}, "thresholdsStyle": {"mode": "off"}},
+              "mappings": [],
+              "max": 1,
+              "min": 0,
+              "thresholds": {"mode": "absolute", "steps": [{"color": "green"}]},
+              "unit": "percentunit"
+            },
+            "overrides": []
+          },
+          "options": {"legend": {"calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom", "showLegend": true}, "tooltip": {"mode": "multi", "sort": "desc"}},
+          "targets": [
+            {"datasource": {"type": "prometheus", "uid": "prometheus"}, "expr": "process_cpu_usage{job=\"spring-api\"}", "legendFormat": "Process CPU", "refId": "A"},
+            {"datasource": {"type": "prometheus", "uid": "prometheus"}, "expr": "system_cpu_usage{job=\"spring-api\"}", "legendFormat": "System CPU", "refId": "B"}
+          ]
+        },
+        {
+          "id": 7,
+          "type": "timeseries",
+          "title": "JVM Memory",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "gridPos": {"h": 8, "w": 12, "x": 12, "y": 5},
+          "fieldConfig": {
+            "defaults": {
+              "color": {"mode": "palette-classic"},
+              "custom": {"axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "", "axisPlacement": "auto", "drawStyle": "line", "fillOpacity": 10, "gradientMode": "none", "lineWidth": 1, "pointSize": 5, "scaleDistribution": {"type": "linear"}, "showPoints": "never", "spanNulls": false, "stacking": {"group": "A", "mode": "none"}, "thresholdsStyle": {"mode": "off"}},
+              "mappings": [],
+              "thresholds": {"mode": "absolute", "steps": [{"color": "green"}]},
+              "unit": "bytes"
+            },
+            "overrides": []
+          },
+          "options": {"legend": {"calcs": ["mean", "last"], "displayMode": "table", "placement": "bottom", "showLegend": true}, "tooltip": {"mode": "multi", "sort": "none"}},
+          "targets": [
+            {"datasource": {"type": "prometheus", "uid": "prometheus"}, "expr": "sum(jvm_memory_used_bytes{job=\"spring-api\",area=\"heap\"})", "legendFormat": "heap used", "refId": "A"},
+            {"datasource": {"type": "prometheus", "uid": "prometheus"}, "expr": "sum(jvm_memory_committed_bytes{job=\"spring-api\",area=\"heap\"})", "legendFormat": "heap committed", "refId": "B"},
+            {"datasource": {"type": "prometheus", "uid": "prometheus"}, "expr": "sum(jvm_memory_max_bytes{job=\"spring-api\",area=\"heap\"})", "legendFormat": "heap max", "refId": "C"},
+            {"datasource": {"type": "prometheus", "uid": "prometheus"}, "expr": "sum(jvm_memory_used_bytes{job=\"spring-api\",area=\"nonheap\"})", "legendFormat": "nonheap used", "refId": "D"}
+          ]
+        },
+        {
+          "id": 8,
+          "type": "timeseries",
+          "title": "JVM Threads",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "gridPos": {"h": 8, "w": 12, "x": 0, "y": 13},
+          "fieldConfig": {
+            "defaults": {
+              "color": {"mode": "palette-classic"},
+              "custom": {"axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "", "axisPlacement": "auto", "drawStyle": "line", "fillOpacity": 10, "gradientMode": "none", "lineWidth": 1, "pointSize": 5, "scaleDistribution": {"type": "linear"}, "showPoints": "never", "spanNulls": false, "stacking": {"group": "A", "mode": "none"}, "thresholdsStyle": {"mode": "off"}},
+              "mappings": [],
+              "min": 0,
+              "thresholds": {"mode": "absolute", "steps": [{"color": "green"}]},
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "options": {"legend": {"calcs": ["mean", "last"], "displayMode": "table", "placement": "bottom", "showLegend": true}, "tooltip": {"mode": "multi", "sort": "none"}},
+          "targets": [
+            {"datasource": {"type": "prometheus", "uid": "prometheus"}, "expr": "jvm_threads_live_threads{job=\"spring-api\"}", "legendFormat": "live", "refId": "A"},
+            {"datasource": {"type": "prometheus", "uid": "prometheus"}, "expr": "jvm_threads_daemon_threads{job=\"spring-api\"}", "legendFormat": "daemon", "refId": "B"},
+            {"datasource": {"type": "prometheus", "uid": "prometheus"}, "expr": "jvm_threads_peak_threads{job=\"spring-api\"}", "legendFormat": "peak", "refId": "C"}
+          ]
+        },
+        {
+          "id": 9,
+          "type": "timeseries",
+          "title": "GC Activity",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "gridPos": {"h": 8, "w": 12, "x": 12, "y": 13},
+          "fieldConfig": {
+            "defaults": {
+              "color": {"mode": "palette-classic"},
+              "custom": {"axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "", "axisPlacement": "auto", "drawStyle": "line", "fillOpacity": 10, "gradientMode": "none", "lineWidth": 1, "pointSize": 5, "scaleDistribution": {"type": "linear"}, "showPoints": "never", "spanNulls": false, "stacking": {"group": "A", "mode": "none"}, "thresholdsStyle": {"mode": "off"}},
+              "mappings": [],
+              "min": 0,
+              "thresholds": {"mode": "absolute", "steps": [{"color": "green"}]},
+              "unit": "s"
+            },
+            "overrides": []
+          },
+          "options": {"legend": {"calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom", "showLegend": true}, "tooltip": {"mode": "multi", "sort": "desc"}},
+          "targets": [
+            {"datasource": {"type": "prometheus", "uid": "prometheus"}, "expr": "rate(jvm_gc_pause_seconds_sum{job=\"spring-api\"}[5m])", "legendFormat": "{{action}} ({{cause}})", "refId": "A"}
+          ]
+        },
+        {
+          "id": 10,
+          "type": "timeseries",
+          "title": "HTTP Request Rate",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "gridPos": {"h": 8, "w": 12, "x": 0, "y": 21},
+          "fieldConfig": {
+            "defaults": {
+              "color": {"mode": "palette-classic"},
+              "custom": {"axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "req/s", "axisPlacement": "auto", "drawStyle": "line", "fillOpacity": 15, "gradientMode": "none", "lineWidth": 2, "pointSize": 5, "scaleDistribution": {"type": "linear"}, "showPoints": "never", "spanNulls": false, "stacking": {"group": "A", "mode": "none"}, "thresholdsStyle": {"mode": "off"}},
+              "mappings": [],
+              "min": 0,
+              "thresholds": {"mode": "absolute", "steps": [{"color": "green"}]},
+              "unit": "reqps"
+            },
+            "overrides": [
+              {"matcher": {"id": "byName", "options": "5xx Errors"}, "properties": [{"id": "color", "value": {"fixedColor": "red", "mode": "fixed"}}]},
+              {"matcher": {"id": "byName", "options": "4xx Errors"}, "properties": [{"id": "color", "value": {"fixedColor": "orange", "mode": "fixed"}}]},
+              {"matcher": {"id": "byName", "options": "Success"}, "properties": [{"id": "color", "value": {"fixedColor": "green", "mode": "fixed"}}]}
+            ]
+          },
+          "options": {"legend": {"calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom", "showLegend": true}, "tooltip": {"mode": "multi", "sort": "desc"}},
+          "targets": [
+            {"datasource": {"type": "prometheus", "uid": "prometheus"}, "expr": "sum(rate(http_server_requests_seconds_count{job=\"spring-api\",outcome=\"SUCCESS\"}[5m]))", "legendFormat": "Success", "refId": "A"},
+            {"datasource": {"type": "prometheus", "uid": "prometheus"}, "expr": "sum(rate(http_server_requests_seconds_count{job=\"spring-api\",outcome=\"CLIENT_ERROR\"}[5m]))", "legendFormat": "4xx Errors", "refId": "B"},
+            {"datasource": {"type": "prometheus", "uid": "prometheus"}, "expr": "sum(rate(http_server_requests_seconds_count{job=\"spring-api\",outcome=\"SERVER_ERROR\"}[5m]))", "legendFormat": "5xx Errors", "refId": "C"}
+          ]
+        },
+        {
+          "id": 11,
+          "type": "timeseries",
+          "title": "Log Events by Level",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "gridPos": {"h": 8, "w": 12, "x": 12, "y": 21},
+          "fieldConfig": {
+            "defaults": {
+              "color": {"mode": "palette-classic"},
+              "custom": {"axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "events/s", "axisPlacement": "auto", "drawStyle": "line", "fillOpacity": 10, "gradientMode": "none", "lineWidth": 1, "pointSize": 5, "scaleDistribution": {"type": "linear"}, "showPoints": "never", "spanNulls": false, "stacking": {"group": "A", "mode": "none"}, "thresholdsStyle": {"mode": "off"}},
+              "mappings": [],
+              "min": 0,
+              "thresholds": {"mode": "absolute", "steps": [{"color": "green"}]},
+              "unit": "short"
+            },
+            "overrides": [
+              {"matcher": {"id": "byName", "options": "error"}, "properties": [{"id": "color", "value": {"fixedColor": "red", "mode": "fixed"}}]},
+              {"matcher": {"id": "byName", "options": "warn"}, "properties": [{"id": "color", "value": {"fixedColor": "orange", "mode": "fixed"}}]},
+              {"matcher": {"id": "byName", "options": "info"}, "properties": [{"id": "color", "value": {"fixedColor": "blue", "mode": "fixed"}}]}
+            ]
+          },
+          "options": {"legend": {"calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom", "showLegend": true}, "tooltip": {"mode": "multi", "sort": "desc"}},
+          "targets": [
+            {"datasource": {"type": "prometheus", "uid": "prometheus"}, "expr": "rate(logback_events_total{job=\"spring-api\",level=\"error\"}[5m])", "legendFormat": "error", "refId": "A"},
+            {"datasource": {"type": "prometheus", "uid": "prometheus"}, "expr": "rate(logback_events_total{job=\"spring-api\",level=\"warn\"}[5m])", "legendFormat": "warn", "refId": "B"},
+            {"datasource": {"type": "prometheus", "uid": "prometheus"}, "expr": "rate(logback_events_total{job=\"spring-api\",level=\"info\"}[5m])", "legendFormat": "info", "refId": "C"}
+          ]
+        }
+      ],
+      "refresh": "30s",
+      "schemaVersion": 39,
+      "tags": ["jvm", "containers"],
+      "templating": {"list": []},
+      "time": {"from": "now-3h", "to": "now"},
+      "timepicker": {},
+      "timezone": "browser",
+      "title": "JVM Container Stats",
+      "uid": "jvm-container-stats",
+      "version": 1,
+      "weekStart": ""
+    }
