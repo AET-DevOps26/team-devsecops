@@ -11,7 +11,7 @@
         name: [git, python3-docker, python3-pip]
         state: present
         update_cache: yes
-    
+
     - name: Install Docker via official script
       shell: curl -fsSL https://get.docker.com -o get-docker.sh && sh get-docker.sh
       args:
@@ -82,12 +82,29 @@
           command: docker compose up -d --build
           args:
             chdir: /var/www/app/infra
+          environment:
+            DOCKER_BUILDKIT: "1"
           register: compose_output
 
       rescue:
-        - name: Show Docker logs if deployment fails
+        - name: Show compose stdout on failure
           debug:
             var: compose_output.stdout_lines
+
+        - name: Show compose stderr on failure
+          debug:
+            var: compose_output.stderr_lines
+
+        - name: Show per-service container logs on failure
+          command: docker compose logs --no-color
+          args:
+            chdir: /var/www/app/infra
+          ignore_errors: yes
+          register: compose_logs
+
+        - name: Print container logs
+          debug:
+            var: compose_logs.stdout_lines
 
         - name: Fail the playbook so GitHub knows it failed
           fail:
