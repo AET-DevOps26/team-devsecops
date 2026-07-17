@@ -826,10 +826,12 @@ export interface components {
             /** @description Free-form user context provided to the AI */
             aboutMe?: string[];
         };
+        /** @description A measured ingredient has both quantity and unit ("200 g flour"); a counted one has a quantity only ("2 eggs"); one added to taste has neither ("salt"). A unit without a quantity is meaningless and is rejected by the recipe editor, though the contract tolerates it. */
         RecipeIngredient: {
-            quantity: number;
-            /** @description Unit of measurement (e.g. g, ml, cup, tbsp) */
-            unit: string;
+            /** @description Amount of the ingredient. Omitted when the ingredient is added to taste. */
+            quantity?: number;
+            /** @description Unit of measurement (e.g. g, ml, cup, tbsp). Omitted when the ingredient is counted as whole items rather than measured. */
+            unit?: string;
             name: string;
         };
         RecipeNutrients: {
@@ -894,8 +896,6 @@ export interface components {
         };
         NutrientRequest: {
             recipe: components["schemas"]["RecipeInput"];
-            /** @description Optional active language context for any generated metadata text */
-            language?: components["schemas"]["Language"];
         };
     };
     responses: never;

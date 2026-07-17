@@ -208,7 +208,10 @@ async def generate_help(
 			if ingredients:
 				recipe_ctx.append("\nIngredients:")
 				for ing in ingredients:
-					recipe_ctx.append(f"- {ing.quantity} {ing.unit} {ing.name}")
+					# an absent quantity or unit is Unset, which would render as "UNSET"
+					parts = [ing.quantity, ing.unit, ing.name]
+					line = " ".join(str(p) for p in parts if not isinstance(p, Unset))
+					recipe_ctx.append(f"- {line}")
 
 			instructions = getattr(request.recipe, "instructions", None)
 			if instructions:

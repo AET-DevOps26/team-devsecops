@@ -45,7 +45,13 @@ def _stub_provider_dependencies():
 			recipes=[
 				LocalRecipeInput(
 					title="Test Recipe",
-					ingredients=[{"quantity": 1.0, "unit": "cup", "name": "Flour"}],
+					# One of each ingredient kind: an absent quantity/unit must be marked by
+					# omitting the key, since the contract forbids both null and "".
+					ingredients=[
+						{"quantity": 1.0, "unit": "cup", "name": "Flour"},
+						{"quantity": 2.0, "name": "Eggs"},
+						{"name": "Salt"},
+					],
 					instructions=["Mix.", "Bake."],
 					portions=2.0,
 					nutrients=nutrients,

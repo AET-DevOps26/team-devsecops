@@ -107,7 +107,7 @@ describe('RecipeEditPage', () => {
 		expect(body.portions).toBe(2)
 		expect(body.ingredients).toEqual([
 			{name: 'tomato', quantity: 4, unit: 'pcs'},
-			{name: 'basil', quantity: 2, unit: ''},
+			{name: 'basil', quantity: 2},
 		])
 		expect(body.nutrients).toEqual({calories: 500, protein: 20, fat: 10, carbs: 60})
 
@@ -131,6 +131,87 @@ describe('RecipeEditPage', () => {
 		const body = JSON.parse(String(putCall[1]!.body))
 		expect(body.ingredients).toEqual([{name: 'tomato', quantity: 4, unit: 'pcs'}])
 		expect(body.instructions).toEqual(['boil pasta', 'add sauce'])
+	})
+
+	it('saves a measured, a counted and a to-taste ingredient, omitting absent quantity and unit', async () => {
+		const user = userEvent.setup()
+		fetchMock.mockResolvedValueOnce(jsonResponse(a))
+		renderLibraryEdit(1)
+		await screen.findByDisplayValue('Tomato Pasta')
+
+		// the fetched row becomes "200 g flour" — measured
+		await user.clear(screen.getAllByLabelText('Qty')[0])
+		await user.type(screen.getAllByLabelText('Qty')[0], '200')
+		await user.clear(screen.getAllByLabelText('Unit')[0])
+		await user.type(screen.getAllByLabelText('Unit')[0], 'g')
+		await user.clear(screen.getAllByLabelText('Ingredient')[0])
+		await user.type(screen.getAllByLabelText('Ingredient')[0], 'flour')
+
+		// "2 eggs" — counted, no unit
+		await user.click(screen.getByRole('button', {name: 'Add ingredient'}))
+		await user.type(screen.getAllByLabelText('Qty')[1], '2')
+		await user.type(screen.getAllByLabelText('Ingredient')[1], 'eggs')
+
+		// "salt" — to taste, neither
+		await user.click(screen.getByRole('button', {name: 'Add ingredient'}))
+		await user.type(screen.getAllByLabelText('Ingredient')[2], 'salt')
+
+		expect(screen.getByRole('button', {name: 'Save'})).toBeEnabled()
+		fetchMock.mockResolvedValueOnce(jsonResponse(a))
+		await user.click(screen.getByRole('button', {name: 'Save'}))
+
+		const putCall = fetchMock.mock.calls.find(([, opts]) => opts?.method === 'PUT')!
+		const body = JSON.parse(String(putCall[1]!.body))
+		expect(body.ingredients).toEqual([
+			{quantity: 200, unit: 'g', name: 'flour'},
+			{quantity: 2, name: 'eggs'},
+			{name: 'salt'},
+		])
+	})
+
+	it('flags a unit without a quantity, and an ingredient without a name', async () => {
+		const user = userEvent.setup()
+		fetchMock.mockResolvedValueOnce(jsonResponse(a))
+		renderLibraryEdit(1)
+		await screen.findByDisplayValue('Tomato Pasta')
+
+		const qty = screen.getAllByLabelText('Qty')[0]
+		const unit = screen.getAllByLabelText('Unit')[0]
+		const name = screen.getAllByLabelText('Ingredient')[0]
+
+		// a unit with no quantity is meaningless ("g tomato") → the quantity is flagged
+		await user.clear(qty)
+		expect(qty.className).toContain('border-red-500')
+		expect(screen.getByRole('button', {name: 'Save'})).toBeDisabled()
+
+		// clearing the unit too leaves "tomato" — a legitimate to-taste ingredient
+		await user.clear(unit)
+		expect(qty.className).not.toContain('border-red-500')
+		expect(screen.getByRole('button', {name: 'Save'})).toBeEnabled()
+
+		// a row with a quantity but no name is incomplete
+		await user.type(qty, '2')
+		await user.clear(name)
+		expect(name.className).toContain('border-red-500')
+		expect(screen.getByRole('button', {name: 'Save'})).toBeDisabled()
+	})
+
+	it('accepts a fractional quantity but not a zero one', async () => {
+		const user = userEvent.setup()
+		fetchMock.mockResolvedValueOnce(jsonResponse(a))
+		renderLibraryEdit(1)
+		await screen.findByDisplayValue('Tomato Pasta')
+
+		const qty = screen.getAllByLabelText('Qty')[0]
+		await user.clear(qty)
+		await user.type(qty, '0.25')
+		expect(qty.className).not.toContain('border-red-500')
+		expect(screen.getByRole('button', {name: 'Save'})).toBeEnabled()
+
+		await user.clear(qty)
+		await user.type(qty, '0')
+		expect(qty.className).toContain('border-red-500')
+		expect(screen.getByRole('button', {name: 'Save'})).toBeDisabled()
 	})
 
 	it('disables Save and flags fields with a red border when counts are invalid', async () => {
