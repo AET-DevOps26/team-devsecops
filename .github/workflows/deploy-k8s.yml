@@ -50,57 +50,21 @@ jobs:
       - name: Apply namespaces
         run: kubectl apply -f infra/k8s/namespace.yaml
 
-      # --dry-run=client -o yaml | kubectl apply -f - is idempotent: creates on first
-      # run, updates on subsequent runs, never errors if the secret already exists.
-      #
-      # Required GitHub Secrets (Settings → Secrets and variables → Actions):
-      #   DB_PASSWORD            — PostgreSQL password
-      #   JWT_SECRET             — JWT signing key
-      #   INTERNAL_AUTH_SECRET   — shared HMAC key between spring-api and python services
-      #   HELP_SERVICE_KEY       — Gemini API key for py-help-service
-      #   RECIPE_SERVICE_KEY     — Gemini API key for py-recipe-service
-      #   GRAFANA_ADMIN_PASSWORD — Grafana admin password
-      #   DISCORD_WEBHOOK_URL    — Discord webhook URL for Grafana alert notifications
-      #   KUBE_CONFIG            — base64-encoded kubeconfig (base64 -w0 on Linux)
       - name: Upsert K8s secrets
-        run: |
-          kubectl create secret generic postgres-secret -n app \
-            --from-literal=password="${{ secrets.DB_PASSWORD }}" \
-            --dry-run=client -o yaml | kubectl apply -f -
-
-          kubectl create secret generic spring-api-secret -n app \
-            --from-literal=DB_PASSWORD="${{ secrets.DB_PASSWORD }}" \
-            --from-literal=JWT_SECRET="${{ secrets.JWT_SECRET }}" \
-            --from-literal=INTERNAL_AUTH_SECRET="${{ secrets.INTERNAL_AUTH_SECRET }}" \
-            --dry-run=client -o yaml | kubectl apply -f -
-
-          kubectl create secret generic py-recipe-secret -n app \
-            --from-literal=PROVIDER="${{ vars.PROVIDER }}" \
-            --from-literal=LOGOS_MODEL="${{ vars.LOGOS_MODEL }}" \
-            --from-literal=LOGOS_BASE_URL="${{ vars.LOGOS_BASE_URL }}" \
-            --from-literal=LOGOS_KEY="${{ secrets.LOGOS_KEY }}" \
-            --from-literal=GEMINI_MODEL="${{ vars.GEMINI_MODEL }}" \
-            --from-literal=GEMINI_RECIPE_SERVICE_KEY="${{ secrets.GEMINI_RECIPE_SERVICE_KEY }}" \
-            --from-literal=INTERNAL_AUTH_SECRET="${{ secrets.INTERNAL_AUTH_SECRET }}" \
-            --dry-run=client -o yaml | kubectl apply -f -
-
-          kubectl create secret generic py-help-secret -n app \
-            --from-literal=PROVIDER="${{ vars.PROVIDER }}" \
-            --from-literal=LOGOS_MODEL="${{ vars.LOGOS_MODEL }}" \
-            --from-literal=LOGOS_BASE_URL="${{ vars.LOGOS_BASE_URL }}" \
-            --from-literal=LOGOS_KEY="${{ secrets.LOGOS_KEY }}" \
-            --from-literal=GEMINI_MODEL="${{ vars.GEMINI_MODEL }}" \
-            --from-literal=GEMINI_HELP_SERVICE_KEY="${{ secrets.GEMINI_HELP_SERVICE_KEY }}" \
-            --from-literal=INTERNAL_AUTH_SECRET="${{ secrets.INTERNAL_AUTH_SECRET }}" \
-            --dry-run=client -o yaml | kubectl apply -f -
-
-          kubectl create secret generic grafana-secret -n monitoring \
-            --from-literal=admin-password="${{ secrets.GRAFANA_ADMIN_PASSWORD }}" \
-            --dry-run=client -o yaml | kubectl apply -f -
-
-          kubectl create secret generic grafana-discord-secret -n monitoring \
-            --from-literal=webhook-url="${{ secrets.DISCORD_WEBHOOK_URL }}" \
-            --dry-run=client -o yaml | kubectl apply -f -
+        env:
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          INTERNAL_AUTH_SECRET: ${{ secrets.INTERNAL_AUTH_SECRET }}
+          GRAFANA_ADMIN_PASSWORD: ${{ secrets.GRAFANA_ADMIN_PASSWORD }}
+          GEMINI_RECIPE_SERVICE_KEY: ${{ secrets.GEMINI_RECIPE_SERVICE_KEY }}
+          GEMINI_HELP_SERVICE_KEY: ${{ secrets.GEMINI_HELP_SERVICE_KEY }}
+          LOGOS_KEY: ${{ secrets.LOGOS_KEY }}
+          PROVIDER: ${{ vars.PROVIDER }}
+          GEMINI_MODEL: ${{ vars.GEMINI_MODEL }}
+          LOGOS_MODEL: ${{ vars.LOGOS_MODEL }}
+          LOGOS_BASE_URL: ${{ vars.LOGOS_BASE_URL }}
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        run: infra/k8s-secrets.sh
 
       - name: Deploy PostgreSQL (StatefulSet)
         run: kubectl apply -f infra/k8s/postgres/

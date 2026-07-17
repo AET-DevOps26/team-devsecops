@@ -5,7 +5,7 @@ on:
     types: [opened, synchronize, reopened, closed]
     paths:
       - 'web-client/**'
-      - 'infra/k8s/preview/**'
+      - 'infra/k8s-preview/**'
       - '.github/workflows/deploy-k8s-client-preview.yml'
 
 concurrency:
@@ -63,7 +63,7 @@ jobs:
         env:
           WEB_CLIENT_IMAGE: ${{ env.IMAGE_PREFIX }}/web-client:preview-pr-${{ github.event.pull_request.number }}
         run: |
-          url=$(infra/k8s/preview/deploy.sh "${{ github.event.pull_request.number }}")
+          url=$(infra/k8s-preview/deploy.sh "${{ github.event.pull_request.number }}")
           echo "url=$url" >> "$GITHUB_OUTPUT"
 
       - name: Comment preview URL

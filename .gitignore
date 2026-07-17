@@ -44,3 +44,4 @@ Thumbs.db
 # Ansible
 local_secrets.yml
 id_rsa
+infra/k8s-secrets.env
