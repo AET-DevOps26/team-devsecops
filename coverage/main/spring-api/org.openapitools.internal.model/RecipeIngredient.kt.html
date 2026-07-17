@@ -26,20 +26,21 @@ package org.openapitools.internal.model
 import com.squareup.moshi.Json
 
 /**
+ * A measured ingredient has both quantity and unit (\&quot;200 g flour\&quot;); a counted one has a quantity only (\&quot;2 eggs\&quot;); one added to taste has neither (\&quot;salt\&quot;). A unit without a quantity is meaningless and is rejected by the recipe editor, though the contract tolerates it.
  *
- *
- * @param quantity
- * @param unit Unit of measurement (e.g. g, ml, cup, tbsp)
  * @param name
+ * @param quantity Amount of the ingredient. Omitted when the ingredient is added to taste.
+ * @param unit Unit of measurement (e.g. g, ml, cup, tbsp). Omitted when the ingredient is counted as whole items rather than measured.
  */
 
-<span class="fc" id="L36">data class RecipeIngredient(</span>
-<span class="fc" id="L37">	@Json(name = &quot;quantity&quot;)</span>
-	val quantity: kotlin.Double,
-	// Unit of measurement (e.g. g, ml, cup, tbsp)
-<span class="fc" id="L40">	@Json(name = &quot;unit&quot;)</span>
-	val unit: kotlin.String,
-<span class="fc" id="L42">	@Json(name = &quot;name&quot;)</span>
+<span class="pc" id="L36">data class RecipeIngredient(</span>
+<span class="fc" id="L37">	@Json(name = &quot;name&quot;)</span>
 	val name: kotlin.String,
-)
+	// Amount of the ingredient. Omitted when the ingredient is added to taste.
+<span class="fc" id="L40">	@Json(name = &quot;quantity&quot;)</span>
+<span class="nc" id="L41">	val quantity: kotlin.Double? = null,</span>
+	// Unit of measurement (e.g. g, ml, cup, tbsp). Omitted when the ingredient is counted as whole items rather than measured.
+<span class="fc" id="L43">	@Json(name = &quot;unit&quot;)</span>
+<span class="nc" id="L44">	val unit: kotlin.String? = null,</span>
+<span class="nc" id="L45">)</span>
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

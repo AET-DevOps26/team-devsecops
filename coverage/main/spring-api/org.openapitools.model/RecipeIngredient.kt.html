@@ -14,25 +14,25 @@ import jakarta.validation.Valid
 import io.swagger.v3.oas.annotations.media.Schema
 
 /**
- *
- * @param quantity
- * @param unit Unit of measurement (e.g. g, ml, cup, tbsp)
+ * A measured ingredient has both quantity and unit (\&quot;200 g flour\&quot;); a counted one has a quantity only (\&quot;2 eggs\&quot;); one added to taste has neither (\&quot;salt\&quot;). A unit without a quantity is meaningless and is rejected by the recipe editor, though the contract tolerates it.
  * @param name
+ * @param quantity Amount of the ingredient. Omitted when the ingredient is added to taste.
+ * @param unit Unit of measurement (e.g. g, ml, cup, tbsp). Omitted when the ingredient is counted as whole items rather than measured.
  */
-<span class="fc" id="L22">data class RecipeIngredient(</span>
+<span class="pc" id="L22">data class RecipeIngredient(</span>
 
-<span class="fc" id="L24">    @get:DecimalMin(value=&quot;0&quot;)</span>
+<span class="fc" id="L24">    @get:Size(min=1)</span>
     @Schema(example = &quot;null&quot;, required = true, description = &quot;&quot;)
-    @get:JsonProperty(&quot;quantity&quot;, required = true) val quantity: kotlin.Double,
+    @get:JsonProperty(&quot;name&quot;, required = true) val name: kotlin.String,
 
-<span class="fc" id="L28">    @get:Size(min=1)</span>
-    @Schema(example = &quot;null&quot;, required = true, description = &quot;Unit of measurement (e.g. g, ml, cup, tbsp)&quot;)
-    @get:JsonProperty(&quot;unit&quot;, required = true) val unit: kotlin.String,
+<span class="fc" id="L28">    @get:DecimalMin(value=&quot;0&quot;)</span>
+    @Schema(example = &quot;null&quot;, description = &quot;Amount of the ingredient. Omitted when the ingredient is added to taste.&quot;)
+<span class="nc" id="L30">    @get:JsonProperty(&quot;quantity&quot;) val quantity: kotlin.Double? = null,</span>
 
 <span class="fc" id="L32">    @get:Size(min=1)</span>
-    @Schema(example = &quot;null&quot;, required = true, description = &quot;&quot;)
-    @get:JsonProperty(&quot;name&quot;, required = true) val name: kotlin.String
-) {
+    @Schema(example = &quot;null&quot;, description = &quot;Unit of measurement (e.g. g, ml, cup, tbsp). Omitted when the ingredient is counted as whole items rather than measured.&quot;)
+<span class="nc" id="L34">    @get:JsonProperty(&quot;unit&quot;) val unit: kotlin.String? = null</span>
+<span class="nc" id="L35">) {</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>
