@@ -35,7 +35,10 @@ const NUTRIENTS = [
 
 const numToStr = (n: number | null | undefined) => (n != null ? String(n) : '')
 
-const isInvalidCount = (s: string) => !(Number.parseFloat(s) >= 0.5)
+// Portions are servings: half a portion means something, a thousandth does not.
+const isInvalidPortions = (s: string) => !(Number.parseFloat(s) >= 0.5)
+// An ingredient's amount is a measurement and may be arbitrarily fine, but never zero.
+const isInvalidQuantity = (s: string) => !(Number.parseFloat(s) > 0)
 // Nutrients may legitimately be zero (a fat-free recipe), unlike portions and quantities.
 const isInvalidAmount = (s: string) => !(Number.parseFloat(s) >= 0)
 const isBlankIngredient = (ing: IngredientDraft) =>
@@ -65,11 +68,12 @@ const toInt = (s: string) => Math.round(Number.parseFloat(s))
 // Parse a validated draft into the recipe itself: drop fully-blank rows, coerce numbers.
 // Nutrients are excluded — they are what the estimator derives from these fields.
 function buildRecipe(draft: RecipeDraft): Omit<RecipeInput, 'nutrients'> {
+	// An absent quantity or unit is marked by omitting the key: "" is not contract-legal.
 	const ingredients = draft.ingredients
 		.filter((ing) => !isBlankIngredient(ing))
 		.map((ing) => ({
-			quantity: Number.parseFloat(ing.quantity),
-			unit: ing.unit.trim(),
+			...(ing.quantity.trim() !== '' && { quantity: Number.parseFloat(ing.quantity) }),
+			...(ing.unit.trim() !== '' && { unit: ing.unit.trim() }),
 			name: ing.name.trim(),
 		}))
 	const instructions = draft.instructions.map((step) => step.trim()).filter((step) => step !== '')
@@ -224,13 +228,20 @@ function RecipeEditor({
 	}, [dirty])
 
 	const titleInvalid = draft.title.trim() === ''
-	const portionsInvalid = isInvalidCount(draft.portions)
+	const portionsInvalid = isInvalidPortions(draft.portions)
 	const nutrientInvalid = (key: (typeof NUTRIENTS)[number]['key']) => isInvalidAmount(draft.nutrients[key])
-	const ingredientQtyInvalid = (ing: IngredientDraft) => !isBlankIngredient(ing) && isInvalidCount(ing.quantity)
+	const ingredientNameInvalid = (ing: IngredientDraft) =>
+		!isBlankIngredient(ing) && ing.name.trim() === ''
+	// A quantity is optional ("salt"), but a unit without one is meaningless ("g flour"):
+	// flag the quantity, since supplying it is the fix.
+	const ingredientQtyInvalid = (ing: IngredientDraft) =>
+		!isBlankIngredient(ing) &&
+		(ing.quantity.trim() !== '' ? isInvalidQuantity(ing.quantity) : ing.unit.trim() !== '')
 
 	const recipeInvalid = titleInvalid ||
 		portionsInvalid ||
-		draft.ingredients.some(ingredientQtyInvalid)
+		draft.ingredients.some(ingredientQtyInvalid) ||
+		draft.ingredients.some(ingredientNameInvalid)
 
 	const hasErrors = recipeInvalid || NUTRIENTS.some((n) => nutrientInvalid(n.key))
 
@@ -375,7 +386,6 @@ function RecipeEditor({
 								<input
 									type="number"
 									step="any"
-									min={0.5}
 									value={ing.quantity}
 									onChange={(e) => updateIngredient(j, { quantity: e.target.value })}
 									placeholder={t('recipe.quantity')}
@@ -398,7 +408,7 @@ function RecipeEditor({
 									onChange={(e) => updateIngredient(j, { name: e.target.value })}
 									placeholder={t('recipe.ingredientName')}
 									aria-label={t('recipe.ingredientName')}
-									className={`min-w-0 flex-1 ${inputBase} ${neutralBorder}`}
+									className={`min-w-0 flex-1 ${inputBase} ${borderFor(ingredientNameInvalid(ing))}`}
 								/>
 								<button
 									type="button"

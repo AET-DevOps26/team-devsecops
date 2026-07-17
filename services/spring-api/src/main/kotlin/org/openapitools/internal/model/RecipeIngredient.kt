@@ -26,19 +26,20 @@ package org.openapitools.internal.model
 import com.squareup.moshi.Json
 
 /**
+ * A measured ingredient has both quantity and unit (\"200 g flour\"); a counted one has a quantity only (\"2 eggs\"); one added to taste has neither (\"salt\"). A unit without a quantity is meaningless and is rejected by the recipe editor, though the contract tolerates it.
  *
- *
- * @param quantity
- * @param unit Unit of measurement (e.g. g, ml, cup, tbsp)
  * @param name
+ * @param quantity Amount of the ingredient. Omitted when the ingredient is added to taste.
+ * @param unit Unit of measurement (e.g. g, ml, cup, tbsp). Omitted when the ingredient is counted as whole items rather than measured.
  */
 
 data class RecipeIngredient(
-	@Json(name = "quantity")
-	val quantity: kotlin.Double,
-	// Unit of measurement (e.g. g, ml, cup, tbsp)
-	@Json(name = "unit")
-	val unit: kotlin.String,
 	@Json(name = "name")
 	val name: kotlin.String,
+	// Amount of the ingredient. Omitted when the ingredient is added to taste.
+	@Json(name = "quantity")
+	val quantity: kotlin.Double? = null,
+	// Unit of measurement (e.g. g, ml, cup, tbsp). Omitted when the ingredient is counted as whole items rather than measured.
+	@Json(name = "unit")
+	val unit: kotlin.String? = null,
 )

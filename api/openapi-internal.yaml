@@ -255,16 +255,24 @@ components:
 
     RecipeIngredient:
       type: object
-      required: [quantity, unit, name]
+      required: [name]
       additionalProperties: false
+      description: >-
+        A measured ingredient has both quantity and unit ("200 g flour"); a counted one
+        has a quantity only ("2 eggs"); one added to taste has neither ("salt").
+        A unit without a quantity is meaningless and is rejected by the recipe editor,
+        though the contract tolerates it.
       properties:
         quantity:
           type: number
-          minimum: 0
+          exclusiveMinimum: 0
+          description: Amount of the ingredient. Omitted when the ingredient is added to taste.
         unit:
           type: string
           minLength: 1
-          description: Unit of measurement (e.g. g, ml, cup, tbsp)
+          description: >-
+            Unit of measurement (e.g. g, ml, cup, tbsp). Omitted when the ingredient is
+            counted as whole items rather than measured.
         name:
           type: string
           minLength: 1

@@ -14,24 +14,24 @@ import jakarta.validation.Valid
 import io.swagger.v3.oas.annotations.media.Schema
 
 /**
- *
- * @param quantity
- * @param unit Unit of measurement (e.g. g, ml, cup, tbsp)
+ * A measured ingredient has both quantity and unit (\"200 g flour\"); a counted one has a quantity only (\"2 eggs\"); one added to taste has neither (\"salt\"). A unit without a quantity is meaningless and is rejected by the recipe editor, though the contract tolerates it.
  * @param name
+ * @param quantity Amount of the ingredient. Omitted when the ingredient is added to taste.
+ * @param unit Unit of measurement (e.g. g, ml, cup, tbsp). Omitted when the ingredient is counted as whole items rather than measured.
  */
 data class RecipeIngredient(
 
+    @get:Size(min=1)
+    @Schema(example = "null", required = true, description = "")
+    @get:JsonProperty("name", required = true) val name: kotlin.String,
+
     @get:DecimalMin(value="0")
-    @Schema(example = "null", required = true, description = "")
-    @get:JsonProperty("quantity", required = true) val quantity: kotlin.Double,
+    @Schema(example = "null", description = "Amount of the ingredient. Omitted when the ingredient is added to taste.")
+    @get:JsonProperty("quantity") val quantity: kotlin.Double? = null,
 
     @get:Size(min=1)
-    @Schema(example = "null", required = true, description = "Unit of measurement (e.g. g, ml, cup, tbsp)")
-    @get:JsonProperty("unit", required = true) val unit: kotlin.String,
-
-    @get:Size(min=1)
-    @Schema(example = "null", required = true, description = "")
-    @get:JsonProperty("name", required = true) val name: kotlin.String
+    @Schema(example = "null", description = "Unit of measurement (e.g. g, ml, cup, tbsp). Omitted when the ingredient is counted as whole items rather than measured.")
+    @get:JsonProperty("unit") val unit: kotlin.String? = null
 ) {
 
 }
