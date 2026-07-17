@@ -22,16 +22,16 @@ import io.swagger.v3.oas.annotations.media.Schema
  * @param recipe
  * @param language Optional active language context for any generated metadata text
  */
-<span class="nc" id="L25">data class NutrientRequest(</span>
+<span class="fc" id="L25">data class NutrientRequest(</span>
 
-<span class="nc" id="L27">    @field:Valid</span>
+<span class="fc" id="L27">    @field:Valid</span>
     @Schema(example = &quot;null&quot;, required = true, description = &quot;&quot;)
     @get:JsonProperty(&quot;recipe&quot;, required = true) val recipe: RecipeInput,
 
-<span class="nc" id="L31">    @field:Valid</span>
+<span class="pc" id="L31">    @field:Valid</span>
     @Schema(example = &quot;null&quot;, description = &quot;Optional active language context for any generated metadata text&quot;)
-<span class="nc" id="L33">    @get:JsonProperty(&quot;language&quot;) val language: Language? = null</span>
-<span class="nc" id="L34">) {</span>
+<span class="fc" id="L33">    @get:JsonProperty(&quot;language&quot;) val language: Language? = null</span>
+<span class="fc" id="L34">) {</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

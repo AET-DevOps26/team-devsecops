@@ -101,23 +101,23 @@ import java.io.InterruptedIOException
 	override fun aiNutrientsPost(
 		@Valid nutrientRequest: org.openapitools.model.NutrientRequest,
 	): ResponseEntity&lt;org.openapitools.model.RecipeNutrients&gt; {
-<span class="nc" id="L104">		val internalRequest =</span>
-<span class="nc" id="L105">			org.openapitools.internal.model.NutrientRequestForwarded(</span>
-<span class="nc" id="L106">				recipe = nutrientRequest.recipe.toInternalRecipe(),</span>
+<span class="fc" id="L104">		val internalRequest =</span>
+<span class="fc" id="L105">			org.openapitools.internal.model.NutrientRequestForwarded(</span>
+<span class="fc" id="L106">				recipe = nutrientRequest.recipe.toInternalRecipe(),</span>
 			)
 
-<span class="nc" id="L109">		val retrofitResponse =</span>
-<span class="nc" id="L110">			try {</span>
-<span class="nc" id="L111">				recipeServiceApi.aiNutrientsPost(&quot;&quot;, &quot;&quot;, internalRequest).execute()</span>
+<span class="fc" id="L109">		val retrofitResponse =</span>
+<span class="fc" id="L110">			try {</span>
+<span class="fc" id="L111">				recipeServiceApi.aiNutrientsPost(&quot;&quot;, &quot;&quot;, internalRequest).execute()</span>
 <span class="nc" id="L112">			} catch (e: InterruptedIOException) {</span>
 <span class="nc" id="L113">				throw ResponseStatusException(HttpStatus.GATEWAY_TIMEOUT, &quot;Upstream AI service timed out&quot;, e)</span>
 <span class="nc" id="L114">			} catch (e: Exception) {</span>
 <span class="nc bnc" id="L115" title="All 2 branches missed.">				throw ResponseStatusException(HttpStatus.BAD_GATEWAY, e.message ?: &quot;Upstream service unreachable&quot;, e)</span>
 			}
 
-<span class="nc" id="L118">		val internalNutrients = handleRetrofitResponse(retrofitResponse)</span>
-<span class="nc" id="L119">		val publicNutrients = internalNutrients.toPublicNutrients()</span>
-<span class="nc" id="L120">		return ResponseEntity.ok(publicNutrients)</span>
+<span class="fc" id="L118">		val internalNutrients = handleRetrofitResponse(retrofitResponse)</span>
+<span class="fc" id="L119">		val publicNutrients = internalNutrients.toPublicNutrients()</span>
+<span class="fc" id="L120">		return ResponseEntity.ok(publicNutrients)</span>
 	}
 
 <span class="fc" id="L123">	private fun currentUsername(): String = SecurityContextHolder.getContext().authentication!!.name</span>
@@ -237,11 +237,11 @@ import java.io.InterruptedIOException
 <span class="fc" id="L237">		)</span>
 
 	private fun org.openapitools.internal.model.RecipeNutrients.toPublicNutrients(): org.openapitools.model.RecipeNutrients =
-<span class="nc" id="L240">		org.openapitools.model.RecipeNutrients(</span>
-<span class="nc" id="L241">			calories = this.calories,</span>
-<span class="nc" id="L242">			protein = this.protein,</span>
-<span class="nc" id="L243">			fat = this.fat,</span>
-<span class="nc" id="L244">			carbs = this.carbs,</span>
-<span class="nc" id="L245">		)</span>
+<span class="fc" id="L240">		org.openapitools.model.RecipeNutrients(</span>
+<span class="fc" id="L241">			calories = this.calories,</span>
+<span class="fc" id="L242">			protein = this.protein,</span>
+<span class="fc" id="L243">			fat = this.fat,</span>
+<span class="fc" id="L244">			carbs = this.carbs,</span>
+<span class="fc" id="L245">		)</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>
