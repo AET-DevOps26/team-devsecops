@@ -229,6 +229,7 @@ async def generate_recipes(
 			f"Write all recipe content (title, ingredients, units and instructions) in {language}. "
 			"Strictly use standard, lowercase abbreviated unit names (e.g., use 'tbsp' instead of 'tablespoon', "
 			"'tsp' instead of 'teaspoon', 'g' instead of 'grams', and 'ml' instead of 'milliliters').\n"
+			"Output the nutrients for the whole recipe in total, not per portion.\n"
 			f"Keep the JSON keys in English as specified."
 		)
 
@@ -280,7 +281,8 @@ async def generate_nutrients(
 
 		system_prompt = (
 			"You are an expert nutritional scientist. Calculate the macronutrients and total calories "
-			"for the provided recipe. Evaluate ingredient quantities, units, and base portion sizes carefully. "
+			"for the provided recipe. Output the nutrients for the whole recipe in total, not per portion. "
+			"Evaluate ingredient quantities, units, and base portion sizes carefully. "
 			"Ensure the output strictly mirrors the exact target JSON object fields."
 		)
 
