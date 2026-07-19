@@ -29,26 +29,19 @@ jobs:
           tenant-id: ${{ vars.AZURE_TENANT_ID }}
           subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
 
-      - name: Deallocate the VM
-        run: az vm deallocate --resource-group "$RESOURCE_GROUP" --name "$VM_NAME"
-
-      - name: Detach and delete the public IP
-        run: |
-          az network nic ip-config update \
-            --resource-group "$RESOURCE_GROUP" \
-            --nic-name "$NIC_NAME" \
-            --name "$IP_CONFIG" \
-            --remove publicIpAddress \
-            --only-show-errors || true
-          az network public-ip delete \
-            --resource-group "$RESOURCE_GROUP" \
-            --name "$PIP_NAME" \
-            --only-show-errors || true
-
-      - name: Summary
-        run: |
-          {
-            echo "### 🛑 Environment stopped"
-            echo ""
+      - name: Stop the environment
+        uses: azure/cli@v2
+        with:
+          azcliversion: "2.64.0"
+          inlineScript: |
+            az vm deallocate --resource-group "$RESOURCE_GROUP" --name "$VM_NAME"
+            az network nic ip-config update \
+              --resource-group "$RESOURCE_GROUP" --nic-name "$NIC_NAME" \
+              --name "$IP_CONFIG" --remove publicIpAddress --only-show-errors || true
+            az network public-ip delete \
+              --resource-group "$RESOURCE_GROUP" --name "$PIP_NAME" --only-show-errors || true
+            {
+              echo "### 🛑 Environment stopped"
+              echo ""
             echo "VM deallocated and public IP released."
-          } >> "$GITHUB_STEP_SUMMARY"
+            } >> "$GITHUB_STEP_SUMMARY"
