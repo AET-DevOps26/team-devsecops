@@ -22,18 +22,31 @@ jobs:
   stop:
     runs-on: ubuntu-latest
     steps:
-      - name: Azure login (OIDC)
-        uses: azure/login@v2
-        with:
-          client-id: ${{ vars.AZURE_CLIENT_ID }}
-          tenant-id: ${{ vars.AZURE_TENANT_ID }}
-          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+      - name: Get OIDC token
+        id: prep
+        run: |
+          TOKEN=$(curl -sS \
+            -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+            "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=api://AzureADTokenExchange" \
+            | jq -r '.value')
+          echo "::add-mask::$TOKEN"
+          echo "token=$TOKEN" >> "$GITHUB_OUTPUT"
 
       - name: Stop the environment
         uses: azure/cli@v2
+        env:
+          FED_TOKEN: ${{ steps.prep.outputs.token }}
+          AZURE_CLIENT_ID: ${{ vars.AZURE_CLIENT_ID }}
+          AZURE_TENANT_ID: ${{ vars.AZURE_TENANT_ID }}
+          AZURE_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
         with:
           azcliversion: "2.64.0"
           inlineScript: |
+            set -e
+            az login --service-principal \
+              --username "$AZURE_CLIENT_ID" --tenant "$AZURE_TENANT_ID" \
+              --federated-token "$FED_TOKEN" --output none
+            az account set --subscription "$AZURE_SUBSCRIPTION_ID"
             az vm deallocate --resource-group "$RESOURCE_GROUP" --name "$VM_NAME"
             az network nic ip-config update \
               --resource-group "$RESOURCE_GROUP" --nic-name "$NIC_NAME" \
