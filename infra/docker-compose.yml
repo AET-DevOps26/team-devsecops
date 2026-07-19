@@ -5,6 +5,7 @@ networks:
 services:
   nginx:
     image: nginx:alpine
+    restart: unless-stopped
     ports:
       - "80:80"
     volumes:
@@ -18,6 +19,7 @@ services:
 
   py-recipe-service:
     build: ../services/py-recipe-service
+    restart: unless-stopped
     env_file: .env
     expose:
       - "8080"
@@ -26,6 +28,7 @@ services:
 
   py-help-service:
     build: ../services/py-help-service
+    restart: unless-stopped
     env_file: .env
     expose:
       - "8080"
@@ -54,6 +57,7 @@ services:
 
   spring-api:
     build: ../services/spring-api
+    restart: unless-stopped
     env_file: .env
     expose:
       - "8080"
@@ -77,6 +81,7 @@ services:
 
   web-client:
     build: ../web-client
+    restart: unless-stopped
     expose:
       - "8080"
     networks:
