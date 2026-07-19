@@ -35,17 +35,23 @@ jobs:
           tenant-id: ${{ vars.AZURE_TENANT_ID }}
           subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
 
+      # az runs in the pinned azure/cli container to avoid the Python 3.14
+      # command-module deadlock in the runner's bundled CLI (Azure/azure-cli#32980).
       - name: Resolve VM public IP
-        run: |
-          IP=$(az vm show -d \
-            --resource-group "$RESOURCE_GROUP" \
-            --name "$VM_NAME" \
-            --query publicIps -o tsv)
-          if [ -z "$IP" ]; then
-            echo "::error::VM has no public IP. Run 'Start environment' first."
-            exit 1
-          fi
-          echo "VM_IP=$IP" >> "$GITHUB_ENV"
+        id: ip
+        uses: azure/cli@v2
+        with:
+          azcliversion: "2.64.0"
+          inlineScript: |
+            IP=$(az vm show -d \
+              --resource-group "$RESOURCE_GROUP" \
+              --name "$VM_NAME" \
+              --query publicIps -o tsv)
+            if [ -z "$IP" ]; then
+              echo "::error::VM has no public IP. Run 'Start environment' first."
+              exit 1
+            fi
+            echo "ip=$IP" >> "$GITHUB_OUTPUT"
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -64,9 +70,13 @@ jobs:
           known_hosts: 'placeholder' # Will be overwritten by ssh-keyscan next
 
       - name: Scan VM Host Key
+        env:
+          VM_IP: ${{ steps.ip.outputs.ip }}
         run: ssh-keyscan -H "$VM_IP" >> ~/.ssh/known_hosts
 
       - name: Write inventory with the resolved IP
+        env:
+          VM_IP: ${{ steps.ip.outputs.ip }}
         run: |
           cat > infra/inventory.ini <<EOF
           [web]

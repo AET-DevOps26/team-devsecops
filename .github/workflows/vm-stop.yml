@@ -3,6 +3,9 @@ name: Stop environment
 # Deallocates the VM (stops compute billing) and deletes the public IP, so the
 # only ongoing cost while idle is the OS disk. Safe to run anytime; the VM's
 # data and containers survive on the disk and return on the next start.
+#
+# az runs inside the pinned azure/cli container to avoid the Python 3.14
+# command-module deadlock in the runner's bundled CLI (Azure/azure-cli#32980).
 
 on:
   workflow_dispatch:
@@ -29,26 +32,19 @@ jobs:
           tenant-id: ${{ vars.AZURE_TENANT_ID }}
           subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
 
-      - name: Deallocate the VM
-        run: az vm deallocate --resource-group "$RESOURCE_GROUP" --name "$VM_NAME"
-
-      - name: Detach and delete the public IP
-        run: |
-          az network nic ip-config update \
-            --resource-group "$RESOURCE_GROUP" \
-            --nic-name "$NIC_NAME" \
-            --name "$IP_CONFIG" \
-            --remove publicIpAddress \
-            --only-show-errors || true
-          az network public-ip delete \
-            --resource-group "$RESOURCE_GROUP" \
-            --name "$PIP_NAME" \
-            --only-show-errors || true
-
-      - name: Summary
-        run: |
-          {
-            echo "### 🛑 Environment stopped"
-            echo ""
-            echo "VM deallocated and public IP released."
-          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Stop the environment
+        uses: azure/cli@v2
+        with:
+          azcliversion: "2.64.0"
+          inlineScript: |
+            az vm deallocate --resource-group "$RESOURCE_GROUP" --name "$VM_NAME"
+            az network nic ip-config update \
+              --resource-group "$RESOURCE_GROUP" --nic-name "$NIC_NAME" \
+              --name "$IP_CONFIG" --remove publicIpAddress --only-show-errors || true
+            az network public-ip delete \
+              --resource-group "$RESOURCE_GROUP" --name "$PIP_NAME" --only-show-errors || true
+            {
+              echo "### 🛑 Environment stopped"
+              echo ""
+              echo "VM deallocated and public IP released. Idle cost is now disk-only (~€0.04/day)."
+            } >> "$GITHUB_STEP_SUMMARY"
