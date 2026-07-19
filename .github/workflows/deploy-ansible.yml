@@ -9,9 +9,17 @@ on:
       - 'services/**'
       - 'infra/**'
       - 'ansible/**'
-      - '.github/workflows/ansible-deploy.yml'
+      - '.github/workflows/deploy-ansible.yml'
 
   workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  RESOURCE_GROUP: my-app-rg
+  VM_NAME: my-vm
 
 jobs:
   deploy:
@@ -19,6 +27,25 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Azure login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Resolve VM public IP
+        run: |
+          IP=$(az vm show -d \
+            --resource-group "$RESOURCE_GROUP" \
+            --name "$VM_NAME" \
+            --query publicIps -o tsv)
+          if [ -z "$IP" ]; then
+            echo "::error::VM has no public IP. Run 'Start environment' first."
+            exit 1
+          fi
+          echo "VM_IP=$IP" >> "$GITHUB_ENV"
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -37,8 +64,20 @@ jobs:
           known_hosts: 'placeholder' # Will be overwritten by ssh-keyscan next
 
       - name: Scan VM Host Key
+        run: ssh-keyscan -H "$VM_IP" >> ~/.ssh/known_hosts
+
+      - name: Write inventory with the resolved IP
         run: |
-          ssh-keyscan -H 4.223.70.80 >> ~/.ssh/known_hosts
+          cat > infra/inventory.ini <<EOF
+          [web]
+          $VM_IP
+
+          [all:vars]
+          ansible_user=azureuser
+          ansible_ssh_private_key_file=~/.ssh/id_rsa
+          ansible_ssh_common_args='-o StrictHostKeyChecking=no'
+          ansible_python_interpreter=/usr/bin/python3.10
+          EOF
 
       - name: Run Playbook
         run: |
