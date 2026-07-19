@@ -4,7 +4,7 @@
 
 Rancher deployment (Kubernetes): https://devsecops.stud.k8s.aet.cit.tum.de
 
-Azure deployment (Docker Compose): Unfortunately, all of us almost ran out of credits on Azure. Therefore, we can only serve it on-demand: [Run the `vm-start` workflow](https://github.com/AET-DevOps26/team-devsecops/actions/workflows/vm-start.yml) to activate an Azure instance for 2 hours (IP address will be printed in the logs).
+Azure deployment (Docker Compose): Unfortunately, all of us almost ran out of credits on Azure. Therefore, we can only serve it on-demand: [Run the `vm-start` workflow](https://github.com/AET-DevOps26/team-devsecops/actions/workflows/vm-start.yml) to activate an Azure instance, and [run `vm-stop`](https://github.com/AET-DevOps26/team-devsecops/actions/workflows/vm-stop.yml).
 
 Coverage reports: https://aet-devops26.github.io/team-devsecops/
 
