@@ -36,52 +36,40 @@ jobs:
           tenant-id: ${{ vars.AZURE_TENANT_ID }}
           subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
 
-      - name: Create public IP (if missing)
-        run: |
-          az network public-ip create \
-            --resource-group "$RESOURCE_GROUP" \
-            --name "$PIP_NAME" \
-            --location "$LOCATION" \
-            --sku Standard \
-            --allocation-method Static \
-            --only-show-errors
-
-      - name: Attach public IP to the VM's NIC
-        run: |
-          az network nic ip-config update \
-            --resource-group "$RESOURCE_GROUP" \
-            --nic-name "$NIC_NAME" \
-            --name "$IP_CONFIG" \
-            --public-ip-address "$PIP_NAME" \
-            --only-show-errors
-
-      - name: Start the VM
-        run: az vm start --resource-group "$RESOURCE_GROUP" --name "$VM_NAME"
-
-      - name: Arm auto-shutdown timer (now + minutes, UTC)
+      - name: Compute auto-shutdown time (UTC)
+        id: t
         env:
           MINUTES: ${{ github.event.inputs.minutes }}
-        run: |
-          SHUTDOWN=$(date -u -d "+${MINUTES} minutes" +%H%M)
-          az vm auto-shutdown \
-            --resource-group "$RESOURCE_GROUP" \
-            --name "$VM_NAME" \
-            --time "$SHUTDOWN"
-          echo "SHUTDOWN_UTC=$SHUTDOWN" >> "$GITHUB_ENV"
+        run: echo "shutdown=$(date -u -d "+${MINUTES} minutes" +%H%M)" >> "$GITHUB_OUTPUT"
 
-      - name: Publish the URL
+      - name: Start the environment
+        uses: azure/cli@v2
         env:
+          SHUTDOWN: ${{ steps.t.outputs.shutdown }}
           MINUTES: ${{ github.event.inputs.minutes }}
-        run: |
-          IP=$(az network public-ip show \
-            --resource-group "$RESOURCE_GROUP" \
-            --name "$PIP_NAME" \
-            --query ipAddress -o tsv)
-          {
-            echo "### 🚀 Environment starting"
-            echo ""
-            echo "**URL:** http://$IP  (allow ~1–2 min for containers to come up)"
-            echo ""
-            echo "Auto-shutdown armed for **${SHUTDOWN_UTC} UTC** (in ${MINUTES} min)."
-            echo "Run **Stop environment** to end early and release the IP."
-          } >> "$GITHUB_STEP_SUMMARY"
+        with:
+          azcliversion: "2.64.0"
+          inlineScript: |
+            set -e
+            az network public-ip create \
+              --resource-group "$RESOURCE_GROUP" --name "$PIP_NAME" \
+              --location "$LOCATION" --sku Standard --allocation-method Static \
+              --only-show-errors
+            az network nic ip-config update \
+              --resource-group "$RESOURCE_GROUP" --nic-name "$NIC_NAME" \
+              --name "$IP_CONFIG" --public-ip-address "$PIP_NAME" --only-show-errors
+            az vm start --resource-group "$RESOURCE_GROUP" --name "$VM_NAME"
+            az vm auto-shutdown \
+              --resource-group "$RESOURCE_GROUP" --name "$VM_NAME" --time "$SHUTDOWN"
+            IP=$(az network public-ip show \
+              --resource-group "$RESOURCE_GROUP" --name "$PIP_NAME" \
+              --query ipAddress -o tsv)
+            echo "Environment URL: http://$IP (auto-shutdown ${SHUTDOWN} UTC, in ${MINUTES} min)"
+            {
+              echo "### 🚀 Environment starting"
+              echo ""
+              echo "**URL:** http://$IP  (allow ~1–2 min for containers to come up)"
+              echo ""
+              echo "Auto-shutdown armed for **${SHUTDOWN} UTC** (in ${MINUTES} min)."
+              echo "Run **Stop environment** to end early and release the IP."
+            } >> "$GITHUB_STEP_SUMMARY"
