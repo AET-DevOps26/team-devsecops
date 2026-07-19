@@ -1,5 +1,5 @@
 ---
-# Two namespaces per best_practices.md:
+# Two namespaces:
 #   app        — all four microservices + database
 #   monitoring — Prometheus & Grafana (deployed separately, later)
 #

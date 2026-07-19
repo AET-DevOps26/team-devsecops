@@ -41,6 +41,23 @@ services:
         - action: rebuild
           path: ./.env
 
+  postgres:
+    image: postgres:16-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-secretpass}
+      POSTGRES_DB: ${DB_NAME:-cookingdb}
+    expose:
+      - "5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres} -d ${DB_NAME:-cookingdb}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
   spring-api:
     build: ./services/spring-api
     ports:
@@ -48,11 +65,19 @@ services:
     environment:
       AI_RECIPE_SERVICE_URL: http://py-recipe-service:8080
       AI_HELP_SERVICE_URL: http://py-help-service:8080
+      DB_URL: jdbc:postgresql://postgres:5432/${DB_NAME:-cookingdb}
+      DB_USER: ${DB_USER:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:-secretpass}
+      JPA_DDL_AUTO: update
     env_file:
       - ./.env
     depends_on:
-      - py-help-service
-      - py-recipe-service
+      postgres:
+        condition: service_healthy
+      py-help-service:
+        condition: service_started
+      py-recipe-service:
+        condition: service_started
     develop:
       watch:
         - action: rebuild
@@ -99,3 +124,6 @@ services:
     volumes:
       - ./api/openapi.yaml:/usr/share/nginx/html/openapi/openapi.yaml:ro
       - ./api/openapi-internal.yaml:/usr/share/nginx/html/openapi/openapi-internal.yaml:ro
+
+volumes:
+  db-data:
