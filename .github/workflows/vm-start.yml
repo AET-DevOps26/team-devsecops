@@ -2,16 +2,16 @@ name: Start environment
 
 # Brings the Azure VM online for a demo. Creates a public IP, attaches it,
 # starts the VM (containers auto-restart via `restart: unless-stopped`), and
-# arms an auto-shutdown timer so the VM deallocates itself after `hours`.
+# arms an auto-shutdown timer so the VM deallocates itself after `minutes`.
 # The public URL is printed in the run summary.
 
 on:
   workflow_dispatch:
     inputs:
-      hours:
-        description: "Hours to keep the VM running before it auto-shuts-down"
+      minutes:
+        description: "Minutes to keep the VM running before it auto-shuts-down (e.g. 5, 60, 120)"
         required: true
-        default: "2"
+        default: "120"
 
 permissions:
   id-token: write
@@ -58,9 +58,11 @@ jobs:
       - name: Start the VM
         run: az vm start --resource-group "$RESOURCE_GROUP" --name "$VM_NAME"
 
-      - name: Arm auto-shutdown timer (now + hours, UTC)
+      - name: Arm auto-shutdown timer (now + minutes, UTC)
+        env:
+          MINUTES: ${{ github.event.inputs.minutes }}
         run: |
-          SHUTDOWN=$(date -u -d "+${{ github.event.inputs.hours }} hours" +%H%M)
+          SHUTDOWN=$(date -u -d "+${MINUTES} minutes" +%H%M)
           az vm auto-shutdown \
             --resource-group "$RESOURCE_GROUP" \
             --name "$VM_NAME" \
@@ -68,6 +70,8 @@ jobs:
           echo "SHUTDOWN_UTC=$SHUTDOWN" >> "$GITHUB_ENV"
 
       - name: Publish the URL
+        env:
+          MINUTES: ${{ github.event.inputs.minutes }}
         run: |
           IP=$(az network public-ip show \
             --resource-group "$RESOURCE_GROUP" \
@@ -78,6 +82,6 @@ jobs:
             echo ""
             echo "**URL:** http://$IP  (allow ~1–2 min for containers to come up)"
             echo ""
-            echo "Auto-shutdown armed for **${SHUTDOWN_UTC} UTC** (in ${{ github.event.inputs.hours }}h)."
+            echo "Auto-shutdown armed for **${SHUTDOWN_UTC} UTC** (in ${MINUTES} min)."
             echo "Run **Stop environment** to end early and release the IP."
           } >> "$GITHUB_STEP_SUMMARY"
